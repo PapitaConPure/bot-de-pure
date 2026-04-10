@@ -1,45 +1,74 @@
-import type { AnyThreadChannel, Client as DiscordClient, Collection, Guild, GuildBasedChannel, GuildMember, GuildTextBasedChannel, User, Message, Role, Snowflake, Emoji} from 'discord.js';
-import { AttachmentBuilder, ContainerBuilder, MessageFlags, ButtonBuilder, StringSelectMenuBuilder } from 'discord.js'; //js
-import { globalConfigs, tenshiColor } from './data/globalProps';
-import images from './data/images.json';
 import Canvas, { type SKRSContext2D } from '@napi-rs/canvas'; //Node Canvas
 import chalk from 'chalk';
-import { ButtonStyle, ChannelType } from 'discord.js';
-import { fetchUserCache } from './utils/usercache';
-import { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } from './utils/tsCasts';
-import { fetchGuildMembers } from './utils/guildratekeeper';
-import { Translator } from './i18n';
+import type {
+	AnyThreadChannel,
+	Collection,
+	Client as DiscordClient,
+	Emoji,
+	Guild,
+	GuildBasedChannel,
+	GuildMember,
+	GuildTextBasedChannel,
+	Message,
+	Role,
+	Snowflake,
+	User,
+} from 'discord.js';
+import {
+	ActionRowBuilder,
+	AttachmentBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	ChannelType,
+	ContainerBuilder,
+	MessageFlags,
+	StringSelectMenuBuilder,
+} from 'discord.js';
 import { client } from './core/client';
+import { globalConfigs, tenshiColor } from './data/globalProps';
+import images from './data/images.json';
+import { Translator } from './i18n';
+import { fetchGuildMembers } from './utils/guildratekeeper';
+import { fetchUserCache } from './utils/usercache';
+
 const concol = {
 	orange: chalk.rgb(255, 140, 70),
-	purple: chalk.rgb(158, 114,214),
+	purple: chalk.rgb(158, 114, 214),
 };
 
 //WARNING: Esta función permanece por compatibilidad. NO TOCAR
 export function paginateRaw<T>(array: Collection<string, T>, pagemax?: number): [string, T][][];
 export function paginateRaw<T>(array: T[], pagemax?: number): T[][];
-export function paginateRaw<T>(values: T[] | Collection<string, T>, pagemax: number): T[][] | ([string, T])[][];
-export function paginateRaw<T>(values: T[] | Collection<string, T>, pagemax: number = 10): T[][] | ([string, T])[][] {
-	if(!Array.isArray(values)) {
-		const intermediate = [ ...values.entries() ];
+export function paginateRaw<T>(
+	values: T[] | Collection<string, T>,
+	pagemax: number,
+): T[][] | [string, T][][];
+export function paginateRaw<T>(
+	values: T[] | Collection<string, T>,
+	pagemax: number = 10,
+): T[][] | [string, T][][] {
+	if (!Array.isArray(values)) {
+		const intermediate = [...values.entries()];
 		return intermediate
-			.map((_, i) => (i % pagemax === 0) ? intermediate.slice(i, i + pagemax) : null)
-			.filter(item => item);
+			.map((_, i) => (i % pagemax === 0 ? intermediate.slice(i, i + pagemax) : null))
+			.filter((item) => item);
 	}
 
 	return values
-		.map((_, i) => (i % pagemax === 0) ? values.slice(i, i + pagemax) : null)
-		.filter(item => item);
+		.map((_, i) => (i % pagemax === 0 ? values.slice(i, i + pagemax) : null))
+		.filter((item) => item);
 }
 
 /**@description Crea una promesa que dura la cantidad de milisegundos indicados.*/
 export function sleep(ms: number): Promise<void> {
-	if(typeof ms !== 'number') throw 'Se esperaba un número de milisegundos durante el cuál esperar';
-	return new Promise(resolve => setTimeout(resolve, ms));
+	if (typeof ms !== 'number')
+		throw 'Se esperaba un número de milisegundos durante el cuál esperar';
+	return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 //#region Comprobadores
-export const isNotModerator = (member: GuildMember) => !(member.permissions.has('ManageRoles') || member.permissions.has('ManageMessages'));
+export const isNotModerator = (member: GuildMember) =>
+	!(member.permissions.has('ManageRoles') || member.permissions.has('ManageMessages'));
 
 export async function isUsageBanned(user: User | GuildMember) {
 	const userCache = await fetchUserCache(user);
@@ -47,19 +76,24 @@ export async function isUsageBanned(user: User | GuildMember) {
 }
 
 export function isBoosting(member: GuildMember) {
-	return member.roles.premiumSubscriberRole ? true : false;
+	return !!member.roles.premiumSubscriberRole;
 }
 
 export function isThread(channel: GuildBasedChannel): channel is AnyThreadChannel {
-	return [ ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.AnnouncementThread ].includes(channel.type);
+	return [
+		ChannelType.PublicThread,
+		ChannelType.PrivateThread,
+		ChannelType.AnnouncementThread,
+	].includes(channel.type);
 }
 
 export function channelIsBlocked(channel: GuildTextBasedChannel) {
 	const member = channel?.guild?.members.me;
-	if(!member?.permissionsIn(channel)?.any?.([ 'SendMessages', 'SendMessagesInThreads' ], true)) return true;
-	if(globalConfigs.maintenance.length === 0) return false;
+	if (!member?.permissionsIn(channel)?.any?.(['SendMessages', 'SendMessagesInThreads'], true))
+		return true;
+	if (globalConfigs.maintenance.length === 0) return false;
 
-	return (globalConfigs.maintenance.startsWith('!'))
+	return globalConfigs.maintenance.startsWith('!')
 		? channel.id === globalConfigs.maintenance.slice(1)
 		: channel.id !== globalConfigs.maintenance;
 }
@@ -72,7 +106,7 @@ export function channelIsBlocked(channel: GuildTextBasedChannel) {
  */
 export function calculateRealMemberCount(guild: Guild) {
 	const members = guild.members.cache;
-	return members.filter(member => !member.user.bot).size;
+	return members.filter((member) => !member.user.bot).size;
 }
 
 interface CanvasTextDrawAreaOptions {
@@ -110,7 +144,13 @@ interface CanvasTextDrawOptions {
  * @param text El usuario del cual dibujar la foto de perfil
  * @param options Opciones de renderizado de texto
  */
-export function drawText(ctx: SKRSContext2D, x: number, y: number, text: string, options: CanvasTextDrawOptions = {}): void {
+export function drawText(
+	ctx: SKRSContext2D,
+	x: number,
+	y: number,
+	text: string,
+	options: CanvasTextDrawOptions = {},
+): void {
 	//Parámetros opcionales
 	options.area ??= {};
 	options.area.halign ??= 'left';
@@ -130,12 +170,15 @@ export function drawText(ctx: SKRSContext2D, x: number, y: number, text: string,
 	options.font ??= {};
 	options.font.family ??= 'headline';
 	options.font.size ??= 12;
-	options.font.styles ??= [ 'regular' ];
-
+	options.font.styles ??= ['regular'];
 
 	const { halign, valign, maxSize } = options.area;
 	const { enabled: fillEnabled, onTop: fillOnTop, color: fillColor } = options.fill;
-	const { color: strokeColor, width: strokeWidth, widthAsFactor: strokeWidthAsFactor } = options.stroke;
+	const {
+		color: strokeColor,
+		width: strokeWidth,
+		widthAsFactor: strokeWidthAsFactor,
+	} = options.stroke;
 	const { family: fontFamily, size: fontSize, styles: fontStyles } = options.font;
 
 	ctx.textAlign = halign;
@@ -143,27 +186,28 @@ export function drawText(ctx: SKRSContext2D, x: number, y: number, text: string,
 
 	const dynamicStepSize = 2;
 	let dynamicFontSize = fontSize + dynamicStepSize;
-	do ctx.font = `${fontStyles.join(' ')} ${dynamicFontSize -= dynamicStepSize}px "${fontFamily}"`;
-	while(ctx.measureText(text).width > maxSize);
+	do
+		// biome-ignore lint/suspicious/noAssignInExpressions: Calcular tamaño de fuente en una sola expresión
+		ctx.font = `${fontStyles.join(' ')} ${(dynamicFontSize -= dynamicStepSize)}px "${fontFamily}"`;
+	while (ctx.measureText(text).width > maxSize);
 
 	const fill = () => {
 		ctx.fillStyle = fillColor;
 		ctx.fillText(text, x, y);
 	};
 	const stroke = () => {
-		ctx.lineWidth = Math.ceil(strokeWidthAsFactor ? Math.ceil(fontSize * strokeWidth) : strokeWidth);
+		ctx.lineWidth = Math.ceil(
+			strokeWidthAsFactor ? Math.ceil(fontSize * strokeWidth) : strokeWidth,
+		);
 		ctx.strokeStyle = strokeColor;
 		ctx.strokeText(text, x, y);
 	};
 
-	if(fillEnabled && !fillOnTop)
-		fill();
+	if (fillEnabled && !fillOnTop) fill();
 
-	if(strokeWidth > 0)
-		stroke();
+	if (strokeWidth > 0) stroke();
 
-	if(fillEnabled && fillOnTop)
-		fill();
+	if (fillEnabled && fillOnTop) fill();
 }
 
 interface CanvasAvatarDrawOptions {
@@ -171,7 +215,14 @@ interface CanvasAvatarDrawOptions {
 	circleStrokeFactor?: number;
 }
 
-export async function drawCircularImage(ctx: SKRSContext2D, user: User, xcenter: number, ycenter: number, radius: number, options: CanvasAvatarDrawOptions = {}): Promise<void> {
+export async function drawCircularImage(
+	ctx: SKRSContext2D,
+	user: User,
+	xcenter: number,
+	ycenter: number,
+	radius: number,
+	options: CanvasAvatarDrawOptions = {},
+): Promise<void> {
 	options.circleStrokeColor ??= '#000000';
 	options.circleStrokeFactor ??= 0.02;
 
@@ -196,26 +247,27 @@ export async function drawCircularImage(ctx: SKRSContext2D, user: User, xcenter:
 }
 
 export async function sendWelcomeMessage(member: GuildMember) {
-	if(member == null || typeof member !== 'object')
+	if (member == null || typeof member !== 'object')
 		throw ReferenceError('Se esperaba un miembro a cual dar la bienvenida.');
 
 	const { guild, user, displayName } = member;
 
 	const channel = guild.systemChannel;
 
-	if(guild.systemChannel == null) {
-		guild.fetchOwner().then(ow => ow.user.send({
-			content:
-				'¡Hola, soy Bot de Puré!\n' +
-				`¡Un nuevo miembro, **${member} (${member.user.username} / ${member.id})**, ha entrado a tu servidor **${guild.name}**!\n\n` +
-				'*Si deseas que envíe una bienvenida a los miembros nuevos en lugar de enviarte un mensaje privado, selecciona un canal de mensajes de sistema en tu servidor.*\n' +
-				'-# Nota: Bot de Puré no opera con mensajes privados.'
-		}));
+	if (guild.systemChannel == null) {
+		guild.fetchOwner().then((ow) =>
+			ow.user.send({
+				content:
+					'¡Hola, soy Bot de Puré!\n'
+					+ `¡Un nuevo miembro, **${member} (${member.user.username} / ${member.id})**, ha entrado a tu servidor **${guild.name}**!\n\n`
+					+ '*Si deseas que envíe una bienvenida a los miembros nuevos en lugar de enviarte un mensaje privado, selecciona un canal de mensajes de sistema en tu servidor.*\n'
+					+ '-# Nota: Bot de Puré no opera con mensajes privados.',
+			}),
+		);
 		return;
 	}
 
-	if(!guild.members.me.permissionsIn(channel).has([ 'SendMessages', 'ViewChannel' ]))
-		return;
+	if (!guild.members.me.permissionsIn(channel).has(['SendMessages', 'ViewChannel'])) return;
 
 	console.log(concol.purple`Un usuario ha entrado a ${guild.name}...`);
 
@@ -226,7 +278,7 @@ export async function sendWelcomeMessage(member: GuildMember) {
 		const canvas = Canvas.createCanvas(1275, 825);
 		const ctx = canvas.getContext('2d');
 
-		const [ fondo ] = await Promise.all([
+		const [fondo] = await Promise.all([
 			Canvas.loadImage(images.announcements.welcome),
 			fetchGuildMembers(guild),
 		]);
@@ -245,7 +297,7 @@ export async function sendWelcomeMessage(member: GuildMember) {
 		const defaultFont: CanvasTextDrawFontOptions = {
 			family: 'headline',
 			size: 100,
-			styles: [ 'bold' ],
+			styles: ['bold'],
 		};
 
 		//Nombre del miembro
@@ -270,34 +322,44 @@ export async function sendWelcomeMessage(member: GuildMember) {
 		});
 
 		//Foto de perfil
-		await drawCircularImage(ctx, user, canvas.width / 2, (canvas.height - 56) / 2, 200, { circleStrokeFactor: strokeFactor });
+		await drawCircularImage(ctx, user, canvas.width / 2, (canvas.height - 56) / 2, 200, {
+			circleStrokeFactor: strokeFactor,
+		});
 
-		const attachment = new AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'bienvenida.webp' });
+		const attachment = new AttachmentBuilder(canvas.toBuffer('image/webp'), {
+			name: 'bienvenida.webp',
+		});
 		const memberCount = calculateRealMemberCount(guild);
 
 		const container = new ContainerBuilder()
 			.setAccentColor(tenshiColor)
-			.addMediaGalleryComponents(mediaGallery =>
-				mediaGallery.addItems(item =>
+			.addMediaGalleryComponents((mediaGallery) =>
+				mediaGallery.addItems((item) =>
 					item
 						.setURL('attachment://bienvenida.webp')
 						.setDescription('Imagen de bienvenida.'),
 				),
 			)
-			.addTextDisplayComponents(textDisplay =>
-				textDisplay.setContent([
-					`¡Bienvenido al servidor **${displayName}**!`,
-					`-# Ahora hay **${memberCount}** usuarios en el server.`,
-				].join('\n'))
+			.addTextDisplayComponents((textDisplay) =>
+				textDisplay.setContent(
+					[
+						`¡Bienvenido al servidor **${displayName}**!`,
+						`-# Ahora hay **${memberCount}** usuarios en el server.`,
+					].join('\n'),
+				),
 			);
 
 		return channel.send({
 			flags: MessageFlags.IsComponentsV2,
-			components: [ container ],
-			files: [ attachment ],
+			components: [container],
+			files: [attachment],
 		});
-	} catch(err) {
-		console.log(chalk.redBright.bold('Ocurrió un problema al intentar enviar un mensaje de bienvenida:'));
+	} catch (err) {
+		console.log(
+			chalk.redBright.bold(
+				'Ocurrió un problema al intentar enviar un mensaje de bienvenida:',
+			),
+		);
 		console.error(err);
 	}
 }
@@ -306,13 +368,13 @@ export async function sendFarewellMessage(member: GuildMember) {
 	const { guild } = member;
 	const channel = guild.systemChannel;
 
-	if(!channel) {
+	if (!channel) {
 		console.log('El servidor no tiene canal de mensajes de sistema.');
 		return;
 	}
 
 	console.log(`Un usuario ha salido de ${guild.name}...`);
-	if(!guild.members.me.permissionsIn(channel).has([ 'SendMessages', 'ViewChannel' ])) {
+	if (!guild.members.me.permissionsIn(channel).has(['SendMessages', 'ViewChannel'])) {
 		console.log('No se puede enviar un mensaje de despedida en este canal.');
 		return;
 	}
@@ -324,7 +386,7 @@ export async function sendFarewellMessage(member: GuildMember) {
 		const canvas = Canvas.createCanvas(1500, 900);
 		const ctx = canvas.getContext('2d');
 
-		const [ fondo ] = await Promise.all([
+		const [fondo] = await Promise.all([
 			Canvas.loadImage(images.announcements.farewell),
 			fetchGuildMembers(guild),
 		]);
@@ -346,34 +408,38 @@ export async function sendFarewellMessage(member: GuildMember) {
 		ctx.fillText(farewellText, halfWidth, canvas.height - 40);
 
 		//Foto de perfil
-		await drawCircularImage(ctx, member.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
+		await drawCircularImage(ctx, member.user, canvas.width / 2, 80 + 200, 200, {
+			circleStrokeFactor: strokeFactor,
+		});
 
 		//Enviar imagen y mensaje extra
-		const attachment = new AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'despedida.webp' });
+		const attachment = new AttachmentBuilder(canvas.toBuffer('image/webp'), {
+			name: 'despedida.webp',
+		});
 		const members = guild.members.cache;
-		const memberCount = members.filter(member => !member.user.bot).size;
+		const memberCount = members.filter((member) => !member.user.bot).size;
 
 		const container = new ContainerBuilder()
 			.setAccentColor(tenshiColor)
-			.addMediaGalleryComponents(mediaGallery =>
-				mediaGallery.addItems(item =>
+			.addMediaGalleryComponents((mediaGallery) =>
+				mediaGallery.addItems((item) =>
 					item
 						.setURL('attachment://despedida.webp')
 						.setDescription('Imagen de despedida.'),
 				),
 			)
-			.addTextDisplayComponents(textDisplay =>
+			.addTextDisplayComponents((textDisplay) =>
 				textDisplay.setContent(`*Ahora hay **${memberCount}** usuarios en el server.*`),
 			);
 
 		await channel.send({
 			flags: MessageFlags.IsComponentsV2,
-			components: [ container ],
-			files: [ attachment ],
+			components: [container],
+			files: [attachment],
 		});
 
 		console.log('Despedida finalizada.');
-	} catch(err) {
+	} catch (err) {
 		console.log(chalk.redBright.bold('Error de despedida'));
 		console.error(err);
 	}
@@ -382,9 +448,9 @@ export async function sendFarewellMessage(member: GuildMember) {
 
 //#region Fetch
 export function extractUserID(data: string): string {
-	if(data.startsWith('<@') && data.endsWith('>')) {
+	if (data.startsWith('<@') && data.endsWith('>')) {
 		data = data.slice(2, -1);
-		if(data.startsWith('!')) data = data.slice(1);
+		if (data.startsWith('!')) data = data.slice(1);
 	}
 	return data;
 }
@@ -398,36 +464,33 @@ interface MemberMatch {
 
 function memberMatchComparer(a: MemberMatch, b: MemberMatch): number {
 	//Favorecer coincidencia temprana
-	if(a.matchIndex < b.matchIndex)
-		return -1;
-	if(a.matchIndex > b.matchIndex)
-		return 1;
+	if (a.matchIndex < b.matchIndex) return -1;
+	if (a.matchIndex > b.matchIndex) return 1;
 
 	//Favorecer nombre corto
-	if(a.length < b.length)
-		return -1;
-	if(a.length > b.length)
-		return 1;
+	if (a.length < b.length) return -1;
+	if (a.length > b.length) return 1;
 
 	//Favorecer orden lexicográfico
-	if(a.rawTarget < b.rawTarget)
-		return -1;
-	if(a.rawTarget > b.rawTarget)
-		return 1;
+	if (a.rawTarget < b.rawTarget) return -1;
+	if (a.rawTarget > b.rawTarget) return 1;
 
 	return 0;
 }
 
-export function findMemberByUsername(members: Collection<string, GuildMember>, query: string): GuildMember {
-	const processedMembers = members.map(m => ({
+export function findMemberByUsername(
+	members: Collection<string, GuildMember>,
+	query: string,
+): GuildMember {
+	const processedMembers = members.map((m) => ({
 		member: m,
 		rawTarget: m.user.username,
 		length: m.user.username.length,
 		matchIndex: m.user.username.toLowerCase().indexOf(query),
 	}));
 
-	const qualifiedMembers = processedMembers.filter(m => m.matchIndex !== -1);
-	if(qualifiedMembers.length) {
+	const qualifiedMembers = processedMembers.filter((m) => m.matchIndex !== -1);
+	if (qualifiedMembers.length) {
 		qualifiedMembers.sort(memberMatchComparer);
 		return qualifiedMembers[0]?.member;
 	}
@@ -435,18 +498,21 @@ export function findMemberByUsername(members: Collection<string, GuildMember>, q
 	return undefined;
 }
 
-export function findMemberByNickname(members: Collection<string, GuildMember>, query: string): GuildMember {
+export function findMemberByNickname(
+	members: Collection<string, GuildMember>,
+	query: string,
+): GuildMember {
 	const processedMembers = members
-		.filter(m => m.nickname)
-		.map(m => ({
+		.filter((m) => m.nickname)
+		.map((m) => ({
 			member: m,
 			rawTarget: m.nickname,
 			length: m.nickname.length,
 			matchIndex: m.nickname.toLowerCase().indexOf(query),
 		}));
 
-	const qualifiedMembers = processedMembers.filter(m => m.matchIndex !== -1);
-	if(qualifiedMembers.length) {
+	const qualifiedMembers = processedMembers.filter((m) => m.matchIndex !== -1);
+	if (qualifiedMembers.length) {
 		qualifiedMembers.sort(memberMatchComparer);
 		return qualifiedMembers[0]?.member;
 	}
@@ -454,18 +520,21 @@ export function findMemberByNickname(members: Collection<string, GuildMember>, q
 	return undefined;
 }
 
-export function findMemberByGlobalName(members: Collection<string, GuildMember>, query: string): GuildMember {
+export function findMemberByGlobalName(
+	members: Collection<string, GuildMember>,
+	query: string,
+): GuildMember {
 	const processedMembers = members
-		.filter(m => m.user.globalName)
-		.map(m => ({
+		.filter((m) => m.user.globalName)
+		.map((m) => ({
 			member: m,
 			rawTarget: m.user.globalName,
 			length: m.user.globalName.length,
 			matchIndex: m.user.globalName.toLowerCase().indexOf(query),
 		}));
 
-	const qualifiedMembers = processedMembers.filter(m => m.matchIndex !== -1);
-	if(qualifiedMembers.length) {
+	const qualifiedMembers = processedMembers.filter((m) => m.matchIndex !== -1);
+	if (qualifiedMembers.length) {
 		qualifiedMembers.sort(memberMatchComparer);
 		return qualifiedMembers[0]?.member;
 	}
@@ -484,48 +553,47 @@ export function findMemberByGlobalName(members: Collection<string, GuildMember>,
  * @returns El miembro encontrado.
  */
 export function fetchMember(query: GuildMember | string, context: FetchUserContext): GuildMember {
-	if(!query)
-		throw new Error('fetchMember: Se requiere un criterio de búsqueda');
+	if (!query) throw new Error('fetchMember: Se requiere un criterio de búsqueda');
 
-	if(typeof query !== 'string')
-		return query.user?.username ? query : undefined;
+	if (typeof query !== 'string') return query.user?.username ? query : undefined;
 
 	const { guild: thisGuild, client } = context ?? {};
-	if(!thisGuild || !client)
+	if (!thisGuild || !client)
 		throw new Error('Se requieren la guild actual y el cliente en búsqueda de miembro');
-
 
 	//Prioridad 1: Intentar encontrar por ID
 	const allGuilds = client.guilds.cache;
-	const otherGuilds = allGuilds.filter(g => g.id !== thisGuild.id);
+	const otherGuilds = allGuilds.filter((g) => g.id !== thisGuild.id);
 	query = extractUserID(query);
 
-	if(!isNaN(+query)) {
-		return thisGuild.members.cache.find(m => m.id === query)
+	if (!Number.isNaN(+query)) {
+		return (
+			thisGuild.members.cache.find((m) => m.id === query)
 			?? otherGuilds
-				.map(guild => guild.members.cache.find(m => m.id === query))
-				.find(m => m)
-		?? undefined;
+				.map((guild) => guild.members.cache.find((m) => m.id === query))
+				.find((m) => m)
+			?? undefined
+		);
 	}
 
 	//Prioridad 2: Intentar encontrar por nombres (este server)
 	const lowerQuery = (query as string).toLowerCase();
 	const thisGuildMembers = thisGuild.members.cache;
-	const memberInThisGuild = findMemberByGlobalName(thisGuildMembers, lowerQuery)
+	const memberInThisGuild =
+		findMemberByGlobalName(thisGuildMembers, lowerQuery)
 		?? findMemberByUsername(thisGuildMembers, lowerQuery)
 		?? findMemberByNickname(thisGuildMembers, lowerQuery);
 
-	if(memberInThisGuild)
-		return memberInThisGuild;
+	if (memberInThisGuild) return memberInThisGuild;
 
 	//Prioridad 3: Intentar encontrar por nombres (otros servers)
-	const otherGuildsMembers = otherGuilds.flatMap(g => g.members.cache);
-	const memberInOtherGuilds = findMemberByGlobalName(otherGuildsMembers, lowerQuery)
+	const otherGuildsMembers = otherGuilds.flatMap((g) => g.members.cache);
+	const memberInOtherGuilds =
+		findMemberByGlobalName(otherGuildsMembers, lowerQuery)
 		?? findMemberByUsername(otherGuildsMembers, lowerQuery)
 		?? findMemberByNickname(otherGuildsMembers, lowerQuery);
 
-	if(memberInOtherGuilds)
-		return memberInOtherGuilds;
+	if (memberInOtherGuilds) return memberInOtherGuilds;
 
 	return undefined;
 }
@@ -546,43 +614,40 @@ interface FetchUserContext {
  * @returns El usuario encontrado.
  */
 export function fetchUser(query: User | string, context: FetchUserContext): User {
-	if(!query)
-		throw new Error('fetchUser: Se requiere un criterio de búsqueda');
+	if (!query) throw new Error('fetchUser: Se requiere un criterio de búsqueda');
 
-	if(typeof query !== 'string')
-		return query.username ? query : undefined;
+	if (typeof query !== 'string') return query.username ? query : undefined;
 
 	const { guild: thisGuild, client } = context ?? {};
-	if(!query || !thisGuild || !client)
+	if (!query || !thisGuild || !client)
 		throw new Error('Se requieren la guild actual y el cliente en búsqueda de usuario');
 
 	//Prioridad 1: Intentar encontrar por ID
 	const usersCache = client.users.cache;
 	query = extractUserID(query);
 
-	if(!isNaN(+query))
-		return usersCache.find(u => u.id === query);
+	if (!Number.isNaN(+query)) return usersCache.find((u) => u.id === query);
 
 	//Prioridad 2: Intentar encontrar por nombres (este server)
 	const lowerQuery = (query as string).toLowerCase();
 	const thisGuildMembers = thisGuild.members.cache;
-	const memberInThisGuild = findMemberByGlobalName(thisGuildMembers, lowerQuery)
+	const memberInThisGuild =
+		findMemberByGlobalName(thisGuildMembers, lowerQuery)
 		?? findMemberByUsername(thisGuildMembers, lowerQuery)
 		?? findMemberByNickname(thisGuildMembers, lowerQuery);
 
-	if(memberInThisGuild)
-		return memberInThisGuild.user;
+	if (memberInThisGuild) return memberInThisGuild.user;
 
 	//Prioridad 3: Intentar encontrar por nombres (otros servers)
 	const allGuilds = client.guilds.cache;
-	const otherGuilds = allGuilds.filter(g => g.id !== thisGuild.id);
-	const otherGuildsMembers = otherGuilds.flatMap(g => g.members.cache);
-	const memberInOtherGuilds = findMemberByGlobalName(otherGuildsMembers, lowerQuery)
+	const otherGuilds = allGuilds.filter((g) => g.id !== thisGuild.id);
+	const otherGuildsMembers = otherGuilds.flatMap((g) => g.members.cache);
+	const memberInOtherGuilds =
+		findMemberByGlobalName(otherGuildsMembers, lowerQuery)
 		?? findMemberByUsername(otherGuildsMembers, lowerQuery)
 		?? findMemberByNickname(otherGuildsMembers, lowerQuery);
 
-	if(memberInOtherGuilds)
-		return memberInOtherGuilds.user;
+	if (memberInOtherGuilds) return memberInOtherGuilds.user;
 
 	return undefined;
 }
@@ -597,9 +662,12 @@ export function fetchUser(query: User | string, context: FetchUserContext): User
  * @param context El contexto del cuál obtener un usuario con la consulta.
  * @returns La ID del usuario encontrado.
  */
-export async function fetchUserID(query: User | string, context: FetchUserContext): Promise<string> {
+export async function fetchUserID(
+	query: User | string,
+	context: FetchUserContext,
+): Promise<string> {
 	const user = fetchUser(query, context);
-	return (user != null) ? user.id : undefined;
+	return user != null ? user.id : undefined;
 }
 
 /**
@@ -612,18 +680,16 @@ export async function fetchUserID(query: User | string, context: FetchUserContex
  * @returns El servidor encontrado.
  */
 export async function fetchGuild(query: string): Promise<Guild> {
-	if(typeof query !== 'string' || !query.length) return;
+	if (typeof query !== 'string' || !query.length) return;
 
-	if(!isNaN(+query))
-		return client.guilds.cache.get(query)
-			?? client.guilds.fetch(query);
+	if (!Number.isNaN(+query)) return client.guilds.cache.get(query) ?? client.guilds.fetch(query);
 
 	let bestDistance = -1;
 	return client.guilds.cache
 		.reduce((bestMatch, guild) => {
 			const distance = levenshteinDistance(guild.name, query);
 
-			if(bestMatch && distance < bestDistance) {
+			if (bestMatch && distance < bestDistance) {
 				bestDistance = distance;
 				return guild;
 			}
@@ -644,19 +710,20 @@ export async function fetchGuild(query: string): Promise<Guild> {
  * @returns El canal encontrado.
  */
 export function fetchChannel(query: string, guild: Guild): GuildBasedChannel {
-	if(typeof query !== 'string' || !query.length) return;
+	if (typeof query !== 'string' || !query.length) return;
 
 	const ccache = guild.channels.cache;
-	if(query.startsWith('<#') && query.endsWith('>'))
-		query = query.slice(2, -1);
+	if (query.startsWith('<#') && query.endsWith('>')) query = query.slice(2, -1);
 
-	const channel = ccache.get(query) || ccache.filter(c => [ ChannelType.GuildText, ChannelType.GuildVoice ].includes(c.type)).find(c => c.name.toLowerCase().includes(query));
+	const channel =
+		ccache.get(query)
+		|| ccache
+			.filter((c) => [ChannelType.GuildText, ChannelType.GuildVoice].includes(c.type))
+			.find((c) => c.name.toLowerCase().includes(query));
 
-	if(!channel)
-		return;
+	if (!channel) return;
 
-	if(![ ChannelType.GuildText, ChannelType.GuildVoice ].includes(channel.type))
-		return;
+	if (![ChannelType.GuildText, ChannelType.GuildVoice].includes(channel.type)) return;
 
 	return channel;
 }
@@ -676,8 +743,11 @@ interface FetchMessageContext {
  * @param context El contexto del cuál obtener un mensaje con la consulta.
  * @returns El mensaje encontrado.
  */
-export async function fetchMessage(data: string, context: FetchMessageContext = {}): Promise<Message> {
-	if(typeof data !== 'string' || !data.length) return;
+export async function fetchMessage(
+	data: string,
+	context: FetchMessageContext = {},
+): Promise<Message> {
+	if (typeof data !== 'string' || !data.length) return;
 
 	const acceptedChannelTypes = [
 		ChannelType.GuildText,
@@ -687,16 +757,16 @@ export async function fetchMessage(data: string, context: FetchMessageContext = 
 		ChannelType.AnnouncementThread,
 	];
 
-	if(!acceptedChannelTypes.includes(context.channel?.type))
-		return;
+	if (!acceptedChannelTypes.includes(context.channel?.type)) return;
 
 	const messages = context.channel?.messages;
 	const matchedUrl = data.match(/https:\/\/discord.com\/channels\/\d+\/\d+\/(\d+)/);
 	const messageId = matchedUrl ? matchedUrl[1] : data;
-	const message = messages.cache.get(messageId) || await messages.fetch(messageId).catch(_ => _);
+	const message =
+		messages.cache.get(messageId) || (await messages.fetch(messageId).catch((_) => _));
 
-	if(!message?.channel) return;
-	if(!acceptedChannelTypes.includes(message.channel.type)) return;
+	if (!message?.channel) return;
+	if (!acceptedChannelTypes.includes(message.channel.type)) return;
 	return message;
 }
 
@@ -711,18 +781,24 @@ export async function fetchMessage(data: string, context: FetchMessageContext = 
  * @returns El rol encontrado.
  */
 export function fetchRole(data: string, guild: Guild): Role {
-	if(typeof data !== 'string' || !data.length) return;
+	if (typeof data !== 'string' || !data.length) return;
 
 	const rcache = guild.roles.cache;
-	if(data.startsWith('<@&') && data.endsWith('>'))
-		data = data.slice(3, -1);
-	const role = rcache.get(data) || rcache.filter(r => r.name !== '@everyone').find(r => r.name.toLowerCase().includes(data));
-	if(!role) return;
+	if (data.startsWith('<@&') && data.endsWith('>')) data = data.slice(3, -1);
+	const role =
+		rcache.get(data)
+		|| rcache
+			.filter((r) => r.name !== '@everyone')
+			.find((r) => r.name.toLowerCase().includes(data));
+	if (!role) return;
 	return role;
 }
 
 /**@deprecated Mantenido por compatibilidad. No debe reusarse nunca hoy en día, y en su lugar: deben usarse componentes de entrada de usuario de */
-export const fetchArrows = (emojiscache: Collection<Snowflake, Emoji>): [Emoji, Emoji] => [ emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460') ];
+export const fetchArrows = (emojiscache: Collection<Snowflake, Emoji>): [Emoji, Emoji] => [
+	emojiscache.get('681963688361590897'),
+	emojiscache.get('681963688411922460'),
+];
 
 /**
  * @param args An array of words, which may contain double-quote groups
@@ -730,55 +806,54 @@ export const fetchArrows = (emojiscache: Collection<Snowflake, Emoji>): [Emoji, 
  * @ignore This should never be used directly, because the class for addressing options already handles the intended use case of this function in a less confusing manner.
  */
 export function fetchSentence(args: string[], i: number) {
-	if(i == undefined || i >= args.length || args[i] == undefined)
-		return undefined;
+	if (i == null || i >= args.length || args[i] == null) return undefined;
 
-	if(!args[i].startsWith('"'))
-		return args.splice(i, 1)[0];
+	if (!args[i].startsWith('"')) return args.splice(i, 1)[0];
 
 	let last = i;
-	while(last < args.length && !args[last].endsWith('"'))
-		last++;
+	while (last < args.length && !args[last].endsWith('"')) last++;
 
-	const text = args.splice(i, last - i + 1).join(' ').slice(1);
+	const text = args
+		.splice(i, last - i + 1)
+		.join(' ')
+		.slice(1);
 
-	if(text.length === 0 || text === '"')
-		return undefined;
+	if (text.length === 0 || text === '"') return undefined;
 
 	return text.endsWith('"') ? text.slice(0, -1) : text;
 }
 //#endregion
 
 //#region Utilidades
-const HTTP_ENTITIES = ({
-	nbsp:   ' ',
-	amp:    '&',
-	quot:   '"',
-	lt:     '<',
-	gt:     '>',
-	tilde:  '~',
-	apos:   '\'',
-	'#039': '\'',
-	cent:   '¢',
-	pound:  '£',
-	euro:   '€',
-	yen:    '¥',
-	copy:   '©',
-	reg:    '®',
-	iexcl:  '¡',
+const HTTP_ENTITIES = {
+	nbsp: ' ',
+	amp: '&',
+	quot: '"',
+	lt: '<',
+	gt: '>',
+	tilde: '~',
+	apos: "'",
+	'#039': "'",
+	cent: '¢',
+	pound: '£',
+	euro: '€',
+	yen: '¥',
+	copy: '©',
+	reg: '®',
+	iexcl: '¡',
 	brvbar: '¦',
-	sect:   '§',
-	uml:    '¨',
-	not:    '¬',
-	deg:    'º',
-	acute:  '`',
-	micro:  'µ',
-	para:   '¶',
-	ordm:   'º',
-	laquo:  '«',
-	raquo:  '»',
-	circ:   '^',
-}) as const;
+	sect: '§',
+	uml: '¨',
+	not: '¬',
+	deg: 'º',
+	acute: '`',
+	micro: 'µ',
+	para: '¶',
+	ordm: 'º',
+	laquo: '«',
+	raquo: '»',
+	circ: '^',
+} as const;
 
 const HTTP_ENTITIES_REGEX = (() => {
 	const keys = Object.keys(HTTP_ENTITIES).join('|');
@@ -787,12 +862,12 @@ const HTTP_ENTITIES_REGEX = (() => {
 
 export function decodeEntities(encodedstring: string) {
 	//Fuente: https://stackoverflow.com/questions/44195322/a-plain-javascript-way-to-decode-html-entities-works-on-both-browsers-and-node
-	return encodedstring.replace(HTTP_ENTITIES_REGEX, function(match, entity) {
-		return HTTP_ENTITIES[entity] ?? match;
-	}).replace(/&#(\d+);/gi, function(_, numStr) {
-		const num = parseInt(numStr, 10);
-		return String.fromCharCode(num);
-	});
+	return encodedstring
+		.replace(HTTP_ENTITIES_REGEX, (match, entity) => HTTP_ENTITIES[entity] ?? match)
+		.replace(/&#(\d+);/gi, (_, numStr) => {
+			const num = parseInt(numStr, 10);
+			return String.fromCharCode(num);
+		});
 }
 
 export interface WeightedDecision<TValue> {
@@ -819,26 +894,25 @@ export interface WeightedDecision<TValue> {
  * // 'common' is most likely, 'legendary' is least likely
  * console.log(result);
  */
-export function makeWeightedDecision<TValue = unknown>(options: WeightedDecision<TValue>[]): TValue {
-	if(!options.length) return;
+export function makeWeightedDecision<TValue = unknown>(
+	options: WeightedDecision<TValue>[],
+): TValue {
+	if (!options.length) return;
 
 	const optionCount = options.length;
 
 	let totalWeight = 0;
-	for(const option of options)
-		totalWeight += option.weight;
+	for (const option of options) totalWeight += option.weight;
 
-	if(totalWeight === 0) {
+	if (totalWeight === 0) {
 		const r = Math.floor(Math.random() * optionCount);
 		return options[r].value;
 	}
 
 	let r = Math.random() * totalWeight;
-	for(let i = 0; i < optionCount; i++) {
-		if(r < options[i].weight)
-			return options[i].value;
-		else
-			r -= options[i].weight;
+	for (let i = 0; i < optionCount; i++) {
+		if (r < options[i].weight) return options[i].value;
+		else r -= options[i].weight;
 	}
 
 	return options[optionCount - 1].value;
@@ -855,29 +929,27 @@ export const emojiRegex = /<a?:\w+:([0-9]+)>/gi;
 
 /**@description Devuelve el primer emoji global encontrado en el string.*/
 export function defaultEmoji(emoji: string): string | null {
-	if(typeof emoji !== 'string') return null;
+	if (typeof emoji !== 'string') return null;
 	return emoji.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0]; //Expresión RegExp cursed
 }
 
 /**@description Devuelve el primer emoji de servidor encontrado con el string.*/
 export function guildEmoji(emoji: string, guild: Guild): Emoji | null {
-	if(typeof emoji !== 'string') return null;
-	if(!guild.emojis) throw TypeError('Debes ingresar una Guild');
+	if (typeof emoji !== 'string') return null;
+	if (!guild.emojis) throw TypeError('Debes ingresar una Guild');
 	const parsedEmoji = emoji.match(/^<a*:\w+:[0-9]+>\B/gu)?.[0];
-	if(!parsedEmoji)
-		return guild.emojis.cache.find(e => e.name === emoji) || null;
+	if (!parsedEmoji) return guild.emojis.cache.find((e) => e.name === emoji) || null;
 	return guild.emojis.resolve(parsedEmoji);
 }
 
 /**@description Devuelve el primer emoji global o de servidor encontrado en el string.*/
-export const emoji = (emoji: string, guild: Guild): Emoji | string | null => defaultEmoji(emoji) ?? guildEmoji(emoji, guild);
+export const emoji = (emoji: string, guild: Guild): Emoji | string | null =>
+	defaultEmoji(emoji) ?? guildEmoji(emoji, guild);
 
 export function isNSFWChannel(channel: GuildBasedChannel) {
-	if(channel.isThread())
-		return channel.parent.nsfw;
+	if (channel.isThread()) return channel.parent.nsfw;
 
-	if(channel.isSendable())
-		return channel.nsfw;
+	if (channel.isSendable()) return channel.nsfw;
 
 	return false;
 }
@@ -887,7 +959,7 @@ export function isNSFWChannel(channel: GuildBasedChannel) {
  * @description Devuelve el valor ingresado, restringido al rango facilitado.
  */
 export function clamp(value: number, min: number, max: number) {
-	if(min > max) {
+	if (min > max) {
 		const temp = min;
 		min = max;
 		max = temp;
@@ -901,11 +973,10 @@ export function clamp(value: number, min: number, max: number) {
  * @description Devuelve la mediana del conjunto especificado.
  */
 export function median(...values: number[]) {
-	if(!values.length) throw RangeError('Se esperaba al menos 1 número');
+	if (!values.length) throw RangeError('Se esperaba al menos 1 número');
 	values = values.sort((a, b) => a - b);
 	const lowestHalf = Math.floor(values.length / 2);
-	if(values.length % 2)
-		return values[lowestHalf];
+	if (values.length % 2) return values[lowestHalf];
 	return (values[lowestHalf] + values[lowestHalf + 1]) / 2;
 }
 
@@ -916,9 +987,10 @@ export function median(...values: number[]) {
  */
 export function rand(maxExclusive: number, round: boolean = true) {
 	maxExclusive = +maxExclusive;
-	const negativeHandler = (maxExclusive < 0) ? -1 : 1;
+	const negativeHandler = maxExclusive < 0 ? -1 : 1;
 	maxExclusive = maxExclusive * negativeHandler;
-	const value = ((globalConfigs.seed + maxExclusive * Math.random()) % maxExclusive) * negativeHandler;
+	const value =
+		((globalConfigs.seed + maxExclusive * Math.random()) % maxExclusive) * negativeHandler;
 	return round ? Math.floor(value) : value;
 }
 
@@ -938,7 +1010,7 @@ export function randRange(minInclusive: number, maxExclusive: number, round: boo
 
 /**@description Devuelve un elemento aleatorio dentro de la Array especificada.*/
 export function randInArray<T>(array: T[]): T {
-	if(!array.length) return undefined;
+	if (!array.length) return undefined;
 	const randomIndex = rand(array.length);
 	return array[randomIndex];
 }
@@ -947,19 +1019,19 @@ export function randInArray<T>(array: T[]): T {
 export function shuffleArray<T>(array: T[]): void {
 	let currentIndex = array.length;
 
-	while(currentIndex !== 0) {
+	while (currentIndex !== 0) {
 		const randomIndex = Math.floor(Math.random() * currentIndex);
 		currentIndex--;
 
-		[ array[currentIndex], array[randomIndex] ] = [ array[randomIndex], array[currentIndex] ];
+		[array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
 	}
 }
 
 export function subdivideArray<T>(array: T[], divisionSize: number): T[][] {
-	if(!array.length) return [ [] ];
+	if (!array.length) return [[]];
 
 	const subdivided = [];
-	for(let i = 0; (i * divisionSize) < array.length; i++) {
+	for (let i = 0; i * divisionSize < array.length; i++) {
 		const j = i * divisionSize;
 		subdivided[i] = array.slice(j, j + divisionSize);
 	}
@@ -993,15 +1065,15 @@ export function subdivideArray<T>(array: T[], divisionSize: number): T[][] {
  * @param lastPage Número de última página
  */
 export function navigationRows(commandFilename: string, page: number, lastPage: number) {
-	const backward = (page > 0) ? (page - 1) : lastPage;
-	const forward = (page < lastPage) ? (page + 1) : 0;
+	const backward = page > 0 ? page - 1 : lastPage;
+	const forward = page < lastPage ? page + 1 : 0;
 	const maxGrowth = 12;
 	const desiredMax = page + maxGrowth;
 	const minPage = Math.max(0, page - maxGrowth - Math.max(0, desiredMax - lastPage));
 	let i = minPage;
 
 	return [
-		makeButtonRowBuilder().addComponents(
+		new ActionRowBuilder<ButtonBuilder>().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`${commandFilename}_loadPage_0_START`)
 				.setEmoji('934430008586403900')
@@ -1023,38 +1095,126 @@ export function navigationRows(commandFilename: string, page: number, lastPage: 
 				.setEmoji('1292310983527632967')
 				.setStyle(ButtonStyle.Primary),
 		),
-		makeStringSelectMenuRowBuilder().addComponents(
+		new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 			new StringSelectMenuBuilder()
 				.setCustomId(`${commandFilename}_loadPageExact`)
 				.setPlaceholder('Seleccionar página')
-				.setOptions(Array(Math.min(lastPage + 1, 25)).fill(null).map(() => ({
-					value: `${i}`,
-					label: `Página ${++i}`,
-				}))),
+				.setOptions(
+					Array(Math.min(lastPage + 1, 25))
+						.fill(null)
+						.map(() => ({
+							value: `${i}`,
+							label: `Página ${++i}`,
+						})),
+				),
 		),
 	];
 }
 
-export const shortnumberNames = ({
+export const shortnumberNames = {
 	es: [
-		'millones', 'miles de millones', 'billones', 'miles de billones', 'trillones', 'miles de trillones', 'cuatrillones', 'miles de cuatrillones',
-		'quintillones', 'miles de quintillones', 'sextillones', 'miles de sextillones', 'septillones', 'miles de septillones', 'octillones', 'miles de octillones', 'nonillones', 'miles de nonillones',
-		'decillones', 'miles de decillones', 'undecillones', 'miles de undecillones', 'duodecillones', 'miles de duodecillones', 'tredecillones', 'miles de tredecillones', 'quattuordecillones', 'miles de quattuordecillones',
-		'quindecillones', 'miles de quindecillones', 'sexdecillones', 'miles de sexdecillones',
+		'millones',
+		'miles de millones',
+		'billones',
+		'miles de billones',
+		'trillones',
+		'miles de trillones',
+		'cuatrillones',
+		'miles de cuatrillones',
+		'quintillones',
+		'miles de quintillones',
+		'sextillones',
+		'miles de sextillones',
+		'septillones',
+		'miles de septillones',
+		'octillones',
+		'miles de octillones',
+		'nonillones',
+		'miles de nonillones',
+		'decillones',
+		'miles de decillones',
+		'undecillones',
+		'miles de undecillones',
+		'duodecillones',
+		'miles de duodecillones',
+		'tredecillones',
+		'miles de tredecillones',
+		'quattuordecillones',
+		'miles de quattuordecillones',
+		'quindecillones',
+		'miles de quindecillones',
+		'sexdecillones',
+		'miles de sexdecillones',
 	],
 	en: [
-		'millions', 'billions', 'trillions', 'quadrillions', 'quintillions', 'sextillions', 'septillions', 'octillions', 'nonillions',
-		'decillions', 'undecillions', 'duodecillions', 'tredecillions', 'quattuordecillions', 'quindecillions', 'sexdecillions', 'septendecillions', 'octodecillions', 'novemdecillions',
-		'vigintillions', 'unvigintillions', 'duovigintillions', 'trevigintillions', 'quattuorvigintillions', 'quinvigintillions', 'sexvigintillions', 'septenvigintillions', 'octovigintillions', 'novemvigintillions',
-		'trigintillions', 'untrigintillions', 'duotrigintillions',
+		'millions',
+		'billions',
+		'trillions',
+		'quadrillions',
+		'quintillions',
+		'sextillions',
+		'septillions',
+		'octillions',
+		'nonillions',
+		'decillions',
+		'undecillions',
+		'duodecillions',
+		'tredecillions',
+		'quattuordecillions',
+		'quindecillions',
+		'sexdecillions',
+		'septendecillions',
+		'octodecillions',
+		'novemdecillions',
+		'vigintillions',
+		'unvigintillions',
+		'duovigintillions',
+		'trevigintillions',
+		'quattuorvigintillions',
+		'quinvigintillions',
+		'sexvigintillions',
+		'septenvigintillions',
+		'octovigintillions',
+		'novemvigintillions',
+		'trigintillions',
+		'untrigintillions',
+		'duotrigintillions',
 	],
 	ja: [
-		'millions', 'billions', 'trillions', 'quadrillions', 'quintillions', 'sextillions', 'septillions', 'octillions', 'nonillions',
-		'decillions', 'undecillions', 'duodecillions', 'tredecillions', 'quattuordecillions', 'quindecillions', 'sexdecillions', 'septendecillions', 'octodecillions', 'novemdecillions',
-		'vigintillions', 'unvigintillions', 'duovigintillions', 'trevigintillions', 'quattuorvigintillions', 'quinvigintillions', 'sexvigintillions', 'septenvigintillions', 'octovigintillions', 'novemvigintillions',
-		'trigintillions', 'untrigintillions', 'duotrigintillions',
+		'millions',
+		'billions',
+		'trillions',
+		'quadrillions',
+		'quintillions',
+		'sextillions',
+		'septillions',
+		'octillions',
+		'nonillions',
+		'decillions',
+		'undecillions',
+		'duodecillions',
+		'tredecillions',
+		'quattuordecillions',
+		'quindecillions',
+		'sexdecillions',
+		'septendecillions',
+		'octodecillions',
+		'novemdecillions',
+		'vigintillions',
+		'unvigintillions',
+		'duovigintillions',
+		'trevigintillions',
+		'quattuorvigintillions',
+		'quinvigintillions',
+		'sexvigintillions',
+		'septenvigintillions',
+		'octovigintillions',
+		'novemvigintillions',
+		'trigintillions',
+		'untrigintillions',
+		'duotrigintillions',
 	],
-}) as const;
+} as const;
 
 interface ImproveNumberOptions {
 	appendOf?: boolean;
@@ -1075,35 +1235,40 @@ export function improveNumber(num: number | string, options: ImproveNumberOption
 		minDigits = 1,
 	} = options;
 
-	if(typeof num === 'string')
-		num = parseFloat(num);
+	if (typeof num === 'string') num = parseFloat(num);
 
-	if(isNaN(num))
-		return '0';
+	if (Number.isNaN(num)) return '0';
 
 	/**
 	 * @param {number} n
 	 * @param {Intl.numberFormatOptions} nopt
 	 */
-	const formatnumber = (n: number, nopt: Intl.NumberFormatOptions = {}) => n.toLocaleString(translator.locale, { maximumFractionDigits: 2, minimumIntegerDigits: minDigits, ...nopt });
-	if((num < 1000000) || !shorten)
-		return formatnumber(num);
+	const formatnumber = (n: number, nopt: Intl.NumberFormatOptions = {}) =>
+		n.toLocaleString(translator.locale, {
+			maximumFractionDigits: 2,
+			minimumIntegerDigits: minDigits,
+			...nopt,
+		});
+	if (num < 1000000 || !shorten) return formatnumber(num);
 
 	const ofPrefix = appendOf ? translator.getText('genericNumberOfPrefix') : '';
 	const ofSuffix = appendOf ? translator.getText('genericNumberOfSuffix') : '';
 
 	const obtainShortenednumber = () => {
-		const googol = Math.pow(10, 100);
-		if(num >= googol)
+		const googol = 10 ** 100;
+		if (num >= googol)
 			return `${formatnumber(num / googol, { maximumFractionDigits: 4 })} Gúgol`;
 
 		const jesus = shortnumberNames[translator.locale];
-		const ni = (num < Math.pow(10, 6 + jesus.length * 3))
-			? Math.floor((num.toLocaleString('fullwide', { useGrouping: false }).length - 7) / 3)
-			: jesus.length - 1;
-		const snum = formatnumber(num / Math.pow(1000, ni + 2), { minimumFractionDigits: 2 });
+		const ni =
+			num < 10 ** (6 + jesus.length * 3)
+				? Math.floor(
+						(num.toLocaleString('fullwide', { useGrouping: false }).length - 7) / 3,
+					)
+				: jesus.length - 1;
+		const snum = formatnumber(num / 1000 ** (ni + 2), { minimumFractionDigits: 2 });
 
-		return [ snum, jesus[ni] ].join(' ');
+		return [snum, jesus[ni]].join(' ');
 	};
 
 	return `${ofPrefix}${obtainShortenednumber()}${ofSuffix}`;
@@ -1121,7 +1286,11 @@ export function quantityDisplay(num: number, translator: Translator) {
 /**@pure */
 export function regroupText(arr: string[], sep = ',') {
 	const sepRegex = new RegExp(`([\\n ]*${sep}[\\n ]*)+`, 'g');
-	return arr.join(' ').replace(sepRegex, sep).split(sep).filter(a => a.length);
+	return arr
+		.join(' ')
+		.replace(sepRegex, sep)
+		.split(sep)
+		.filter((a) => a.length);
 }
 
 /**
@@ -1129,11 +1298,15 @@ export function regroupText(arr: string[], sep = ',') {
  * Limita un string a una cantidad definida de caracteres.
  * Si el string sobrepasa el máximo establecido, se reemplaza el final por un string suspensor para indicar el recorte.
  */
-export function shortenText(text: string, max: number | null = 200, suspensor: string | null = '...'): string {
-	if(typeof text !== 'string') throw TypeError('El texto debe ser un string');
-	if(typeof max !== 'number') throw TypeError('El máximo debe ser un número');
-	if(typeof suspensor !== 'string') throw TypeError('El suspensor debe ser un string');
-	if(text.length < max) return text;
+export function shortenText(
+	text: string,
+	max: number | null = 200,
+	suspensor: string | null = '...',
+): string {
+	if (typeof text !== 'string') throw TypeError('El texto debe ser un string');
+	if (typeof max !== 'number') throw TypeError('El máximo debe ser un número');
+	if (typeof suspensor !== 'string') throw TypeError('El suspensor debe ser un string');
+	if (text.length < max) return text;
 	return `${text.slice(0, max - suspensor.length)}${suspensor}`;
 }
 
@@ -1142,25 +1315,27 @@ export function shortenText(text: string, max: number | null = 200, suspensor: s
  * Limita un string a una cantidad definida de caracteres de forma floja (no recorta palabras).
  * Si el string sobrepasa el máximo establecido, se reemplaza el final por un string suspensor para indicar el recorte.
  */
-export function shortenTextLoose(text: string, max: number | null = 200, hardMax: number | null = 256, suspensor: string | null = '...'): string {
-	if(typeof text !== 'string') throw TypeError('El texto debe ser un string');
-	if(typeof max !== 'number') throw TypeError('El máximo debe ser un número');
-	if(typeof hardMax !== 'number') throw TypeError('El máximo verdadero debe ser un número');
-	if(typeof suspensor !== 'string') throw TypeError('El suspensor debe ser un string');
+export function shortenTextLoose(
+	text: string,
+	max: number | null = 200,
+	hardMax: number | null = 256,
+	suspensor: string | null = '...',
+): string {
+	if (typeof text !== 'string') throw TypeError('El texto debe ser un string');
+	if (typeof max !== 'number') throw TypeError('El máximo debe ser un número');
+	if (typeof hardMax !== 'number') throw TypeError('El máximo verdadero debe ser un número');
+	if (typeof suspensor !== 'string') throw TypeError('El suspensor debe ser un string');
 
-	if(text.length < max)
-		return text;
+	if (text.length < max) return text;
 
 	const trueMax = Math.min(text.length, hardMax);
-	const whitespaces = [ ' ', '\n', '\t' ];
+	const whitespaces = [' ', '\n', '\t'];
 	let calculatedMax = max;
-	while(calculatedMax < trueMax && !whitespaces.includes(text[calculatedMax])) calculatedMax++;
+	while (calculatedMax < trueMax && !whitespaces.includes(text[calculatedMax])) calculatedMax++;
 
-	if(calculatedMax + suspensor.length > hardMax)
-		calculatedMax = hardMax - suspensor.length;
+	if (calculatedMax + suspensor.length > hardMax) calculatedMax = hardMax - suspensor.length;
 
-	if(calculatedMax <= text.length)
-		return text;
+	if (calculatedMax <= text.length) return text;
 
 	return `${text.slice(0, calculatedMax)}${suspensor}`;
 }
@@ -1190,8 +1365,7 @@ export function shortenTextSmart(text: string, options: Partial<SmartShortenOpti
 	options.structs ??= [];
 	const { max, hardMax, suspensor } = options;
 
-	if(text.length < max)
-		return text;
+	if (text.length < max) return text;
 
 	const trueHardMax = Math.min(text.length, hardMax);
 
@@ -1211,7 +1385,10 @@ interface LowerCaseNormalizationOptions {
 }
 
 /**@description Obtiene una representación en minúsculas, normalizada y sin diacríticos del string ingresado.*/
-export function toLowerCaseNormalized(text: string, options: LowerCaseNormalizationOptions = null): string {
+export function toLowerCaseNormalized(
+	text: string,
+	options: LowerCaseNormalizationOptions = null,
+): string {
 	options ??= {};
 	options.removeCarriageReturns ??= false;
 
@@ -1220,8 +1397,7 @@ export function toLowerCaseNormalized(text: string, options: LowerCaseNormalizat
 		.normalize('NFD')
 		.replace(/([aeioun])[\u0300-\u030A]/gi, '$1');
 
-	if(options.removeCarriageReturns)
-		text = text.replace(/\r/g, '');
+	if (options.removeCarriageReturns) text = text.replace(/\r/g, '');
 
 	return text;
 }
@@ -1236,19 +1412,17 @@ export function levenshteinDistance(a: string, b: string): number {
 	const m = a.length + 1;
 	const n = b.length + 1;
 	const distance = new Array(m);
-	for(let i = 0; i < m; ++i) {
+	for (let i = 0; i < m; ++i) {
 		distance[i] = new Array(n);
-		for(let j = 0; j < n; ++j)
-			distance[i][j] = 0;
+		for (let j = 0; j < n; ++j) distance[i][j] = 0;
 		distance[i][0] = i;
 	}
 
-	for(let j = 1; j < n; j++)
-		distance[0][j] = j;
+	for (let j = 1; j < n; j++) distance[0][j] = j;
 
 	let cost: number;
-	for(let i = 1; i < m; i++)
-		for(let j = 1; j < n; j++) {
+	for (let i = 1; i < m; i++)
+		for (let j = 1; j < n; j++) {
 			cost = a.at(i - 1) === b.at(j - 1) ? 0 : 1;
 
 			distance[i][j] = Math.min(
@@ -1269,41 +1443,43 @@ export function levenshteinDistance(a: string, b: string): number {
  */
 export function edlDistance(a: string, b: string): number {
 	const keyboardKeys = [
-		[ ...'º1234567890\'¡' ],
-		[ ...' qwertyuiop`+' ],
-		[ ...' asdfghjklñ´ç' ],
-		[ ...'<zxcvbnm,.-  ' ],
+		[..."º1234567890'¡"],
+		[...' qwertyuiop`+'],
+		[...' asdfghjklñ´ç'],
+		[...'<zxcvbnm,.-  '],
 	];
 	const shiftKeyboardKeys = [
-		[ ...'ª!"·$%&/()=?¿' ],
-		[ ...'           ^*' ],
-		[ ...'           ¨Ç' ],
-		[ ...'>       ;:_  ' ],
+		[...'ª!"·$%&/()=?¿'],
+		[...'           ^*'],
+		[...'           ¨Ç'],
+		[...'>       ;:_  '],
 	];
 	const altKeyboardKeys = [
-		[ ...'\\|@#~€¬      ' ],
-		[ ... '           []' ],
-		[ ... '           {}' ],
-		[ ... '			 ' ],
+		[...'\\|@#~€¬      '],
+		[...'           []'],
+		[...'           {}'],
+		[...'			 '],
 	];
 
-	const keyboardCartesians = {};
+	const keyboardCartesians: Record<string, { x: number; y: number }> = {};
 	function assignToPlane(x: number, y: number, c: string) {
-		if(c == undefined) return;
+		if (c == null) return;
 		keyboardCartesians[c] = { x, y };
 	}
-	for(let j = 0; j < keyboardKeys.length; j++) {
-		keyboardKeys[j]     .forEach((char, i) => assignToPlane(i, j, char));
+	for (let j = 0; j < keyboardKeys.length; j++) {
+		keyboardKeys[j].forEach((char, i) => assignToPlane(i, j, char));
 		shiftKeyboardKeys[j].forEach((char, i) => assignToPlane(i, j, char));
-		altKeyboardKeys[j]  .forEach((char, i) => assignToPlane(i, j, char));
+		altKeyboardKeys[j].forEach((char, i) => assignToPlane(i, j, char));
 	}
-	assignToPlane(keyboardCartesians['b'].x, keyboardCartesians['b'].y + 1, 'SPACE');
-	const centerCartesian = { x: parseInt(`${keyboardKeys[1].length * 0.5}`), y: 1 };
+	assignToPlane(keyboardCartesians.b.x, keyboardCartesians.b.y + 1, 'SPACE');
+	const centerCartesian = { x: parseInt(`${keyboardKeys[1].length * 0.5}`, 10), y: 1 };
 	function euclideanDistance(a = 'g', b = 'h') {
 		a = a.toLowerCase();
 		b = b.toLowerCase();
-		const aa = a === ' ' ? keyboardCartesians['SPACE'] : keyboardCartesians[a] ?? centerCartesian;
-		const bb = b === ' ' ? keyboardCartesians['SPACE'] : keyboardCartesians[b] ?? centerCartesian;
+		const aa =
+			a === ' ' ? keyboardCartesians.SPACE : (keyboardCartesians[a] ?? centerCartesian);
+		const bb =
+			b === ' ' ? keyboardCartesians.SPACE : (keyboardCartesians[b] ?? centerCartesian);
 		const x = (aa.x - bb.x) ** 2;
 		const y = (aa.y - bb.y) ** 2;
 		return Math.sqrt(x + y);
@@ -1313,16 +1489,15 @@ export function edlDistance(a: string, b: string): number {
 
 	const m = a.length + 1;
 	const n = b.length + 1;
-	const distance = (new Array(m)).fill(null).map((element, i) => {
-		element = (new Array(n)).fill(0);
+	const distance = new Array(m).fill(null).map((element, i) => {
+		element = new Array(n).fill(0);
 		element[0] = i;
 		return element as number[];
 	});
-	for(let j = 1; j < n; j++)
-		distance[0][j] = j;
+	for (let j = 1; j < n; j++) distance[0][j] = j;
 
-	for(let i = 1; i < m; i++)
-		for(let j = 1; j < n; j++) {
+	for (let i = 1; i < m; i++)
+		for (let j = 1; j < n; j++) {
 			const aa = a.at(i - 1);
 			const bb = b.at(j - 1);
 			const cost = aa === bb ? 0 : 1;
@@ -1332,14 +1507,12 @@ export function edlDistance(a: string, b: string): number {
 			const substitution = distance[i - 1][j - 1] + cost;
 			distance[i][j] = Math.min(deletion, insertion, substitution);
 
-			if(a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1])
-				distance[i][j] = Math.min(
-					distance[i][j],
-					distance[i - 2][j - 2] + 1,
-				);
+			if (a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1])
+				distance[i][j] = Math.min(distance[i][j], distance[i - 2][j - 2] + 1);
 
-			if(cost && substitution < insertion && substitution < deletion)
-				distance[i][j] += euclideanDistance(aa, bb) * halfNormalizedEuclidean - normalizedEuclidean;
+			if (cost && substitution < insertion && substitution < deletion)
+				distance[i][j] +=
+					euclideanDistance(aa, bb) * halfNormalizedEuclidean - normalizedEuclidean;
 		}
 
 	return distance[m - 1][n - 1];
@@ -1357,12 +1530,12 @@ export function radix10to64(n: number, s: string = ''): string {
 export function radix64to10(s: string): number {
 	const digits = s.split('');
 	let result = 0;
-	for(const e in digits)
-		result = (result * 64) + digitsOf64.indexOf(digits[e]);
+	for (const e in digits) result = result * 64 + digitsOf64.indexOf(digits[e]);
 	return result;
 }
 
-const digitsOf128 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/*ÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÂÊÎÔÛÃÕáéíóúàèìòùäëïöüãõÑñÇçºª;:,.!·%¿?@#~€¬¨^<>';
+const digitsOf128 =
+	'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz+/*ÁÉÍÓÚÀÈÌÒÙÄËÏÖÜÂÊÎÔÛÃÕáéíóúàèìòùäëïöüãõÑñÇçºª;:,.!·%¿?@#~€¬¨^<>';
 
 export function radix10to128(n: number, s: string = ''): string {
 	const newKey = n % 128;
@@ -1374,17 +1547,14 @@ export function radix10to128(n: number, s: string = ''): string {
 export function radix128to10(s: string): number {
 	const digits = s.split('');
 	let result = 0;
-	for(const e in digits)
-		result = (result * 128) + digitsOf128.indexOf(digits[e]);
+	for (const e in digits) result = result * 128 + digitsOf128.indexOf(digits[e]);
 	return result;
 }
 
 export function fullToShortHour(hour: number) {
-	if(hour < 1)
-		return { value: 12, meridian: 'AM' as const };
+	if (hour < 1) return { value: 12, meridian: 'AM' as const };
 
-	if(hour < 12)
-		return { value: hour, meridian: 'AM' as const };
+	if (hour < 12) return { value: hour, meridian: 'AM' as const };
 
 	return { value: hour - 12, meridian: 'PM' as const };
 }
@@ -1420,10 +1590,9 @@ export function fullToShortHour(hour: number) {
  * @param locale Por ejemplo, "en-US" o "es-ES".
  */
 export function dateToUTCFormat(date: Date, template: string, locale: string = 'en-US'): string {
-	if(!(date instanceof Date))
-		throw new TypeError('Se esperaba un objeto Date');
+	if (!(date instanceof Date)) throw new TypeError('Se esperaba un objeto Date');
 
-	if(typeof template !== 'string' || !template.length)
+	if (typeof template !== 'string' || !template.length)
 		throw new TypeError('Se esperaba un string válido como plantilla de formato');
 
 	const year = date.getUTCFullYear().toString();
@@ -1436,34 +1605,34 @@ export function dateToUTCFormat(date: Date, template: string, locale: string = '
 	const milliseconds = date.getUTCMilliseconds().toString();
 
 	const replacements = {
-		'yyyy' : year,
-		'yy'   : year.slice(-2),
-		'MMMM' : date.toLocaleDateString(locale, { month: 'long', timeZone: 'UTC' }),
-		'MMM'  : date.toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' }),
-		'MM'   : month.padStart(2, '0'),
-		'M'    : month,
-		'dddd' : date.toLocaleDateString(locale, { weekday: 'long', timeZone: 'UTC' }),
-		'ddd'  : date.toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' }),
-		'dd'   : day.padStart(2, '0'),
-		'd'    : day,
-		'hhhh'  : `${hoursInfo.value.toString()}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')} ${hoursInfo.meridian}`,
-		'hhh'  : `${hoursInfo.value.toString()}:${minutes.padStart(2, '0')} ${hoursInfo.meridian}`,
-		'hh'   : hoursInfo.value.toString().padStart(2, '0'),
-		'h'    : hoursInfo.value.toString(),
-		'HH'   : hours.toString().padStart(2, '0'),
-		'H'    : hours.toString(),
-		'mm'   : minutes.padStart(2, '0'),
-		'm'    : minutes,
-		'ss'   : seconds.padStart(2, '0'),
-		's'    : seconds,
-		'fff'  : milliseconds.padStart(3, '0'),
-		'ff'   : milliseconds.slice(0, 2).padStart(2, '0'),
-		'f'    : milliseconds.slice(0, 1),
+		yyyy: year,
+		yy: year.slice(-2),
+		MMMM: date.toLocaleDateString(locale, { month: 'long', timeZone: 'UTC' }),
+		MMM: date.toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' }),
+		MM: month.padStart(2, '0'),
+		M: month,
+		dddd: date.toLocaleDateString(locale, { weekday: 'long', timeZone: 'UTC' }),
+		ddd: date.toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' }),
+		dd: day.padStart(2, '0'),
+		d: day,
+		hhhh: `${hoursInfo.value.toString()}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')} ${hoursInfo.meridian}`,
+		hhh: `${hoursInfo.value.toString()}:${minutes.padStart(2, '0')} ${hoursInfo.meridian}`,
+		hh: hoursInfo.value.toString().padStart(2, '0'),
+		h: hoursInfo.value.toString(),
+		HH: hours.toString().padStart(2, '0'),
+		H: hours.toString(),
+		mm: minutes.padStart(2, '0'),
+		m: minutes,
+		ss: seconds.padStart(2, '0'),
+		s: seconds,
+		fff: milliseconds.padStart(3, '0'),
+		ff: milliseconds.slice(0, 2).padStart(2, '0'),
+		f: milliseconds.slice(0, 1),
 	};
 
 	let formatted = template;
 
-	for(const key in replacements) {
+	for (const key in replacements) {
 		const regex = new RegExp(`\\b${key}\\b`, 'g');
 		formatted = formatted.replace(regex, replacements[key]);
 	}
@@ -1478,22 +1647,22 @@ export function dateToUTCFormat(date: Date, template: string, locale: string = '
  * La longitud del segmento izquierdo comprimido se antepone al resultado para permitir su decodificación.
  */
 export function compressId(id: string): string {
-	if(typeof id !== 'string')
-		throw Error('La id debe ser un string');
+	if (typeof id !== 'string') throw Error('La id debe ser un string');
 
 	let mid = Math.floor(id.length * 0.5);
 
-	if(id[mid] === '0')
-		mid = Math.floor(mid * 0.5) || 1;
+	if (id[mid] === '0') mid = Math.floor(mid * 0.5) || 1;
 
-	while(id[mid] === '0' && mid < id.length - 1)
-		mid++;
+	while (id[mid] === '0' && mid < id.length - 1) mid++;
 
 	const left = id.slice(0, mid);
 	const right = id.slice(mid);
-	const compr = [ left, right ].map(str => {
-		const int = parseInt(str);
-		if(isNaN(int)) throw TypeError(`No se pudo convertir ${str} a un entero al intentar comprimir la id: ${id}`);
+	const compr = [left, right].map((str) => {
+		const int = parseInt(str, 10);
+		if (Number.isNaN(int))
+			throw TypeError(
+				`No se pudo convertir ${str} a un entero al intentar comprimir la id: ${id}`,
+			);
 		return radix10to128(int);
 	});
 
@@ -1502,29 +1671,26 @@ export function compressId(id: string): string {
 
 /**@description Realiza el proceso inverso de la función de compresión: {@linkcode compressId}.*/
 export function decompressId(id: string): string {
-	if(typeof id !== 'string')
-		throw Error('La id debe ser un string');
+	if (typeof id !== 'string') throw Error('La id debe ser un string');
 
 	const mid = id[0];
 	id = id.slice(1);
 	const left = id.slice(0, +mid);
 	const right = id.slice(+mid);
-	const decomp = [ left, right ].map(str => radix128to10(str).toString());
+	const decomp = [left, right].map((str) => radix128to10(str).toString());
 
 	return decomp.join('');
 }
 
 export function stringHexToNumber(str: string): number {
-	if(typeof str !== 'string')
+	if (typeof str !== 'string')
 		throw TypeError('Se esperaba un string de hexadecimal para convertir a número');
 
-	if(!str.length)
-		return 0;
+	if (!str.length) return 0;
 
-	if(str.startsWith('#'))
-		str = str.slice(1);
+	if (str.startsWith('#')) str = str.slice(1);
 
-	return parseInt(`0x${str}`);
+	return parseInt(`0x${str}`, 10);
 }
 
 /**
@@ -1534,9 +1700,10 @@ export function stringHexToNumber(str: string): number {
  * Si la parte decimal tiene menos dígitos que lo especificado, se deja como está.
  */
 export function toPrecision(num: number, precision: number) {
-	if(typeof num !== 'number') throw TypeError('Se esperaba un número válido');
-	if(typeof precision !== 'number') throw TypeError('La presición debe ser un número');
-	if(precision < 0 || precision > 14) throw RangeError('La presición debe ser un número entre 0 y 14');
+	if (typeof num !== 'number') throw TypeError('Se esperaba un número válido');
+	if (typeof precision !== 'number') throw TypeError('La presición debe ser un número');
+	if (precision < 0 || precision > 14)
+		throw RangeError('La presición debe ser un número entre 0 y 14');
 
 	const abs = ~~num;
 	const decimal = num - abs;

@@ -10,12 +10,16 @@ const ConfessionSystemSchema = new Mongoose.Schema({
 	logChannelId: {
 		type: String,
 		required: true,
-		validator: makeStringIdValidator('Se esperaba una ID de canal de auditoría que no estuviera vacía'),
+		validator: makeStringIdValidator(
+			'Se esperaba una ID de canal de auditoría que no estuviera vacía',
+		),
 	},
 	confessionsChannelId: {
 		type: String,
 		required: true,
-		validator: makeStringIdValidator('Se esperaba una ID de canal de confesiones que no estuviera vacía'),
+		validator: makeStringIdValidator(
+			'Se esperaba una ID de canal de confesiones que no estuviera vacía',
+		),
 	},
 	pending: {
 		type: Array,
@@ -25,8 +29,9 @@ const ConfessionSystemSchema = new Mongoose.Schema({
 
 const ConfessionSystem = Mongoose.model('ConfessionSystem', ConfessionSystemSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() { return new ConfessionSystem({}); }
-export type ConfessionSystemDocument = ReturnType<(typeof m)>;
+function m() {
+	return new ConfessionSystem({});
+}
+export type ConfessionSystemDocument = ReturnType<typeof m>;
 
 export default ConfessionSystem;

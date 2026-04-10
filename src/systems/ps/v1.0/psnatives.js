@@ -255,7 +255,7 @@ function createDiscordChannel(channel) {
         .set('id',      makeText(channel.id))
         .set('nombre',  makeText(channel.name))
         .set('mención', makeText(`${channel}`))
-        .set('nsfw',    isNSFW != undefined ? makeBoolean(isNSFW) : makeNada());
+        .set('nsfw',    isNSFW != null ? makeBoolean(isNSFW) : makeNada());
     return canal;
 }
 
@@ -353,13 +353,13 @@ function buscarRol([búsqueda], currentStatement, _, request) {
 //#region Funciones
 /**@param {Array<RuntimeValue>} param0*/
 function esNada([x]) {
-    if(x == undefined) throw Error('Se esperaba un argumento en comprobación de tipo');
+    if(x == null) throw Error('Se esperaba un argumento en comprobación de tipo');
     return makeBoolean(isNada(x) || x.type === 'Nada');
 }
 
 /**@param {Array<RuntimeValue>} param0*/
 function esNúmero([x]) {
-    if(x == undefined) throw Error('Se esperaba un argumento en comprobación de tipo');
+    if(x == null) throw Error('Se esperaba un argumento en comprobación de tipo');
     return makeBoolean(x?.type === 'Number');
 }
 
@@ -367,37 +367,37 @@ function esNumero([x]) { return esNúmero([x]); }
 
 /**@param {Array<RuntimeValue>} param0*/
 function esTexto([x]) {
-    if(x == undefined) throw Error('Se esperaba un argumento en comprobación de tipo');
+    if(x == null) throw Error('Se esperaba un argumento en comprobación de tipo');
     return makeBoolean(x?.type === 'Text');
 }
 
 /**@param {Array<RuntimeValue>} param0*/
 function esDupla([x]) {
-    if(x == undefined) throw Error('Se esperaba un argumento en comprobación de tipo');
+    if(x == null) throw Error('Se esperaba un argumento en comprobación de tipo');
     return makeBoolean(x?.type === 'Boolean');
 }
 
 /**@param {Array<RuntimeValue>} param0*/
 function esLista([x]) {
-    if(x == undefined) throw Error('Se esperaba un argumento en comprobación de tipo');
+    if(x == null) throw Error('Se esperaba un argumento en comprobación de tipo');
     return makeBoolean(x?.type === 'List');
 }
 
 /**@param {Array<RuntimeValue>} param0*/
 function esGlosario([x]) {
-    if(x == undefined) throw Error('Se esperaba un argumento en comprobación de tipo');
+    if(x == null) throw Error('Se esperaba un argumento en comprobación de tipo');
     return makeBoolean(x?.type === 'Glossary');
 }
 
 /**@param {Array<RuntimeValue>} param0*/
 function esMarco([x]) {
-    if(x == undefined) throw Error('Se esperaba un argumento en comprobación de tipo');
+    if(x == null) throw Error('Se esperaba un argumento en comprobación de tipo');
     return makeBoolean(x?.type === 'Embed');
 }
 
 /**@param {Array<RuntimeValue>} param0*/
 function esEnlace([x]) {
-    if(x == undefined) throw Error('Se esperaba un argumento en comprobación de enlace');
+    if(x == null) throw Error('Se esperaba un argumento en comprobación de enlace');
     if(x.type !== 'Text') return false;
     if(!x.value.length)   return false;
     return makeBoolean(linkRegex.test(x.value));
@@ -405,7 +405,7 @@ function esEnlace([x]) {
 
 /**@param {Array<RuntimeValue>} param0*/
 function esArchivo([x]) {
-    if(x == undefined) throw Error('Se esperaba un argumento en comprobación de enlace');
+    if(x == null) throw Error('Se esperaba un argumento en comprobación de enlace');
     if(x.type !== 'Text') return false;
     if(!x.value.length)   return false;
     return makeBoolean(fileRegex.test(x.value));
@@ -413,7 +413,7 @@ function esArchivo([x]) {
 
 /**@param {Array<RuntimeValue>} param0*/
 function esImagen([x]) {
-    if(x == undefined) throw Error('Se esperaba un argumento en comprobación de enlace');
+    if(x == null) throw Error('Se esperaba un argumento en comprobación de enlace');
     if(x.type !== 'Text') return false;
     if(!x.value.length)   return false;
     return makeBoolean(imageRegex.test(x.value));
@@ -424,13 +424,13 @@ function esImagen([x]) {
  * @param {CurrentStatement} currentStatement
  */
 function dado([x, y, z], currentStatement) {
-    if(x == undefined)
+    if(x == null)
         return makeNumber(Math.random());
     
     if(x.type !== 'Number' || isNotOperable(x.value))
         throw TuberInterpreterError('Se esperaba un Número de primer argumento', currentStatement);
     
-    if(y == undefined)
+    if(y == null)
         return makeNumber(rand(x.value));
 
     if(y.type === 'Boolean')
@@ -439,7 +439,7 @@ function dado([x, y, z], currentStatement) {
     if(y.type !== 'Number' || isNotOperable(y.value))
         throw TuberInterpreterError('Se esperaba un Número o Dupla de segundo argumento', currentStatement);
 
-    if(z == undefined)
+    if(z == null)
         return makeNumber(randRange(x.value, y.value));
     
     if(z.type !== 'Boolean')
@@ -494,7 +494,7 @@ function calculatePositionOffset(value, length) {
  */
 function númeroRedondear(member, [haciaArriba], currentStatement) {
     const val = member.value;
-    if(haciaArriba == undefined)
+    if(haciaArriba == null)
         return makeNumber(Math.floor(val + 0.5));
     if(haciaArriba?.type !== 'Boolean')
         throw TuberInterpreterError('Se esperaba una Dupla como parámetro de redondeo de número', currentStatement);
@@ -507,7 +507,7 @@ function númeroRedondear(member, [haciaArriba], currentStatement) {
  * @param {CurrentStatement} currentStatement
  */
 function númeroATexto(member, [precision], currentStatement) {
-    if(precision == undefined)
+    if(precision == null)
         return makeText(`${member.value}`);
     if(precision.type !== 'Number' || isNotOperable(precision.value))
         throw TuberInterpreterError('Se esperaba un Número válido como parámetro de función', currentStatement);
@@ -530,7 +530,7 @@ Número
  * @param {CurrentStatement} currentStatement
  */
 function textoCaracterEn(member, [posición], currentStatement) {
-    if(posición == undefined || posición.type !== 'Number' || isNotOperable(posición.value))
+    if(posición == null || posición.type !== 'Number' || isNotOperable(posición.value))
         throw TuberInterpreterError('Se esperaba un Número válido como argumento de posición de caracter', currentStatement);
     const pos = calculatePositionOffset(posición.value, member.value.length);
 
@@ -607,7 +607,7 @@ function textoIncluye(member, [texto], currentStatement) {
  */
 function textoRepetir(member, [veces], currentStatement) {
     veces ??= makeNumber(0);
-    if(veces == undefined)
+    if(veces == null)
         return makeText('');
     if(veces.type !== 'Number' || isNotOperable(veces.value))
         throw TuberInterpreterError('Se esperaba un Número válido como argumento de repeticiones de Texto', currentStatement);
@@ -650,9 +650,9 @@ function textoPartir(member, [separador], currentStatement) {
  * @param {CurrentStatement} currentStatement
  */
 function textoCortar(member, [inicio, fin], currentStatement) {
-    if(inicio == undefined || inicio.type !== 'Number' || isNotOperable(inicio.value))
+    if(inicio == null || inicio.type !== 'Number' || isNotOperable(inicio.value))
         throw TuberInterpreterError('Se esperaba un Número válido como primer argumento de recorte de Texto', currentStatement);
-    if(fin == undefined)
+    if(fin == null)
         return makeText(member.value.slice(inicio.value));
     if(fin.type !== 'Number' || isNotOperable(fin.value))
         throw TuberInterpreterError('Se esperaba un Número válido como segundo argumento de recorte de Texto', currentStatement);
@@ -744,7 +744,7 @@ function listaVacía(member, _) {
  * @returns {BooleanValue}
  */
 function listaIncluye(member, [ criteria ], currentStatement) {
-    if(criteria == undefined)
+    if(criteria == null)
         throw TuberInterpreterError('Se esperaba un valor como argumento de búsqueda en Lista', currentStatement);
 
     return makeBoolean(member.elements.some(el => el.equals(criteria)));
@@ -772,9 +772,9 @@ function listaOrdenar(member, _) {
  * @param {CurrentStatement} currentStatement
  */
 function listaCortar(member, [inicio, fin], currentStatement) {
-    if(inicio == undefined || inicio.type !== 'Number' || isNotOperable(inicio.value))
+    if(inicio == null || inicio.type !== 'Number' || isNotOperable(inicio.value))
         throw TuberInterpreterError('Se esperaba un Número válido como primer argumento de recorte de Lista', currentStatement);
-    if(fin == undefined)
+    if(fin == null)
         return makeList(member.elements.slice(inicio.value));
     if(fin.type !== 'Number' || isNotOperable(fin.value))
         throw TuberInterpreterError('Se esperaba un Número válido como segundo argumento de recorte de Lista', currentStatement);
@@ -790,7 +790,7 @@ function listaCortar(member, [inicio, fin], currentStatement) {
  */
 function listaÚltimo(member, _) {
     const value = member.elements[member.elements.length - 1];
-    if(value == undefined)
+    if(value == null)
         return makeNada();
     return value;
 }
@@ -805,7 +805,7 @@ function listaRobar(member, [index], currentStatement) {
     if(index?.type !== 'Number')
         throw TuberInterpreterError('Se esperaba un Número válido especificando el índice del cual robar un elemento', currentStatement);
     const taken = member.elements.splice(index.value, 1)?.[0];
-    if(taken == undefined)
+    if(taken == null)
         return makeNada();
     return taken;
 }
@@ -816,7 +816,7 @@ function listaRobar(member, [index], currentStatement) {
  */
 function listaRobarPrimero(member, _) {
     const taken = member.elements.shift();
-    if(taken == undefined)
+    if(taken == null)
         return makeNada();
     return taken;
 }
@@ -827,7 +827,7 @@ function listaRobarPrimero(member, _) {
  */
 function listaRobarÚltimo(member, _) {
     const taken = member.elements.pop();
-    if(taken == undefined)
+    if(taken == null)
         return makeNada();
     return taken;
 }
@@ -1032,7 +1032,7 @@ function TuberInitializerError(message) {
  * @param {Array<String>} args 
  */
 async function declareContext(scope, request, tuber, args) {
-    if(tuber.inputs && args != undefined) {
+    if(tuber.inputs && args != null) {
         const argsList = args;
         const attachmentsList = [
             // ...(request.attachments ? request.attachments.map(attachment => attachment.proxyURL)) : ,

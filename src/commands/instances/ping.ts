@@ -1,18 +1,18 @@
-import { CommandTags, Command } from '../commons';
-import { improveNumber, sleep } from '@/func';
 import type { InteractionResponse, Message } from 'discord.js';
 import type { CommandEditReplyOptions, ComplexCommandRequest } from 'types/commands';
+import { improveNumber, sleep } from '@/func';
+import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
 
 const command = new Command('ping', tags)
 	.setLongDescription('Muestra el tiempo de respuesta del Bot y la API')
-	.setExecution(async request => {
+	.setExecution(async (request) => {
 		const sent = (await request.reply({
 			content:
-				'Pong~♪\n' +
-				`**Latencia de la API** ${request.client.ws.ping}ms\n` +
-				`**Tiempo de respuesta** _comprobando..._`,
+				'Pong~♪\n'
+				+ `**Latencia de la API** ${request.client.ws.ping}ms\n`
+				+ `**Tiempo de respuesta** _comprobando..._`,
 		})) as Message<true>;
 
 		const wsPing = request.client.ws.ping;
@@ -21,22 +21,22 @@ const command = new Command('ping', tags)
 		start = Date.now();
 		await editSent(sent, request, {
 			content:
-				'Pong~♪\n' +
-				`**Latencia de la API** ${wsPing}ms\n` +
-				`**Tiempo de respuesta** _enviando..._`,
+				'Pong~♪\n'
+				+ `**Latencia de la API** ${wsPing}ms\n`
+				+ `**Tiempo de respuesta** _enviando..._`,
 		});
 		end = Date.now();
 
 		const max = 4;
 		let amount = end - start;
 		let count: number;
-		for(count = 1; count < max; count++) {
+		for (count = 1; count < max; count++) {
 			start = Date.now();
 			await editSent(sent, request, {
 				content:
-					'Pong~♪\n' +
-					`**Latencia de la API** ${wsPing}ms\n` +
-					`**Tiempo de respuesta** ${improveNumber(amount / count)}ms... (${count}/${max})`,
+					'Pong~♪\n'
+					+ `**Latencia de la API** ${wsPing}ms\n`
+					+ `**Tiempo de respuesta** ${improveNumber(amount / count)}ms... (${count}/${max})`,
 			});
 			end = Date.now();
 
@@ -47,18 +47,18 @@ const command = new Command('ping', tags)
 
 		return editSent(sent, request, {
 			content:
-				'Pong~♪\n' +
-				`**Latencia de la API** ${wsPing}ms\n` +
-				`**Tiempo de respuesta** ${improveNumber(amount / count)}ms`,
+				'Pong~♪\n'
+				+ `**Latencia de la API** ${wsPing}ms\n`
+				+ `**Tiempo de respuesta** ${improveNumber(amount / count)}ms`,
 		});
 	});
 
 function editSent(
 	sent: Message<true> | InteractionResponse<false>,
 	request: ComplexCommandRequest,
-	editOptions: CommandEditReplyOptions
+	editOptions: CommandEditReplyOptions,
 ) {
-	if(request.isInteraction) {
+	if (request.isInteraction) {
 		return request.editReply(editOptions);
 	} else {
 		const message = sent;

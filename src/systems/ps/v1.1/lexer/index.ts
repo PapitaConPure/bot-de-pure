@@ -1,6 +1,6 @@
-import type { TokenKind} from './tokens';
-import { TokenKinds, Token } from './tokens';
 import { shortenText, toLowerCaseNormalized } from '../util/utils';
+import type { TokenKind } from './tokens';
+import { Token, TokenKinds } from './tokens';
 
 interface Keyword {
 	match: string;
@@ -11,12 +11,10 @@ interface Keyword {
 interface LexerAdvanceOptions {
 	advanceColumns?: boolean;
 	newLine?: boolean;
-	override?: { col: number; line: number; };
+	override?: { col: number; line: number };
 }
 
-interface PatternHandler {
-	(match: string, rawMatch: string): void;
-}
+type PatternHandler = (match: string, rawMatch: string) => void;
 
 interface Pattern {
 	match: string | RegExp;
@@ -49,8 +47,8 @@ export class Lexer {
 			{ match: 'y', kind: TokenKinds.AND },
 			{ match: 'no', kind: TokenKinds.NOT },
 
-			{ match: 'es', kind:TokenKinds.EQUALS },
-			{ match: 'parece', kind:TokenKinds.SEEMS },
+			{ match: 'es', kind: TokenKinds.EQUALS },
+			{ match: 'parece', kind: TokenKinds.SEEMS },
 			{ match: 'precede', kind: TokenKinds.LESS },
 			{ match: 'excede', kind: TokenKinds.GREATER },
 
@@ -147,18 +145,30 @@ export class Lexer {
 
 			{ match: /^[A-Za-z_][A-Za-z0-9_]{0,99}/, handler: this.#makeSymbolHandler() },
 
-			{ match: /^(?!_)(([0-9_]+([.][0-9]*)?)|([.][0-9]+))/, handler: this.#makeNumberHandler() },
+			{
+				match: /^(?!_)(([0-9_]+([.][0-9]*)?)|([.][0-9]+))/,
+				handler: this.#makeNumberHandler(),
+			},
 			{ match: '.', handler: this.#makeDefaultHandler(TokenKinds.DOT) },
 
 			{ match: /^"(\\"|[^"])*"/, handler: this.#makeStringHandler() },
 			{ match: /^'(\\'|[^'])*'/, handler: this.#makeStringHandler() },
 
-			{ match: '"', handler: this.#makeInvalidHandler(`Faltó cerrar comillas dobles (\`"\`)`) },
-			{ match: "'", handler: this.#makeInvalidHandler(`Faltó cerrar comillas simples (\`'\`)`) },
+			{
+				match: '"',
+				handler: this.#makeInvalidHandler(`Faltó cerrar comillas dobles (\`"\`)`),
+			},
+			{
+				match: "'",
+				handler: this.#makeInvalidHandler(`Faltó cerrar comillas simples (\`'\`)`),
+			},
 		];
 	}
 
-	TuberLexerError(message: string, errorOptions: {  col?: number, line?: number, lineString?: string } = {}) {
+	TuberLexerError(
+		message: string,
+		errorOptions: { col?: number; line?: number; lineString?: string } = {},
+	) {
 		errorOptions.col ??= this.#col;
 		errorOptions.line ??= this.#line;
 		const lineString = this.lineString;
@@ -215,12 +225,12 @@ export class Lexer {
 	}
 
 	get atEOF() {
-		return (this.#pos - 1) >= this.#source.length;
+		return this.#pos - 1 >= this.#source.length;
 	}
 
 	/**@description Tokeniza el string indicado, basándose en PuréScript.*/
 	tokenize(source: string): Token[] {
-		if(typeof source !== 'string')
+		if (typeof source !== 'string')
 			throw this.TuberLexerError('Se esperaba un string válido para tokenizar');
 
 		this.#tokens = [];
@@ -234,28 +244,40 @@ export class Lexer {
 		/**@type {string}*/
 		let normalizedRemainder: string;
 
-		while(!this.atEOF) {
+		while (!this.atEOF) {
 			match = null;
 			normalizedRemainder = toLowerCaseNormalized(this.remainder);
 
-			for(const pattern of this.#patterns) {
+			for (const pattern of this.#patterns) {
 				match = matchPattern(pattern, normalizedRemainder);
 
-				if(match != null) {
+				if (match != null) {
 					const rawMatch = this.remainder.slice(0, match.length);
 					pattern.handler(match, rawMatch);
 					break;
 				}
 			}
 
-			if(match == null) {
+			if (match == null) {
 				const wsIndex = this.remainder.match(/[\r\s\b]/)?.index ?? this.remainder.length;
-				throw this.TuberLexerError(`Símbolo no reconocido: \`${shortenText(this.remainder.slice(0, wsIndex), 12, ' (...)')}\``);
+				throw this.TuberLexerError(
+					`Símbolo no reconocido: \`${shortenText(this.remainder.slice(0, wsIndex), 12, ' (...)')}\``,
+				);
 			}
 		}
 
-		this.addToken(new Token(this, TokenKinds.EOF, 'Fin de Código', this.#line, this.#col, this.#pos - 1, 1));
-		return [ ...this.#tokens ];
+		this.addToken(
+			new Token(
+				this,
+				TokenKinds.EOF,
+				'Fin de Código',
+				this.#line,
+				this.#col,
+				this.#pos - 1,
+				1,
+			),
+		);
+		return [...this.#tokens];
 	}
 
 	/**@description Avanza la posición del Lexer.*/
@@ -264,23 +286,22 @@ export class Lexer {
 		options.newLine ??= false;
 		this.#pos += steps;
 
-		if(options.override != null && (options.override.col != null || options.override.line != null)) {
-			if(options.override.col != null)
-				this.#col = options.override.col;
+		if (
+			options.override != null
+			&& (options.override.col != null || options.override.line != null)
+		) {
+			if (options.override.col != null) this.#col = options.override.col;
 
-			if(options.override.line != null)
-				this.#line = options.override.line;
-		} else if(options.newLine) {
+			if (options.override.line != null) this.#line = options.override.line;
+		} else if (options.newLine) {
 			this.#col = 1;
 			this.#line++;
-		} else if(options.advanceColumns)
-			this.#col += steps;
+		} else if (options.advanceColumns) this.#col += steps;
 	}
 
 	/**@description Añade un token al Lexer.*/
 	addToken(token: Token) {
-		if(!this.handleCommentStatement)
-			this.#tokens.push(token);
+		if (!this.handleCommentStatement) this.#tokens.push(token);
 	}
 
 	//#region Handlers
@@ -297,10 +318,12 @@ export class Lexer {
 			const len = matched.length;
 			const num = +matched.replace(/_/g, '');
 
-			if(isNaN(num))
+			if (Number.isNaN(+num))
 				throw this.TuberLexerError('Valor inválido en tokenización de número');
 
-			this.addToken(new Token(this, TokenKinds.LIT_NUMBER, num, this.line, this.col, this.pos - 1, len));
+			this.addToken(
+				new Token(this, TokenKinds.LIT_NUMBER, num, this.line, this.col, this.pos - 1, len),
+			);
 			this.advance(len, { advanceColumns: true });
 		};
 	}
@@ -316,35 +339,42 @@ export class Lexer {
 			let line = this.line;
 			let rePos = -1;
 
-			for(const c of chars) {
-				if(c === '\n') {
+			for (const c of chars) {
+				if (c === '\n') {
 					col = 1;
 					line++;
 				} else {
-					if(c === '\\') {
+					if (c === '\\') {
 						rePos = chars.indexOf('\\', rePos + 1);
 						chars.splice(rePos, 1);
 
-						switch(chars[rePos]) {
-						case 'N':
-						case 'n':
-							chars[rePos] = '\n';
-							break;
+						switch (chars[rePos]) {
+							case 'N':
+							case 'n':
+								chars[rePos] = '\n';
+								break;
 
-						case 'T':
-						case 't':
-							chars[rePos] = '\t';
-							break;
+							case 'T':
+							case 't':
+								chars[rePos] = '\t';
+								break;
 
-						case '"': break;
-						case '`': break;
-						case "'": break;
-						case '\\': break;
+							case '"':
+								break;
+							case '`':
+								break;
+							case "'":
+								break;
+							case '\\':
+								break;
 
-						default: {
-							const lineString = this.source.split(/\r?\n/g)[line - 1];
-							throw this.TuberLexerError(`Caracter de escape inválido en literal de Texto: \`${c}\``, { col, line, lineString });
-						}
+							default: {
+								const lineString = this.source.split(/\r?\n/g)[line - 1];
+								throw this.TuberLexerError(
+									`Caracter de escape inválido en literal de Texto: \`${c}\``,
+									{ col, line, lineString },
+								);
+							}
 						}
 					}
 
@@ -355,7 +385,17 @@ export class Lexer {
 			col++; //Sumar los "" removidos
 			rawMatch = chars.join('');
 
-			this.addToken(new Token(this, TokenKinds.LIT_TEXT, rawMatch, this.line, this.col, this.pos - 1, len));
+			this.addToken(
+				new Token(
+					this,
+					TokenKinds.LIT_TEXT,
+					rawMatch,
+					this.line,
+					this.col,
+					this.pos - 1,
+					len,
+				),
+			);
 			this.advance(len, { override: { col, line } }); //Aplicar cambios de columna y línea locales
 			this.handleCommentStatement = false;
 		};
@@ -364,15 +404,34 @@ export class Lexer {
 	#makeSymbolHandler(): PatternHandler {
 		return (match, rawMatch) => {
 			const len = match.length;
-			const keyword = this.lookupTable.find(k => k.match === match);
+			const keyword = this.lookupTable.find((k) => k.match === match);
 
-			if(keyword) {
-				if(keyword.kind !== TokenKinds.COMMENT)
-					this.addToken(new Token(this, keyword.kind, rawMatch, this.line, this.col, this.pos - 1, len));
-				else
-					this.handleCommentStatement = true;
+			if (keyword) {
+				if (keyword.kind !== TokenKinds.COMMENT)
+					this.addToken(
+						new Token(
+							this,
+							keyword.kind,
+							rawMatch,
+							this.line,
+							this.col,
+							this.pos - 1,
+							len,
+						),
+					);
+				else this.handleCommentStatement = true;
 			} else {
-				this.addToken(new Token(this, TokenKinds.IDENTIFIER, rawMatch, this.line, this.col, this.pos - 1, len));
+				this.addToken(
+					new Token(
+						this,
+						TokenKinds.IDENTIFIER,
+						rawMatch,
+						this.line,
+						this.col,
+						this.pos - 1,
+						len,
+					),
+				);
 			}
 
 			this.advance(len, { advanceColumns: true });
@@ -403,26 +462,22 @@ export class Lexer {
 }
 
 function matchPattern(pattern: Pattern, source: string) {
-	if(typeof pattern.match === 'string')
-		return stringPatternMatch(pattern.match, source);
-	else
-		return regexPatternMatch(pattern.match, source);
+	if (typeof pattern.match === 'string') return stringPatternMatch(pattern.match, source);
+	else return regexPatternMatch(pattern.match, source);
 }
 
 function stringPatternMatch(matcher: string, source: string) {
 	const slicedSource = source.slice(0, matcher.length);
 
-	return (slicedSource === matcher) ? slicedSource : null;
+	return slicedSource === matcher ? slicedSource : null;
 }
 
 function regexPatternMatch(matcher: RegExp, source: string) {
 	const match = matcher.exec(source);
 
-	if(match == null)
-		return null;
+	if (match == null) return null;
 
-	if(match.index !== 0)
-		return null;
+	if (match.index !== 0) return null;
 
 	return match[0];
 }

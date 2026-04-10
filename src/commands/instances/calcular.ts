@@ -1,15 +1,23 @@
-import { improveNumber } from '@/func';
-import { CommandTags, Command, CommandOptions, CommandOptionSolver } from '../commons';
-import { calc, MathEvaluatorError, MathLexerError, MathParserError } from '@/systems/others/mathreader';
 import { Colors, ContainerBuilder, MessageFlags } from 'discord.js';
+import { improveNumber } from '@/func';
 import { Translator } from '@/i18n';
+import {
+	calc,
+	MathEvaluatorError,
+	MathLexerError,
+	MathParserError,
+} from '@/systems/others/mathreader';
+import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
 
 const options = new CommandOptions()
 	.addParam('operación', 'TEXT', ' para expresar la operación matemátca')
-	.addFlag([ 'a','s' ], 'acortar', 'para acortar el resultado')
-	.addFlag([ 'm','d' ], [ 'mínimo','minimo','digitos' ], 'para designar el mínimo de dígitos', { name: 'minimo', type: 'NUMBER' });
+	.addFlag(['a', 's'], 'acortar', 'para acortar el resultado')
+	.addFlag(['m', 'd'], ['mínimo', 'minimo', 'digitos'], 'para designar el mínimo de dígitos', {
+		name: 'minimo',
+		type: 'NUMBER',
+	});
 
 const command = new Command('calcular', tags)
 	.setAliases('calc', 'clc', 'cx')
@@ -23,34 +31,40 @@ const command = new Command('calcular', tags)
 		const translator = await Translator.from(request);
 
 		const shorten = args.hasFlag('acortar');
-		const minDigits = args.flagExprIf('mínimo', v => CommandOptionSolver.asNumber(v), 1);
+		const minDigits = args.flagExprIf('mínimo', (v) => CommandOptionSolver.asNumber(v), 1);
 		const operation = args.getString('operación', true);
 
-		if(!operation)
-			return request.reply({ content: '⚠️ Debes ingresar una operación' });
+		if (!operation) return request.reply({ content: '⚠️ Debes ingresar una operación' });
 
 		try {
 			const result = calc(operation);
 
-			if(isNaN(result))
-				return request.reply({ content: '⚠️ La operación no pertenece al dominio de los números Reales' });
+			if (Number.isNaN(+result))
+				return request.reply({
+					content: '⚠️ La operación no pertenece al dominio de los números Reales',
+				});
 
-			return request.reply({ content: improveNumber(result, { shorten, minDigits, translator }) });
-		} catch(err) {
-			if(err instanceof MathLexerError || err instanceof MathParserError || err instanceof MathEvaluatorError)
+			return request.reply({
+				content: improveNumber(result, { shorten, minDigits, translator }),
+			});
+		} catch (err) {
+			if (
+				err instanceof MathLexerError
+				|| err instanceof MathParserError
+				|| err instanceof MathEvaluatorError
+			)
 				return request.reply({
 					flags: MessageFlags.IsComponentsV2,
 					components: [
 						new ContainerBuilder()
 							.setAccentColor(Colors.Red)
-							.addTextDisplayComponents(textDisplay =>
-								textDisplay.setContent([
-									'### -# ⚠️ Operación inválida',
-									'```',
-									err.message,
-									'```',
-								].join('\n'))
-							)
+							.addTextDisplayComponents((textDisplay) =>
+								textDisplay.setContent(
+									['### -# ⚠️ Operación inválida', '```', err.message, '```'].join(
+										'\n',
+									),
+								),
+							),
 					],
 				});
 

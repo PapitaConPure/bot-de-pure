@@ -30,9 +30,10 @@ const PureVoiceSchema = new Mongoose.Schema({
 
 export const PureVoiceModel = Mongoose.model('PureVoice', PureVoiceSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() { return new PureVoiceModel({}); }
-export type PureVoiceDocument = ReturnType<(typeof m)>;
+function m() {
+	return new PureVoiceModel({});
+}
+export type PureVoiceDocument = ReturnType<typeof m>;
 
 /** */
 const PureVoiceSessionSchema = new Mongoose.Schema({
@@ -77,6 +78,7 @@ const PureVoiceSessionSchema = new Mongoose.Schema({
 
 export const PureVoiceSessionModel = Mongoose.model('PureVoiceSession', PureVoiceSessionSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function n() { return new PureVoiceSessionModel({}); }
-export type PureVoiceSessionDocument = ReturnType<(typeof n)>;
+function n() {
+	return new PureVoiceSessionModel({});
+}
+export type PureVoiceSessionDocument = ReturnType<typeof n>;

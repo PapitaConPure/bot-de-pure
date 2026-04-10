@@ -1,11 +1,10 @@
-import type { Guild, GuildTextBasedChannel } from 'discord.js';
-import { lookupService } from 'dns';
-import { promisify } from 'util';
+import { lookupService } from 'node:dns';
+import { promisify } from 'node:util';
 import { color } from 'bun';
-
+import type { Guild, GuildTextBasedChannel } from 'discord.js';
 import minimist from 'minimist';
-const argv = minimist(process.argv.slice(2));
 
+const argv = minimist(process.argv.slice(2));
 
 //Entorno
 /**@description Si se está en un entorno de producción (`true`) o de desarrollo (`false`, por defecto).*/
@@ -13,7 +12,6 @@ export const remoteStartup: boolean = process.env.NODE_ENV === 'production';
 
 /**@description Si está prohibido el uso de base de datos (`true`) o permitido (`false`, por defecto).*/
 export const noDataBase: boolean = !!argv.nodb;
-
 
 //Claves
 /**
@@ -55,16 +53,14 @@ export const booruApiKey: string = process.env.GELBOORU_APIKEY;
  */
 export const booruUserId: string = process.env.GELBOORU_USERID;
 
-
 //Prefijos
-export type PrefixPair = { raw: string; regex: RegExp; };
+export type PrefixPair = { raw: string; regex: RegExp };
 export const prefixes: Record<string, PrefixPair> = {
 	'0': {
 		raw: 'p!',
 		regex: /^p *!\s*/i,
-	}
+	},
 };
-
 
 //Host
 /**@description El nombre de host del proceso corriendo a Bot de Puré actualmente.*/
@@ -72,7 +68,7 @@ let hostname: string;
 
 /**@description Obtiene el nombre de host del proceso corriendo a Bot de Puré actualmente.*/
 export function getHostName() {
-	if(hostname == null)
+	if (hostname == null)
 		throw new ReferenceError('Debes llamar resolveHost() antes de getHostName()');
 
 	return hostname;
@@ -92,11 +88,7 @@ interface ResolveHostOptions {
  * @param options Opciones para el comportamiento al intentar resolver el nombre de host.
  */
 export async function resolveHost(options: ResolveHostOptions = {}) {
-	const {
-		fallback = null,
-		onSuccess = () => undefined,
-		onFailure = () => undefined,
-	} = options;
+	const { fallback = null, onSuccess = () => undefined, onFailure = () => undefined } = options;
 
 	try {
 		const asyncLookupService = promisify(lookupService);
@@ -104,15 +96,13 @@ export async function resolveHost(options: ResolveHostOptions = {}) {
 
 		hostname = `${h.service}://${h.hostname}/`;
 		onSuccess(hostname);
-	} catch(err) {
-		if(fallback == null && onFailure == null)
-			throw err;
+	} catch (err) {
+		if (fallback == null && onFailure == null) throw err;
 
 		hostname = fallback;
 		onFailure(err);
 	}
 }
-
 
 //Constantes varias
 /**

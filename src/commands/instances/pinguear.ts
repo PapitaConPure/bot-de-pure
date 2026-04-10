@@ -1,8 +1,8 @@
 import type { User } from 'discord.js';
+import type { ComplexCommandRequest } from 'types/commands';
 import { randRange } from '@/func';
 import { p_pure } from '@/utils/prefixes';
-import { CommandOptions, CommandTags, Command } from '../commons';
-import type { ComplexCommandRequest } from 'types/commands';
+import { Command, CommandOptions, CommandTags } from '../commons';
 
 const frase = [
 	'Oe po [m] <:junkNo:1107847991580164106>',
@@ -23,22 +23,21 @@ const frase = [
 	'Se te ve la raja [m] <:detective:720736199727251536>',
 ];
 
-async function pinguear(request: ComplexCommandRequest, user: import('discord.js').User, cnt: number, isFirst: boolean) {
+async function pinguear(
+	request: ComplexCommandRequest,
+	user: import('discord.js').User,
+	cnt: number,
+	isFirst: boolean,
+) {
 	const replyContent = { content: frase[randRange(0, frase.length)].replace('[m]', `${user}`) };
 
-	if(isFirst)
-		await request.reply(replyContent);
-	else
-		await request.channel.send(replyContent).catch(() => undefined);
+	if (isFirst) await request.reply(replyContent);
+	else await request.channel.send(replyContent).catch(() => undefined);
 
-	if(cnt > 1)
-		setTimeout(pinguear, 800, request, user, cnt - 1, false);
+	if (cnt > 1) setTimeout(pinguear, 800, request, user, cnt - 1, false);
 }
 
-const flags = new CommandTags().add(
-	'MEME',
-	'CHAOS',
-);
+const flags = new CommandTags().add('MEME', 'CHAOS');
 const options = new CommandOptions()
 	.addParam('cantidad', 'NUMBER', 'para indicar la cantidad de veces que se debe pinguear')
 	.addParam('usuario', 'USER', 'para indicar el usuario a pinguear');
@@ -52,25 +51,31 @@ const command = new Command('pinguear', flags)
 		const uid = request.userId;
 		const lastUse = (command.memory.get(uid) as number) ?? 0;
 
-		if(now - lastUse < 1000 * 60)
+		if (now - lastUse < 1000 * 60)
 			return request.isInteraction
-				? request.reply({ content: '⏳ Pero no seas tan degenerado, aflójale un poco', ephemeral: true })
+				? request.reply({
+						content: '⏳ Pero no seas tan degenerado, aflójale un poco',
+						ephemeral: true,
+					})
 				: request.inferAsMessage().react('⏳');
 
-		if(request.isMessage && args.count < 2)
-			return request.reply({ content: `⚠️ Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`, ephemeral: true });
+		if (request.isMessage && args.count < 2)
+			return request.reply({
+				content: `⚠️ Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`,
+				ephemeral: true,
+			});
 
 		let repeats = -1;
 		let user: User;
 
-		if(request.isInteraction) {
+		if (request.isInteraction) {
 			repeats = Math.floor(args.getNumber('cantidad', 3));
 			user = await args.getUser('usuario');
 		} else {
-			if(!isNaN(+args.args[0])) {
+			if (!Number.isNaN(+args.args[0])) {
 				repeats = Math.floor(args.getNumber('cantidad', 3));
 				user = await args.getUser('usuario');
-			} else if(!isNaN(+args.args[1])) {
+			} else if (!Number.isNaN(+args.args[1])) {
 				user = await args.getUser('usuario');
 				repeats = Math.floor(args.getNumber('cantidad', 3));
 			} else {
@@ -81,13 +86,13 @@ const command = new Command('pinguear', flags)
 			}
 		}
 
-		if(repeats < 2 || repeats > 10)
+		if (repeats < 2 || repeats > 10)
 			return request.reply({
 				content: '⚠️ Solo puedes pinguear a alguien entre 2 y 10 veces',
 				ephemeral: true,
 			});
 
-		if(!user)
+		if (!user)
 			return request.reply({
 				content: '⚠️ Usuario inválido',
 				ephemeral: true,

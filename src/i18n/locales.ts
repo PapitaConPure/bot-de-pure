@@ -4,10 +4,10 @@
  *
  * Todos los idiomas aquí enumerados deben ser soportados por el bot.
  */
-const Locales = ({
+const Locales = {
 	Spanish: 'es',
 	English: 'en',
 	Japanese: 'ja',
-}) as const;
+} as const;
 
 export default Locales;

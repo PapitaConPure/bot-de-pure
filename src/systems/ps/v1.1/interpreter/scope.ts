@@ -1,12 +1,5 @@
-import type {
-	RuntimeValue,
-	ValueKind,
-	FunctionValue} from './values';
-import {
-	makeNada,
-	defaultValueOf,
-	ValueKinds
-} from './values';
+import type { RuntimeValue, ValueKind, FunctionValue } from './values';
+import { makeNada, defaultValueOf, ValueKinds } from './values';
 import type { Interpreter } from '.';
 
 /**@description Representa un ámbito de variables en un contexto de ejecución de PuréScript.*/
@@ -35,7 +28,7 @@ export class Scope {
 
 		let fnScope: Scope;
 
-		if(fnValue.lambda === false) {
+		if (fnValue.lambda === false) {
 			fnValue.scope.include(this);
 			fnScope = new Scope(it, fnValue.scope);
 		} else fnScope = new Scope(it, this);
@@ -43,8 +36,8 @@ export class Scope {
 		fnValue.args.forEach((arg, i) => {
 			/**@type {RuntimeValue}*/
 			let value: RuntimeValue;
-			if(i < argValues.length) value = argValues[i];
-			else if(arg.optional) value = it.evaluate(arg.fallback, this);
+			if (i < argValues.length) value = argValues[i];
+			else if (arg.optional) value = it.evaluate(arg.fallback, this);
 			else
 				throw it.TuberInterpreterError(
 					`Se esperaba un valor para el parámetro \`${arg.identifier}\` de la Función \`${fnValue.name}\``,
@@ -55,7 +48,7 @@ export class Scope {
 			fnScope.assignVariable(arg.identifier, value);
 		});
 
-		if(fnValue.self != null && fnValue.self.kind !== ValueKinds.NADA)
+		if (fnValue.self != null && fnValue.self.kind !== ValueKinds.NADA)
 			fnScope.assignVariable('este', fnValue.self);
 
 		return fnScope;
@@ -82,7 +75,7 @@ export class Scope {
 	 * @param identifier El nombre bajo el cual se declarará la variable.
 	 */
 	declareVariable(identifier: string, kind: ValueKind): RuntimeValue {
-		if(this.variables.has(identifier))
+		if (this.variables.has(identifier))
 			throw this.#interpreter.TuberInterpreterError(
 				`El identificador \`${identifier}\` ya estaba declarado`,
 			);
@@ -96,7 +89,7 @@ export class Scope {
 	assignVariable(identifier: string, value: RuntimeValue): RuntimeValue {
 		const scope = this.resolve(identifier, false);
 
-		if(value == null)
+		if (value == null)
 			throw this.#interpreter.TuberInterpreterError('Se esperaba una asignación');
 
 		(scope ?? this).variables.set(identifier, value);
@@ -112,10 +105,10 @@ export class Scope {
 	 */
 	lookup(identifier: string, mustBeDeclared = true): RuntimeValue {
 		const scope = this.resolve(identifier, mustBeDeclared);
-		if(scope == null) return makeNada();
+		if (scope == null) return makeNada();
 
 		const variable = scope.variables.get(identifier);
-		if(variable == null) return makeNada();
+		if (variable == null) return makeNada();
 
 		return variable;
 	}
@@ -124,12 +117,12 @@ export class Scope {
 	resolve(identifier: string, mustBeDeclared: boolean = true): Scope | null {
 		const variable = this.variables.get(identifier);
 
-		if(variable != null) return this;
+		if (variable != null) return this;
 
-		if(this.hasNoParent()) {
-			if(this.#mirror) return this.#mirror.resolve(identifier, mustBeDeclared);
+		if (this.hasNoParent()) {
+			if (this.#mirror) return this.#mirror.resolve(identifier, mustBeDeclared);
 
-			if(mustBeDeclared)
+			if (mustBeDeclared)
 				throw this.#interpreter.TuberInterpreterError(
 					`El identificador \`${identifier}\` no representa ninguna variable ni función`,
 				);
@@ -142,11 +135,11 @@ export class Scope {
 
 	/**@description Asigna todas las variables de otro scope al que llama el método.*/
 	include(scope: Scope) {
-		if(scope.hasParent() && scope.parent !== this && !scope.parent.global)
+		if (scope.hasParent() && scope.parent !== this && !scope.parent.global)
 			this.include(scope.parent);
 
 		scope.variables.forEach((variable, key) => {
-			if(!this.variables.has(key)) this.variables.set(key, variable);
+			if (!this.variables.has(key)) this.variables.set(key, variable);
 		});
 
 		this.#mirror = scope.resolveClosestGlobalMirror();
@@ -156,11 +149,11 @@ export class Scope {
 
 	/**@description Encuentra el mirror global usando el Scope especificado.*/
 	resolveClosestGlobalMirror() {
-		if(this.#mirror != null) return this.#mirror;
+		if (this.#mirror != null) return this.#mirror;
 
-		if(!this.hasParent()) return null;
+		if (!this.hasParent()) return null;
 
-		if(this.#parent.global) return this.#parent;
+		if (this.#parent.global) return this.#parent;
 
 		return this.#parent.resolveClosestGlobalMirror();
 	}

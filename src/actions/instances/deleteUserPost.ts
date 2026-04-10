@@ -1,20 +1,26 @@
-import { ContextMenuAction } from '../commons/actionBuilder';
-import { getAgentMessageOwnerId, deleteAgentMessage } from '@/utils/discordagent';
 import { Translator } from '@/i18n';
+import { deleteAgentMessage, getAgentMessageOwnerId } from '@/utils/discordagent';
+import { ContextMenuAction } from '../commons/actionBuilder';
 
-const action = new ContextMenuAction('actionDeleteUserPost', 'Message')
-	.setMessageResponse(async interaction => {
+const action = new ContextMenuAction('actionDeleteUserPost', 'Message').setMessageResponse(
+	async (interaction) => {
 		const message = interaction.targetMessage;
 		const uid = interaction.user.id;
 		const translator = await Translator.from(uid);
 
-		if((message.webhookId == undefined || message.webhookId.length == 0) && message.author.id !== interaction.client.user.id)
+		if (
+			(message.webhookId == null || message.webhookId.length === 0)
+			&& message.author.id !== interaction.client.user.id
+		)
 			return interaction.reply({
 				content: translator.getText('invalidMessage'),
 				ephemeral: true,
 			});
 
-		if(uid !== getAgentMessageOwnerId(message.id) && !interaction.member.permissionsIn(interaction.channel).has('ManageMessages')) {
+		if (
+			uid !== getAgentMessageOwnerId(message.id)
+			&& !interaction.member.permissionsIn(interaction.channel).has('ManageMessages')
+		) {
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
 				ephemeral: true,
@@ -28,6 +34,7 @@ const action = new ContextMenuAction('actionDeleteUserPost', 'Message')
 			}),
 			deleteAgentMessage(message),
 		]);
-	});
+	},
+);
 
 export default action;

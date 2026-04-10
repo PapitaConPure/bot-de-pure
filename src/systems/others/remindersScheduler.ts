@@ -1,12 +1,12 @@
 import type { Client, GuildTextBasedChannel, User } from 'discord.js';
-import { MessageFlags, ContainerBuilder } from 'discord.js';
+import { ContainerBuilder, MessageFlags } from 'discord.js';
+import { tenshiColor } from '@/data/globalProps';
+import { decompressId } from '@/func';
+import { Translator } from '@/i18n';
 import type { ReminderDocument } from '@/models/reminders';
 import Reminder from '@/models/reminders';
+import { INT32_MAX } from '@/utils/general';
 import Logger from '@/utils/logs';
-import { decompressId } from '@/func';
-import { tenshiColor } from '@/data/globalProps';
-import { Translator } from '@/i18n';
-import Int32 from 'mongoose-int32';
 
 const { debug, info, error } = Logger('WARN', 'Reminders');
 
@@ -18,8 +18,10 @@ const scheduledIds = new Map<string, NodeJS.Timeout>();
  * @param reminder El recordatorio a programar.
  */
 export async function scheduleReminder(reminder: ReminderDocument) {
-	if(!reminder)
-		throw new TypeError(`Expected a ReminderDocument. Got: ${reminder == null ? reminder : typeof reminder}`);
+	if (!reminder)
+		throw new TypeError(
+			`Expected a ReminderDocument. Got: ${reminder == null ? reminder : typeof reminder}`,
+		);
 
 	const debugId = decompressId(reminder._id);
 
@@ -31,16 +33,20 @@ export async function scheduleReminder(reminder: ReminderDocument) {
 	const ms = timeUntil(reminder.date);
 	debug(`Reminder #${debugId} time to trigger: ${ms / 1000} seconds (${ms}ms)`);
 
-	if(ms < 1) {
+	if (ms < 1) {
 		triggerReminder(reminder);
-		info('A reminder was about to be scheduled, but it\'s already expired so it was triggered immediately instead.');
+		info(
+			"A reminder was about to be scheduled, but it's already expired so it was triggered immediately instead.",
+		);
 		return;
 	}
 
-	if(ms > Int32.INT32_MAX) {
-		const newTimeout = setTimeout(scheduleReminder, Int32.INT32_MAX, reminder);
+	if (ms > INT32_MAX) {
+		const newTimeout = setTimeout(scheduleReminder, INT32_MAX, reminder);
 		scheduledIds.set(reminder._id, newTimeout);
-		info(`Reminder #${debugId} would take longer to trigger than what's representable by int32, so it will be stalled for the maximum int32 duration and checked again`);
+		info(
+			`Reminder #${debugId} would take longer to trigger than what's representable by int32, so it will be stalled for the maximum int32 duration and checked again`,
+		);
 		return;
 	}
 
@@ -58,11 +64,15 @@ export async function processReminders() {
 	try {
 		debug('Attempting to process all registered reminders');
 		const dueReminders = await Reminder.find();
-		const reminders = await Promise.allSettled(dueReminders.map(reminder => scheduleReminder(reminder)));
-		const failedSchedules = reminders.filter(trigger => trigger.status === 'rejected');
-		if(failedSchedules.length)
-			throw new RemindersSchedulerError(`Couldn't process every reminder.\nReceived the following reasons:\n${failedSchedules.map(t => t.reason).join('\n')}`);
-	} catch(err) {
+		const reminders = await Promise.allSettled(
+			dueReminders.map((reminder) => scheduleReminder(reminder)),
+		);
+		const failedSchedules = reminders.filter((trigger) => trigger.status === 'rejected');
+		if (failedSchedules.length)
+			throw new RemindersSchedulerError(
+				`Couldn't process every reminder.\nReceived the following reasons:\n${failedSchedules.map((t) => t.reason).join('\n')}`,
+			);
+	} catch (err) {
 		const message = 'Failed to process all reminders.';
 		error(err, message);
 		throw new RemindersSchedulerError(message);
@@ -74,8 +84,10 @@ export async function processReminders() {
  * @param reminder El recordatorio a disparar.
  */
 async function triggerReminder(reminder: ReminderDocument) {
-	if(!reminder)
-		throw new TypeError(`Expected a ReminderDocument. Got: ${reminder == null ? reminder : typeof reminder}`);
+	if (!reminder)
+		throw new TypeError(
+			`Expected a ReminderDocument. Got: ${reminder == null ? reminder : typeof reminder}`,
+		);
 
 	debug(`Attempting to trigger reminder #${reminder._id}.`);
 
@@ -83,25 +95,28 @@ async function triggerReminder(reminder: ReminderDocument) {
 	const userId = decompressId(reminder.userId);
 
 	debug(`Fetching the specified channel for reminder #${reminder._id}.`);
-	const channel = schedulerClient.channels.cache.get(channelId)
-	?? await schedulerClient.channels.fetch(channelId);
+	const channel =
+		schedulerClient.channels.cache.get(channelId)
+		?? (await schedulerClient.channels.fetch(channelId));
 
 	debug(`Fetching the specified user for reminder #${reminder._id}.`);
-	const user = schedulerClient.users.cache.get(userId)
-		?? await schedulerClient.users.fetch(userId);
+	const user =
+		schedulerClient.users.cache.get(userId) ?? (await schedulerClient.users.fetch(userId));
 
 	try {
-		if(channel.isSendable() && channel.isTextBased() && !channel.isDMBased()) {
+		if (channel.isSendable() && channel.isTextBased() && !channel.isDMBased()) {
 			await sendReminder(channel, user, reminder.content);
 			debug(`Reminder message for ${user.username} has been sent to ${channelId}.`);
 		}
 
 		await Reminder.findByIdAndDelete(reminder._id);
 
-		info(`The reminder #${reminder._id} for ${user.username} has been triggered, sent to ${channelId}, and deleted appropiately.`);
-	} catch(err) {
+		info(
+			`The reminder #${reminder._id} for ${user.username} has been triggered, sent to ${channelId}, and deleted appropiately.`,
+		);
+	} catch (err) {
 		error(err);
-		throw new RemindersSchedulerError('Couldn\'t trigger a reminder.');
+		throw new RemindersSchedulerError("Couldn't trigger a reminder.");
 	}
 }
 
@@ -116,16 +131,15 @@ async function sendReminder(channel: GuildTextBasedChannel, user: User, reminder
 
 	const translator = await Translator.from(user.id);
 
-	const container = new ContainerBuilder()
-		.setAccentColor(tenshiColor)
-		.addTextDisplayComponents(
-			textDisplay => textDisplay.setContent(translator.getText('reminderTriggerEpigraph', user)),
-			textDisplay => textDisplay.setContent(reminderContent),
-		);
+	const container = new ContainerBuilder().setAccentColor(tenshiColor).addTextDisplayComponents(
+		(textDisplay) =>
+			textDisplay.setContent(translator.getText('reminderTriggerEpigraph', user)),
+		(textDisplay) => textDisplay.setContent(reminderContent),
+	);
 
 	return channel.send({
 		flags: MessageFlags.IsComponentsV2,
-		components: [ container ],
+		components: [container],
 	});
 }
 
@@ -137,7 +151,7 @@ export function clearScheduledReminder(reminder: ReminderDocument | string): Nod
 	const id: string = typeof reminder === 'string' ? reminder : reminder.id;
 
 	const samePreviousReminderTimeout = scheduledIds.get(id);
-	if(samePreviousReminderTimeout) {
+	if (samePreviousReminderTimeout) {
 		debug(`Scheduled reminder #${id} has been cleared.`);
 		clearTimeout(samePreviousReminderTimeout);
 	}
@@ -159,8 +173,10 @@ function timeUntil(date: Date) {
 
 /**@description Inicializa el programador de recordatorios con el cliente indicado.*/
 export function initRemindersScheduler(client: Client) {
-	if(!client)
-		throw new TypeError(`Expected a Discord client. Got: ${client == null ? client : typeof client}`);
+	if (!client)
+		throw new TypeError(
+			`Expected a Discord client. Got: ${client == null ? client : typeof client}`,
+		);
 
 	debug('Initializing the scheduler.');
 	schedulerClient = client;

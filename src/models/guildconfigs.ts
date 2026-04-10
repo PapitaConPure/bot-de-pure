@@ -1,15 +1,28 @@
 import Mongoose from 'mongoose';
-import { makeStringIdValidator } from './modelUtils';
-import type { Tubercle } from '../systems/ps/common/executeTuber';
 import type { FeedData } from '../systems/booru/boorufeed';
+import type { Tubercle } from '../systems/ps/common/executeTuber';
+import { makeStringIdValidator } from './modelUtils';
 
 //Perdoname por todos mis pecados
 export type TubersDict = Record<string, Tubercle>;
 export type FeedsDict = Record<string, FeedData>;
 
 /**@type Describe la configuración de un servidor.*/
-// eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-object-type
-const GuildConfigSchema: Mongoose.Schema<unknown, Mongoose.Model<any, any, any, any, any>, {}, {}, {}, {}, Mongoose.DefaultSchemaOptions, { guildId: string; chaos?: boolean; tubers: object; feeds: FeedsDict; }> = new Mongoose.Schema({
+const GuildConfigSchema: Mongoose.Schema<
+	unknown,
+	// biome-ignore lint/suspicious/noExplicitAny: Hack
+	Mongoose.Model<any, any, any, any, any>,
+	// biome-ignore lint/complexity/noBannedTypes: Hack
+	{},
+	// biome-ignore lint/complexity/noBannedTypes: Hack
+	{},
+	// biome-ignore lint/complexity/noBannedTypes: Hack
+	{},
+	// biome-ignore lint/complexity/noBannedTypes: Hack
+	{},
+	Mongoose.DefaultSchemaOptions,
+	{ guildId: string; chaos?: boolean; tubers: object; feeds: FeedsDict }
+> = new Mongoose.Schema({
 	guildId: {
 		type: String,
 		required: true,
@@ -36,8 +49,9 @@ const GuildConfigSchema: Mongoose.Schema<unknown, Mongoose.Model<any, any, any, 
 
 const GuildConfig = Mongoose.model('GuildConfig', GuildConfigSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() { return new GuildConfig({}); }
-export type GuildConfigDocument = ReturnType<(typeof m)>;
+function m() {
+	return new GuildConfig({});
+}
+export type GuildConfigDocument = ReturnType<typeof m>;
 
 export default GuildConfig;

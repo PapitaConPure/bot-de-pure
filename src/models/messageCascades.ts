@@ -18,8 +18,9 @@ const MessageCascadeSchema = new Mongoose.Schema({
 
 const MessageCascade = Mongoose.model('MessageCascade', MessageCascadeSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() { return new MessageCascade({}); }
-export type MessageCascadeDocument = ReturnType<(typeof m)>;
+function m() {
+	return new MessageCascade({});
+}
+export type MessageCascadeDocument = ReturnType<typeof m>;
 
 export default MessageCascade;

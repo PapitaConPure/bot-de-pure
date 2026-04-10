@@ -1,26 +1,76 @@
-import type { Input, InputReader} from './inputReader';
-import { ProductionInputReader, TestDriveInputReader } from './inputReader';
-import type { RuntimeValue, AssertedRuntimeValue, ValueKind, AnyFunctionValue } from './values';
-import { ValueKinds, ValueKindTranslationLookups, makeNumber, makeText, makeBoolean, makeList, makeRegistry, makeEmbed, makeFunction, makeLambda, makeNativeFunction, makeNada, coerceValue, isInternalOperable } from './values';
-import { UnaryOperationLookups, BinaryOperationLookups, ValueKindLookups } from './lookups';
-import type { EnvironmentProvider } from './environment/environmentProvider';
-import { NativeMethodsLookup } from './environment';
-import { Scope } from './scope';
-import type { Token} from '../lexer/tokens';
-import { TokenKinds } from '../lexer/tokens';
-import type { AssignmentStatement, BlockStatement, ConditionalStatement, DeclarationStatement, DeleteStatement, DoUntilStatement, ExpressionStatement, ForEachStatement, ForStatement, FullForStatement, InsertionStatement, LoadStatement, ProgramStatement, ReadStatement, RepeatStatement, ReturnStatement, SaveStatement, SendStatement, ShortForStatement, Statement, StopStatement, WhileStatement } from '../ast/statements';
-import { StatementKinds } from '../ast/statements';
-import type { ArrowExpression, BinaryExpression, CallExpression, CastExpression, ConditionalExpression, Expression, FunctionExpression, ListLiteralExpression, RegistryLiteralExpression, SequenceExpression, UnaryExpression } from '../ast/expressions';
+import type {
+	ArrowExpression,
+	BinaryExpression,
+	CallExpression,
+	CastExpression,
+	ConditionalExpression,
+	Expression,
+	FunctionExpression,
+	ListLiteralExpression,
+	RegistryLiteralExpression,
+	SequenceExpression,
+	UnaryExpression,
+} from '../ast/expressions';
 import { ExpressionKinds } from '../ast/expressions';
-import { iota, shortenText } from '../util/utils';
+import type {
+	AssignmentStatement,
+	BlockStatement,
+	ConditionalStatement,
+	DeclarationStatement,
+	DeleteStatement,
+	DoUntilStatement,
+	ExpressionStatement,
+	ForEachStatement,
+	ForStatement,
+	FullForStatement,
+	InsertionStatement,
+	LoadStatement,
+	ProgramStatement,
+	ReadStatement,
+	RepeatStatement,
+	ReturnStatement,
+	SaveStatement,
+	SendStatement,
+	ShortForStatement,
+	Statement,
+	StopStatement,
+	WhileStatement,
+} from '../ast/statements';
+import { StatementKinds } from '../ast/statements';
+import type { Token } from '../lexer/tokens';
+import { TokenKinds } from '../lexer/tokens';
 import type { ValuesOf } from '../util/types';
+import { iota, shortenText } from '../util/utils';
+import { NativeMethodsLookup } from './environment';
+import type { EnvironmentProvider } from './environment/environmentProvider';
+import type { Input, InputReader } from './inputReader';
+import { ProductionInputReader, TestDriveInputReader } from './inputReader';
+import { BinaryOperationLookups, UnaryOperationLookups, ValueKindLookups } from './lookups';
+import { Scope } from './scope';
+import type { AnyFunctionValue, AssertedRuntimeValue, RuntimeValue, ValueKind } from './values';
+import {
+	coerceValue,
+	isInternalOperable,
+	makeBoolean,
+	makeEmbed,
+	makeFunction,
+	makeLambda,
+	makeList,
+	makeNada,
+	makeNativeFunction,
+	makeNumber,
+	makeRegistry,
+	makeText,
+	ValueKinds,
+	ValueKindTranslationLookups,
+} from './values';
 
-export const Stops = ({
+export const Stops = {
 	NONE: iota(0),
 	BREAK: iota(),
 	RETURN: iota(),
 	ABORT: iota(),
-}) as const;
+} as const;
 export type StopKind = ValuesOf<typeof Stops>;
 
 export interface EvaluationResult {
@@ -85,8 +135,12 @@ export class Interpreter {
 		return err;
 	}
 
-	#setupInterpreterErrorDisplay(node: Expression | Statement | Token): { lineString: string | null; offset: number; markLength: number; } {
-		if(node == null) {
+	#setupInterpreterErrorDisplay(node: Expression | Statement | Token): {
+		lineString: string | null;
+		offset: number;
+		markLength: number;
+	} {
+		if (node == null) {
 			return {
 				lineString: null,
 				offset: 0,
@@ -104,7 +158,7 @@ export class Interpreter {
 		let lineString = sourceLines[node.line - 1];
 		const offset = Math.max(0, lineString.length - maxLength);
 
-		if(lineString.length < maxLength) {
+		if (lineString.length < maxLength) {
 			return {
 				lineString,
 				offset,
@@ -114,17 +168,19 @@ export class Interpreter {
 
 		const suspensorLength = suspensor.length + 1; //Considera el espacio
 
-		if(columnEnd < maxLength) //Suspensor a la derecha
-			lineString = lineString.slice(0, maxLength - suspensorLength) + ' ' + suspensor;
-		else if(node.column >= lineString.length) //Suspensor a la izquierda
-			lineString = suspensor + ' ' + lineString.slice(lineString.length - maxLength - 1 + suspensorLength);
-		else { //Dos suspensores
+		if (columnEnd < maxLength)
+			//Suspensor a la derecha
+			lineString = `${lineString.slice(0, maxLength - suspensorLength)} ${suspensor}`;
+		else if (node.column >= lineString.length)
+			//Suspensor a la izquierda
+			lineString = `${suspensor} ${lineString.slice(lineString.length - maxLength - 1 + suspensorLength)}`;
+		else {
+			//Dos suspensores
 			let center = (node.column + columnEnd) * 0.5;
 			const half1 = Math.floor(maxLength * 0.5);
 			const half2 = maxLength - half1;
-			if(node.column < (center - half1))
-				center = node.column + half1;
-			lineString = suspensor + ' ' + lineString.slice(center - half1 + suspensorLength, center + half2 - suspensorLength) + ' ' + suspensor;
+			if (node.column < center - half1) center = node.column + half1;
+			lineString = `${suspensor} ${lineString.slice(center - half1 + suspensorLength, center + half2 - suspensorLength)} ${suspensor}`;
 		}
 
 		return {
@@ -134,9 +190,13 @@ export class Interpreter {
 		};
 	}
 
-	#formatInterpreterErrorDisplay(node: Expression | Statement | Token, lineString: string | null, offset: number, markLength: number) {
-		if(node == null)
-			return '```arm\n//No hay información adicional para mostrar...\n```';
+	#formatInterpreterErrorDisplay(
+		node: Expression | Statement | Token,
+		lineString: string | null,
+		offset: number,
+		markLength: number,
+	) {
+		if (node == null) return '```arm\n//No hay información adicional para mostrar...\n```';
 
 		const col = Math.max(0, Math.min(node.column - offset - 1, lineString?.length || 0));
 		const rest = Math.max(1, Math.min(col + markLength, lineString?.length || 1) - col);
@@ -153,9 +213,9 @@ export class Interpreter {
 	#generateStackTrace() {
 		const stackTrace = [];
 
-		while(this.#lastNodes.length > 0 && stackTrace.length < 6) {
+		while (this.#lastNodes.length > 0 && stackTrace.length < 6) {
 			const node = this.forgetLastNode();
-			if(node?.kind === ExpressionKinds.CALL)
+			if (node?.kind === ExpressionKinds.CALL)
 				stackTrace.push(`- En \`${this.astString(node.fn)}\``);
 		}
 
@@ -168,12 +228,18 @@ export class Interpreter {
 		return this.#inputReader.isTestDrive();
 	}
 
-	is<TKind extends ValueKind>(value: RuntimeValue | null | undefined, valueKind: TKind): value is AssertedRuntimeValue<TKind> {
+	is<TKind extends ValueKind>(
+		value: RuntimeValue | null | undefined,
+		valueKind: TKind,
+	): value is AssertedRuntimeValue<TKind> {
 		return value?.kind === valueKind;
 	}
 
-	isAnyOf<TKind extends ValueKind>(value: RuntimeValue, ...valueKinds: TKind[]): value is AssertedRuntimeValue<TKind> {
-		return valueKinds.some(valueKind => value.kind === valueKind);
+	isAnyOf<TKind extends ValueKind>(
+		value: RuntimeValue,
+		...valueKinds: TKind[]
+	): value is AssertedRuntimeValue<TKind> {
+		return valueKinds.some((valueKind) => value.kind === valueKind);
 	}
 
 	checkStop(stopKind: StopKind) {
@@ -183,8 +249,7 @@ export class Interpreter {
 	eatStop(stopKind: StopKind) {
 		const test = this.#stop >= stopKind;
 
-		if(this.#stop <= stopKind)
-			this.#stop = Stops.NONE;
+		if (this.#stop <= stopKind) this.#stop = Stops.NONE;
 
 		return test;
 	}
@@ -199,17 +264,31 @@ export class Interpreter {
 		return this.#lastNodes.shift();
 	}
 
-	evaluateAs<TKind extends ValueKind>(node: Expression, scope: Scope, as: TKind, mustBeDeclared = true): AssertedRuntimeValue<TKind> {
+	evaluateAs<TKind extends ValueKind>(
+		node: Expression,
+		scope: Scope,
+		as: TKind,
+		mustBeDeclared = true,
+	): AssertedRuntimeValue<TKind> {
 		return coerceValue(this, this.evaluate(node, scope, mustBeDeclared), as);
 	}
 
 	/**@description Evalúa un nodo programa.*/
-	evaluateProgram(ast: ProgramStatement, scope: Scope, source: string, provider: EnvironmentProvider, args: string[] | null = undefined, isTestDrive: boolean = false): EvaluationResult {
-		if(ast == null || ast.kind !== StatementKinds.PROGRAM || ast.body == null)
+	evaluateProgram(
+		ast: ProgramStatement,
+		scope: Scope,
+		source: string,
+		provider: EnvironmentProvider,
+		args: string[] | null = undefined,
+		isTestDrive: boolean = false,
+	): EvaluationResult {
+		if (ast == null || ast.kind !== StatementKinds.PROGRAM || ast.body == null)
 			throw `Se esperaba AST válido para interpretar`;
 
-		if(typeof source !== 'string')
-			throw new Error('Se esperaba un string válido para proveer información de errores de evaluación');
+		if (typeof source !== 'string')
+			throw new Error(
+				'Se esperaba un string válido para proveer información de errores de evaluación',
+			);
 
 		this.#saveTable = new Map();
 		this.#errorStack = [];
@@ -241,93 +320,98 @@ export class Interpreter {
 
 	/**@description Evalúa una sentencia y devuelve el valor Nada.*/
 	evaluateStatement(node: Statement, scope: Scope): RuntimeValue {
-		if(this.#quota-- <= 0)
-			throw this.TuberInterpreterError(`Límite de ejecución de sentencias agotado. Esto puede deberse a un bucle infinito, abuso de estructuras iterativas o código poco eficiente`, node);
+		if (this.#quota-- <= 0)
+			throw this.TuberInterpreterError(
+				`Límite de ejecución de sentencias agotado. Esto puede deberse a un bucle infinito, abuso de estructuras iterativas o código poco eficiente`,
+				node,
+			);
 
 		this.rememberNode(node);
 
-		let returnValue;
-		switch(node.kind) {
-		//Estructuras de control
-		case StatementKinds.BLOCK:
-			returnValue = this.#evaluateBlock(node, scope);
-			break;
+		let returnValue: RuntimeValue;
+		switch (node.kind) {
+			//Estructuras de control
+			case StatementKinds.BLOCK:
+				returnValue = this.#evaluateBlock(node, scope);
+				break;
 
-		case StatementKinds.CONDITIONAL:
-			returnValue = this.#evaluateConditionalStmt(node, scope);
-			break;
+			case StatementKinds.CONDITIONAL:
+				returnValue = this.#evaluateConditionalStmt(node, scope);
+				break;
 
-		case StatementKinds.WHILE:
-			returnValue = this.#evaluateWhile(node, scope);
-			break;
+			case StatementKinds.WHILE:
+				returnValue = this.#evaluateWhile(node, scope);
+				break;
 
-		case StatementKinds.DO_UNTIL:
-			returnValue = this.#evaluateDoUntil(node, scope);
-			break;
+			case StatementKinds.DO_UNTIL:
+				returnValue = this.#evaluateDoUntil(node, scope);
+				break;
 
-		case StatementKinds.REPEAT:
-			returnValue = this.#evaluateRepeat(node, scope);
-			break;
+			case StatementKinds.REPEAT:
+				returnValue = this.#evaluateRepeat(node, scope);
+				break;
 
-		case StatementKinds.FOR_EACH:
-			returnValue = this.#evaluateForEach(node, scope);
-			break;
+			case StatementKinds.FOR_EACH:
+				returnValue = this.#evaluateForEach(node, scope);
+				break;
 
-		case StatementKinds.FOR:
-			returnValue = this.#evaluateFor(node, scope);
-			break;
+			case StatementKinds.FOR:
+				returnValue = this.#evaluateFor(node, scope);
+				break;
 
-		//Inmediatas
-		case StatementKinds.EXPRESSION:
-			returnValue = this.#evaluateExpressionStatement(node, scope);
-			break;
+			//Inmediatas
+			case StatementKinds.EXPRESSION:
+				returnValue = this.#evaluateExpressionStatement(node, scope);
+				break;
 
-		case StatementKinds.READ:
-			returnValue = this.#evaluateReadStatement(node, scope);
-			break;
+			case StatementKinds.READ:
+				returnValue = this.#evaluateReadStatement(node, scope);
+				break;
 
-		case StatementKinds.DECLARATION:
-			returnValue = this.#evaluateDeclarationStatement(node, scope);
-			break;
+			case StatementKinds.DECLARATION:
+				returnValue = this.#evaluateDeclarationStatement(node, scope);
+				break;
 
-		case StatementKinds.SAVE:
-			returnValue = this.#evaluateSaveStatement(node, scope);
-			break;
+			case StatementKinds.SAVE:
+				returnValue = this.#evaluateSaveStatement(node, scope);
+				break;
 
-		case StatementKinds.LOAD:
-			returnValue = this.#evaluateLoadStatement(node, scope);
-			break;
+			case StatementKinds.LOAD:
+				returnValue = this.#evaluateLoadStatement(node, scope);
+				break;
 
-		case StatementKinds.ASSIGNMENT:
-			returnValue = this.#evaluateAssignmentStatement(node, scope);
-			break;
+			case StatementKinds.ASSIGNMENT:
+				returnValue = this.#evaluateAssignmentStatement(node, scope);
+				break;
 
-		case StatementKinds.INSERTION:
-			returnValue = this.#evaluateInsertionStatement(node, scope);
-			break;
+			case StatementKinds.INSERTION:
+				returnValue = this.#evaluateInsertionStatement(node, scope);
+				break;
 
-		case StatementKinds.DELETE:
-			returnValue = this.#evaluateDeleteStatement(node, scope);
-			break;
+			case StatementKinds.DELETE:
+				returnValue = this.#evaluateDeleteStatement(node, scope);
+				break;
 
-		case StatementKinds.RETURN:
-			returnValue = this.#evaluateReturnStatement(node, scope);
-			break;
+			case StatementKinds.RETURN:
+				returnValue = this.#evaluateReturnStatement(node, scope);
+				break;
 
-		case StatementKinds.END:
-			returnValue = this.#evaluateEndStatement();
-			break;
+			case StatementKinds.END:
+				returnValue = this.#evaluateEndStatement();
+				break;
 
-		case StatementKinds.STOP:
-			returnValue = this.#evaluateStopStatement(node, scope);
-			break;
+			case StatementKinds.STOP:
+				returnValue = this.#evaluateStopStatement(node, scope);
+				break;
 
-		case StatementKinds.SEND:
-			returnValue = this.#evaluateSendStatement(node, scope);
-			break;
+			case StatementKinds.SEND:
+				returnValue = this.#evaluateSendStatement(node, scope);
+				break;
 
-		default:
-			throw new Error(`Se encontró un nodo inesperado u no implementado al evaluar sentencia: ${node.kind}`);
+			default:
+				throw new Error(
+					`Se encontró un nodo inesperado u no implementado al evaluar sentencia: ${node.kind}`,
+				);
 		}
 
 		this.forgetLastNode();
@@ -338,79 +422,84 @@ export class Interpreter {
 	evaluate(node: Expression, scope: Scope, mustBeDeclared: boolean = true): RuntimeValue {
 		this.rememberNode(node);
 
-		if(this.#quota <= 0)
-			throw this.TuberInterpreterError(`Límite de ejecución de sentencias agotado. Esto puede deberse a un bucle infinito, abuso de estructuras iterativas o código poco eficiente`, node);
+		if (this.#quota <= 0)
+			throw this.TuberInterpreterError(
+				`Límite de ejecución de sentencias agotado. Esto puede deberse a un bucle infinito, abuso de estructuras iterativas o código poco eficiente`,
+				node,
+			);
 
 		this.#quota -= 0.1;
 
-		let returnValue;
-		switch(node.kind) {
-		case ExpressionKinds.NUMBER_LITERAL:
-			returnValue = makeNumber(node.value);
-			break;
+		let returnValue: RuntimeValue;
+		switch (node.kind) {
+			case ExpressionKinds.NUMBER_LITERAL:
+				returnValue = makeNumber(node.value);
+				break;
 
-		case ExpressionKinds.TEXT_LITERAL:
-			returnValue = makeText(node.value);
-			break;
+			case ExpressionKinds.TEXT_LITERAL:
+				returnValue = makeText(node.value);
+				break;
 
-		case ExpressionKinds.BOOLEAN_LITERAL:
-			returnValue = makeBoolean(node.value);
-			break;
+			case ExpressionKinds.BOOLEAN_LITERAL:
+				returnValue = makeBoolean(node.value);
+				break;
 
-		case ExpressionKinds.LIST_LITERAL:
-			returnValue = this.#evaluateList(node, scope);
-			break;
+			case ExpressionKinds.LIST_LITERAL:
+				returnValue = this.#evaluateList(node, scope);
+				break;
 
-		case ExpressionKinds.REGISTRY_LITERAL:
-			returnValue = this.#evaluateRegistry(node, scope);
-			break;
+			case ExpressionKinds.REGISTRY_LITERAL:
+				returnValue = this.#evaluateRegistry(node, scope);
+				break;
 
-		case ExpressionKinds.EMBED_LITERAL:
-			returnValue = makeEmbed();
-			break;
+			case ExpressionKinds.EMBED_LITERAL:
+				returnValue = makeEmbed();
+				break;
 
-		case ExpressionKinds.FUNCTION:
-			returnValue = this.#evaluateFunction(node, scope);
-			break;
+			case ExpressionKinds.FUNCTION:
+				returnValue = this.#evaluateFunction(node, scope);
+				break;
 
-		case ExpressionKinds.NADA_LITERAL:
-			returnValue = makeNada();
-			break;
+			case ExpressionKinds.NADA_LITERAL:
+				returnValue = makeNada();
+				break;
 
-		case ExpressionKinds.IDENTIFIER:
-			returnValue = scope.lookup(node.name, mustBeDeclared);
-			break;
+			case ExpressionKinds.IDENTIFIER:
+				returnValue = scope.lookup(node.name, mustBeDeclared);
+				break;
 
-		case ExpressionKinds.UNARY:
-			returnValue = this.#evaluateUnary(node, scope, mustBeDeclared);
-			break;
+			case ExpressionKinds.UNARY:
+				returnValue = this.#evaluateUnary(node, scope, mustBeDeclared);
+				break;
 
-		case ExpressionKinds.BINARY:
-			returnValue = this.#evaluateBinary(node, scope, mustBeDeclared);
-			break;
+			case ExpressionKinds.BINARY:
+				returnValue = this.#evaluateBinary(node, scope, mustBeDeclared);
+				break;
 
-		case ExpressionKinds.CONDITIONAL:
-			returnValue = this.#evaluateConditionalExpr(node, scope, mustBeDeclared);
-			break;
+			case ExpressionKinds.CONDITIONAL:
+				returnValue = this.#evaluateConditionalExpr(node, scope, mustBeDeclared);
+				break;
 
-		case ExpressionKinds.CAST:
-			returnValue = this.#evaluateCast(node, scope);
-			break;
+			case ExpressionKinds.CAST:
+				returnValue = this.#evaluateCast(node, scope);
+				break;
 
-		case ExpressionKinds.SEQUENCE:
-			returnValue = this.#evaluateSequence(node, scope);
-			break;
+			case ExpressionKinds.SEQUENCE:
+				returnValue = this.#evaluateSequence(node, scope);
+				break;
 
-		case ExpressionKinds.ARROW:
-			returnValue = this.#evaluateArrow(node, scope);
-			break;
+			case ExpressionKinds.ARROW:
+				returnValue = this.#evaluateArrow(node, scope);
+				break;
 
-		case ExpressionKinds.CALL:
-			returnValue = this.#evaluateCall(node, scope);
-			break;
+			case ExpressionKinds.CALL:
+				returnValue = this.#evaluateCall(node, scope);
+				break;
 
-		default:
-			throw new Error(`Se encontró un nodo inesperado u no implementado al evaluar expresión: ${node.kind}`);
+			default:
+				throw new Error(
+					`Se encontró un nodo inesperado u no implementado al evaluar expresión: ${node.kind}`,
+				);
 		}
 
 		this.forgetLastNode();
@@ -421,9 +510,9 @@ export class Interpreter {
 		let returned: RuntimeValue = makeNada();
 
 		const blockScope = new Scope(this, scope);
-		for(const statement of node.body) {
+		for (const statement of node.body) {
 			returned = this.evaluateStatement(statement, blockScope);
-			if(this.checkStop(Stops.BREAK)) break;
+			if (this.checkStop(Stops.BREAK)) break;
 		}
 
 		return returned;
@@ -433,11 +522,9 @@ export class Interpreter {
 		const { test, consequent, alternate } = node;
 
 		const testValue = this.evaluateAs(test, scope, ValueKinds.BOOLEAN, false);
-		if(testValue.value)
-			return this.#evaluateBlock(consequent, scope);
+		if (testValue.value) return this.#evaluateBlock(consequent, scope);
 
-		if(alternate != null)
-			return this.evaluateStatement(alternate, scope);
+		if (alternate != null) return this.evaluateStatement(alternate, scope);
 
 		return makeNada();
 	}
@@ -447,9 +534,9 @@ export class Interpreter {
 
 		let evaluated: RuntimeValue = makeNada();
 
-		while(this.evaluateAs(test, scope, ValueKinds.BOOLEAN).value === true) {
+		while (this.evaluateAs(test, scope, ValueKinds.BOOLEAN).value === true) {
 			evaluated = this.#evaluateBlock(body, scope);
-			if(this.eatStop(Stops.BREAK)) break;
+			if (this.eatStop(Stops.BREAK)) break;
 		}
 
 		return evaluated;
@@ -462,8 +549,8 @@ export class Interpreter {
 
 		do {
 			evaluated = this.#evaluateBlock(body, scope);
-			if(this.eatStop(Stops.BREAK)) break;
-		} while(this.evaluateAs(test, scope, ValueKinds.BOOLEAN).value === false);
+			if (this.eatStop(Stops.BREAK)) break;
+		} while (this.evaluateAs(test, scope, ValueKinds.BOOLEAN).value === false);
 
 		return evaluated;
 	}
@@ -474,9 +561,9 @@ export class Interpreter {
 		let evaluated: RuntimeValue = makeNada();
 
 		const timesValue = this.evaluateAs(times, scope, ValueKinds.NUMBER).value;
-		for(let i = 0; i < timesValue; i++) {
+		for (let i = 0; i < timesValue; i++) {
 			evaluated = this.#evaluateBlock(body, scope);
-			if(this.eatStop(Stops.BREAK)) break;
+			if (this.eatStop(Stops.BREAK)) break;
 		}
 
 		return evaluated;
@@ -488,26 +575,33 @@ export class Interpreter {
 		let evaluated: RuntimeValue = makeNada();
 
 		const containerValue = this.evaluate(container, scope);
-		if(!this.isAnyOf(containerValue, ValueKinds.LIST, ValueKinds.REGISTRY))
-			throw this.TuberInterpreterError(`Se esperaba un valor de Lista o Registro en expresión de contenedor de Sentencia \`PARA CADA\`, pero \`${this.astString(container)}\` fue de tipo ${ValueKindTranslationLookups.get(containerValue.kind)}`, container);
+		if (!this.isAnyOf(containerValue, ValueKinds.LIST, ValueKinds.REGISTRY))
+			throw this.TuberInterpreterError(
+				`Se esperaba un valor de Lista o Registro en expresión de contenedor de Sentencia \`PARA CADA\`, pero \`${this.astString(container)}\` fue de tipo ${ValueKindTranslationLookups.get(containerValue.kind)}`,
+				container,
+			);
 
-		const entryNames = (this.is(containerValue, ValueKinds.LIST) ? containerValue.elements : containerValue.entries).keys();
+		const entryNames = (
+			this.is(containerValue, ValueKinds.LIST)
+				? containerValue.elements
+				: containerValue.entries
+		).keys();
 		const forEachScope = new Scope(this, scope);
 		const getFn = this.is(containerValue, ValueKinds.LIST)
-			? (idx => containerValue.elements[idx])
-			: (name => makeList([ makeText(name), containerValue.entries.get(name) ]));
+			? (idx: string | number) => containerValue.elements[idx]
+			: (name: string) => makeList([makeText(name), containerValue.entries.get(name)]);
 
-		for(const entryName of entryNames) {
+		for (const entryName of entryNames) {
 			forEachScope.assignVariable(identifier, getFn(entryName));
 			evaluated = this.#evaluateBlock(body, forEachScope);
-			if(this.eatStop(Stops.BREAK)) break;
+			if (this.eatStop(Stops.BREAK)) break;
 		}
 
 		return evaluated;
 	}
 
 	#evaluateFor(node: ForStatement, scope: Scope) {
-		return (node.full === true)
+		return node.full === true
 			? this.#evaluateFullFor(node, scope)
 			: this.#evaluateShortFor(node, scope);
 	}
@@ -526,9 +620,9 @@ export class Interpreter {
 		const testFn = () => this.evaluateAs(test, forScope, ValueKinds.BOOLEAN).value;
 		const stepFn = () => this.evaluateStatement(step, forScope);
 
-		for(startFn(); testFn(); stepFn()) {
+		for (startFn(); testFn(); stepFn()) {
 			evaluated = this.#evaluateBlock(body, forScope);
-			if(this.eatStop(Stops.BREAK)) break;
+			if (this.eatStop(Stops.BREAK)) break;
 		}
 
 		return evaluated;
@@ -543,15 +637,16 @@ export class Interpreter {
 		const toValue = this.evaluateAs(to, scope, ValueKinds.NUMBER).value;
 		const forScope = new Scope(this, scope);
 
-		let i;
-		const { testFn, stepFn } = (fromValue < toValue)
-			? { testFn: () => i <= toValue, stepFn: () => i++ }
-			: { testFn: () => i >= toValue, stepFn: () => i-- };
+		let i: number;
+		const { testFn, stepFn } =
+			fromValue < toValue
+				? { testFn: () => i <= toValue, stepFn: () => i++ }
+				: { testFn: () => i >= toValue, stepFn: () => i-- };
 
-		for(i = fromValue; testFn(); stepFn()) {
+		for (i = fromValue; testFn(); stepFn()) {
 			forScope.assignVariable(identifier, makeNumber(i));
 			evaluated = this.#evaluateBlock(body, forScope);
-			if(this.eatStop(Stops.BREAK)) break;
+			if (this.eatStop(Stops.BREAK)) break;
 		}
 
 		return evaluated;
@@ -592,9 +687,11 @@ export class Interpreter {
 	#evaluateDeclarationStatement(node: DeclarationStatement, scope: Scope) {
 		const { dataKind, declarations } = node;
 
-		const valueKind = dataKind != null ? (ValueKindLookups.get(dataKind.kind) ?? ValueKinds.NADA) : ValueKinds.NADA;
-		for(const declaration of declarations)
-			scope.declareVariable(declaration, valueKind);
+		const valueKind =
+			dataKind != null
+				? (ValueKindLookups.get(dataKind.kind) ?? ValueKinds.NADA)
+				: ValueKinds.NADA;
+		for (const declaration of declarations) scope.declareVariable(declaration, valueKind);
 
 		return makeNada();
 	}
@@ -610,9 +707,21 @@ export class Interpreter {
 
 		const value = this.evaluate(expression, scope);
 
-		if(!this.isAnyOf(value, ValueKinds.NUMBER, ValueKinds.TEXT, ValueKinds.BOOLEAN, ValueKinds.LIST, ValueKinds.REGISTRY)) {
+		if (
+			!this.isAnyOf(
+				value,
+				ValueKinds.NUMBER,
+				ValueKinds.TEXT,
+				ValueKinds.BOOLEAN,
+				ValueKinds.LIST,
+				ValueKinds.REGISTRY,
+			)
+		) {
 			const kindStr = ValueKindTranslationLookups.get(value.kind) ?? 'Desconocido';
-			throw this.TuberInterpreterError(`Tipo de dato inválido al intentar guardar un valor bajo el nombre: \`${identifier}\`. El tipo del valor recibido fue: _${kindStr}_`, expression);
+			throw this.TuberInterpreterError(
+				`Tipo de dato inválido al intentar guardar un valor bajo el nombre: \`${identifier}\`. El tipo del valor recibido fue: _${kindStr}_`,
+				expression,
+			);
 		}
 
 		this.#saveTable.set(identifier, value);
@@ -641,17 +750,16 @@ export class Interpreter {
 	#evaluateLoadStatement(node: LoadStatement, scope: Scope) {
 		const { identifier, conditional } = node;
 
-		if(conditional) {
+		if (conditional) {
 			const assignment = node.expressions
-				.map(expr => this.evaluate(expr, scope, false))
-				.find(value => coerceValue(this, value, ValueKinds.BOOLEAN).value);
+				.map((expr) => this.evaluate(expr, scope, false))
+				.find((value) => coerceValue(this, value, ValueKinds.BOOLEAN).value);
 
 			scope.assignVariable(identifier, assignment);
 		} else {
 			const value = scope.lookup(identifier, false);
 
-			if(value.kind === ValueKinds.NADA)
-				scope.assignVariable(identifier, value);
+			if (value.kind === ValueKinds.NADA) scope.assignVariable(identifier, value);
 		}
 
 		return makeNada();
@@ -669,42 +777,54 @@ export class Interpreter {
 		let receptionValue: RuntimeValue;
 		let implicit = false;
 
-		if(reception == null) {
-			if(!operator.isAny(TokenKinds.ADD, TokenKinds.SUBTRACT))
-				throw this.TuberInterpreterError('La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con los indicadores de Sentencia `SUMAR` y `RESTAR`', operator);
+		if (reception == null) {
+			if (!operator.isAny(TokenKinds.ADD, TokenKinds.SUBTRACT))
+				throw this.TuberInterpreterError(
+					'La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con los indicadores de Sentencia `SUMAR` y `RESTAR`',
+					operator,
+				);
 
 			receptionValue = makeNumber(1);
 			implicit = true;
 		} else {
 			receptionValue = this.evaluate(reception, scope, false);
 
-			if(this.is(receptionValue, ValueKinds.FUNCTION))
+			if (this.is(receptionValue, ValueKinds.FUNCTION))
 				receptionValue.name = shortenText(this.astString(receptor), 96);
 		}
 
-		if(operator.is(TokenKinds.EXTEND)) {
+		if (operator.is(TokenKinds.EXTEND)) {
 			const receptorValue = this.evaluate(receptor, scope, false);
-			if(!this.is(receptorValue, ValueKinds.LIST))
-				throw this.TuberInterpreterError(`El receptor en Sentencia \`EXTENDER\` debe ser una Lista, y \`${this.astString(receptor)}\` no lo era`, receptor);
+			if (!this.is(receptorValue, ValueKinds.LIST))
+				throw this.TuberInterpreterError(
+					`El receptor en Sentencia \`EXTENDER\` debe ser una Lista, y \`${this.astString(receptor)}\` no lo era`,
+					receptor,
+				);
 
 			receptorValue.elements.push(receptionValue);
 			return makeNada();
 		}
 
 		//SUMAR, RESTAR, etc...
-		if(BinaryOperationLookups.has(operator.kind)) {
+		if (BinaryOperationLookups.has(operator.kind)) {
 			const receptorValue = this.evaluate(receptor, scope, false);
 
-			if(receptorValue.kind === ValueKinds.TEXT) {
-				if(implicit)
-					throw this.TuberInterpreterError('La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con Números', operator);
+			if (receptorValue.kind === ValueKinds.TEXT) {
+				if (implicit)
+					throw this.TuberInterpreterError(
+						'La omisión del valor de recepción en una sentencia de asignación solo puede hacerse con Números',
+						operator,
+					);
 
-				if(!operator.is(TokenKinds.ADD))
-					throw this.TuberInterpreterError('Las únicas sentencias de asignación que se pueden usar con Textos son `CARGAR` y `SUMAR`', operator);
+				if (!operator.is(TokenKinds.ADD))
+					throw this.TuberInterpreterError(
+						'Las únicas sentencias de asignación que se pueden usar con Textos son `CARGAR` y `SUMAR`',
+						operator,
+					);
 			}
 
 			const operation = BinaryOperationLookups.get(operator.kind);
-			if(!operation) throw 'Operación binaria desconocida';
+			if (!operation) throw 'Operación binaria desconocida';
 			receptionValue = operation(this, receptorValue, receptionValue, receptor, reception);
 		}
 
@@ -723,8 +843,11 @@ export class Interpreter {
 		const { receptor, reception, index } = node;
 
 		const receptorValue = this.evaluate(receptor, scope, false);
-		if(receptorValue.kind !== ValueKinds.LIST)
-			throw this.TuberInterpreterError(`El receptor en Sentencia \`EXTENDER\` debe ser una Lista, y \`${this.astString(receptor)}\` no lo era`, receptor);
+		if (receptorValue.kind !== ValueKinds.LIST)
+			throw this.TuberInterpreterError(
+				`El receptor en Sentencia \`EXTENDER\` debe ser una Lista, y \`${this.astString(receptor)}\` no lo era`,
+				receptor,
+			);
 
 		const receptionValue = this.evaluate(reception, scope, false);
 		const indexValue = this.evaluateAs(index, scope, ValueKinds.NUMBER, true);
@@ -770,12 +893,18 @@ export class Interpreter {
 	#evaluateStopStatement(node: StopStatement, scope: Scope) {
 		const { condition, stopMessage } = node;
 
-		const conditionValue = condition ? coerceValue(this, this.evaluate(condition, scope, false), ValueKinds.BOOLEAN) : makeBoolean(true);
-		const stopMessageValue = coerceValue(this, this.evaluate(stopMessage, scope), ValueKinds.TEXT);
+		const conditionValue = condition
+			? coerceValue(this, this.evaluate(condition, scope, false), ValueKinds.BOOLEAN)
+			: makeBoolean(true);
+		const stopMessageValue = coerceValue(
+			this,
+			this.evaluate(stopMessage, scope),
+			ValueKinds.TEXT,
+		);
 
-		if(conditionValue.value) {
+		if (conditionValue.value) {
 			this.#stop = Stops.ABORT;
-			this.#sendStack = [ stopMessageValue ];
+			this.#sendStack = [stopMessageValue];
 			return stopMessageValue;
 		}
 
@@ -792,22 +921,25 @@ export class Interpreter {
 	#evaluateSendStatement(node: SendStatement, scope: Scope) {
 		let sendValue = this.evaluate(node.expression, scope, false);
 
-		switch(sendValue.kind) {
-		case ValueKinds.LIST:
-			sendValue = makeList([ ... sendValue.elements ]);
-			break;
-		case ValueKinds.REGISTRY:
-			sendValue = makeRegistry(new Map([ ...sendValue.entries.entries() ]));
-			break;
-		case ValueKinds.EMBED: {
-			if(sendValue.value.empty)
-				throw this.TuberInterpreterError('No se puede enviar un valor de Marco vacío', node);
+		switch (sendValue.kind) {
+			case ValueKinds.LIST:
+				sendValue = makeList([...sendValue.elements]);
+				break;
+			case ValueKinds.REGISTRY:
+				sendValue = makeRegistry(new Map([...sendValue.entries.entries()]));
+				break;
+			case ValueKinds.EMBED: {
+				if (sendValue.value.empty)
+					throw this.TuberInterpreterError(
+						'No se puede enviar un valor de Marco vacío',
+						node,
+					);
 
-			const embedDataCopy = sendValue.value.copy();
-			sendValue = makeEmbed();
-			sendValue.value = embedDataCopy;
-			break;
-		}
+				const embedDataCopy = sendValue.value.copy();
+				sendValue = makeEmbed();
+				sendValue.value = embedDataCopy;
+				break;
+			}
 		}
 
 		this.#sendStack.push(sendValue);
@@ -817,7 +949,7 @@ export class Interpreter {
 	/**@description Evalúa una expresión de Lista y retorna un valor de Lista.*/
 	#evaluateList(node: ListLiteralExpression, scope: Scope) {
 		const { elements } = node;
-		const evaluatedElements = elements.map(e => this.evaluate(e, scope));
+		const evaluatedElements = elements.map((e) => this.evaluate(e, scope));
 		return makeList(evaluatedElements);
 	}
 
@@ -827,11 +959,10 @@ export class Interpreter {
 
 		const registryValue = makeRegistry(new Map());
 
-		for(const [ key, value ] of entries.entries()) {
+		for (const [key, value] of entries.entries()) {
 			let evaluated = this.evaluate(value, scope);
 
-			if(evaluated.kind === ValueKinds.NATIVE_FN)
-				evaluated = evaluated.with(registryValue);
+			if (evaluated.kind === ValueKinds.NATIVE_FN) evaluated = evaluated.with(registryValue);
 
 			registryValue.entries.set(key, evaluated);
 		}
@@ -841,8 +972,7 @@ export class Interpreter {
 
 	/**@description Evalúa una expresión de Función de usuario y devuelve un valor de Función de usuario.*/
 	#evaluateFunction(node: FunctionExpression, scope: Scope) {
-		if(node.expression === true)
-			return makeLambda(node.body, node.args);
+		if (node.expression === true) return makeLambda(node.body, node.args);
 
 		const fnValue = makeFunction(node.body, node.args, new Scope(this).include(scope));
 		fnValue.name = '[Función]';
@@ -856,8 +986,11 @@ export class Interpreter {
 		const argumentValue = this.evaluate(argument, scope, mustBeDeclared);
 
 		const operation = UnaryOperationLookups.get(operator.kind);
-		if(operation == null)
-			throw this.TuberInterpreterError(`Operación unaria inválida. No se puede evaluar ${this.astString(node)} porque el operador "${operator.value}" es inválido`, operator);
+		if (operation == null)
+			throw this.TuberInterpreterError(
+				`Operación unaria inválida. No se puede evaluar ${this.astString(node)} porque el operador "${operator.value}" es inválido`,
+				operator,
+			);
 
 		return operation(this, argumentValue, argument);
 	}
@@ -866,11 +999,10 @@ export class Interpreter {
 	#evaluateBinary(node: BinaryExpression, scope: Scope, mustBeDeclared = true) {
 		const { operator, left, right } = node;
 
-		if(operator.is(TokenKinds.AFTER))
-			return this.#evaluateAfter(node, scope, mustBeDeclared);
+		if (operator.is(TokenKinds.AFTER)) return this.#evaluateAfter(node, scope, mustBeDeclared);
 
 		//Caso especial de operaciones binarias lógicas
-		if(operator.isAny(TokenKinds.AND, TokenKinds.OR))
+		if (operator.isAny(TokenKinds.AND, TokenKinds.OR))
 			return this.#evaluateLogical(node, scope, mustBeDeclared);
 
 		const leftValue = this.evaluate(left, scope, mustBeDeclared);
@@ -878,8 +1010,11 @@ export class Interpreter {
 
 		const operation = BinaryOperationLookups.get(operator.kind);
 
-		if(operation == null)
-			throw this.TuberInterpreterError(`Operación binaria inválida. No se puede evaluar ${this.astString(node)} porque el operador "${operator.value}" es inválido`, operator);
+		if (operation == null)
+			throw this.TuberInterpreterError(
+				`Operación binaria inválida. No se puede evaluar ${this.astString(node)} porque el operador "${operator.value}" es inválido`,
+				operator,
+			);
 
 		return operation(this, leftValue, rightValue, left, right);
 	}
@@ -899,10 +1034,8 @@ export class Interpreter {
 	#evaluateAfter(node: BinaryExpression, scope: Scope, mustBeDeclared = true) {
 		const { left, right } = node;
 
-		if(this.isTestDrive())
-			return this.evaluate(left, scope, mustBeDeclared);
-		else
-			return this.evaluate(right, scope, mustBeDeclared);
+		if (this.isTestDrive()) return this.evaluate(left, scope, mustBeDeclared);
+		else return this.evaluate(right, scope, mustBeDeclared);
 	}
 
 	/**@description Evalúa una expresión binaria lógica y devuelve el valor resultante de la operación.*/
@@ -910,11 +1043,15 @@ export class Interpreter {
 		const { operator, left, right } = node;
 
 		const leftValue = this.evaluate(left, scope, mustBeDeclared);
-		const leftTruth = this.is(leftValue, ValueKinds.NADA) ? makeBoolean(false) : coerceValue(this, leftValue, ValueKinds.BOOLEAN);
+		const leftTruth = this.is(leftValue, ValueKinds.NADA)
+			? makeBoolean(false)
+			: coerceValue(this, leftValue, ValueKinds.BOOLEAN);
 
 		//Evaluación de cortocircuito
-		if((leftTruth.value === true  && operator.is(TokenKinds.OR))
-		|| (leftTruth.value === false && operator.is(TokenKinds.AND)))
+		if (
+			(leftTruth.value === true && operator.is(TokenKinds.OR))
+			|| (leftTruth.value === false && operator.is(TokenKinds.AND))
+		)
 			return leftValue;
 
 		const rightValue = this.evaluate(right, scope, mustBeDeclared);
@@ -931,7 +1068,7 @@ export class Interpreter {
 		const { argument, as } = node;
 		const value = this.evaluate(argument, scope, false);
 		const valueKind = ValueKindLookups.get(as.kind);
-		if(!valueKind) throw 'Tipo de valor inválido al castear';
+		if (!valueKind) throw 'Tipo de valor inválido al castear';
 		return coerceValue(this, value, valueKind);
 	}
 
@@ -944,7 +1081,7 @@ export class Interpreter {
 	#evaluateSequence(node: SequenceExpression, scope: Scope) {
 		let lastEvaluation: RuntimeValue = makeNada();
 
-		for(const expression of node.expressions)
+		for (const expression of node.expressions)
 			lastEvaluation = this.evaluate(expression, scope);
 
 		return lastEvaluation;
@@ -955,92 +1092,95 @@ export class Interpreter {
 		const { holder } = node;
 
 		const holderValue = this.evaluate(holder, scope);
-		const keyString = node.computed === true ? this.evaluateAs(node.key, scope, ValueKinds.TEXT).value : node.key;
+		const keyString =
+			node.computed === true
+				? this.evaluateAs(node.key, scope, ValueKinds.TEXT).value
+				: node.key;
 
-		switch(holderValue.kind) {
-		case ValueKinds.NUMBER: {
-			const method = this.#tryFindNativeMethod(holderValue, keyString);
-			if(method) return method;
-			return makeNada();
-		}
-
-		case ValueKinds.TEXT: {
-			if(keyString === 'largo')
-				return makeNumber(holderValue.value.length);
-
-			const method = this.#tryFindNativeMethod(holderValue, keyString);
-			if(method) return method;
-			return makeNada();
-		}
-
-		case ValueKinds.BOOLEAN: {
-			throw this.TuberInterpreterError(`El contenedor "${this.astString(holder)}" en expresión de flecha "->" fue de tipo Lógico, el cual no contiene miembros accedibles por clave`, holder);
-		}
-
-		case ValueKinds.LIST: {
-			if(keyString === 'largo')
-				return makeNumber(holderValue.elements.length);
-
-			const method = this.#tryFindNativeMethod(holderValue, keyString);
-			if(method) return method;
-
-			const index = +keyString;
-			if(isInternalOperable(index))
-				return holderValue.elements[index] ?? makeNada();
-
-			return makeNada();
-		}
-
-		case ValueKinds.REGISTRY: {
-			const method = this.#tryFindNativeMethod(holderValue, keyString);
-			if(method) return method;
-
-			const entryValue = holderValue.entries.get(keyString);
-			if(entryValue) {
-				if(this.is(entryValue, ValueKinds.NATIVE_FN))
-					return entryValue.with(holderValue);
-
-				if(this.is(entryValue, ValueKinds.FUNCTION))
-					entryValue.self = holderValue;
-
-				return entryValue;
+		switch (holderValue.kind) {
+			case ValueKinds.NUMBER: {
+				const method = this.#tryFindNativeMethod(holderValue, keyString);
+				if (method) return method;
+				return makeNada();
 			}
 
-			if(keyString === 'largo' || keyString === 'tamaño')
-				return makeNumber(holderValue.entries.size);
+			case ValueKinds.TEXT: {
+				if (keyString === 'largo') return makeNumber(holderValue.value.length);
 
-			return makeNada();
-		}
+				const method = this.#tryFindNativeMethod(holderValue, keyString);
+				if (method) return method;
+				return makeNada();
+			}
 
-		case ValueKinds.EMBED: {
-			if(keyString === 'largo')
-				return makeNumber(holderValue.value.data.fields?.length || 0);
+			case ValueKinds.BOOLEAN: {
+				throw this.TuberInterpreterError(
+					`El contenedor "${this.astString(holder)}" en expresión de flecha "->" fue de tipo Lógico, el cual no contiene miembros accedibles por clave`,
+					holder,
+				);
+			}
 
-			const method = this.#tryFindNativeMethod(holderValue, keyString);
-			if(method) return method;
-			return makeNada();
-		}
+			case ValueKinds.LIST: {
+				if (keyString === 'largo') return makeNumber(holderValue.elements.length);
 
-		case ValueKinds.NATIVE_FN: {
-			if(keyString === 'largo')
-				return makeNumber(holderValue.call.length);
+				const method = this.#tryFindNativeMethod(holderValue, keyString);
+				if (method) return method;
 
-			const method = this.#tryFindNativeMethod(holderValue, keyString);
-			if(method) return method;
-			return makeNada();
-		}
+				const index = +keyString;
+				if (isInternalOperable(index)) return holderValue.elements[index] ?? makeNada();
 
-		case ValueKinds.FUNCTION: {
-			if(keyString === 'largo')
-				return makeNumber(holderValue.args.length);
+				return makeNada();
+			}
 
-			const method = this.#tryFindNativeMethod(holderValue, keyString);
-			if(method) return method;
-			return makeNada();
-		}
+			case ValueKinds.REGISTRY: {
+				const method = this.#tryFindNativeMethod(holderValue, keyString);
+				if (method) return method;
 
-		default:
-			throw this.TuberInterpreterError(`El contenedor "${this.astString(holder)}" en expresión de flecha "->" fue de tipo Nada`, holder);
+				const entryValue = holderValue.entries.get(keyString);
+				if (entryValue) {
+					if (this.is(entryValue, ValueKinds.NATIVE_FN))
+						return entryValue.with(holderValue);
+
+					if (this.is(entryValue, ValueKinds.FUNCTION)) entryValue.self = holderValue;
+
+					return entryValue;
+				}
+
+				if (keyString === 'largo' || keyString === 'tamaño')
+					return makeNumber(holderValue.entries.size);
+
+				return makeNada();
+			}
+
+			case ValueKinds.EMBED: {
+				if (keyString === 'largo')
+					return makeNumber(holderValue.value.data.fields?.length || 0);
+
+				const method = this.#tryFindNativeMethod(holderValue, keyString);
+				if (method) return method;
+				return makeNada();
+			}
+
+			case ValueKinds.NATIVE_FN: {
+				if (keyString === 'largo') return makeNumber(holderValue.call.length);
+
+				const method = this.#tryFindNativeMethod(holderValue, keyString);
+				if (method) return method;
+				return makeNada();
+			}
+
+			case ValueKinds.FUNCTION: {
+				if (keyString === 'largo') return makeNumber(holderValue.args.length);
+
+				const method = this.#tryFindNativeMethod(holderValue, keyString);
+				if (method) return method;
+				return makeNada();
+			}
+
+			default:
+				throw this.TuberInterpreterError(
+					`El contenedor "${this.astString(holder)}" en expresión de flecha "->" fue de tipo Nada`,
+					holder,
+				);
 		}
 	}
 
@@ -1056,10 +1196,13 @@ export class Interpreter {
 		const { fn, args } = node;
 
 		const fnValue = this.evaluate(fn, scope);
-		if(!this.isAnyOf(fnValue, ValueKinds.NATIVE_FN, ValueKinds.FUNCTION))
-			throw this.TuberInterpreterError(`No se pudo llamar ${this.astString(fn)} porque no era una Función. En cambio, era de tipo ${ValueKindTranslationLookups.get(fnValue.kind)}`, fn);
+		if (!this.isAnyOf(fnValue, ValueKinds.NATIVE_FN, ValueKinds.FUNCTION))
+			throw this.TuberInterpreterError(
+				`No se pudo llamar ${this.astString(fn)} porque no era una Función. En cambio, era de tipo ${ValueKindTranslationLookups.get(fnValue.kind)}`,
+				fn,
+			);
 
-		const argValues = args.map(arg => this.evaluate(arg, scope, false));
+		const argValues = args.map((arg) => this.evaluate(arg, scope, false));
 
 		return this.callFunction(fnValue, argValues, scope);
 	}
@@ -1073,18 +1216,17 @@ export class Interpreter {
 	 * Es irrelevante si la Función es nativa o de usuario. Superficialmente, se ejecutarán de forma similar.
 	 */
 	callFunction(fnValue: AnyFunctionValue, argValues: RuntimeValue[], scope: Scope) {
-		let returnedValue;
+		let returnedValue: RuntimeValue;
 
-		if(this.is(fnValue, ValueKinds.NATIVE_FN)) {
+		if (this.is(fnValue, ValueKinds.NATIVE_FN)) {
 			const fnScope = new Scope(this, scope);
 			returnedValue = fnValue.call(fnValue.self ?? makeNada(), argValues, fnScope);
 		} else {
 			const fnScope = scope.createFunctionScope(fnValue, argValues);
 
-			if(fnValue.lambda === false)
+			if (fnValue.lambda === false)
 				returnedValue = this.#evaluateBlock(fnValue.body, fnScope);
-			else
-				returnedValue = this.evaluate(fnValue.expression, fnScope);
+			else returnedValue = this.evaluate(fnValue.expression, fnScope);
 		}
 
 		this.eatStop(Stops.RETURN);
@@ -1099,11 +1241,11 @@ export class Interpreter {
 	 */
 	#tryFindNativeMethod(value: RuntimeValue, key: string) {
 		const lookup = NativeMethodsLookup.get(value.kind);
-		if(!lookup) throw 'Tipo de valor inválido al intentar encontrar método nativo para el mismo';
+		if (!lookup)
+			throw 'Tipo de valor inválido al intentar encontrar método nativo para el mismo';
 
 		const method = lookup.get(key);
-		if(method)
-			return makeNativeFunction(value, method);
+		if (method) return makeNativeFunction(value, method);
 
 		return null;
 	}
@@ -1111,46 +1253,54 @@ export class Interpreter {
 	/**@description Asigna un valor concreto a un valor receptor. La expresión receptora DEBE evaluar a una referencia asignable.*/
 	#assignValueToExpression(receptor: Expression, receptionValue: RuntimeValue, scope: Scope) {
 		let identifier: string;
-		switch(receptor.kind) {
-		case ExpressionKinds.IDENTIFIER: {
-			identifier = receptor.name;
-			scope.assignVariable(identifier, receptionValue);
-			break;
-		}
-
-		case ExpressionKinds.ARROW: {
-			if(receptor.computed === true) {
-				const evaluated = this.evaluate(receptor.key, scope);
-				identifier = coerceValue(this, evaluated, ValueKinds.TEXT).value;
-			} else
-				identifier = receptor.key;
-
-			//Modificar por referencia
-			const holderValue = this.evaluate(receptor.holder, scope);
-			switch(holderValue.kind) {
-			case ValueKinds.LIST: {
-				const index = +identifier;
-				if(!isInternalOperable(index))
-					throw this.TuberInterpreterError(`Se esperaba un índice válido en lado derecho de expresión de flecha "->" para la Lista \`${this.astString(receptor.holder)}\` en expresión receptora de sentencia de asignación. Sin embargo, se recibió: ${identifier}`, receptor);
-
-				holderValue.elements[index] = receptionValue;
+		switch (receptor.kind) {
+			case ExpressionKinds.IDENTIFIER: {
+				identifier = receptor.name;
+				scope.assignVariable(identifier, receptionValue);
 				break;
 			}
 
-			case ValueKinds.REGISTRY:
-				if(receptionValue.kind === ValueKinds.NATIVE_FN)
-					receptionValue = receptionValue.with(holderValue);
-				holderValue.entries.set(identifier, receptionValue);
+			case ExpressionKinds.ARROW: {
+				if (receptor.computed === true) {
+					const evaluated = this.evaluate(receptor.key, scope);
+					identifier = coerceValue(this, evaluated, ValueKinds.TEXT).value;
+				} else identifier = receptor.key;
+
+				//Modificar por referencia
+				const holderValue = this.evaluate(receptor.holder, scope);
+				switch (holderValue.kind) {
+					case ValueKinds.LIST: {
+						const index = +identifier;
+						if (!isInternalOperable(index))
+							throw this.TuberInterpreterError(
+								`Se esperaba un índice válido en lado derecho de expresión de flecha "->" para la Lista \`${this.astString(receptor.holder)}\` en expresión receptora de sentencia de asignación. Sin embargo, se recibió: ${identifier}`,
+								receptor,
+							);
+
+						holderValue.elements[index] = receptionValue;
+						break;
+					}
+
+					case ValueKinds.REGISTRY:
+						if (receptionValue.kind === ValueKinds.NATIVE_FN)
+							receptionValue = receptionValue.with(holderValue);
+						holderValue.entries.set(identifier, receptionValue);
+						break;
+
+					default:
+						throw this.TuberInterpreterError(
+							`Expresión de flecha inválida como receptora de sentencia de asignación. El tipo de \`${this.astString(receptor.holder)}\` no tiene miembros asignables`,
+							receptor,
+						);
+				}
 				break;
+			}
 
 			default:
-				throw this.TuberInterpreterError(`Expresión de flecha inválida como receptora de sentencia de asignación. El tipo de \`${this.astString(receptor.holder)}\` no tiene miembros asignables`, receptor);
-			}
-			break;
-		}
-
-		default:
-			throw this.TuberInterpreterError(`La expresión ${this.astString(receptor)} es inválida como receptora de una sentencia de asignación`, receptor);
+				throw this.TuberInterpreterError(
+					`La expresión ${this.astString(receptor)} es inválida como receptora de una sentencia de asignación`,
+					receptor,
+				);
 		}
 	}
 

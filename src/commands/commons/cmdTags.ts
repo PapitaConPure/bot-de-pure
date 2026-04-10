@@ -6,20 +6,20 @@
 
 const bigIntField = (n: number | bigint) => 2n ** BigInt(n);
 
-export const CommandTag = ({
-	COMMON      : bigIntField(1),
-	MOD         : bigIntField(2),
-	EMOTE       : bigIntField(3),
-	MEME        : bigIntField(4),
-	CHAOS       : bigIntField(5),
-	GAME        : bigIntField(6),
-	MAINTENANCE : bigIntField(7),
-	OUTDATED    : bigIntField(8),
-	GUIDE       : bigIntField(9),
-	PAPA        : bigIntField(10),
-	SAKI        : bigIntField(11),
-	MUSIC       : bigIntField(12),
-}) as const;
+export const CommandTag = {
+	COMMON: bigIntField(1),
+	MOD: bigIntField(2),
+	EMOTE: bigIntField(3),
+	MEME: bigIntField(4),
+	CHAOS: bigIntField(5),
+	GAME: bigIntField(6),
+	MAINTENANCE: bigIntField(7),
+	OUTDATED: bigIntField(8),
+	GUIDE: bigIntField(9),
+	PAPA: bigIntField(10),
+	SAKI: bigIntField(11),
+	MUSIC: bigIntField(12),
+} as const;
 
 export type CommandTagStringField = keyof typeof CommandTag;
 export type CommandTagResolvable = CommandTagStringField | bigint | number;
@@ -27,25 +27,29 @@ const metaFlagValues = Object.keys(CommandTag) as ReadonlyArray<CommandTagString
 
 /**@description Devuelve la profundidad de una tag de comando.*/
 function resolveTagNumber(tag: CommandTagResolvable | CommandTagResolvable[]): bigint {
-	if(typeof tag === 'bigint')
-		return tag;
+	if (typeof tag === 'bigint') return tag;
 
-	if(typeof tag === 'number')
-		return BigInt(tag);
+	if (typeof tag === 'number') return BigInt(tag);
 
-	if(typeof tag === 'string') {
+	if (typeof tag === 'string') {
 		const tagFromObject = CommandTag[tag];
 
-		if(typeof tagFromObject !== 'bigint')
-			throw new TypeError(`Se recibió una cadena de etiqueta de comando cuyo valor no está dentro de los admitidos: ${tag}`);
+		if (typeof tagFromObject !== 'bigint')
+			throw new TypeError(
+				`Se recibió una cadena de etiqueta de comando cuyo valor no está dentro de los admitidos: ${tag}`,
+			);
 
 		return tagFromObject;
 	}
 
-	if(Array.isArray(tag))
-		return resolveTagNumber(tag.reduce((a, b) => resolveTagNumber(a) | resolveTagNumber(b), 0n));
+	if (Array.isArray(tag))
+		return resolveTagNumber(
+			tag.reduce((a, b) => resolveTagNumber(a) | resolveTagNumber(b), 0n),
+		);
 
-	throw new TypeError(`Se recibió una etiqueta de comando cuyo tipo es inválido: ${tag} (${typeof tag})`);
+	throw new TypeError(
+		`Se recibió una etiqueta de comando cuyo tipo es inválido: ${tag} (${typeof tag})`,
+	);
 }
 
 /**@class Representa un conjunto de etiquetas de comando*/
@@ -86,7 +90,7 @@ export class CommandTags {
 	 * @param flags Meta Flags de comando a comprobar
 	 */
 	any(...flags: (CommandTagResolvable | CommandTagResolvable[])[]) {
-		return flags.some(flag => this.has(flag));
+		return flags.some((flag) => this.has(flag));
 	}
 
 	/**
@@ -95,7 +99,7 @@ export class CommandTags {
 	 * @param flags Meta Flags de comando a comprobar
 	 */
 	all(...flags: (CommandTagResolvable | CommandTagResolvable[])[]) {
-		return flags.every(flag => this.has(flag));
+		return flags.every((flag) => this.has(flag));
 	}
 
 	get bitfield() {
@@ -107,9 +111,9 @@ export class CommandTags {
 		const values: bigint[] = [];
 
 		let i = BigInt(2 ** this.#bitfield.toString(2).length);
-		while(i > 0n) {
+		while (i > 0n) {
 			const value = this.#bitfield & i;
-			if(value) values.push(value);
+			if (value) values.push(value);
 			i = i >> 1n;
 		}
 
@@ -117,7 +121,7 @@ export class CommandTags {
 	}
 
 	get keys(): CommandTagStringField[] {
-		return metaFlagValues.filter(key => this.has(key));
+		return metaFlagValues.filter((key) => this.has(key));
 	}
 
 	toString() {

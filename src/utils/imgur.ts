@@ -1,14 +1,14 @@
+import { Readable } from 'node:stream';
 import { fetchExt } from './fetchext';
-import { Readable } from 'stream';
 
 type ImgurImageMap = {
 	url: string | URL;
 	buffer: Buffer<ArrayBuffer>;
 	stream: NodeJS.ReadableStream;
 	blob: Blob;
-}
+};
 
-export type ImgurImageKey = (keyof ImgurImageMap & {});
+export type ImgurImageKey = keyof ImgurImageMap & {};
 
 interface BaseImgurImagePayload<TType extends ImgurImageKey, TImage extends ImgurImageMap[TType]> {
 	type: TType;
@@ -24,7 +24,7 @@ export type ImgurImagePayload =
 export interface ImgurImageUploadAPISchema {
 	data: {
 		link: string;
-	},
+	};
 	success: boolean;
 	status: number;
 }
@@ -55,34 +55,41 @@ export class ImgurClient {
 	#clientId: string;
 
 	constructor(clientId: string) {
-		if(clientId == null)
-			throw new TypeError(`Se esperaba un string para clientId, pero se recibió: ${clientId}`);
+		if (clientId == null)
+			throw new TypeError(
+				`Se esperaba un string para clientId, pero se recibió: ${clientId}`,
+			);
 
 		this.#clientId = clientId;
 	}
 
-	async upload(image: ImgurImagePayload, options: ImgurImageUploadOptions = {}): Promise<ImgurImageUploadResult> {
+	async upload(
+		image: ImgurImagePayload,
+		options: ImgurImageUploadOptions = {},
+	): Promise<ImgurImageUploadResult> {
 		const formDataImage = await this.#toFormDataImage(image);
 		const { timeout } = options;
 
 		const formData = new FormData();
 		formData.append('image', formDataImage);
 
-		if(image.type === 'url')
-			formData.append('type', 'URL');
+		if (image.type === 'url') formData.append('type', 'URL');
 
-		const fetchResult = await fetchExt<ImgurImageUploadAPISchema>('https://api.imgur.com/3/image', {
-			init: {
-				method: 'POST',
-				headers: new Headers({
-					Authorization: `Client-ID ${this.#clientId}`,
-				}),
-				body: formData,
-				signal: timeout ? AbortSignal.timeout(timeout) : undefined,
+		const fetchResult = await fetchExt<ImgurImageUploadAPISchema>(
+			'https://api.imgur.com/3/image',
+			{
+				init: {
+					method: 'POST',
+					headers: new Headers({
+						Authorization: `Client-ID ${this.#clientId}`,
+					}),
+					body: formData,
+					signal: timeout ? AbortSignal.timeout(timeout) : undefined,
+				},
 			},
-		});
+		);
 
-		if(fetchResult.success === false) {
+		if (fetchResult.success === false) {
 			return {
 				success: false,
 				status: fetchResult.response.status,
@@ -100,16 +107,14 @@ export class ImgurClient {
 	}
 
 	async #toFormDataImage(payload: ImgurImagePayload): Promise<string | Blob> {
-		if(payload.type === 'url')
-			return `${payload.image}`;
+		if (payload.type === 'url') return `${payload.image}`;
 
-		if(payload.type === 'stream') {
+		if (payload.type === 'stream') {
 			const stream = Readable.from(payload.image);
 			return new Response(stream as unknown as ReadableStream).blob();
 		}
 
-		if(payload.type === 'buffer')
-			return new Blob([ payload.image ]);
+		if (payload.type === 'buffer') return new Blob([payload.image]);
 
 		return payload.toString();
 	}

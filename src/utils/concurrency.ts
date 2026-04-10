@@ -3,9 +3,9 @@ import { Queue } from './ds';
 export function createTaskScheduler() {
 	const queue: Queue<() => Promise<void>> = new Queue();
 
-	const scheduleTask = async function(callback: () => Promise<any>) {
-		let resolveResult: (value: any) => void;
-		const result = new Promise(resolve => {
+	const scheduleTask = async (callback: () => Promise<unknown>) => {
+		let resolveResult: (value: unknown) => void;
+		const result = new Promise((resolve) => {
 			resolveResult = resolve;
 		});
 
@@ -18,8 +18,7 @@ export function createTaskScheduler() {
 
 		queue.enqueue(performQueueStep);
 
-		if(queue.count === 1)
-			await performQueueStep();
+		if (queue.count === 1) await performQueueStep();
 
 		return result;
 	};

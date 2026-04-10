@@ -1,9 +1,25 @@
-import { Message, Collection, InteractionType } from 'discord.js';
-import type { MessageComponentInteraction, MessageActionRowComponentBuilder, Interaction, ModalMessageModalSubmitInteraction, ButtonInteraction, MessageReplyOptions, AnySelectMenuInteraction } from 'discord.js';
-import type { CommandTags } from './cmdTags';
-import type { CommandEditReplyOptions, CommandReplyOptions, CommandRequest, ComplexCommandRequest, ComponentInteraction, ExtendedCommandRequest } from 'types/commands';
-import type { CommandOptions, CommandOptionSolver } from './cmdOpts';
+import type {
+	AnySelectMenuInteraction,
+	ButtonInteraction,
+	Interaction,
+	MessageActionRowComponentBuilder,
+	MessageComponentInteraction,
+	MessageReplyOptions,
+	ModalMessageModalSubmitInteraction,
+} from 'discord.js';
+import { Collection, InteractionType, Message } from 'discord.js';
+import type {
+	AnyCommandInteraction,
+	CommandEditReplyOptions,
+	CommandReplyOptions,
+	CommandRequest,
+	ComplexCommandRequest,
+	ComponentInteraction,
+	ExtendedCommandRequest,
+} from 'types/commands';
+import type { CommandOptionSolver, CommandOptions } from './cmdOpts';
 import type { CommandPermissions } from './cmdPerms';
+import type { CommandTags } from './cmdTags';
 
 const extendedCommandRequestBlank: ExtendedCommandRequest = {
 	initialReply: undefined,
@@ -34,10 +50,12 @@ const extendedCommandRequestBlank: ExtendedCommandRequest = {
 function extendRequest(request: CommandRequest | ComponentInteraction): ComplexCommandRequest {
 	const extension: ExtendedCommandRequest = Object.assign({}, extendedCommandRequestBlank);
 
-	if(Command.requestIsMessage(request)) {
+	if (Command.requestIsMessage(request)) {
 		extension.isMessage = true;
 		extension.inferAsMessage = () => request;
-		extension.inferAsSlash = () => { throw 'Invalid inference of a Message Command into a Slash Command'; };
+		extension.inferAsSlash = () => {
+			throw 'Invalid inference of a Message Command into a Slash Command';
+		};
 
 		extension.appPermisions = request.guild.members.me.permissionsIn(request.channel);
 		extension.deferred = false;
@@ -46,22 +64,25 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 		extension.user = request.author;
 		extension.userId = request.author.id;
 
-		extension.deferReply = async() => {
+		extension.deferReply = async () => {
 			const initialReply = await request.reply({ content: '...' });
 			extension.initialReply = initialReply;
 			extension.deferred = true;
 			return initialReply;
 		};
-		extension.deleteReply = async() => extension.initialReply?.delete();
-		extension.editReply = async(options) => {
-			if(extension.initialReply == undefined)
+		extension.deleteReply = async () => extension.initialReply?.delete();
+		extension.editReply = async (options) => {
+			if (extension.initialReply == null)
 				throw 'No se encontró una respuesta inicial de comando a editar';
 
 			extension.replied = true;
 
-			return extension.initialReply.edit({ content: '', ...options } as CommandEditReplyOptions);
+			return extension.initialReply.edit({
+				content: '',
+				...options,
+			} as CommandEditReplyOptions);
 		};
-		extension.replyFirst = async(options) => {
+		extension.replyFirst = async (options) => {
 			const replied = (request as Message).reply(options as MessageReplyOptions);
 			extension.replied = true;
 			return replied;
@@ -70,46 +91,69 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 		extension.wasReplied = () => extension.replied;
 	} else {
 		extension.isInteraction = true;
-		extension.inferAsMessage = () => { throw 'Invalid inference of a Slash Command into a Message Command'; };
+		extension.inferAsMessage = () => {
+			throw 'Invalid inference of a Slash Command into a Message Command';
+		};
 		extension.inferAsSlash = () => {
-			if(request.isChatInputCommand())
-				return request;
-			else
-				throw 'Invalid inference of a non-Slash Command Interaction into a Slash Command';
+			if (request.isChatInputCommand()) return request;
+			else throw 'Invalid inference of a non-Slash Command Interaction into a Slash Command';
 		};
 
 		extension.activity = null;
 		extension.attachments = new Collection();
 		extension.userId = request.user.id;
 
-		extension.delete = async() => undefined;
+		extension.delete = async () => undefined;
 		extension.wasDeferred = () => request.isCommand() && request.deferred;
 		extension.wasReplied = () => request.isCommand() && request.replied;
 	}
 
-	for(const [ k, v ] of Object.entries(extension)) {
-		if(v !== undefined)
-			request[k] = v;
+	for (const [k, v] of Object.entries(extension)) {
+		if (v !== undefined) request[k] = v;
 	}
 
 	return request as ComplexCommandRequest;
 }
 
-type ExecutionFunction = (request: ComplexCommandRequest, args: CommandOptionSolver, rawArgs?: string) => Promise<unknown>;
+type ExecutionFunction = (
+	request: ComplexCommandRequest,
+	args: CommandOptionSolver,
+	rawArgs?: string,
+) => Promise<unknown>;
 
-type InteractionResponseFunction = (interaction: Interaction, ...args: string[]) => Promise<unknown>;
+type InteractionResponseFunction = (
+	interaction: Interaction,
+	...args: string[]
+) => Promise<unknown>;
 
 interface InteractionResponseOptions {
 	userFilterIndex?: number;
 }
 
-type ButtonResponseFunction = (interaction: ButtonInteraction<'cached'>, ...args: string[]) => Promise<unknown>;
+type ButtonResponseFunction = (
+	interaction: ButtonInteraction<'cached'>,
+	...args: string[]
+) => Promise<unknown>;
 
-type SelectMenuResponseFunction = (interaction: AnySelectMenuInteraction<'cached'>, ...args: string[]) => Promise<unknown>;
+type SelectMenuResponseFunction = (
+	interaction: AnySelectMenuInteraction<'cached'>,
+	...args: string[]
+) => Promise<unknown>;
 
-type ModalResponseFunction = (interaction: ModalMessageModalSubmitInteraction<'cached'>, ...args: string[]) => Promise<unknown>;
+type ModalResponseFunction = (
+	interaction: ModalMessageModalSubmitInteraction<'cached'>,
+	...args: string[]
+) => Promise<unknown>;
 
-export type WikiComponentEvaluator = (request: ComplexCommandRequest | MessageComponentInteraction<'cached'>) => MessageActionRowComponentBuilder;
+export type AnyCommandComponentResponseFunction = ((
+	interaction: AnyCommandInteraction,
+	...args: string[]
+) => Promise<unknown>) &
+	InteractionResponseOptions;
+
+export type WikiComponentEvaluator = (
+	request: ComplexCommandRequest | MessageComponentInteraction<'cached'>,
+) => MessageActionRowComponentBuilder;
 
 export type WikiRowDefinition = WikiComponentEvaluator[];
 
@@ -140,11 +184,11 @@ export class Command {
 	 * @param tags Un objeto {@linkcode CommandTags} con las flags del comando
 	 */
 	constructor(name: string, tags: CommandTags) {
-		if(typeof name !== 'string') throw new TypeError('El nombre debe ser un string');
-		if(!name.length)             throw new Error('El nombre del comando no puede estar vacío');
-		if(!tags)                    throw new TypeError('Debes suministrar CommandTags para el comando');
-		if(tags.bitfield == null)    throw new TypeError('Las tags deben ser un CommandTags');
-		if(!tags.bitfield)           throw new Error('Las tags no pueden estar vacías');
+		if (typeof name !== 'string') throw new TypeError('El nombre debe ser un string');
+		if (!name.length) throw new Error('El nombre del comando no puede estar vacío');
+		if (!tags) throw new TypeError('Debes suministrar CommandTags para el comando');
+		if (tags.bitfield == null) throw new TypeError('Las tags deben ser un CommandTags');
+		if (!tags.bitfield) throw new Error('Las tags no pueden estar vacías');
 		this.name = name;
 		this.aliases = [];
 		this.flags = tags;
@@ -152,7 +196,7 @@ export class Command {
 		this.wiki = {
 			rows: [],
 		};
-		this.execute = request => request.reply(this.reply);
+		this.execute = (request) => request.reply(this.reply);
 	}
 
 	/**Alias de `<Command>.flags`.*/
@@ -161,20 +205,20 @@ export class Command {
 	}
 
 	setAliases(...aliases: string[]) {
-		if(!aliases.length) throw new Error('Debes pasar al menos un alias');
+		if (!aliases.length) throw new Error('Debes pasar al menos un alias');
 		this.aliases = aliases;
 		return this;
 	}
 
 	setBriefDescription(desc: string) {
-		if(typeof desc !== 'string') throw new TypeError('La descripción debe ser un string');
-		if(!desc.length)             throw new Error('Debes escribir una descripción válida');
+		if (typeof desc !== 'string') throw new TypeError('La descripción debe ser un string');
+		if (!desc.length) throw new Error('Debes escribir una descripción válida');
 		this.brief = desc;
 		return this;
 	}
 
 	setLongDescription(...desc: string[]) {
-		if(!desc.length) throw new Error('Debes especificar una descripción');
+		if (!desc.length) throw new Error('Debes especificar una descripción');
 		this.desc = desc.join('\n');
 		return this;
 	}
@@ -184,17 +228,17 @@ export class Command {
 	}
 
 	addWikiRow(...components: WikiComponentResolvable[]) {
-		if(!components.length) throw new Error('Debes pasar al menos un botón');
-		if(components.length > 5) throw new Error('No puedes pasar más de 5 botones a la vez');
+		if (!components.length) throw new Error('Debes pasar al menos un botón');
+		if (components.length > 5) throw new Error('No puedes pasar más de 5 botones a la vez');
 
-		const row = components.map(c => typeof c === 'function' ? c : (() => c));
+		const row = components.map((c) => (typeof c === 'function' ? c : () => c));
 		this.wiki.rows.push(row);
 
 		return this;
 	}
 
 	setPermissions(permissions: CommandPermissions) {
-		if(typeof (permissions?.isAllowed) !== 'function')
+		if (typeof permissions?.isAllowed !== 'function')
 			throw new TypeError('Las opciones deben ser una instancia de CommandPermissions');
 
 		this.permissions = permissions;
@@ -202,7 +246,7 @@ export class Command {
 	}
 
 	setOptions(options: CommandOptions) {
-		if(!options.options) throw new Error('Las opciones deben ser un CommandOptions');
+		if (!options.options) throw new Error('Las opciones deben ser un CommandOptions');
 		this.options = options;
 		this.callx = options.callSyntax;
 		return this;
@@ -223,10 +267,13 @@ export class Command {
 	 * @param fn Una función NO anónima
 	 * @param options Opciones de respuesta de interacción
 	 */
-	setFunction<TFunction extends (a?: unknown) => Promise<unknown>>(fn: TFunction, options: InteractionResponseOptions = {}) {
+	setFunction<TFunction extends AnyCommandComponentResponseFunction>(
+		fn: TFunction,
+		options: InteractionResponseOptions = {},
+	) {
 		const functionName = fn.name;
 		this[functionName] = fn;
-		fn['userFilterIndex'] = options.userFilterIndex;
+		fn.userFilterIndex = options.userFilterIndex;
 		return this;
 	}
 
@@ -234,7 +281,10 @@ export class Command {
 	 * @param responseFn Una función NO anónima a ejecutar al recibir una interacción
 	 * @param options Opciones adicionales para controlar las respuestas de interacción
 	 */
-	setInteractionResponse(responseFn: InteractionResponseFunction, options: InteractionResponseOptions = {}) {
+	setInteractionResponse(
+		responseFn: InteractionResponseFunction,
+		options: InteractionResponseOptions = {},
+	) {
 		return this.setFunction(responseFn, options);
 	}
 
@@ -242,7 +292,10 @@ export class Command {
 	 * @param responseFn Una función NO anónima a ejecutar al recibir una interacción
 	 * @param options Opciones adicionales para controlar las respuestas de interacción
 	 */
-	setButtonResponse(responseFn: ButtonResponseFunction, options: InteractionResponseOptions = {}) {
+	setButtonResponse(
+		responseFn: ButtonResponseFunction,
+		options: InteractionResponseOptions = {},
+	) {
 		return this.setFunction(responseFn, options);
 	}
 
@@ -250,7 +303,10 @@ export class Command {
 	 * @param responseFn Una función NO anónima a ejecutar al recibir una interacción
 	 * @param options Opciones adicionales para controlar las respuestas de interacción
 	 */
-	setSelectMenuResponse(responseFn: SelectMenuResponseFunction, options: InteractionResponseOptions = {}) {
+	setSelectMenuResponse(
+		responseFn: SelectMenuResponseFunction,
+		options: InteractionResponseOptions = {},
+	) {
 		return this.setFunction(responseFn, options);
 	}
 
@@ -267,8 +323,7 @@ export class Command {
 	}
 
 	static requestIsInteraction(request: CommandRequest | Interaction): request is Interaction {
-		if(this.requestIsMessage(request))
-			return false;
+		if (Command.requestIsMessage(request)) return false;
 
 		const interactionTypes = [
 			InteractionType.ApplicationCommand,
@@ -278,7 +333,7 @@ export class Command {
 			InteractionType.Ping,
 		];
 
-		return interactionTypes.some(interactionType => request.type === interactionType);
+		return interactionTypes.some((interactionType) => request.type === interactionType);
 	}
 
 	static requestize(request: CommandRequest | ComponentInteraction) {

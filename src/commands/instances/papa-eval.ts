@@ -1,15 +1,18 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/** biome-ignore-all lint/security/noGlobalEval: Uso deliberado de eval en contexto solo permitido para el dueño del bot */
+/** biome-ignore-all lint/correctness/noUnusedImports: Los imports pueden usarse en el eval */
 
-import { p_pure } from '@/utils/prefixes';
-import { CommandOptions, CommandTags, Command } from '../commons';
+import Canvas from '@napi-rs/canvas';
 import { EmbedBuilder } from 'discord.js';
-
 import * as GlobalProps from '@/data/globalProps';
 import * as func from '@/func';
-import Canvas from '@napi-rs/canvas';
+import { p_pure } from '@/utils/prefixes';
+import { Command, CommandOptions, CommandTags } from '../commons';
 
-const options = new CommandOptions()
-	.addFlag('d', [ 'del', 'delete' ], 'para eliminar el mensaje original');
+const options = new CommandOptions().addFlag(
+	'd',
+	['del', 'delete'],
+	'para eliminar el mensaje original',
+);
 
 const tags = new CommandTags().add('PAPA');
 
@@ -38,7 +41,7 @@ const command = new Command('papa-eval', tags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		if(request.isInteraction)
+		if (request.isInteraction)
 			return request.reply({ content: '❌ No permitido con comandos Slash.' });
 
 		const message = request.inferAsMessage();
@@ -49,18 +52,21 @@ const command = new Command('papa-eval', tags)
 			console.log(fnString);
 			await eval(fnString);
 			await message.react('✅');
-		} catch(error) {
+		} catch (error) {
 			const embed = new EmbedBuilder()
 				.setColor(0x0000ff)
-				.setAuthor({ name: `${message.guild.name} • ${message.channel.name}`, iconURL: message.author.avatarURL(), url: message.url })
+				.setAuthor({
+					name: `${message.guild.name} • ${message.channel.name}`,
+					iconURL: message.author.avatarURL(),
+					url: message.url,
+				})
 				.addFields({
 					name: 'Ha ocurrido un error al ingresar un comando',
 					value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``,
 				});
-			await message.reply({ embeds: [ embed ] });
+			await message.reply({ embeds: [embed] });
 		}
-		if(deleteAfter)
-			message.delete();
+		if (deleteAfter) message.delete();
 	});
 
 export default command;

@@ -2,7 +2,7 @@ import type { ValuesOf } from '../util/types';
 import type { Lexer } from '.';
 
 /**Contiene tipos de token de lexer*/
-export const TokenKinds = ({
+export const TokenKinds = {
 	//Valores
 	LIT_NUMBER: 'Number',
 	LIT_TEXT: 'String',
@@ -98,7 +98,7 @@ export const TokenKinds = ({
 
 	//EOF
 	EOF: 'EOF',
-}) as const;
+} as const;
 /**@description Representa un tipo de token de lexer.*/
 export type TokenKind = ValuesOf<typeof TokenKinds>;
 
@@ -190,11 +190,11 @@ export function translateTokenKind(tokenKind: TokenKind): string {
 }
 
 export function translateTokenKinds(...tokenKinds: TokenKind[]): string[] {
-	return tokenKinds.map(tokenKind => TokenKindTranslations.get(tokenKind));
+	return tokenKinds.map((tokenKind) => TokenKindTranslations.get(tokenKind));
 }
 
 /**@description Contiene tipos de indicador de sentencia de lexer.*/
-const StatementVerbs: Readonly<TokenKind[]> = ([
+const StatementVerbs: Readonly<TokenKind[]> = [
 	TokenKinds.BLOCK_OPEN,
 	TokenKinds.BLOCK_CLOSE,
 	TokenKinds.IF,
@@ -222,10 +222,10 @@ const StatementVerbs: Readonly<TokenKind[]> = ([
 	TokenKinds.STOP,
 	TokenKinds.SEND,
 	TokenKinds.COMMENT,
-]) as const;
+] as const;
 
 /**@description Contiene tipos de indicador de sentencia de lexer.*/
-export const DataKindValues = ({
+export const DataKindValues = {
 	NUMBER: 'Número',
 	TEXT: 'Texto',
 	BOOLEAN: 'Lógico',
@@ -233,7 +233,7 @@ export const DataKindValues = ({
 	REGISTRY: 'Registro',
 	EMBED: 'Marco',
 	INPUT: 'Entrada',
-}) as const;
+} as const;
 /**@description Representa un tipo de Token Léxico de PuréScript.*/
 export type DataKindValue = ValuesOf<typeof DataKindValues>;
 
@@ -267,17 +267,20 @@ export class Token {
 	 * @param start La posición del primer caracter del token en el código.
 	 * @param length El largo del token.
 	 */
-	constructor(lexer: Lexer, kind: TokenKind, value: TokenInternalValue, line: number, column: number, start: number, length: number) {
-		if(!Object.values(TokenKinds).includes(kind))
-			throw `Tipo de token inválido: ${kind}`;
-		if(line < 1)
-			throw 'La línea de inicio del token debe ser al menos 1';
-		if(column < 1)
-			throw 'La columna inicial del token debe ser al menos 1';
-		if(start < 0)
-			throw 'La posición de inicio del token debe ser al menos 0';
-		if(length < 1)
-			throw 'El largo del token debe ser al menos 1';
+	constructor(
+		lexer: Lexer,
+		kind: TokenKind,
+		value: TokenInternalValue,
+		line: number,
+		column: number,
+		start: number,
+		length: number,
+	) {
+		if (!Object.values(TokenKinds).includes(kind)) throw `Tipo de token inválido: ${kind}`;
+		if (line < 1) throw 'La línea de inicio del token debe ser al menos 1';
+		if (column < 1) throw 'La columna inicial del token debe ser al menos 1';
+		if (start < 0) throw 'La posición de inicio del token debe ser al menos 0';
+		if (length < 1) throw 'El largo del token debe ser al menos 1';
 
 		this.#lexer = lexer;
 		this.#kind = kind;
@@ -290,29 +293,43 @@ export class Token {
 	}
 
 	/**@description El tipo de token.*/
-	get kind() { return this.#kind; }
+	get kind() {
+		return this.#kind;
+	}
 
 	get translated() {
 		return TokenKindTranslations.get(this.#kind);
 	}
 
 	/**@description El valor del token.*/
-	get value() { return this.#value; }
+	get value() {
+		return this.#value;
+	}
 
 	/**@description La línea inicial del token.*/
-	get line() { return this.#line; }
+	get line() {
+		return this.#line;
+	}
 
 	/**@description La columna inicial del token.*/
-	get column() { return this.#column; }
+	get column() {
+		return this.#column;
+	}
 
 	/**@description La posición del primer caracter del token.*/
-	get start() { return this.#start; }
+	get start() {
+		return this.#start;
+	}
 
 	/**@description La posición del caracter al final del token.*/
-	get end() { return this.#start + this.#length; }
+	get end() {
+		return this.#start + this.#length;
+	}
 
 	/**@description El largo del token*/
-	get length() { return this.#length; }
+	get length() {
+		return this.#length;
+	}
 
 	/**@description El fragmento de código fuente de la línea de origen del token.*/
 	get lineString() {
@@ -344,21 +361,21 @@ export class Token {
 	}
 
 	/**@description Devuelve `true` si el token es de alguno de los tipos indicados, `false` de lo contrario.*/
-	isAny<TInfer extends TokenKind[]>(...tokenKinds: TInfer): this is Token & { kind: TInfer[number] } {
-		return (tokenKinds).includes(this.#kind);
+	isAny<TInfer extends TokenKind[]>(
+		...tokenKinds: TInfer
+	): this is Token & { kind: TInfer[number] } {
+		return tokenKinds.includes(this.#kind);
 	}
 
 	get [Symbol.toStringTag]() {
-		if(this.value == null)
-			return this.#kind;
+		if (this.value == null) return this.#kind;
 
 		return `${this.#kind} (${this.#value})`;
 	}
 }
 
-Token.prototype.toString = function() {
-	if(this.value == null)
-		return this.kind;
+Token.prototype.toString = function () {
+	if (this.value == null) return this.kind;
 
 	return `${this.kind} (${this.value})`;
 };

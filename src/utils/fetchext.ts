@@ -43,8 +43,14 @@ export interface FetchErrorResult extends BaseFetchResult<false> {
 
 export type FetchResult<TData = unknown> = FetchSuccessResult<TData> | FetchErrorResult;
 
-export async function fetchExt<TFetch extends Exclude<FetchType, 'json'>>(url: string | URL | Request, options: FetchExtOptions<TFetch>): Promise<FetchResult<AssertedFetchData<TFetch>>>;
-export async function fetchExt<TSchema = unknown>(url: string | URL | Request, options?: FetchExtOptions<'json'>): Promise<FetchResult<TSchema>>;
+export async function fetchExt<TFetch extends Exclude<FetchType, 'json'>>(
+	url: string | URL | Request,
+	options: FetchExtOptions<TFetch>,
+): Promise<FetchResult<AssertedFetchData<TFetch>>>;
+export async function fetchExt<TSchema = unknown>(
+	url: string | URL | Request,
+	options?: FetchExtOptions<'json'>,
+): Promise<FetchResult<TSchema>>;
 
 /**
  * Realiza una consulta y obtiene un dato utilizando la API nativa fetch(), ofreciendo algunas utilidades por encima de esta.
@@ -55,26 +61,24 @@ export async function fetchExt<TSchema = unknown>(url: string | URL | Request, o
  * @returns Un objeto conteniendo el {@link Response} obtenido y si el resultado fue validado y extraído correctamente.
  * Si lo fue, el objeto también contiene el dato extraído y convertido. Si no, contiene un error describiendo el problema.
  */
-export async function fetchExt<TSchema = unknown, TFetch extends FetchType = 'json'>(url: string | URL | Request, options: FetchExtOptions<TFetch> = {}): Promise<FetchResult<AssertedFetchData<TFetch, TSchema>>> {
-	const {
-		type = 'json',
-		init,
-		validateStatus,
-		validateResponse,
-	} = options;
+export async function fetchExt<TSchema = unknown, TFetch extends FetchType = 'json'>(
+	url: string | URL | Request,
+	options: FetchExtOptions<TFetch> = {},
+): Promise<FetchResult<AssertedFetchData<TFetch, TSchema>>> {
+	const { type = 'json', init, validateStatus, validateResponse } = options;
 
 	let response: Response;
 
 	try {
 		response = await fetch(url, init);
-	} catch(err) {
+	} catch (err) {
 		return {
 			success: false as const,
 			error: err instanceof Error ? err : new FetchError(`${err}`),
 		};
 	}
 
-	if(validateStatus && !validateStatus(response.status)) {
+	if (validateStatus && !validateStatus(response.status)) {
 		return {
 			success: false as const,
 			error: new HTTPError(response.status, response.statusText),
@@ -82,7 +86,7 @@ export async function fetchExt<TSchema = unknown, TFetch extends FetchType = 'js
 		};
 	}
 
-	if(validateResponse && !validateResponse(response)) {
+	if (validateResponse && !validateResponse(response)) {
 		return {
 			success: false as const,
 			error: new ResponseError('Response state was not valid.', response),
@@ -93,42 +97,50 @@ export async function fetchExt<TSchema = unknown, TFetch extends FetchType = 'js
 	try {
 		let data: AssertedFetchData<TFetch, TSchema>;
 
-		switch(type) {
-		case 'json':
-			data = await response.json() as TSchema as AssertedFetchData<TFetch, TSchema>;
-			break;
+		switch (type) {
+			case 'json':
+				data = (await response.json()) as TSchema as AssertedFetchData<TFetch, TSchema>;
+				break;
 
-		case 'text':
-			data = await response.text() as AssertedFetchData<TFetch, TSchema>;
-			break;
+			case 'text':
+				data = (await response.text()) as AssertedFetchData<TFetch, TSchema>;
+				break;
 
-		case 'arrayBuffer':
-			data = await response.arrayBuffer() as AssertedFetchData<TFetch, TSchema>;
-			break;
+			case 'arrayBuffer':
+				data = (await response.arrayBuffer()) as AssertedFetchData<TFetch, TSchema>;
+				break;
 
-		case 'buffer': {
-			const arrayBuffer = await response.arrayBuffer();
-			data = Buffer.from(arrayBuffer) as AssertedFetchData<TFetch, TSchema>;
-			break;
-		}
+			case 'buffer': {
+				const arrayBuffer = await response.arrayBuffer();
+				data = Buffer.from(arrayBuffer) as AssertedFetchData<TFetch, TSchema>;
+				break;
+			}
 
-		case 'webStream':
-			if(!response.body)
-				throw new ResponseError('Response body unavailable for stream extraction.', response);
+			case 'webStream':
+				if (!response.body)
+					throw new ResponseError(
+						'Response body unavailable for stream extraction.',
+						response,
+					);
 
-			data = response.body as AssertedFetchData<TFetch, TSchema>;
-			break;
+				data = response.body as AssertedFetchData<TFetch, TSchema>;
+				break;
 
-		case 'nodeStream': {
-			if(!response.body)
-				throw new ResponseError('Response body unavailable for stream extraction.', response);
+			case 'nodeStream': {
+				if (!response.body)
+					throw new ResponseError(
+						'Response body unavailable for stream extraction.',
+						response,
+					);
 
-			data = stream.Readable.fromWeb(response.body as unknown as WebReadableStream<Uint8Array>) as AssertedFetchData<TFetch, TSchema>;
-			break;
-		}
+				data = stream.Readable.fromWeb(
+					response.body as unknown as WebReadableStream<Uint8Array>,
+				) as AssertedFetchData<TFetch, TSchema>;
+				break;
+			}
 
-		default:
-			throw new RangeError(`Invalid or unsupported type: ${type}`);
+			default:
+				throw new RangeError(`Invalid or unsupported type: ${type}`);
 		}
 
 		return {

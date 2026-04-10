@@ -1,14 +1,10 @@
 import { makeGuideMenu } from '@/systems/others/wiki.js';
-import { CommandTags, Command } from '../commons/index.js';
+import { Command, CommandTags } from '../commons/index.js';
 
 const tags = new CommandTags().add('GUIDE');
 
 const command = new Command('g-tipos', tags)
-	.setAliases(
-		'g-valores',
-		'g-types', 'g-values',
-		'g-t', 'g-v',
-	)
+	.setAliases('g-valores', 'g-types', 'g-values', 'g-t', 'g-v')
 	.setLongDescription(
 		'Al usar un comando, sus `<parámetros>` y `--banderas` con parámetro esperan ciertos _(tipos)_ de valores',
 		'No puedes usar un comando si escribes mal un valor. ¡Si es un Comando Slash, ni siquiera puedes enviarlo!',

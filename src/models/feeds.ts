@@ -2,7 +2,7 @@ import Mongoose from 'mongoose';
 
 const FeedSchema = new Mongoose.Schema({
 	ids: {
-		type: [ String ],
+		type: [String],
 		default: [],
 	},
 	tags: {
@@ -41,8 +41,9 @@ const FeedSchema = new Mongoose.Schema({
 
 const Feed = Mongoose.model('Feed', FeedSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() { return new Feed({}); }
-export type FeedDocument = ReturnType<(typeof m)>;
+function m() {
+	return new Feed({});
+}
+export type FeedDocument = ReturnType<typeof m>;
 
 export default Feed;

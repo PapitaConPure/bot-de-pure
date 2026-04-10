@@ -12,7 +12,7 @@ const TuberInputSchema = new Mongoose.Schema({
 	},
 	kind: {
 		type: String,
-		enum: [ 'Number', 'Text', 'Boolean' ],
+		enum: ['Number', 'Text', 'Boolean'],
 		required: true,
 	},
 	optional: {
@@ -39,7 +39,7 @@ const TuberSchema = new Mongoose.Schema({
 		default: null,
 	},
 	inputs: {
-		type: [ [ TuberInputSchema ] ],
+		type: [[TuberInputSchema]],
 		default: [],
 	},
 	advanced: {
@@ -51,7 +51,7 @@ const TuberSchema = new Mongoose.Schema({
 		required: false,
 	},
 	files: {
-		type: [ String ],
+		type: [String],
 	},
 	script: {
 		type: String,
@@ -92,8 +92,9 @@ const TuberSchema = new Mongoose.Schema({
 
 const Tuber = Mongoose.model('Tuber', TuberSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() { return new Tuber({}); }
-export type TuberDocument = ReturnType<(typeof m)>;
+function m() {
+	return new Tuber({});
+}
+export type TuberDocument = ReturnType<typeof m>;
 
 export default Tuber;

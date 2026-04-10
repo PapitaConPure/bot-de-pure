@@ -1,12 +1,20 @@
-/* eslint-disable no-empty-pattern */
+/** biome-ignore-all lint/correctness/noEmptyPattern: Claridad */
 
-import type { RuntimeValue, NativeFunction, NumberValue, TextValue, BooleanValue} from '../../values';
-import { ValueKinds, makeNumber, makeText } from '../../values';
+import { clamp, improveNumber } from '../../../util/utils';
+import type {
+	BooleanValue,
+	NativeFunction,
+	NumberValue,
+	RuntimeValue,
+	TextValue,
+} from '../../values';
+import { makeNumber, makeText, ValueKinds } from '../../values';
 import { expectParam, getParamOrDefault } from '../nativeUtils';
-import { improveNumber, clamp } from '../../../util/utils';
 
-export type NumberMethod<TArg extends RuntimeValue[] = RuntimeValue[], TResult extends RuntimeValue = RuntimeValue>
-	= NativeFunction<NumberValue, TArg, TResult>;
+export type NumberMethod<
+	TArg extends RuntimeValue[] = RuntimeValue[],
+	TResult extends RuntimeValue = RuntimeValue,
+> = NativeFunction<NumberValue, TArg, TResult>;
 
 const númeroAbsoluto: NumberMethod<[], NumberValue> = (self, []) => {
 	return makeNumber(Math.abs(self.value));
@@ -16,45 +24,61 @@ const númeroAEntero: NumberMethod<[], NumberValue> = (self, []) => {
 	return makeNumber(Math.trunc(self.value));
 };
 
-const númeroAFijo: NumberMethod<[ NumberValue ], TextValue> = (self, [ precisión ], scope) => {
+const númeroAFijo: NumberMethod<[NumberValue], TextValue> = (self, [precisión], scope) => {
 	const precisiónResult = expectParam('precisión', precisión, ValueKinds.NUMBER, scope);
 
-	if(precisiónResult.value < 0 || precisiónResult.value > 100)
-		throw scope.interpreter.TuberInterpreterError('La precisión especificada debe ser un Número entre 1 y 100');
+	if (precisiónResult.value < 0 || precisiónResult.value > 100)
+		throw scope.interpreter.TuberInterpreterError(
+			'La precisión especificada debe ser un Número entre 1 y 100',
+		);
 
 	const text = self.value.toFixed(precisiónResult.value);
 	return makeText(text);
 };
 
-const númeroAPrecisión: NumberMethod<[ NumberValue ], TextValue> = (self, [ precisión ], scope) => {
+const númeroAPrecisión: NumberMethod<[NumberValue], TextValue> = (self, [precisión], scope) => {
 	const precisiónResult = expectParam('precisión', precisión, ValueKinds.NUMBER, scope);
 
-	if(precisiónResult.value < 0 || precisiónResult.value > 100)
-		throw scope.interpreter.TuberInterpreterError('La precisión especificada debe ser un Número entre 0 y 100');
+	if (precisiónResult.value < 0 || precisiónResult.value > 100)
+		throw scope.interpreter.TuberInterpreterError(
+			'La precisión especificada debe ser un Número entre 0 y 100',
+		);
 
 	const text = (+self.value.toFixed(precisiónResult.value)).toString();
 	return makeText(text);
 };
 
-const númeroATexto: NumberMethod<[ NumberValue ], TextValue> = (self, [ base ], scope) => {
+const númeroATexto: NumberMethod<[NumberValue], TextValue> = (self, [base], scope) => {
 	const baseResult = getParamOrDefault('base', base, ValueKinds.NUMBER, scope, 10);
 
-	if(baseResult.value < 2 || baseResult.value > 36)
-		throw scope.interpreter.TuberInterpreterError('La base numérica de la conversión a Texto debe ser un Número entre 2 y 36 inclusive');
+	if (baseResult.value < 2 || baseResult.value > 36)
+		throw scope.interpreter.TuberInterpreterError(
+			'La base numérica de la conversión a Texto debe ser un Número entre 2 y 36 inclusive',
+		);
 
 	return makeText(self.value.toString(baseResult.value));
 };
 
-const númeroFormatear: NumberMethod<[ BooleanValue, NumberValue ], TextValue> = (self, [ acortar, mínimoDígitos ], scope) => {
+const númeroFormatear: NumberMethod<[BooleanValue, NumberValue], TextValue> = (
+	self,
+	[acortar, mínimoDígitos],
+	scope,
+) => {
 	const acortarResult = expectParam('acortar', acortar, ValueKinds.BOOLEAN, scope);
 	const mínimoResult = expectParam('mínimoDígitos', mínimoDígitos, ValueKinds.NUMBER, scope);
-	if(mínimoResult.value < 1 || mínimoResult.value > 10)
-		throw scope.interpreter.TuberInterpreterError(`El parámetro requerido \`mínimoDígitos\` debe ser un Número entre 1 y 10`);
+	if (mínimoResult.value < 1 || mínimoResult.value > 10)
+		throw scope.interpreter.TuberInterpreterError(
+			`El parámetro requerido \`mínimoDígitos\` debe ser un Número entre 1 y 10`,
+		);
 
 	return makeText(`${improveNumber(self.value, acortarResult.value, mínimoResult.value)}`);
 };
 
-const númeroLimitar: NumberMethod<[ BooleanValue, NumberValue ], NumberValue> = (self, [ mínimo, máximo ], scope) => {
+const númeroLimitar: NumberMethod<[BooleanValue, NumberValue], NumberValue> = (
+	self,
+	[mínimo, máximo],
+	scope,
+) => {
 	const mínimoValue = expectParam('mínimo', mínimo, ValueKinds.NUMBER, scope).value;
 	const máximoValue = expectParam('máximo', máximo, ValueKinds.NUMBER, scope).value;
 

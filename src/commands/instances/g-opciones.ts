@@ -1,13 +1,10 @@
 import { makeGuideMenu } from '@/systems/others/wiki.js';
-import { CommandTags, Command } from '../commons/index.js';
+import { Command, CommandTags } from '../commons/index.js';
 
 const tags = new CommandTags().add('GUIDE');
 
 const command = new Command('g-opciones', tags)
-	.setAliases(
-		'g-banderas',
-		'g-opt', 'g-flags',
-	)
+	.setAliases('g-banderas', 'g-opt', 'g-flags')
 	.setLongDescription(
 		'Algunos comandos pueden usar `--banderas`',
 		'Las banderas indican acciones y/o propiedades optativas de un comando. Tienen nombres cortos y/o largos.',

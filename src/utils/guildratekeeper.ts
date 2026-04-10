@@ -1,20 +1,21 @@
 import Logger from '@/utils/logs';
+
 const { debug, info, error } = Logger('WARN', 'GRK');
 
 const fetchRegistry: {
-    members: Map<string, Date>;
+	members: Map<string, Date>;
 } = {
-	members: new Map()
+	members: new Map(),
 };
 
 const GuildRateKeeper: {
-    client?: import('discord.js').Client;
+	client?: import('discord.js').Client;
 } = {
 	client: null,
 };
 
 interface GuildRateKeeperSetupOptions {
-    client: import('discord.js').Client;
+	client: import('discord.js').Client;
 }
 
 export function setupGuildRateKeeper({ client }: GuildRateKeeperSetupOptions) {
@@ -24,7 +25,10 @@ export function setupGuildRateKeeper({ client }: GuildRateKeeperSetupOptions) {
 type GuildResolvable = import('discord.js').Guild | string;
 
 /**@description Refresca la caché de miembros del servidor indicado, si es que no ha sido refrescada en un tiempo.*/
-export async function fetchGuildMembers(target: GuildResolvable, fetchOptions: { withPresences?: boolean; } = {}) {
+export async function fetchGuildMembers(
+	target: GuildResolvable,
+	fetchOptions: { withPresences?: boolean } = {},
+) {
 	const { withPresences = false } = fetchOptions;
 	const guild = await resolveGuild(target);
 	const guildId = guild.id;
@@ -34,7 +38,7 @@ export async function fetchGuildMembers(target: GuildResolvable, fetchOptions: {
 
 	try {
 		const previousEntry = fetchRegistry.members.get(guildId);
-		if(previousEntry && Math.abs(+previousEntry - +now) <= 60e3 * 30) {
+		if (previousEntry && Math.abs(+previousEntry - +now) <= 60e3 * 30) {
 			debug(`Valid caché hit for ${guildId}. Cannot request`);
 			return;
 		}
@@ -43,7 +47,7 @@ export async function fetchGuildMembers(target: GuildResolvable, fetchOptions: {
 		await guild.members.fetch({ withPresences });
 		fetchRegistry.members.set(guildId, now);
 		info(`All members of ${guildId} have been fetched`);
-	} catch(err) {
+	} catch (err) {
 		error(err);
 	}
 }
@@ -53,16 +57,19 @@ export async function fetchAllGuildMembers(): Promise<void[]> {
 
 	try {
 		await GuildRateKeeper.client.guilds.fetch();
-		return Promise.all(GuildRateKeeper.client.guilds.cache.map(guild => fetchGuildMembers(guild, { withPresences: true })));
-	} catch(err) {
+		return Promise.all(
+			GuildRateKeeper.client.guilds.cache.map((guild) =>
+				fetchGuildMembers(guild, { withPresences: true }),
+			),
+		);
+	} catch (err) {
 		error(err);
 	}
 }
 
 /**@description Resuelve un {@link GuildResolvable}.*/
 async function resolveGuild(data: GuildResolvable) {
-	if(typeof data === 'string')
-		return GuildRateKeeper.client.guilds.fetch(data);
+	if (typeof data === 'string') return GuildRateKeeper.client.guilds.fetch(data);
 
 	return data;
 }

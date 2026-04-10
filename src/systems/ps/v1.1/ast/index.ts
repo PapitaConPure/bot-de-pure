@@ -2,7 +2,7 @@ import type { ValuesOf } from '../util/types';
 import { iota } from '../util/utils';
 
 /**@description Contiene niveles de vínculo de operadores.*/
-export const BindingPowers = ({
+export const BindingPowers = {
 	/**@description Vínculo más débil. Usado por defecto, para sentencias y agrupamiento.*/
 	DEFAULT: iota(0),
 	/**@description Segundo vínculo más débil. A veces usado para el operador de coma.*/
@@ -31,16 +31,16 @@ export const BindingPowers = ({
 	MEMBER: iota(),
 	/**@description Vínculo más fuerte. Usado para expresiones primarias y símbolos.*/
 	PRIMARY: iota(),
-}) as const;
+} as const;
 export type BindingPower = ValuesOf<typeof BindingPowers>;
 
 /**Contiene tipos de asociatividad de operadores*/
-export const Associativities = ({
+export const Associativities = {
 	/**Asociatividad a la izquierda. Por defecto. Usado para la mayoría de expresiones si es que se usa*/
 	LEFT: 0,
 	/**Asociatividad a la derecha. No es usado con frecuencia*/
 	RIGHT: -0.5,
-}) as const;
+} as const;
 export type Associativity = ValuesOf<typeof Associativities>;
 
 export interface NodeMetadata {

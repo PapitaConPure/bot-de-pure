@@ -3,53 +3,51 @@ import type {
 	NativeFunction,
 	TextValue,
 	RegistryValue,
-	NadaValue} from '../../values';
-import {
-	ValueKinds,
-	makeNada
+	NadaValue,
 } from '../../values';
+import { ValueKinds, makeNada } from '../../values';
 import { expectParam } from '../nativeUtils';
 import { makeDiscordChannel, makeDiscordMember, makeDiscordRole } from '../registryPrefabs';
 import type { NativeFunctionEntry } from '.';
 
 const buscarCanal: NativeFunction<RuntimeValue, [TextValue], RegistryValue | NadaValue> = (
 	_self,
-	[ búsqueda ],
+	[búsqueda],
 	scope,
 ) => {
 	const búsquedaResult = expectParam('búsqueda', búsqueda, ValueKinds.TEXT, scope);
 
 	const channel = scope.interpreter.provider.fetchChannel(búsquedaResult.value);
 
-	if(!channel) return makeNada();
+	if (!channel) return makeNada();
 
 	return makeDiscordChannel(channel);
 };
 
 const buscarMiembro: NativeFunction<RuntimeValue, [TextValue], RegistryValue | NadaValue> = (
 	_self,
-	[ búsqueda ],
+	[búsqueda],
 	scope,
 ) => {
 	const búsquedaResult = expectParam('búsqueda', búsqueda, ValueKinds.TEXT, scope);
 
 	const member = scope.interpreter.provider.fetchMember(búsquedaResult.value);
 
-	if(!member) return makeNada();
+	if (!member) return makeNada();
 
 	return makeDiscordMember(member);
 };
 
 const buscarRol: NativeFunction<RuntimeValue, [TextValue], RegistryValue | NadaValue> = (
 	_self,
-	[ búsqueda ],
+	[búsqueda],
 	scope,
 ) => {
 	const búsquedaResult = expectParam('búsqueda', búsqueda, ValueKinds.TEXT, scope);
 
 	const role = scope.interpreter.provider.fetchRole(búsquedaResult.value);
 
-	if(!role) return makeNada();
+	if (!role) return makeNada();
 
 	return makeDiscordRole(role);
 };

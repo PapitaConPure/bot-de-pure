@@ -1,17 +1,18 @@
-export { onUncaughtException, onUnhandledRejection, onShutdown } from './process';
-export { onStartup } from './onStartup';
-export { onMessage } from './onMessage';
-export { onReactionAdd } from './onReactionAdd';
-export { onReactionRemove } from './onReactionRemove';
-export { onMessageDelete } from './onMessageDelete';
-export { onInteraction } from './onInteraction';
-export { onVoiceUpdate } from './onVoiceUpdate';
-export { onRateLimit } from './onRateLimit';
 export { onGuildMemberAdd } from './onGuildMemberAdd';
 export { onGuildMemberRemove } from './onGuildMemberRemove';
 export { onGuildMemberUpdate } from './onGuildMemberUpdate';
-import { auditError } from '../systems/others/auditor';
+export { onInteraction } from './onInteraction';
+export { onMessage } from './onMessage';
+export { onMessageDelete } from './onMessageDelete';
+export { onRateLimit } from './onRateLimit';
+export { onReactionAdd } from './onReactionAdd';
+export { onReactionRemove } from './onReactionRemove';
+export { onStartup } from './onStartup';
+export { onVoiceUpdate } from './onVoiceUpdate';
+export { onShutdown, onUncaughtException, onUnhandledRejection } from './process';
+
 import chalk from 'chalk';
+import { auditError } from '../systems/others/auditor';
 
 /**Cuando se recibe un error inesperado durante un evento asíncrono*/
 export function onCriticalError(error: Error) {

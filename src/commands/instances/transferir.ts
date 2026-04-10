@@ -1,11 +1,11 @@
-import { CommandTags, Command, CommandOptions } from '../commons';
-import { improveNumber, compressId, sleep } from '@/func';
+import { EmbedBuilder } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
 import { globalConfigs, tenshiColor } from '@/data/globalProps';
-import { auditError } from '@/systems/others/auditor';
-import UserConfigs from '@/models/userconfigs';
-import { EmbedBuilder } from 'discord.js';
+import { compressId, improveNumber, sleep } from '@/func';
 import { Translator } from '@/i18n';
+import UserConfigs from '@/models/userconfigs';
+import { auditError } from '@/systems/others/auditor';
+import { Command, CommandOptions, CommandTags } from '../commons';
 
 const transferLocks = new Set<string>();
 
@@ -19,50 +19,50 @@ const command = new Command('transferir', flags)
 	.setDescription('Permite transferir PRC a otro usuario')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const [ translator ] = await Promise.all([
+		const [translator] = await Promise.all([
 			Translator.from(request.userId),
 			request.deferReply({ ephemeral: true }),
 		]);
 
-		if(args.isMessageSolver(args.args))
-			swapIfNeeded(args.args);
+		if (args.isMessageSolver(args.args)) swapIfNeeded(args.args);
 
 		const amount = args.getNumber('monto');
 		const target = args.getUser('usuario');
 
-		if(!amount || isNaN(amount))
+		if (!amount || Number.isNaN(+amount))
 			return request.editReply({ content: translator.getText('transferAmountExpected') });
 
-		if(!target)
+		if (!target)
 			return request.editReply({ content: translator.getText('transferTargetExpected') });
 
-		if(target.bot)
+		if (target.bot)
 			return request.editReply({ content: translator.getText('transferHumanExpected') });
 
-		if(request.userId === target.id)
+		if (request.userId === target.id)
 			return request.editReply({ content: translator.getText('transferOtherExpected') });
 
-		if(amount < 1)
+		if (amount < 1)
 			return request.editReply({ content: translator.getText('transferAmountTooLow') });
 
 		const { userId } = request;
 		const { id: targetId } = target;
 
-		while(transferLocks.has(userId) || transferLocks.has(targetId))
-			await sleep(50);
+		while (transferLocks.has(userId) || transferLocks.has(targetId)) await sleep(50);
 
 		try {
 			transferLocks.add(userId);
 			transferLocks.add(targetId);
 
-			const userQuery   = { userId: userId };
+			const userQuery = { userId: userId };
 			const targetQuery = { userId: targetId };
-			const [ userConfigs, targetConfigs ] = await Promise.all([
-				(async() => (await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery))(),
-				(async() => (await UserConfigs.findOne(targetQuery)) || new UserConfigs(targetQuery))(),
+			const [userConfigs, targetConfigs] = await Promise.all([
+				(async () =>
+					(await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery))(),
+				(async () =>
+					(await UserConfigs.findOne(targetQuery)) || new UserConfigs(targetQuery))(),
 			]);
 
-			if(amount > userConfigs.prc)
+			if (amount > userConfigs.prc)
 				return request.editReply({ content: translator.getText('transferInsufficient') });
 
 			userConfigs.prc -= amount;
@@ -71,7 +71,10 @@ const command = new Command('transferir', flags)
 
 			const embed = new EmbedBuilder()
 				.setColor(tenshiColor)
-				.setAuthor({ name: translator.getText('transferAuthorName'), iconURL: request.guild.iconURL({ size: 256 }) })
+				.setAuthor({
+					name: translator.getText('transferAuthorName'),
+					iconURL: request.guild.iconURL({ size: 256 }),
+				})
 				.setTitle(translator.getText('transferTitle'))
 				.addFields(
 					{
@@ -95,19 +98,16 @@ const command = new Command('transferir', flags)
 					},
 				);
 
-			await Promise.all([
-				targetConfigs.save(),
-				userConfigs.save(),
-			]);
+			await Promise.all([targetConfigs.save(), userConfigs.save()]);
 
-			const receipt = { embeds: [ embed ] };
+			const receipt = { embeds: [embed] };
 			return Promise.all([
-				request.editReply(receipt).catch(_ => _),
-				request.user.send(receipt).catch(_ => _),
-				target.send(receipt).catch(_ => _),
+				request.editReply(receipt).catch((_) => _),
+				request.user.send(receipt).catch((_) => _),
+				target.send(receipt).catch((_) => _),
 				globalConfigs.logch?.send(receipt).catch(console.error),
 			]);
-		} catch(error) {
+		} catch (error) {
 			console.error(error);
 			auditError(error, {
 				request,
@@ -123,13 +123,11 @@ const command = new Command('transferir', flags)
 	});
 
 function swapIfNeeded(args: string[]) {
-	if(!Array.isArray(args))
-		return;
+	if (!Array.isArray(args)) return;
 
 	const amount = +args[0];
 
-	if(!isNaN(amount))
-		return;
+	if (!Number.isNaN(amount)) return;
 
 	const t = args[0];
 	args[0] = args[1];

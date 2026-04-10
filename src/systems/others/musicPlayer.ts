@@ -1,17 +1,32 @@
-import type { Track, GuildQueue } from 'discord-player';
-import { Player, useMainPlayer, QueueRepeatMode } from 'discord-player';
 import { DefaultExtractors } from '@discord-player/extractor';
-import { SoundcloudExtractor } from 'discord-player-soundcloud';
+import type {
+	AnySelectMenuInteraction,
+	BaseGuildVoiceChannel,
+	ButtonInteraction,
+	Client,
+	ColorResolvable,
+	ModalSubmitInteraction,
+} from 'discord.js';
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	Colors,
+	EmbedBuilder,
+	MessageFlags,
+	StringSelectMenuBuilder,
+} from 'discord.js';
+import type { GuildQueue, Track } from 'discord-player';
+import { Player, QueueRepeatMode, useMainPlayer } from 'discord-player';
 import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
-import type { Client, ButtonInteraction, ModalSubmitInteraction, ColorResolvable, BaseGuildVoiceChannel, AnySelectMenuInteraction } from 'discord.js';
-import { EmbedBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder, Colors, MessageFlags } from 'discord.js';
+import { SoundcloudExtractor } from 'discord-player-soundcloud';
 import type { ComplexCommandRequest, ComponentInteraction } from 'types/commands';
-import { makeButtonRowBuilder, makeStringSelectMenuRowBuilder } from '@/utils/tsCasts';
-import { tryRecoverSavedTracksQueue, saveTracksQueue } from '@/models/playerQueue';
 import { compressId, decompressId, shortenText } from '@/func';
 import { Translator } from '@/i18n';
+import { saveTracksQueue, tryRecoverSavedTracksQueue } from '@/models/playerQueue';
 
 import Logger from '@/utils/logs';
+
 const { debug, info, warn, error } = Logger('DEBUG', 'PuréMusic');
 
 export function makePuréMusicEmbed(
@@ -22,16 +37,16 @@ export function makePuréMusicEmbed(
 ) {
 	const { channel } = request.member.voice;
 
-	const footerExtraContent = additionalFooterData.length ? ` • ${additionalFooterData.join(' • ')}` : '';
+	const footerExtraContent = additionalFooterData.length
+		? ` • ${additionalFooterData.join(' • ')}`
+		: '';
 
-	const embed = new EmbedBuilder()
-		.setColor(color)
-		.setAuthor({
-			name: request.member.displayName,
-			iconURL: request.member.displayAvatarURL({ size: 128 }),
-		});
+	const embed = new EmbedBuilder().setColor(color).setAuthor({
+		name: request.member.displayName,
+		iconURL: request.member.displayAvatarURL({ size: 128 }),
+	});
 
-	if(iconUrl != null)
+	if (iconUrl != null)
 		embed.setFooter({
 			text: `${shortenText(channel.name, 32)}${footerExtraContent}`,
 			iconURL: iconUrl,
@@ -58,16 +73,51 @@ export interface ArbitraryServiceInfo extends BaseServiceInfo {
 export type ServiceInfo = KnownServiceInfo | ArbitraryServiceInfo;
 
 /**@satisfies {Record<string, ServiceInfo>}*/
-export const SERVICES = ({
-	youtube:      { name: 'YouTube',      color: 0xff0000, iconUrl: 'https://i.imgur.com/0k9tFqd.png', isArbitrary: false },
-	spotify:      { name: 'Spotify',      color: 0x1db954, iconUrl: 'https://i.imgur.com/qpCz3Ug.png', isArbitrary: false },
-	soundcloud:   { name: 'SoundCloud',   color: 0xff7e19, iconUrl: 'https://i.imgur.com/UVx6eva.png', isArbitrary: false },
-	apple_music:  { name: 'Apple Music',  color: 0xfc334a, iconUrl: 'https://i.imgur.com/Nw0aLwN.png', isArbitrary: false },
-	vimeo:        { name: 'Vimeo',        color: 0x9e3845, iconUrl: 'https://i.imgur.com/LC5Ic3R.png', isArbitrary: false },
-	reverbnation: { name: 'Reverbnation', color: 0x9e3845, iconUrl: 'https://i.imgur.com/LC5Ic3R.png', isArbitrary: false },
-	arbitrary:    { name: null,           color: 0x9e3845, iconUrl: 'https://i.imgur.com/LC5Ic3R.png', isArbitrary: true  },
-}) as const;
-export type ServiceKey = (typeof Track.prototype.source) & string;
+export const SERVICES = {
+	youtube: {
+		name: 'YouTube',
+		color: 0xff0000,
+		iconUrl: 'https://i.imgur.com/0k9tFqd.png',
+		isArbitrary: false,
+	},
+	spotify: {
+		name: 'Spotify',
+		color: 0x1db954,
+		iconUrl: 'https://i.imgur.com/qpCz3Ug.png',
+		isArbitrary: false,
+	},
+	soundcloud: {
+		name: 'SoundCloud',
+		color: 0xff7e19,
+		iconUrl: 'https://i.imgur.com/UVx6eva.png',
+		isArbitrary: false,
+	},
+	apple_music: {
+		name: 'Apple Music',
+		color: 0xfc334a,
+		iconUrl: 'https://i.imgur.com/Nw0aLwN.png',
+		isArbitrary: false,
+	},
+	vimeo: {
+		name: 'Vimeo',
+		color: 0x9e3845,
+		iconUrl: 'https://i.imgur.com/LC5Ic3R.png',
+		isArbitrary: false,
+	},
+	reverbnation: {
+		name: 'Reverbnation',
+		color: 0x9e3845,
+		iconUrl: 'https://i.imgur.com/LC5Ic3R.png',
+		isArbitrary: false,
+	},
+	arbitrary: {
+		name: null,
+		color: 0x9e3845,
+		iconUrl: 'https://i.imgur.com/LC5Ic3R.png',
+		isArbitrary: true,
+	},
+} as const;
+export type ServiceKey = typeof Track.prototype.source & string;
 
 /**Cantidad máxima de pistas por página al mostrar la cola de reproducción*/
 const QUEUE_PAGE_TRACKS_MAX = 5;
@@ -87,7 +137,11 @@ export async function prepareTracksPlayer(client: Client) {
 	debug('Loading Soundcloud extractor...');
 	await player.extractors.register(SoundcloudExtractor, {});
 	debug('Loading default extractors...');
-	await player.extractors.loadMulti(DefaultExtractors.filter(ext => ext.identifier !== 'com.discord-player.soundcloudextractor'));
+	await player.extractors.loadMulti(
+		DefaultExtractors.filter(
+			(ext) => ext.identifier !== 'com.discord-player.soundcloudextractor',
+		),
+	);
 	info('Extractors have been loaded.');
 
 	player.on('debug', debug);
@@ -118,23 +172,32 @@ export async function prepareTracksPlayer(client: Client) {
  * @param authorId ID del autor para verificar permisos de botón
  * @param page Número de página, enumerado desde 0 y por defecto 0
  */
-export async function showQueuePage(request: ComplexCommandRequest | ButtonInteraction<'cached'> | AnySelectMenuInteraction<'cached'> | ModalSubmitInteraction<'cached'>, op: string = undefined, authorId: string = undefined, page: number = 0) {
+export async function showQueuePage(
+	request:
+		| ComplexCommandRequest
+		| ButtonInteraction<'cached'>
+		| AnySelectMenuInteraction<'cached'>
+		| ModalSubmitInteraction<'cached'>,
+	op: string = undefined,
+	authorId: string = undefined,
+	page: number = 0,
+) {
 	const translator = await Translator.from(request.user.id);
 
-	if(authorId && request.user.id !== decompressId(authorId))
+	if (authorId && request.user.id !== decompressId(authorId))
 		return (request as ComplexCommandRequest).reply({
 			flags: MessageFlags.Ephemeral,
 			content: translator.getText('unauthorizedInteraction'),
 		});
 
 	const channel = request.member.voice?.channel;
-	if(!channel)
+	if (!channel)
 		return (request as ComplexCommandRequest).reply({
 			flags: MessageFlags.Ephemeral,
 			content: translator.getText('voiceExpected'),
 		});
 
-	if(isPlayerUnavailable(channel))
+	if (isPlayerUnavailable(channel))
 		return (request as ComplexCommandRequest).reply({
 			flags: MessageFlags.Ephemeral,
 			content: translator.getText('voiceSameChannelExpected'),
@@ -143,75 +206,77 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 	const shortChannelName = shortenText(channel.name, 20);
 
 	/**@param {ColorResolvable} color*/
-	const makeReplyEmbed = (color: ColorResolvable) => new EmbedBuilder()
-		.setColor(color)
-		.setTitle(translator.getText('queueTitle'))
-		.setAuthor({
-			name: request.member.displayName,
-			iconURL: request.member.displayAvatarURL({ size: 128 }),
-		});
+	const makeReplyEmbed = (color: ColorResolvable) =>
+		new EmbedBuilder()
+			.setColor(color)
+			.setTitle(translator.getText('queueTitle'))
+			.setAuthor({
+				name: request.member.displayName,
+				iconURL: request.member.displayAvatarURL({ size: 128 }),
+			});
 
-	if(op !== 'PL') {
-		await (
-			(!op || op === 'CM')
-				? request.deferReply()
-				: (request as ButtonInteraction<'cached'>).deferUpdate()
-		);
+	if (op !== 'PL') {
+		await (!op || op === 'CM'
+			? request.deferReply()
+			: (request as ButtonInteraction<'cached'>).deferUpdate());
 	}
 
 	const player = useMainPlayer();
 	const queue = player.queues.get(request.guildId) ?? (await tryRecoverSavedTracksQueue(request));
-	const fullRows = [ 'EX', 'SF', 'AP', 'RP', 'LP' ].includes(op);
+	const fullRows = ['EX', 'SF', 'AP', 'RP', 'LP'].includes(op);
 
-	if(!queue?.currentTrack && !queue?.size) {
+	if (!queue?.currentTrack && !queue?.size) {
 		const embed = makeReplyEmbed(Colors.Blurple)
 			.setDescription(translator.getText('queueDescriptionEmptyQueue'))
 			.setFooter({
 				text: `${shortChannelName}`,
-				iconURL: 'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless',
+				iconURL:
+					'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless',
 			});
 
 		const replyObj = {
-			embeds: [ embed ],
-			components: [
-				getTrackActionRow(queue, page, request.user.id, fullRows),
-			],
+			embeds: [embed],
+			components: [getTrackActionRow(queue, page, request.user.id, fullRows)],
 		};
 		return request.editReply(replyObj);
 	}
 
 	let offset = page * QUEUE_PAGE_TRACKS_MAX;
-	while(queue.size && offset >= queue.size)
-		offset = (op === 'DE') ? Math.max(0, offset - QUEUE_PAGE_TRACKS_MAX) : 0;
+	while (queue.size && offset >= queue.size)
+		offset = op === 'DE' ? Math.max(0, offset - QUEUE_PAGE_TRACKS_MAX) : 0;
 
 	const tracks = queue.tracks.toArray().slice(offset, offset + QUEUE_PAGE_TRACKS_MAX);
-	const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
+	const queueInfo = queue.size
+		? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted)
+		: translator.getText('playFooterTextQueueEmpty');
 
-	const lastPage = queue.size ? (Math.ceil(queue.size / QUEUE_PAGE_TRACKS_MAX) - 1) : 0;
+	const lastPage = queue.size ? Math.ceil(queue.size / QUEUE_PAGE_TRACKS_MAX) - 1 : 0;
 	const previousPage = page === 0 ? lastPage : page - 1;
 	const nextPage = page === lastPage ? 0 : page + 1;
 	const footerText = `${shortChannelName} • ${queueInfo}`;
 	const labels = [];
 
-	let queueEmbed;
+	let queueEmbed: EmbedBuilder;
 
-	if(queue.currentTrack) {
+	if (queue.currentTrack) {
 		const currentTrack = queue.currentTrack;
 		const isPaused = queue.node.isPaused();
-		const progressBar = isPaused ? '' : `\n${queue.node.createProgressBar({
-			length: 16,
-			queue: false,
-			timecodes: false,
-			leftChar:  '▰',
-			indicator: '',
-			rightChar: '▱',
-		})}`;
+		const progressBar = isPaused
+			? ''
+			: `\n${queue.node.createProgressBar({
+					length: 16,
+					queue: false,
+					timecodes: false,
+					leftChar: '▰',
+					indicator: '',
+					rightChar: '▱',
+				})}`;
 
 		const service = SERVICES[currentTrack.source];
 		queueEmbed = makeReplyEmbed(service.color)
 			.setThumbnail(currentTrack.thumbnail ?? request.client.user.displayAvatarURL())
 			.addFields({
-				name: `${isPaused ? '0.' : translator.getText('queueNowPlayingName')}  ⏱️ ${currentTrack.duration}${ currentTrack.requestedBy ? `  👤 ${currentTrack.requestedBy.username}` : '' }`,
+				name: `${isPaused ? '0.' : translator.getText('queueNowPlayingName')}  ⏱️ ${currentTrack.duration}${currentTrack.requestedBy ? `  👤 ${currentTrack.requestedBy.username}` : ''}`,
 				value: `[${currentTrack.title}](${currentTrack.url})${progressBar}`,
 			})
 			.setFooter({
@@ -219,58 +284,60 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 				iconURL: service.iconUrl,
 			});
 
-		switch(queue.repeatMode) {
-		case QueueRepeatMode.TRACK:
-			labels.push(translator.getText('queueDescriptionLoopTrack'));
-			break;
-		case QueueRepeatMode.QUEUE:
-			labels.push(translator.getText('queueDescriptionLoopQueue'));
-			break;
-		case QueueRepeatMode.AUTOPLAY:
-			labels.push(translator.getText('queueDescriptionLoopAutoplay'));
-			break;
+		switch (queue.repeatMode) {
+			case QueueRepeatMode.TRACK:
+				labels.push(translator.getText('queueDescriptionLoopTrack'));
+				break;
+			case QueueRepeatMode.QUEUE:
+				labels.push(translator.getText('queueDescriptionLoopQueue'));
+				break;
+			case QueueRepeatMode.AUTOPLAY:
+				labels.push(translator.getText('queueDescriptionLoopAutoplay'));
+				break;
 		}
 	} else {
-		queueEmbed = makeReplyEmbed(Colors.Blurple)
-			.setFooter({
-				text: footerText,
-				iconURL: 'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless',
-			});
+		queueEmbed = makeReplyEmbed(Colors.Blurple).setFooter({
+			text: footerText,
+			iconURL:
+				'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless',
+		});
 	}
 
-	if(queue.isShuffling)
-		labels.push(translator.getText('queueDescriptionShuffle'));
+	if (queue.isShuffling) labels.push(translator.getText('queueDescriptionShuffle'));
 
-	if(labels.length)
-		queueEmbed.setDescription(labels.join('\n'));
+	if (labels.length) queueEmbed.setDescription(labels.join('\n'));
 
 	queueEmbed
-		.addFields(...tracks.map((t, i) => ({
-			name: `${i + offset + 1}.  ⏱️ ${t.duration}${ t.requestedBy ? `  👤 ${t.requestedBy.username}` : '' }`,
-			value: `[${t.title || '<<???>>'}](${t.url})`,
-		})))
+		.addFields(
+			...tracks.map((t, i) => ({
+				name: `${i + offset + 1}.  ⏱️ ${t.duration}${t.requestedBy ? `  👤 ${t.requestedBy.username}` : ''}`,
+				value: `[${t.title || '<<???>>'}](${t.url})`,
+			})),
+		)
 		.setTimestamp(Date.now());
 
 	const compressedUserId = compressId(request.user.id);
 
 	const components = [];
 
-	if(queue.size) {
-		const menuRow = makeStringSelectMenuRowBuilder().addComponents(
+	if (queue.size) {
+		const menuRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 			new StringSelectMenuBuilder()
 				.setCustomId(`cola_dequeue_${compressedUserId}_${page}`)
 				.setPlaceholder(translator.getText('queueMenuDequeuePlaceholder'))
 				.setMaxValues(1)
-				.addOptions(tracks.map((t, i) => ({
-					label: shortenText(t.title, 48),
-					value: `${page}:${i}:${t.id}`,
-				})))
+				.addOptions(
+					tracks.map((t, i) => ({
+						label: shortenText(t.title, 48),
+						value: `${page}:${i}:${t.id}`,
+					})),
+				),
 		);
 
 		components.push(menuRow);
 
-		if(queue.size > QUEUE_PAGE_TRACKS_MAX) {
-			const navigationRow = makeButtonRowBuilder().addComponents(
+		if (queue.size > QUEUE_PAGE_TRACKS_MAX) {
+			const navigationRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`cola_showPage_FP_${compressedUserId}_0`)
 					.setEmoji('1357002075531382805')
@@ -301,29 +368,34 @@ export async function showQueuePage(request: ComplexCommandRequest | ButtonInter
 	const trackRow = getTrackActionRow(queue, page, request.user.id, fullRows);
 	components.push(trackRow);
 
-	if(fullRows) {
+	if (fullRows) {
 		const queueRow = getQueueActionRow(queue, page, request.user.id, translator);
 		components.push(queueRow);
 	}
 
 	const replyObj = {
-		embeds: [ queueEmbed ],
+		embeds: [queueEmbed],
 		components,
 	};
 	return request.editReply(replyObj);
 }
 
-function getTrackActionRow(queue: import('discord-player').GuildQueue, page: number, userId: string, fullRows: boolean) {
+function getTrackActionRow(
+	queue: import('discord-player').GuildQueue,
+	page: number,
+	userId: string,
+	fullRows: boolean,
+) {
 	const compressedUserId = compressId(userId);
 
-	const actionRow = makeButtonRowBuilder().addComponents(
+	const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
 		new ButtonBuilder()
 			.setCustomId(`cola_add_${compressedUserId}_${page}`)
 			.setEmoji('1291900911643263008')
 			.setStyle(ButtonStyle.Success),
 	);
 
-	if(!queue)
+	if (!queue)
 		return actionRow.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`cola_showPage_CU_${compressedUserId}_${page}`)
@@ -331,16 +403,16 @@ function getTrackActionRow(queue: import('discord-player').GuildQueue, page: num
 				.setStyle(ButtonStyle.Primary),
 		);
 
-	if(queue.currentTrack) {
+	if (queue.currentTrack) {
 		const pauseOrResumeButton = queue.node.isPaused()
 			? new ButtonBuilder()
-				.setCustomId(`cola_resume_${compressedUserId}_${page}`)
-				.setEmoji('1356977685468942416')
-				.setStyle(ButtonStyle.Primary)
+					.setCustomId(`cola_resume_${compressedUserId}_${page}`)
+					.setEmoji('1356977685468942416')
+					.setStyle(ButtonStyle.Primary)
 			: new ButtonBuilder()
-				.setCustomId(`cola_pause_${compressedUserId}_${page}`)
-				.setEmoji('1356977691122995371')
-				.setStyle(ButtonStyle.Primary);
+					.setCustomId(`cola_pause_${compressedUserId}_${page}`)
+					.setEmoji('1356977691122995371')
+					.setStyle(ButtonStyle.Primary);
 
 		actionRow.addComponents(
 			pauseOrResumeButton,
@@ -365,10 +437,15 @@ function getTrackActionRow(queue: import('discord-player').GuildQueue, page: num
 	return actionRow;
 }
 
-function getQueueActionRow(queue: GuildQueue, page: number, userId: string, translator: Translator) {
+function getQueueActionRow(
+	queue: GuildQueue,
+	page: number,
+	userId: string,
+	translator: Translator,
+) {
 	const compressedUserId = compressId(userId);
 
-	const actionRow = makeButtonRowBuilder().addComponents(
+	const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
 		new ButtonBuilder()
 			.setCustomId(`cola_autoplay_${compressedUserId}_${page}`)
 			.setEmoji('1360868342411427892')
@@ -383,7 +460,7 @@ function getQueueActionRow(queue: GuildQueue, page: number, userId: string, tran
 			.setStyle(ButtonStyle.Primary),
 	);
 
-	if(queue.size)
+	if (queue.size)
 		actionRow.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`cola_clearQueue_${compressedUserId}`)
@@ -402,6 +479,6 @@ export function getPageAndNumberTrackIndex(page: number, num: number) {
 
 export function isPlayerUnavailable(targetChannel: BaseGuildVoiceChannel) {
 	const playerChannel = targetChannel.guild?.members?.me?.voice?.channel;
-	if(!playerChannel) return false;
+	if (!playerChannel) return false;
 	return playerChannel.id !== targetChannel.id;
 }

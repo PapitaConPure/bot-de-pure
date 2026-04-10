@@ -39,7 +39,7 @@ const {
 } = require('./commons.js');
 
 function invalidToLanguage(value) {
-	if(value == undefined) return 'Nada';
+	if(value == null) return 'Nada';
 	if(isNaN(value)) return 'Innumerable';
 	if(!isFinite(value)) return 'Infinito';
 	return 'Desconocido';
@@ -147,7 +147,7 @@ class TuberInterpreter {
 			const statement = JSON.parse(JSON.stringify(body[i]));
 			let statementName = ParserToLanguageType.get((statement.type === ParserStatementNodeTypes.Expression) ? (statement.expression?.type ?? statement.type) : statement.type);
 			
-			if(statementName == undefined) {
+			if(statementName == null) {
 				const fallback = 'expresión posterior a muchas sentencias';
 				statementName = lastStatementName.length > 64 || lastStatementName === fallback
 					? fallback
@@ -286,7 +286,7 @@ class TuberInterpreter {
 				throw this.#TuberInterpreterError('Se esperaba un identificador de elemento de Lista en estructura PARA CADA');
 
 			for(let element of list.elements) {
-				if(element == undefined) continue;
+				if(element == null) continue;
 				const blockScope = new TuberScope(scope);
 				blockScope.assignVariable(assertedNode.element.name, element);
 				
@@ -508,7 +508,7 @@ class TuberInterpreter {
 	 * @param {TuberScope} scope 
 	 */
 	#evaluate(node, scope, mustBeDeclared = false) {
-		if(node == undefined)
+		if(node == null)
 			return makeNada();
 
 		let evaluation;
@@ -878,8 +878,8 @@ class TuberInterpreter {
 				result = fn.call(args, this.#currentStatement, functionScope, this.#request);
 		} else {
 			for(let i = 0; i < Math.max(fn.arguments.length, args.length); i++) {
-				if(fn.arguments[i] == undefined) continue;
-				if(args[i] == undefined) {
+				if(fn.arguments[i] == null) continue;
+				if(args[i] == null) {
 					functionScope.declareVariable(fn.arguments[i].name, RuntimeNodeTypes.Nada);
 					if(fn.arguments[i].default)
 						functionScope.assignVariable(fn.arguments[i].name, this.#evaluate(fn.arguments[i].default, functionScope));

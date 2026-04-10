@@ -1,5 +1,5 @@
-import { CommandTags, Command } from '../commons';
 import { searchAndReplyWithPost } from '@/systems/booru/boorusend';
+import { Command, CommandTags } from '../commons';
 import { searchCommandOptions } from './buscar';
 
 const tags = new CommandTags().add('COMMON');
@@ -12,6 +12,12 @@ const command = new Command('vtubers', tags)
 		'**Nota:** en canales NSFW, los resultados serán NSFW',
 	)
 	.setOptions(searchCommandOptions)
-	.setExecution((request, args) => searchAndReplyWithPost(request, args, { cmdtag: 'virtual_youtuber', sfwtitle: 'Vtubers', nsfwtitle: 'Vtubas' }));
+	.setExecution((request, args) =>
+		searchAndReplyWithPost(request, args, {
+			cmdtag: 'virtual_youtuber',
+			sfwtitle: 'Vtubers',
+			nsfwtitle: 'Vtubas',
+		}),
+	);
 
 export default command;

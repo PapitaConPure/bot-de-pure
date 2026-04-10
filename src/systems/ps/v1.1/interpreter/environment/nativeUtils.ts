@@ -1,46 +1,84 @@
-import type { RuntimeValue, AssertedRuntimeValue, RuntimeInternalValue, ValueKind, FunctionValue, NativeFunction, NadaValue} from '../values';
-import { ValueKinds, ValueKindTranslationLookups, makeList, makeRegistry, makeEmbed, makeFunction, makeNativeFunction, makeNada, valueMakers, coerceValue, isOperable, isValidText } from '../values';
+import type {
+	RuntimeValue,
+	AssertedRuntimeValue,
+	RuntimeInternalValue,
+	ValueKind,
+	FunctionValue,
+	NativeFunction,
+	NadaValue,
+} from '../values';
+import {
+	ValueKinds,
+	ValueKindTranslationLookups,
+	makeList,
+	makeRegistry,
+	makeEmbed,
+	makeFunction,
+	makeNativeFunction,
+	makeNada,
+	valueMakers,
+	coerceValue,
+	isOperable,
+	isValidText,
+} from '../values';
 import type { ArgumentExpression } from '../../ast/expressions';
 import type { BlockStatement } from '../../ast/statements';
 import type { EmbedData } from '../../embedData';
 import type { Scope } from '../scope';
 
-export const psFileRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_/.0-9#:?=&;,]*\.(txt|png|jpg|jpeg|webp|gif|webm|mp4|mp3|wav|flac|ogg)[a-zA-Z-_.0-9#:?=&;,]*/i;
-export const psImageRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_/.0-9#:?=&;,]*\.(png|jpg|jpeg|webp)[a-zA-Z-_.0-9#:?=&;,]*/i;
-export const psLinkRegex = /(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}(\/[a-zA-Z-_/.0-9#:?=&;,]*)?/i;
+export const psFileRegex =
+	/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_/.0-9#:?=&;,]*\.(txt|png|jpg|jpeg|webp|gif|webm|mp4|mp3|wav|flac|ogg)[a-zA-Z-_.0-9#:?=&;,]*/i;
+export const psImageRegex =
+	/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_/.0-9#:?=&;,]*\.(png|jpg|jpeg|webp)[a-zA-Z-_.0-9#:?=&;,]*/i;
+export const psLinkRegex =
+	/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}(\/[a-zA-Z-_/.0-9#:?=&;,]*)?/i;
 
-export function makeKindFromValue<TKind extends ValueKind>(kind: TKind, ...values: [ RuntimeInternalValue<TKind>, ...unknown[] ]): AssertedRuntimeValue<TKind> {
-	switch(kind) {
-	case ValueKinds.NUMBER:
-	case ValueKinds.TEXT:
-	case ValueKinds.BOOLEAN: {
-		const valueMaker = valueMakers[kind];
-		return valueMaker(values[0]);
-	}
+export function makeKindFromValue<TKind extends ValueKind>(
+	kind: TKind,
+	...values: [RuntimeInternalValue<TKind>, ...unknown[]]
+): AssertedRuntimeValue<TKind> {
+	switch (kind) {
+		case ValueKinds.NUMBER:
+		case ValueKinds.TEXT:
+		case ValueKinds.BOOLEAN: {
+			const valueMaker = valueMakers[kind];
+			return valueMaker(values[0]);
+		}
 
-	case ValueKinds.LIST:
-		return makeList(Array.isArray(values[0]) ? values[0] : (values as RuntimeValue[])) as AssertedRuntimeValue<TKind>;
+		case ValueKinds.LIST:
+			return makeList(
+				Array.isArray(values[0]) ? values[0] : (values as RuntimeValue[]),
+			) as AssertedRuntimeValue<TKind>;
 
-	case ValueKinds.REGISTRY:
-		return makeRegistry(values[0] as Map<string, RuntimeValue>) as AssertedRuntimeValue<TKind>;
+		case ValueKinds.REGISTRY:
+			return makeRegistry(
+				values[0] as Map<string, RuntimeValue>,
+			) as AssertedRuntimeValue<TKind>;
 
-	case ValueKinds.NATIVE_FN:
-		return makeNativeFunction(null, values[0] as NativeFunction) as AssertedRuntimeValue<TKind>;
+		case ValueKinds.NATIVE_FN:
+			return makeNativeFunction(
+				null,
+				values[0] as NativeFunction,
+			) as AssertedRuntimeValue<TKind>;
 
-	case ValueKinds.FUNCTION:
-		return makeFunction(values[0] as unknown as BlockStatement, values[1] as ArgumentExpression[], values[2] as Scope) as AssertedRuntimeValue<TKind>;
+		case ValueKinds.FUNCTION:
+			return makeFunction(
+				values[0] as unknown as BlockStatement,
+				values[1] as ArgumentExpression[],
+				values[2] as Scope,
+			) as AssertedRuntimeValue<TKind>;
 
-	case ValueKinds.EMBED: {
-		const embed = makeEmbed();
-		embed.value = values[0] as EmbedData;
-		return;
-	}
+		case ValueKinds.EMBED: {
+			const embed = makeEmbed();
+			embed.value = values[0] as EmbedData;
+			return;
+		}
 
-	case ValueKinds.NADA:
-		return makeNada() as AssertedRuntimeValue<TKind>;
+		case ValueKinds.NADA:
+			return makeNada() as AssertedRuntimeValue<TKind>;
 
-	default:
-		throw 'Tipo de dato inválido al intentar crear un RuntimeValue desde tipo de dato y valor primitivo';
+		default:
+			throw 'Tipo de dato inválido al intentar crear un RuntimeValue desde tipo de dato y valor primitivo';
 	}
 }
 
@@ -50,12 +88,21 @@ export function makeKindFromValue<TKind extends ValueKind>(kind: TKind, ...value
  * @param kind El tipo de valor del argumento de la Función nativa.
  * @param scope El {@link Scope} de la Función nativa que llama esta función.
  */
-function verifyParam<TKind extends ValueKind>(name: string, coerced: AssertedRuntimeValue<TKind>, kind: TKind, scope: Scope) {
-	if(kind === ValueKinds.NUMBER && !isOperable(coerced))
-		throw scope.interpreter.TuberInterpreterError(`Se recibió un valor inválido para parámetro de tipo **Número**: \`${name}\``);
+function verifyParam<TKind extends ValueKind>(
+	name: string,
+	coerced: AssertedRuntimeValue<TKind>,
+	kind: TKind,
+	scope: Scope,
+) {
+	if (kind === ValueKinds.NUMBER && !isOperable(coerced))
+		throw scope.interpreter.TuberInterpreterError(
+			`Se recibió un valor inválido para parámetro de tipo **Número**: \`${name}\``,
+		);
 
-	if(kind === ValueKinds.TEXT && !isValidText(coerced))
-		throw scope.interpreter.TuberInterpreterError(`Se recibió un valor inválido para parámetro de tipo **Texto**: \`${name}\``);
+	if (kind === ValueKinds.TEXT && !isValidText(coerced))
+		throw scope.interpreter.TuberInterpreterError(
+			`Se recibió un valor inválido para parámetro de tipo **Texto**: \`${name}\``,
+		);
 }
 
 /**
@@ -68,12 +115,21 @@ function verifyParam<TKind extends ValueKind>(name: string, coerced: AssertedRun
  * @param kind El tipo de valor del argumento de la Función nativa.
  * @param scope El {@link Scope} de la Función nativa que llama esta función.
  */
-export function expectParam<TKind extends ValueKind>(name: string, value: RuntimeValue, kind: TKind, scope: Scope): AssertedRuntimeValue<TKind> {
-	if(value == null)
-		throw scope.interpreter.TuberInterpreterError(`Se esperaba un valor para el parámetro requerido \`${name}\` en Función nativa`);
+export function expectParam<TKind extends ValueKind>(
+	name: string,
+	value: RuntimeValue,
+	kind: TKind,
+	scope: Scope,
+): AssertedRuntimeValue<TKind> {
+	if (value == null)
+		throw scope.interpreter.TuberInterpreterError(
+			`Se esperaba un valor para el parámetro requerido \`${name}\` en Función nativa`,
+		);
 
-	if(value.kind === ValueKinds.NADA)
-		throw scope.interpreter.TuberInterpreterError(`Se esperaba un **${ValueKindTranslationLookups.get(kind)}** para el parámetro requerido \`${name}\` en Función nativa, pero se recibió **Nada**`);
+	if (value.kind === ValueKinds.NADA)
+		throw scope.interpreter.TuberInterpreterError(
+			`Se esperaba un **${ValueKindTranslationLookups.get(kind)}** para el parámetro requerido \`${name}\` en Función nativa, pero se recibió **Nada**`,
+		);
 
 	const coerced = coerceValue(scope.interpreter, value, kind);
 	verifyParam(name, coerced, kind, scope);
@@ -96,8 +152,14 @@ export function expectParam<TKind extends ValueKind>(name: string, value: Runtim
  * @param scope El {@link Scope} de la Función nativa que llama esta función.
  * @param {...*} fallback Definición del valor por defecto. Para la mayoría de tipos, solo se pasa un parámetro que es meramente el valor. Para Listas puedes pasar un argumento de Array o varios argumentos de sus elementos. Para tipos de Función no-nativa, se pasan el cuerpo de la Función, los argumentos y el {@link Scope} de la misma.
  */
-export function getParamOrDefault<TKind extends ValueKind>(name: string, value: RuntimeValue, kind: TKind, scope: Scope, ...fallback: [ RuntimeInternalValue<TKind>, ...unknown[] ]): AssertedRuntimeValue<TKind> {
-	if(value == null || value.kind === ValueKinds.NADA)
+export function getParamOrDefault<TKind extends ValueKind>(
+	name: string,
+	value: RuntimeValue,
+	kind: TKind,
+	scope: Scope,
+	...fallback: [RuntimeInternalValue<TKind>, ...unknown[]]
+): AssertedRuntimeValue<TKind> {
+	if (value == null || value.kind === ValueKinds.NADA)
 		return makeKindFromValue(kind, ...fallback);
 
 	const coerced = coerceValue(scope.interpreter, value, kind);
@@ -120,27 +182,24 @@ export function getParamOrDefault<TKind extends ValueKind>(name: string, value: 
  * @param kind El tipo de valor del argumento de la Función nativa.
  * @param scope El {@link Scope} de la Función nativa que llama esta función.
  */
-export function getParamOrNada<TKind extends ValueKind>(name, value: RuntimeValue, kind: TKind, scope: Scope): [ false, NadaValue ] | [ true, AssertedRuntimeValue<TKind> ] {
-	if(value == null)
-		return [
-			false,
-			makeNada(),
-		];
+export function getParamOrNada<TKind extends ValueKind>(
+	name,
+	value: RuntimeValue,
+	kind: TKind,
+	scope: Scope,
+): [false, NadaValue] | [true, AssertedRuntimeValue<TKind>] {
+	if (value == null) return [false, makeNada()];
 
 	const coerced = coerceValue(scope.interpreter, value, kind);
 	verifyParam(name, coerced, kind, scope);
 
-	return [
-		true,
-		coerced,
-	];
+	return [true, coerced];
 }
 
 export function calculatePositionOffset(value: number, length: number) {
 	value = Math.floor(value);
 
-	if(value < 0)
-		value = length + value;
+	if (value < 0) value = length + value;
 
 	return value;
 }
@@ -149,14 +208,22 @@ export function calculatePositionOffset(value: number, length: number) {
  * Dispone una evaluación de llamado de PuréScript por medio de una Función nativa
  * @returns Una Función que recibe parámetros RuntimeValue y realiza una evaluación de PuréScript
  */
-export function makePredicateFn(name: string, fn: FunctionValue, scope: Scope): (...args: RuntimeValue[]) => RuntimeValue {
+export function makePredicateFn(
+	name: string,
+	fn: FunctionValue,
+	scope: Scope,
+): (...args: RuntimeValue[]) => RuntimeValue {
 	const it = scope.interpreter;
 
-	if(fn == null)
-		throw it.TuberInterpreterError(`Se esperaba un valor para el parámetro requerido \`${name}\` en Función nativa`);
+	if (fn == null)
+		throw it.TuberInterpreterError(
+			`Se esperaba un valor para el parámetro requerido \`${name}\` en Función nativa`,
+		);
 
-	if(!it.isAnyOf(fn, ValueKinds.FUNCTION, ValueKinds.NATIVE_FN))
-		throw it.TuberInterpreterError(`Se esperaba una Función para el parámetro requerido \`${name}\` en Función nativa`);
+	if (!it.isAnyOf(fn, ValueKinds.FUNCTION, ValueKinds.NATIVE_FN))
+		throw it.TuberInterpreterError(
+			`Se esperaba una Función para el parámetro requerido \`${name}\` en Función nativa`,
+		);
 
 	return (...args) => it.callFunction(fn, args, scope);
 }

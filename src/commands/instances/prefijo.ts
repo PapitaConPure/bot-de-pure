@@ -1,19 +1,16 @@
 import { EmbedBuilder } from 'discord.js';
+import { prefixes, tenshiColor } from '@/data/globalProps';
 import { shortenText } from '@/func';
 import PrefixPair from '@/models/prefixpair';
-import { prefixes, tenshiColor } from '@/data/globalProps';
 import { p_pure } from '@/utils/prefixes';
-import { CommandOptions, CommandTags, Command } from '../commons';
+import { Command, CommandOptions, CommandTags } from '../commons';
 import { CommandPermissions } from '../commons/cmdPerms';
 
 const perms = new CommandPermissions('ManageGuild');
-const flags = new CommandTags().add(
-	'COMMON',
-	'MOD',
-);
+const flags = new CommandTags().add('COMMON', 'MOD');
 const options = new CommandOptions()
 	.addParam('prefijo', 'TEXT', 'para cambiar el prefijo del servidor', { optional: true })
-	.addFlag('r', [ 'reestablecer', 'reiniciar', 'reset' ], 'para volver al prefijo por defecto');
+	.addFlag('r', ['reestablecer', 'reiniciar', 'reset'], 'para volver al prefijo por defecto');
 
 const command = new Command('prefijo', flags)
 	.setAliases('prefix', 'pf')
@@ -25,18 +22,18 @@ const command = new Command('prefijo', flags)
 		const guildsearch = { guildId: request.guildId };
 		const { raw: preraw, regex: preregex } = p_pure(request.guildId);
 
-		if(reset) {
+		if (reset) {
 			await PrefixPair.findOneAndRemove(guildsearch);
 			prefixes[request.guildId] = null;
 			return request.reply({
 				content:
-					'Prefijo reestablecido a la configuración por defecto.\n' +
-					`\`${prefixes['0'].raw}\` <:arrowl:681963688361590897> \`${preraw}\``,
+					'Prefijo reestablecido a la configuración por defecto.\n'
+					+ `\`${prefixes['0'].raw}\` <:arrowl:681963688361590897> \`${preraw}\``,
 			});
 		}
 
 		const prefix = args.getString('prefijo');
-		if(!prefix) {
+		if (!prefix) {
 			const embed = new EmbedBuilder()
 				.setColor(tenshiColor)
 				.setFooter({ text: `Usa "${preraw}ayuda" para más información` })
@@ -53,15 +50,19 @@ const command = new Command('prefijo', flags)
 					},
 				);
 
-			return request.reply({ embeds: [ embed ] });
+			return request.reply({ embeds: [embed] });
 		}
 
 		await PrefixPair.findOneAndRemove(guildsearch);
 		const pfpair = (await PrefixPair.findOne(guildsearch)) || new PrefixPair(guildsearch);
-		const regex = new RegExp(`^${prefix.replace(/[a-z]/g, l => `[${l.toUpperCase()}${l}]`).replace('\\', '\\\\')}[\n ]*`);
+		const regex = new RegExp(
+			`^${prefix.replace(/[a-z]/g, (l) => `[${l.toUpperCase()}${l}]`).replace('\\', '\\\\')}[\n ]*`,
+		);
 		prefixes[request.guildId] = {
-			raw: pfpair.pure.raw = prefix,
-			regex: pfpair.pure.regex = regex,
+			// biome-ignore lint/suspicious/noAssignInExpressions: Asignación múltiple
+			raw: (pfpair.pure.raw = prefix),
+			// biome-ignore lint/suspicious/noAssignInExpressions: Asignación múltiple
+			regex: (pfpair.pure.regex = regex),
 		};
 		await pfpair.save();
 		return request.reply({
@@ -69,7 +70,7 @@ const command = new Command('prefijo', flags)
 				'Prefijo cambiado',
 				`\`${preraw}\` <:arrowr:681963688411922460> \`${pfpair.pure.raw}\``,
 				`||Expresión Regular (avanzado): \`${shortenText(regex.toString(), 500)}\`||`,
-			].join('\n')
+			].join('\n'),
 		});
 	});
 

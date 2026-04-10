@@ -1,8 +1,39 @@
-import { parsePrimaryExpression, parseUnaryExpression, parseBinaryExpression, parseCastExpression, parseArrowExpression, parseCallExpression, parseFunctionExpression, parseSequenceExpression, parseConditionalExpression, parseLambdaExpression, parseGroupExpression } from './syntax/expressionParsing';
-import { parseBlockStatement, parseConditionalStatement, parseWhileLoopStatement, parseDoWhileLoopStatement, parseRepeatLoopStatement, parseForEachLoopStatement, parseForLoopStatement, parseExpressionStatement, parseReadStatement, parseDeclarationStatement, parseSaveStatement, parseAssignmentStatement, parseExtendStatement, parseDeleteStatement, parseReturnStatement, parseEndStatement, parseStopStatement, parseSendStatement } from './syntax/statementParsing';
+import {
+	parsePrimaryExpression,
+	parseUnaryExpression,
+	parseBinaryExpression,
+	parseCastExpression,
+	parseArrowExpression,
+	parseCallExpression,
+	parseFunctionExpression,
+	parseSequenceExpression,
+	parseConditionalExpression,
+	parseLambdaExpression,
+	parseGroupExpression,
+} from './syntax/expressionParsing';
+import {
+	parseBlockStatement,
+	parseConditionalStatement,
+	parseWhileLoopStatement,
+	parseDoWhileLoopStatement,
+	parseRepeatLoopStatement,
+	parseForEachLoopStatement,
+	parseForLoopStatement,
+	parseExpressionStatement,
+	parseReadStatement,
+	parseDeclarationStatement,
+	parseSaveStatement,
+	parseAssignmentStatement,
+	parseExtendStatement,
+	parseDeleteStatement,
+	parseReturnStatement,
+	parseEndStatement,
+	parseStopStatement,
+	parseSendStatement,
+} from './syntax/statementParsing';
 import type { BindingPower, Associativity } from '../ast';
 import { BindingPowers, Associativities } from '../ast';
-import type { TokenKind} from '../lexer/tokens';
+import type { TokenKind } from '../lexer/tokens';
 import { TokenKinds } from '../lexer/tokens';
 import type { Expression } from '../ast/expressions';
 import type { Statement } from '../ast/statements';
@@ -12,7 +43,12 @@ export type StatementHandler = (parser: Parser) => Statement;
 
 export type NuDHandler = (parser: Parser) => Expression;
 
-export type LeDHandler = (parser: Parser, left: Expression, bp: BindingPower, ass: Associativity) => Expression;
+export type LeDHandler = (
+	parser: Parser,
+	left: Expression,
+	bp: BindingPower,
+	ass: Associativity,
+) => Expression;
 
 export const stmtLookup = new Map<TokenKind, StatementHandler>();
 export const nudLookup = new Map<TokenKind, NuDHandler>();
@@ -66,12 +102,27 @@ export function createLookups() {
 
 	//Asignación y Misceláneo
 	led(TokenKinds.LAMBDA, BindingPowers.ASSIGNMENT, Associativities.RIGHT, parseLambdaExpression);
-	led(TokenKinds.QUESTION, BindingPowers.ASSIGNMENT, Associativities.RIGHT, parseConditionalExpression);
+	led(
+		TokenKinds.QUESTION,
+		BindingPowers.ASSIGNMENT,
+		Associativities.RIGHT,
+		parseConditionalExpression,
+	);
 	led(TokenKinds.AFTER, BindingPowers.ASSIGNMENT, Associativities.LEFT, parseBinaryExpression);
 
 	//Lógico
-	led(TokenKinds.OR, BindingPowers.LOGICAL_DISJUNCTION, Associativities.LEFT, parseBinaryExpression);
-	led(TokenKinds.AND, BindingPowers.LOGICAL_CONJUNCTION, Associativities.LEFT, parseBinaryExpression);
+	led(
+		TokenKinds.OR,
+		BindingPowers.LOGICAL_DISJUNCTION,
+		Associativities.LEFT,
+		parseBinaryExpression,
+	);
+	led(
+		TokenKinds.AND,
+		BindingPowers.LOGICAL_CONJUNCTION,
+		Associativities.LEFT,
+		parseBinaryExpression,
+	);
 
 	//Equitativo
 	led(TokenKinds.EQUALS, BindingPowers.EQUALITY, Associativities.LEFT, parseBinaryExpression);
@@ -81,9 +132,19 @@ export function createLookups() {
 
 	//Relacional
 	led(TokenKinds.LESS, BindingPowers.RELATIONAL, Associativities.LEFT, parseBinaryExpression);
-	led(TokenKinds.LESS_EQUALS, BindingPowers.RELATIONAL, Associativities.LEFT, parseBinaryExpression);
+	led(
+		TokenKinds.LESS_EQUALS,
+		BindingPowers.RELATIONAL,
+		Associativities.LEFT,
+		parseBinaryExpression,
+	);
 	led(TokenKinds.GREATER, BindingPowers.RELATIONAL, Associativities.LEFT, parseBinaryExpression);
-	led(TokenKinds.GREATER_EQUALS, BindingPowers.RELATIONAL, Associativities.LEFT, parseBinaryExpression);
+	led(
+		TokenKinds.GREATER_EQUALS,
+		BindingPowers.RELATIONAL,
+		Associativities.LEFT,
+		parseBinaryExpression,
+	);
 
 	//Aditivo
 	led(TokenKinds.PLUS, BindingPowers.ADDITIVE, Associativities.LEFT, parseBinaryExpression);
@@ -91,12 +152,27 @@ export function createLookups() {
 
 	//Multiplicativo
 	led(TokenKinds.STAR, BindingPowers.MULTIPLICATIVE, Associativities.LEFT, parseBinaryExpression);
-	led(TokenKinds.SLASH, BindingPowers.MULTIPLICATIVE, Associativities.LEFT, parseBinaryExpression);
-	led(TokenKinds.PERCENT, BindingPowers.MULTIPLICATIVE, Associativities.LEFT, parseBinaryExpression);
+	led(
+		TokenKinds.SLASH,
+		BindingPowers.MULTIPLICATIVE,
+		Associativities.LEFT,
+		parseBinaryExpression,
+	);
+	led(
+		TokenKinds.PERCENT,
+		BindingPowers.MULTIPLICATIVE,
+		Associativities.LEFT,
+		parseBinaryExpression,
+	);
 
 	//Exponencial
 	led(TokenKinds.CARET, BindingPowers.EXPONENTIAL, Associativities.RIGHT, parseBinaryExpression);
-	led(TokenKinds.DOUBLE_STAR, BindingPowers.EXPONENTIAL, Associativities.RIGHT, parseBinaryExpression);
+	led(
+		TokenKinds.DOUBLE_STAR,
+		BindingPowers.EXPONENTIAL,
+		Associativities.RIGHT,
+		parseBinaryExpression,
+	);
 
 	//Unarios
 	nud(TokenKinds.NOT, parseUnaryExpression);
@@ -111,7 +187,7 @@ export function createLookups() {
 
 	//Miembros
 	led(TokenKinds.ARROW, BindingPowers.MEMBER, Associativities.LEFT, parseArrowExpression);
-	led(TokenKinds.DOT,   BindingPowers.MEMBER, Associativities.LEFT, parseArrowExpression);
+	led(TokenKinds.DOT, BindingPowers.MEMBER, Associativities.LEFT, parseArrowExpression);
 
 	//Primarios
 	nud(TokenKinds.LIT_NUMBER, parsePrimaryExpression);

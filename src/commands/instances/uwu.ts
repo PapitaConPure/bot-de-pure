@@ -1,23 +1,20 @@
 import { randInArray } from '@/func';
-import { CommandOptions, CommandTags, Command } from '../commons';
+import { Command, CommandOptions, CommandTags } from '../commons';
 
 const uwusopt = [
 	'<:uwu:681935702308552730>',
 	'<:uwu2:681936445958914128>',
 	'<:uwu3:681937073401233537>',
 	'<:uwu4:681937074047549467>',
-	'<:uwu5:720506981743460472>'
+	'<:uwu5:720506981743460472>',
 ];
 
 const options = new CommandOptions()
 	.addParam('uwu', { name: 'uwu', expression: 'uwu' }, 'uwu', { optional: true })
 	.addFlag('u', 'uwuwu', 'uwu')
-	.addFlag('bd', [ 'borrar', 'delete' ], 'para borrar el mensaje original');
+	.addFlag('bd', ['borrar', 'delete'], 'para borrar el mensaje original');
 
-const tags = new CommandTags().add(
-	'MEME',
-	'EMOTE',
-);
+const tags = new CommandTags().add('MEME', 'EMOTE');
 
 const command = new Command('uwu', tags)
 	.setAliases('uwu')
@@ -27,7 +24,7 @@ const command = new Command('uwu', tags)
 		const deleteOriginal = args.hasFlag('borrar');
 		const randomUwu = randInArray(uwusopt);
 
-		if(deleteOriginal && request.isMessage) {
+		if (deleteOriginal && request.isMessage) {
 			return Promise.all([
 				request.channel.send({ content: randomUwu }).catch(console.error),
 				request.delete().catch(console.error),

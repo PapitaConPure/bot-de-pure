@@ -1,16 +1,18 @@
-import { EmbedBuilder, Colors, AttachmentBuilder } from 'discord.js';
-import { CommandTags, Command } from '../commons';
+import { AttachmentBuilder, Colors, EmbedBuilder } from 'discord.js';
 import { fetchExt } from '@/utils/fetchext';
+import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
 
 const command = new Command('café', tags)
 	.setAliases('cafe', 'cafecito', 'coffee', 'cawfee')
 	.setLongDescription('Muestra imágenes de café. API: https://coffee.alexflipnote.dev')
-	.setExecution(async request => {
-		const fetchResult = await fetchExt('https://coffee.alexflipnote.dev/random', { type: 'buffer' });
+	.setExecution(async (request) => {
+		const fetchResult = await fetchExt('https://coffee.alexflipnote.dev/random', {
+			type: 'buffer',
+		});
 
-		if(!fetchResult.success) {
+		if (!fetchResult.success) {
 			return request.reply({
 				embeds: [
 					new EmbedBuilder()
@@ -20,7 +22,7 @@ const command = new Command('café', tags)
 			});
 		}
 
-		if(!fetchResult.response.ok) {
+		if (!fetchResult.response.ok) {
 			return request.reply({
 				embeds: [
 					new EmbedBuilder()
@@ -39,9 +41,7 @@ const command = new Command('café', tags)
 					.setTitle('Café ☕')
 					.setImage('attachment://cawfee.png'),
 			],
-			files: [
-				new AttachmentBuilder(image, { name: 'cawfee.png' })
-			],
+			files: [new AttachmentBuilder(image, { name: 'cawfee.png' })],
 		};
 
 		return request.reply(replyBody);

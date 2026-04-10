@@ -1,16 +1,23 @@
-import { ContextMenuAction } from '../commons/actionBuilder';
-import { MessageFlags, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	EmbedBuilder,
+	MessageFlags,
+} from 'discord.js';
 import { emojiRegex } from '@/func';
 import { Translator } from '@/i18n';
+import { ContextMenuAction } from '../commons/actionBuilder';
 
-const action = new ContextMenuAction('actionGetEmojis', 'Message')
-	.setMessageResponse(async interaction => {
+const action = new ContextMenuAction('actionGetEmojis', 'Message').setMessageResponse(
+	async (interaction) => {
 		const message = interaction.targetMessage;
 		const uid = interaction.user.id;
+		// biome-ignore lint/correctness/noUnusedVariables: TODO: Traducir
 		const translator = await Translator.from(uid);
 
 		const emojisMatches = message.content.matchAll(emojiRegex);
-		if(!emojisMatches)
+		if (!emojisMatches)
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: 'No se encontraron emotes...',
@@ -19,11 +26,11 @@ const action = new ContextMenuAction('actionGetEmojis', 'Message')
 		const embeds: EmbedBuilder[] = [];
 		const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
-		for(const emojiMatch of emojisMatches) {
-			if(embeds.length >= 25) continue;
+		for (const emojiMatch of emojisMatches) {
+			if (embeds.length >= 25) continue;
 
 			const emoji = interaction.client.emojis.resolve(emojiMatch[1]);
-			if(!emoji) continue;
+			if (!emoji) continue;
 
 			const embed = new EmbedBuilder()
 				.setColor('Blurple')
@@ -41,7 +48,7 @@ const action = new ContextMenuAction('actionGetEmojis', 'Message')
 				.setLabel(emoji.name)
 				.setStyle(ButtonStyle.Link);
 
-			if(components.length && components[components.length - 1].components.length < 5) {
+			if (components.length && components[components.length - 1].components.length < 5) {
 				components[components.length - 1].addComponents(button);
 			} else {
 				const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button);
@@ -49,13 +56,15 @@ const action = new ContextMenuAction('actionGetEmojis', 'Message')
 			}
 		}
 
-		if(!embeds.length)
+		if (!embeds.length)
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
-				content: '⚠️️ Los emotes mencionados son inválidos o inaccesibles. Verifica que yo esté en el servidor con el emote',
+				content:
+					'⚠️️ Los emotes mencionados son inválidos o inaccesibles. Verifica que yo esté en el servidor con el emote',
 			});
 
 		return interaction.reply({ embeds, components });
-	});
+	},
+);
 
 export default action;

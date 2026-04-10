@@ -1,16 +1,16 @@
-import BooruTags from '@/models/boorutags';
-import { shuffleArray, decodeEntities } from '@/func';
-import { noDataBase } from '@/data/globalProps';
 import type { ValuesOf } from 'types';
+import { noDataBase } from '@/data/globalProps';
+import { decodeEntities, shuffleArray } from '@/func';
+import BooruTags from '@/models/boorutags';
 import type { FetchResult } from '@/utils/fetchext';
 import { fetchExt } from '@/utils/fetchext';
 
-export const PostRating = ({
+export const PostRating = {
 	General: 'general',
 	Sensitive: 'sensitive',
 	Questionable: 'questionable',
 	Explicit: 'explicit',
-}) as const;
+} as const;
 type Rating = ValuesOf<typeof PostRating>;
 
 export interface APIPostData {
@@ -36,15 +36,15 @@ export interface APIPostData {
 export type PostResolvable = Post | APIPostData;
 
 /**@satisfies {Record<string, number>}*/
-export const TagTypes = ({
-	GENERAL:    0,
-	ARTIST:     1,
-	UNKNOWN:    2,
-	COPYRIGHT:  3,
-	CHARACTER:  4,
-	METADATA:   5,
+export const TagTypes = {
+	GENERAL: 0,
+	ARTIST: 1,
+	UNKNOWN: 2,
+	COPYRIGHT: 3,
+	CHARACTER: 4,
+	METADATA: 5,
 	DEPRECATED: 6,
-}) as const;
+} as const;
 export type TagType = ValuesOf<typeof TagTypes>;
 
 interface APITagData {
@@ -86,9 +86,9 @@ interface BooruSearchOptions {
 
 /**@class Representa una conexión a un sitio Booru.*/
 export class Booru {
-	static readonly API_URI       = 'https://gelbooru.com/index.php';
+	static readonly API_URI = 'https://gelbooru.com/index.php';
 	static readonly API_POSTS_URL = 'https://gelbooru.com/index.php';
-	static readonly API_TAGS_URL  = 'https://gelbooru.com/index.php?page=dapi&s=tag&q=index';
+	static readonly API_TAGS_URL = 'https://gelbooru.com/index.php?page=dapi&s=tag&q=index';
 
 	static readonly POSTS_API = Booru.#createBooruEndpoint({
 		//timeout: 10000,
@@ -106,9 +106,9 @@ export class Booru {
 		json: '1',
 	});
 
-	static readonly TAGS_SEMAPHORE_MAX: number  = 100_000_000;
+	static readonly TAGS_SEMAPHORE_MAX: number = 100_000_000;
 	static readonly TAGS_CACHE_LIFETIME: number = 4 * 60 * 60e3;
-	static readonly TAGS_DB_LIFETIME: number    = 4 * 60 * 60e3; //De momento, exactamente igual que la vida en caché
+	static readonly TAGS_DB_LIFETIME: number = 4 * 60 * 60e3; //De momento, exactamente igual que la vida en caché
 
 	static tagsCache: Map<string, Tag> = new Map();
 	static tagsSemaphoreCount: number = 0;
@@ -124,14 +124,14 @@ export class Booru {
 	static #createBooruEndpoint(defaultParams: Record<string, string>) {
 		const endpointURL = new URL(Booru.API_URI);
 
-		for(const [ name, value ] of Object.entries(defaultParams))
+		for (const [name, value] of Object.entries(defaultParams))
 			endpointURL.searchParams.set(name, value);
 
 		return {
 			async request<TSchema>(params: Record<string, unknown>) {
 				const searchURL = new URL(endpointURL);
 
-				for(const [ name, value ] of Object.entries(params))
+				for (const [name, value] of Object.entries(params))
 					searchURL.searchParams.set(name, `${value}`);
 
 				return fetchExt<TSchema>(searchURL, {
@@ -153,9 +153,8 @@ export class Booru {
 	 */
 	static cleanupTagsCache() {
 		const now = Date.now();
-		for(const [ key, tag ] of Booru.tagsCache.entries())
-			if((now - (+tag.fetchTimestamp)) > Booru.TAGS_CACHE_LIFETIME)
-				Booru.tagsCache.delete(key);
+		for (const [key, tag] of Booru.tagsCache.entries())
+			if (now - +tag.fetchTimestamp > Booru.TAGS_CACHE_LIFETIME) Booru.tagsCache.delete(key);
 	}
 
 	/**
@@ -163,17 +162,21 @@ export class Booru {
 	 * @throws {BooruFetchError}
 	 * @throws {BooruUnknownPostError}
 	 */
-	static #expectPosts(fetchResult: FetchResult<{ post: APIPostData[] }>, options: ExpectAPIFetchOptions = {}): PostResolvable[] {
+	static #expectPosts(
+		fetchResult: FetchResult<{ post: APIPostData[] }>,
+		options: ExpectAPIFetchOptions = {},
+	): PostResolvable[] {
 		const { dontThrowOnEmptyFetch = false } = options;
 
-		if(fetchResult.success === false)
-			throw new BooruFetchError(`Booru API Posts fetch failed: ${fetchResult.error.name} ${fetchResult.error.message || ''}`, { cause: fetchResult.error });
+		if (fetchResult.success === false)
+			throw new BooruFetchError(
+				`Booru API Posts fetch failed: ${fetchResult.error.name} ${fetchResult.error.message || ''}`,
+				{ cause: fetchResult.error },
+			);
 
-		if(!Array.isArray(fetchResult.data?.post)) {
-			if(dontThrowOnEmptyFetch)
-				return [];
-			else
-				throw new BooruUnknownPostError(`Couldn't fetch any Posts from the Booru API`);
+		if (!Array.isArray(fetchResult.data?.post)) {
+			if (dontThrowOnEmptyFetch) return [];
+			else throw new BooruUnknownPostError(`Couldn't fetch any Posts from the Booru API`);
 		}
 
 		return fetchResult.data.post;
@@ -184,20 +187,24 @@ export class Booru {
 	 * @throws {BooruFetchError}
 	 * @throws {BooruUnknownTagError}
 	 */
-	static #expectTags(fetchResult: FetchResult<{ tag: APITagData[] }>, options: ExpectAPIFetchOptions & ExpectAPITagFetchOptions = {}): TagResolvable[] {
-		const {
-			dontThrowOnEmptyFetch = false,
-			tags = null,
-		} = options;
+	static #expectTags(
+		fetchResult: FetchResult<{ tag: APITagData[] }>,
+		options: ExpectAPIFetchOptions & ExpectAPITagFetchOptions = {},
+	): TagResolvable[] {
+		const { dontThrowOnEmptyFetch = false, tags = null } = options;
 
-		if(fetchResult.success === false)
-			throw new BooruFetchError(`Booru API Tags fetch failed: ${fetchResult.error.name} ${fetchResult.error.message || ''}`, { cause: fetchResult.error });
+		if (fetchResult.success === false)
+			throw new BooruFetchError(
+				`Booru API Tags fetch failed: ${fetchResult.error.name} ${fetchResult.error.message || ''}`,
+				{ cause: fetchResult.error },
+			);
 
-		if(!Array.isArray(fetchResult.data?.tag)) {
-			if(dontThrowOnEmptyFetch)
-				return [];
+		if (!Array.isArray(fetchResult.data?.tag)) {
+			if (dontThrowOnEmptyFetch) return [];
 			else
-				throw new BooruUnknownTagError(`Couldn't fetch any Tags from the Booru API${tags ? `. Tried to fetch: ${tags}` : ''}`);
+				throw new BooruUnknownTagError(
+					`Couldn't fetch any Tags from the Booru API${tags ? `. Tried to fetch: ${tags}` : ''}`,
+				);
 		}
 
 		return fetchResult.data.tag;
@@ -215,22 +222,20 @@ export class Booru {
 		const { limit = 1, random = false } = searchOptions;
 
 		const { apiKey, userId } = this.#getCredentials();
-		if(Array.isArray(tags))
-			tags = tags.join(' ');
+		if (Array.isArray(tags)) tags = tags.join(' ');
 
 		const fetchResult = await Booru.POSTS_API.request<{ post: APIPostData[] }>({
-			'api_key': apiKey,
-			'user_id': userId,
-			'limit': limit,
-			'tags': tags,
+			api_key: apiKey,
+			user_id: userId,
+			limit: limit,
+			tags: tags,
 		});
 
 		const posts = Booru.#expectPosts(fetchResult, { dontThrowOnEmptyFetch: true });
 
-		if(random)
-			shuffleArray(posts);
+		if (random) shuffleArray(posts);
 
-		return posts.map(p => new Post(p));
+		return posts.map((p) => new Post(p));
 	}
 
 	/**
@@ -242,15 +247,14 @@ export class Booru {
 	 */
 	async fetchPostById(postId: string | number): Promise<Post | undefined> {
 		const { apiKey, userId } = this.#getCredentials();
-		if(![ 'string', 'number' ].includes(typeof postId))
-			throw TypeError('Invalid Post ID');
+		if (!['string', 'number'].includes(typeof postId)) throw TypeError('Invalid Post ID');
 
 		const response = await Booru.POSTS_API.request<{ post: APIPostData[] }>({
-			'api_key': apiKey,
-			'user_id': userId,
-			'id': postId,
+			api_key: apiKey,
+			user_id: userId,
+			id: postId,
 		});
-		const [ post ] = Booru.#expectPosts(response);
+		const [post] = Booru.#expectPosts(response);
 		return new Post(post);
 	}
 
@@ -263,8 +267,7 @@ export class Booru {
 	async fetchPostByUrl(postUrl: string): Promise<Post | undefined> {
 		const { apiKey, userId } = this.#getCredentials();
 
-		if(typeof postUrl !== 'string')
-			throw TypeError('Invalid Post URL');
+		if (typeof postUrl !== 'string') throw TypeError('Invalid Post URL');
 
 		const url = new URL(postUrl);
 		url.searchParams.set('page', 'dapi');
@@ -276,7 +279,7 @@ export class Booru {
 		url.searchParams.set('user_id', userId);
 
 		const response = await fetchExt<{ post: APIPostData[] }>(url.toString());
-		const [ post ] = Booru.#expectPosts(response);
+		const [post] = Booru.#expectPosts(response);
 		return new Post(post);
 	}
 
@@ -287,8 +290,7 @@ export class Booru {
 	 * @throws {BooruFetchError}
 	 */
 	async fetchPostTags(post: Post) {
-		if(!Array.isArray(post?.tags))
-			throw ReferenceError('Invalid Post');
+		if (!Array.isArray(post?.tags)) throw ReferenceError('Invalid Post');
 
 		return this.fetchTagsByNames(...post.tags);
 	}
@@ -301,9 +303,7 @@ export class Booru {
 	 */
 	async fetchPostTagsByUrl(postUrl: string) {
 		const post = await this.fetchPostByUrl(postUrl);
-		return post
-			? this.fetchTagsByNames(...post.tags)
-			: undefined;
+		return post ? this.fetchTagsByNames(...post.tags) : undefined;
 	}
 
 	/**
@@ -314,9 +314,7 @@ export class Booru {
 	 */
 	async fetchPostTagsById(postId: string | number) {
 		const post = await this.fetchPostById(postId);
-		return post
-			? this.fetchTagsByNames(...post.tags)
-			: undefined;
+		return post ? this.fetchTagsByNames(...post.tags) : undefined;
 	}
 
 	/**
@@ -329,58 +327,56 @@ export class Booru {
 
 		const { apiKey, userId } = this.#getCredentials();
 
-		if(tagNames.some(t => typeof t !== 'string'))
-			throw TypeError('Invalid Tags');
+		if (tagNames.some((t) => typeof t !== 'string')) throw TypeError('Invalid Tags');
 
-		while(semaphoreId !== Booru.tagsSemaphoreDone)
-			await new Promise(resolve => setTimeout(resolve, 50));
+		while (semaphoreId !== Booru.tagsSemaphoreDone)
+			await new Promise((resolve) => setTimeout(resolve, 50));
 
 		const cachedTags: Tag[] = [];
 		const uncachedTagNames: string[] = [];
 
-		tagNames
-			.map(decodeEntities)
-			.forEach(tn => {
-				const cachedTag = Booru.tagsCache.get(tn);
-				if(cachedTag && (Date.now() - (+cachedTag.fetchTimestamp)) < Booru.TAGS_CACHE_LIFETIME)
-					cachedTags.push(cachedTag);
-				else
-					uncachedTagNames.push(tn);
-			});
+		tagNames.map(decodeEntities).forEach((tn) => {
+			const cachedTag = Booru.tagsCache.get(tn);
+			if (cachedTag && Date.now() - +cachedTag.fetchTimestamp < Booru.TAGS_CACHE_LIFETIME)
+				cachedTags.push(cachedTag);
+			else uncachedTagNames.push(tn);
+		});
 
-		if(!uncachedTagNames.length) {
+		if (!uncachedTagNames.length) {
 			Booru.tagsSemaphoreDone = (Booru.tagsSemaphoreDone + 1) % Booru.TAGS_SEMAPHORE_MAX;
 			return cachedTags;
 		}
 
 		try {
 			const query = { name: { $in: uncachedTagNames } };
-			const savedTags = (noDataBase ? [] : await BooruTags.find(query)).map(t => new Tag(t));
+			const savedTags = (noDataBase ? [] : await BooruTags.find(query)).map(
+				(t) => new Tag(t),
+			);
 
-			const savedTagNames = savedTags.map(t => t.name);
-			const missingTagNames = uncachedTagNames.filter(tn => !savedTagNames.includes(tn));
+			const savedTagNames = savedTags.map((t) => t.name);
+			const missingTagNames = uncachedTagNames.filter((tn) => !savedTagNames.includes(tn));
 
-			if(missingTagNames.length) {
+			if (missingTagNames.length) {
 				const fetchedTags: Tag[] = [];
 
-				for(let i = 0; i < missingTagNames.length; i += 100) {
+				for (let i = 0; i < missingTagNames.length; i += 100) {
 					const namesBatch = missingTagNames.slice(i, i + 100).join(' ');
 					const response = await Booru.TAGS_API.request<{ tag: APITagData[] }>({
-						'api_key': apiKey,
-						'user_id': userId,
-						'names': namesBatch,
+						api_key: apiKey,
+						user_id: userId,
+						names: namesBatch,
 					});
 					const tags = Booru.#expectTags(response, { tags: namesBatch });
 
-					if(tags.length) {
-						const newTags = tags.map(t => new Tag(t));
+					if (tags.length) {
+						const newTags = tags.map((t) => new Tag(t));
 						fetchedTags.push(...newTags);
 					}
 				}
 
-				if(fetchedTags.length) {
+				if (fetchedTags.length) {
 					savedTags.push(...fetchedTags);
-					const bulkOps = fetchedTags.map(t => ({
+					const bulkOps = fetchedTags.map((t) => ({
 						updateOne: {
 							filter: { id: t.id },
 							update: { $set: t },
@@ -388,12 +384,12 @@ export class Booru {
 						},
 					}));
 
-					!noDataBase && await BooruTags.bulkWrite(bulkOps);
+					!noDataBase && (await BooruTags.bulkWrite(bulkOps));
 				}
 			}
 
-			savedTags.forEach(t => Booru.tagsCache.set(t.name, t));
-			return [ ...cachedTags, ...savedTags ];
+			savedTags.forEach((t) => Booru.tagsCache.set(t.name, t));
+			return [...cachedTags, ...savedTags];
 		} finally {
 			Booru.tagsSemaphoreDone = (Booru.tagsSemaphoreDone + 1) % Booru.TAGS_SEMAPHORE_MAX;
 		}
@@ -428,9 +424,11 @@ export class Booru {
 	 * @throws {TypeError}
 	 */
 	#expectCredentials(credentials: Credentials) {
-		if(!credentials) throw ReferenceError('No credentials were defined');
-		if(!credentials.apiKey || typeof credentials.apiKey !== 'string') throw TypeError('API Key is invalid');
-		if(!credentials.userId || ![ 'string', 'number' ].includes(typeof credentials.userId)) throw TypeError('User ID is invalid');
+		if (!credentials) throw ReferenceError('No credentials were defined');
+		if (!credentials.apiKey || typeof credentials.apiKey !== 'string')
+			throw TypeError('API Key is invalid');
+		if (!credentials.userId || !['string', 'number'].includes(typeof credentials.userId))
+			throw TypeError('User ID is invalid');
 	}
 }
 
@@ -455,37 +453,44 @@ export class Post {
 	constructor(data: PostResolvable) {
 		this.id = data.id;
 		this.title = data.title;
-		this.tags = Array.isArray(data.tags) ? data.tags.map(decodeEntities) : decodeEntities(data.tags ?? '').split(' ');
-		if(data.source) {
-			const sources = (typeof data.source === 'object')
-				? (Array.isArray(data.source) ? data.source : Object.values(data.source as Record<string, string>))
-				: (data.source.split(/[ \n]+/));
+		this.tags = Array.isArray(data.tags)
+			? data.tags.map(decodeEntities)
+			: decodeEntities(data.tags ?? '').split(' ');
+		if (data.source) {
+			const sources =
+				typeof data.source === 'object'
+					? Array.isArray(data.source)
+						? data.source
+						: Object.values(data.source as Record<string, string>)
+					: data.source.split(/[ \n]+/);
 			this.sources = sources;
 			this.source = sources.join(' ');
 		}
 		this.score = data.score;
 		this.rating = data.rating;
-		this.creatorId = ('creatorId' in data) ? data.creatorId : data.creator_id;
+		this.creatorId = 'creatorId' in data ? data.creatorId : data.creator_id;
 
-		const createdAt = ('createdAt' in data) ? data.createdAt : data.created_at;
-		this.createdAt = (typeof createdAt === 'string' || typeof createdAt === 'number') ? new Date(createdAt) : createdAt;
+		const createdAt = 'createdAt' in data ? data.createdAt : data.created_at;
+		this.createdAt =
+			typeof createdAt === 'string' || typeof createdAt === 'number'
+				? new Date(createdAt)
+				: createdAt;
 
+		this.fileUrl = 'fileUrl' in data ? data.fileUrl : data.file_url;
+		this.size = 'size' in data ? data.size : [data.width, data.height];
 
-		this.fileUrl = ('fileUrl' in data) ? data.fileUrl : data.file_url;
-		this.size = ('size' in data) ? data.size : [ data.width, data.height ];
-
-		if('preview_url' in data) {
+		if ('preview_url' in data) {
 			this.previewUrl = data.preview_url;
-			this.previewSize = [ data.preview_width, data.preview_height ];
-		} else if('previewUrl' in data) {
+			this.previewSize = [data.preview_width, data.preview_height];
+		} else if ('previewUrl' in data) {
 			this.previewUrl = data.previewUrl;
 			this.previewSize = data.size;
 		}
 
-		if('sample_url' in data) {
+		if ('sample_url' in data) {
 			this.sampleUrl = data.sample_url;
-			this.sampleSize = [ data.sample_width, data.sample_height ];
-		} else if('sampleUrl' in data) {
+			this.sampleSize = [data.sample_width, data.sample_height];
+		} else if ('sampleUrl' in data) {
 			this.sampleUrl = data.sampleUrl;
 			this.sampleSize = data.size;
 		}
@@ -493,9 +498,7 @@ export class Post {
 
 	/**@description Tries to find sources that match an URL pattern, and returns all matches (if any)*/
 	findUrlSources() {
-		return this.sources
-			.map(getSourceUrl)
-			.filter(s => s);
+		return this.sources.map(getSourceUrl).filter((s) => s);
 	}
 
 	/**
@@ -505,9 +508,7 @@ export class Post {
 	 * If no URL source is found, `undefined` is returned
 	 */
 	findFirstUrlSource() {
-		return this.sources
-			.map(getSourceUrl)
-			.find(s => s);
+		return this.sources.map(getSourceUrl).find((s) => s);
 	}
 
 	/**
@@ -517,9 +518,7 @@ export class Post {
 	 * If no URL source is found, `undefined` is returned.
 	 */
 	findLastUrlSource() {
-		return this.sources
-			.map(getSourceUrl)
-			.findLast(s => s);
+		return this.sources.map(getSourceUrl).findLast((s) => s);
 	}
 }
 
@@ -533,7 +532,7 @@ export class Tag {
 	fetchTimestamp: Date;
 
 	constructor(data: TagResolvable) {
-		if(!Object.values(TagTypes).some(t => t === data.type))
+		if (!Object.values(TagTypes).some((t) => t === data.type))
 			throw RangeError('Tipo de tag inválido. Solo se aceptan números: 0, 1, 2, 3, 4, 5, 6');
 
 		this.id = data.id;
@@ -541,18 +540,25 @@ export class Tag {
 		this.count = data.count;
 		this.type = data.type as TagType;
 		this.ambiguous = !!data.ambiguous;
-		this.fetchTimestamp = ('fetchTimestamp' in data) ? data.fetchTimestamp : new Date(Date.now());
+		this.fetchTimestamp = 'fetchTimestamp' in data ? data.fetchTimestamp : new Date(Date.now());
 	}
 
 	get typeName() {
-		switch(this.type) {
-		case TagTypes.GENERAL:    return 'General';
-		case TagTypes.ARTIST:     return 'Artist';
-		case TagTypes.COPYRIGHT:  return 'Copyright';
-		case TagTypes.CHARACTER:  return 'Character';
-		case TagTypes.METADATA:   return 'Metadata';
-		case TagTypes.DEPRECATED: return 'Deprecated';
-		default: return 'Unknown';
+		switch (this.type) {
+			case TagTypes.GENERAL:
+				return 'General';
+			case TagTypes.ARTIST:
+				return 'Artist';
+			case TagTypes.COPYRIGHT:
+				return 'Copyright';
+			case TagTypes.CHARACTER:
+				return 'Character';
+			case TagTypes.METADATA:
+				return 'Metadata';
+			case TagTypes.DEPRECATED:
+				return 'Deprecated';
+			default:
+				return 'Unknown';
 		}
 	}
 
@@ -562,9 +568,11 @@ export class Tag {
 }
 
 function getSourceUrl(source: string) {
-	if(!source) return null;
-	const smatch = source.match(/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_/.0-9#:?=&;,]*)?)?/);
-	if(!smatch) return null;
+	if (!source) return null;
+	const smatch = source.match(
+		/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_/.0-9#:?=&;,]*)?)?/,
+	);
+	if (!smatch) return null;
 	return source.slice(smatch.index, smatch.index + smatch[0].length);
 }
 

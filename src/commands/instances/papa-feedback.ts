@@ -1,21 +1,26 @@
-import { EmbedBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
-import { CommandTags, Command } from '../commons';
-import GuildConfig from '@/models/guildconfigs.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { tenshiColor } from '@/data/globalProps';
-import { makeButtonRowBuilder } from '@/utils/tsCasts.js';
+import GuildConfig from '@/models/guildconfigs.js';
+import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('PAPA');
 
 const command = new Command('papa-feedback', tags)
 	.setLongDescription('Comando de feedback')
-	.setExecution(async request => {
+	.setExecution(async (request) => {
 		const { client } = request;
 
 		const feedbackEmbed = new EmbedBuilder()
-			.setAuthor({ name: 'Bot de Puré • PuréFeed', iconURL: client.user.displayAvatarURL({ size: 256 }) })
+			.setAuthor({
+				name: 'Bot de Puré • PuréFeed',
+				iconURL: client.user.displayAvatarURL({ size: 256 }),
+			})
 			.setColor(tenshiColor)
 			.setTitle('Retroalimentación / Feedback / フィードバック')
-			.setFooter({ text: 'Papita con Puré', iconURL: 'https://cdn.discordapp.com/emojis/1107848137458073701.gif?size=96' })
+			.setFooter({
+				text: 'Papita con Puré',
+				iconURL: 'https://cdn.discordapp.com/emojis/1107848137458073701.gif?size=96',
+			})
 			.setTimestamp(Date.now())
 			.addFields(
 				{
@@ -36,7 +41,7 @@ const command = new Command('papa-feedback', tags)
 			);
 
 		const feedbackRows = [
-			makeButtonRowBuilder().addComponents(
+			new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_giveFeedback_Y')
 					.setEmoji('1163687887120891955')
@@ -45,10 +50,10 @@ const command = new Command('papa-feedback', tags)
 				new ButtonBuilder()
 					.setCustomId('feed_giveFeedback_N')
 					.setEmoji('1355143793577426962')
-					.setLabel('No me gusta / I don\'t like it / 良くないです')
+					.setLabel("No me gusta / I don't like it / 良くないです")
 					.setStyle(ButtonStyle.Danger),
 			),
-			makeButtonRowBuilder().addComponents(
+			new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_giveFeedback_F')
 					.setEmoji('✉')
@@ -59,14 +64,14 @@ const command = new Command('papa-feedback', tags)
 
 		const guildConfigs = await GuildConfig.find({});
 		const guilds = client.guilds.cache;
-		guildConfigs.forEach(guildConfig => {
+		guildConfigs.forEach((guildConfig) => {
 			const guild = guilds.get(guildConfig.guildId);
 			const channels = guild.channels.cache;
-			Object.entries(guildConfig.feeds).forEach(([ channelId ]) => {
+			Object.entries(guildConfig.feeds).forEach(([channelId]) => {
 				const channel = channels.get(channelId);
-				if(!channel.isSendable()) return;
+				if (!channel.isSendable()) return;
 				channel.send({
-					embeds: [ feedbackEmbed ],
+					embeds: [feedbackEmbed],
 					components: feedbackRows,
 				});
 			});

@@ -1,4 +1,10 @@
-import type { EnvironmentProvider, PSChannel, PSRole, PSMember, PSMemberCreationData } from '../v1.1/interpreter/environment/environmentProvider';
+import type {
+	EnvironmentProvider,
+	PSChannel,
+	PSRole,
+	PSMember,
+	PSMemberCreationData,
+} from '../v1.1/interpreter/environment/environmentProvider';
 import { PSGuild, PSUser } from '../v1.1/interpreter/environment/environmentProvider';
 import type { ComplexCommandRequest } from 'types/commands';
 import { fetchChannel, fetchRole, fetchMember } from '@/func';
@@ -6,8 +12,11 @@ import { fetchChannel, fetchRole, fetchMember } from '@/func';
 export default class DiscordEnvironmentProvider implements EnvironmentProvider {
 	static CACHE_LIFETIME: number = 5e3;
 
-	static #GUILDS: Map<string, { validUntil: number; guild: PSGuild; }> = new Map();
-	static #OWNERS: Map<string, { validUntil: number; owner: import('discord.js').GuildMember | null; }> = new Map();
+	static #GUILDS: Map<string, { validUntil: number; guild: PSGuild }> = new Map();
+	static #OWNERS: Map<
+		string,
+		{ validUntil: number; owner: import('discord.js').GuildMember | null }
+	> = new Map();
 
 	#request: ComplexCommandRequest;
 
@@ -67,32 +76,35 @@ export default class DiscordEnvironmentProvider implements EnvironmentProvider {
 	static #getOrMakePSGuild(guild: import('discord.js').Guild) {
 		const existingPsGuild = DiscordEnvironmentProvider.#GUILDS.get(guild.id);
 
-		if(existingPsGuild && Date.now() < existingPsGuild.validUntil)
+		if (existingPsGuild && Date.now() < existingPsGuild.validUntil)
 			return existingPsGuild.guild;
 
-		const members: Array<Omit<PSMemberCreationData, 'guild'>> = guild.members.cache.map((m, id) => ({
-			user: new PSUser({
-				id,
-				username: m.user.username,
-				displayName: m.user.displayName,
-			}),
-			displayAvatarUrlHandler: options => m.displayAvatarURL(options),
-			roleIds: m.roles.cache.map(r => r.id),
-			nickname: m.nickname,
-		}));
-
-		if(!guild.members.cache.get(guild.ownerId)) {
-			const owner = DiscordEnvironmentProvider.#OWNERS.get(guild.ownerId).owner;
-			owner && members.push({
+		const members: Array<Omit<PSMemberCreationData, 'guild'>> = guild.members.cache.map(
+			(m, id) => ({
 				user: new PSUser({
-					id: owner.id,
-					username: owner.user.username,
-					displayName: owner.user.displayName,
+					id,
+					username: m.user.username,
+					displayName: m.user.displayName,
 				}),
-				nickname: owner.nickname,
-				roleIds: owner.roles.cache.map(r => r.id),
-				displayAvatarUrlHandler: options => owner.displayAvatarURL(options),
-			});
+				displayAvatarUrlHandler: (options) => m.displayAvatarURL(options),
+				roleIds: m.roles.cache.map((r) => r.id),
+				nickname: m.nickname,
+			}),
+		);
+
+		if (!guild.members.cache.get(guild.ownerId)) {
+			const owner = DiscordEnvironmentProvider.#OWNERS.get(guild.ownerId).owner;
+			owner
+				&& members.push({
+					user: new PSUser({
+						id: owner.id,
+						username: owner.user.username,
+						displayName: owner.user.displayName,
+					}),
+					nickname: owner.nickname,
+					roleIds: owner.roles.cache.map((r) => r.id),
+					displayAvatarUrlHandler: (options) => owner.displayAvatarURL(options),
+				});
 		}
 
 		const psGuild = new PSGuild({
@@ -111,11 +123,11 @@ export default class DiscordEnvironmentProvider implements EnvironmentProvider {
 				id,
 				name: r.name,
 				color: r.color,
-				iconUrlHandler: options => r.iconURL(options),
+				iconUrlHandler: (options) => r.iconURL(options),
 			})),
-			iconUrlHandler: options => guild.iconURL(options),
-			splashUrlHandler: options => guild.splashURL(options),
-			bannerUrlHandler: options => guild.bannerURL(options),
+			iconUrlHandler: (options) => guild.iconURL(options),
+			splashUrlHandler: (options) => guild.splashURL(options),
+			bannerUrlHandler: (options) => guild.bannerURL(options),
 		});
 
 		DiscordEnvironmentProvider.#GUILDS.set(guild.id, {

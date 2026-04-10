@@ -1,7 +1,6 @@
-import { CommandTags, Command, CommandOptions } from '../commons';
+import { Command, CommandOptions, CommandTags } from '../commons';
 
-const options = new CommandOptions()
-	.addParam('servidor', 'GUILD', 'para indicar un servidor');
+const options = new CommandOptions().addParam('servidor', 'GUILD', 'para indicar un servidor');
 
 const tags = new CommandTags().add('PAPA');
 
@@ -10,12 +9,13 @@ const command = new Command('papa-escapar', tags)
 	.setDescription('Me hace abandonar el servidor especificado.')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		if(args.empty)
-			return request.reply({ content: request.client.guilds.cache.map(g => `**${g.name}** ${g.id}`).join('\n') });
+		if (args.empty)
+			return request.reply({
+				content: request.client.guilds.cache.map((g) => `**${g.name}** ${g.id}`).join('\n'),
+			});
 
 		const guild = await args.getGuild('servidor');
-		if(!guild)
-			return request.reply({ content: '⚠️ Servidor inválido' });
+		if (!guild) return request.reply({ content: '⚠️ Servidor inválido' });
 
 		return guild.leave();
 	});

@@ -1,6 +1,6 @@
-import type { ValuesOf } from '../types/util';
 import type { UserCacheResolvable } from '@/utils/usercache';
 import { fetchUserCache } from '@/utils/usercache';
+import type { ValuesOf } from '../types/util';
 import Locales from './locales';
 
 export { Locales };
@@ -25,24 +25,23 @@ function paragraph(...lines: string[]) {
  * @param defaultValue Valor por defecto si no se ingresó un valor en el índice
  */
 function subl(i: number, defaultValue?: string) {
-	if(i == undefined) throw ReferenceError('Se esperaba un índice de componente de traducción');
+	if (i == null) throw ReferenceError('Se esperaba un índice de componente de traducción');
 
 	const baseSub = `${i}{...}`;
 
-	if(!defaultValue)
-		return baseSub;
+	if (!defaultValue) return baseSub;
 
 	return `${baseSub}<?{'${defaultValue}'}`;
 }
 
-export const ConditionFields = ({
+export const ConditionFields = {
 	Equal: '=',
 	Distinct: '!=',
 	Lesser: '<',
 	Greater: '>',
 	LesserOrEqual: '<=',
 	GreaterOrEqual: '>=',
-}) as const;
+} as const;
 
 /**
  * @param i Índice del valor a usar como operando izquierdo de la comprobación
@@ -51,19 +50,24 @@ export const ConditionFields = ({
  * @param whenTrue Valor de reemplazo en caso de verdadero
  * @param whenFalse Valor de reemplazo en caso de falso
  */
-function subif<TReplacement>(i: number, condition: ConditionString, rightOperand: TReplacement, whenTrue: string, whenFalse: string | null = '') {
-	if(i == undefined) throw ReferenceError('Se esperaba un índice de componente de traducción');
-	if(!whenTrue) throw ReferenceError('Se esperaba un valor para verdadero en componente de traducción');
+function subif<TReplacement>(
+	i: number,
+	condition: ConditionString,
+	rightOperand: TReplacement,
+	whenTrue: string,
+	whenFalse: string | null = '',
+) {
+	if (i == null) throw ReferenceError('Se esperaba un índice de componente de traducción');
+	if (!whenTrue)
+		throw ReferenceError('Se esperaba un valor para verdadero en componente de traducción');
 
-	const r = (typeof rightOperand === 'boolean')
-		? `__${rightOperand}__`
-		: rightOperand;
+	const r = typeof rightOperand === 'boolean' ? `__${rightOperand}__` : rightOperand;
 
 	return `${i}{...}<!{${condition}:${r}|'${whenTrue}'}<?{'${whenFalse}'}`;
 }
 
 /**@satisfies {Record<string, Translation>}*/
-const localesObject = ({
+const localesObject = {
 	currentLanguage: {
 		es: 'Español',
 		en: 'English',
@@ -88,7 +92,7 @@ const localesObject = ({
 	dmDisclaimer: {
 		es: 'Nota: Bot de Puré no opera con mensajes privados',
 		en: 'Note: Bot de Puré does not reply to DMs',
-		ja: '注: ピューレボットは DM に返信しません'
+		ja: '注: ピューレボットは DM に返信しません',
 	},
 	dmInteraction: {
 		es: '❌ Solo respondo a comandos en servidores',
@@ -117,12 +121,12 @@ const localesObject = ({
 	},
 	insufficientPermissions: {
 		es: '❌ No tienes permiso para hacer esto',
-		en: '❌ You\'re not allowed to do that',
+		en: "❌ You're not allowed to do that",
 		ja: '❌ あなたにはそれをする許可がありません',
 	},
 	unknownInteraction: {
 		es: '🍔 Recibí una acción, pero no sé cómo responderla. Esto es un problema... mientras arreglo algunas cosas, toma una hamburguesa',
-		en: '🍔 I received an action, but I don\'t know how to reply to it. This is a problem... while I fix some things, take this burger',
+		en: "🍔 I received an action, but I don't know how to reply to it. This is a problem... while I fix some things, take this burger",
 		ja: '🍔 リクエストを受け取ったのですが、返信の仕方がわかりません。これは問題です...いくつか修正している間、このハンバーガーを受け取ってください',
 	},
 	huskInteraction: {
@@ -132,7 +136,7 @@ const localesObject = ({
 	},
 	unauthorizedInteraction: {
 		es: '❌ No puedes hacer eso. Si intentaste interactuar con un mensaje de comando, prueba usando el comando tú mismo',
-		en: '❌ You can\'t do that. If you tried to interact with a command message, try calling the command yourself',
+		en: "❌ You can't do that. If you tried to interact with a command message, try calling the command yourself",
 		ja: '❌ それはできません。コマンドメッセージとやり取りしようとした場合は、自分でコマンドを呼び出してみてください',
 	},
 
@@ -149,7 +153,7 @@ const localesObject = ({
 	},
 	missingMemberChannelPermissionsDescription: {
 		es: 'Este comando u esta acción requiere permisos para ejecutarse que no tienes actualmente',
-		en: 'This command or action requires permissions that you don\'t currently have to execute',
+		en: "This command or action requires permissions that you don't currently have to execute",
 		ja: 'このコマンドまたはアクションを実行するには、現在所有していない権限が必要です',
 	},
 	missingMemberChannelPermissionsFullRequisitesName: {
@@ -164,11 +168,11 @@ const localesObject = ({
 		),
 		en: paragraph(
 			'I don\t have the required permissions to execute the command or action that you requested in this channel',
-			'I\'m a well educated girl, so I won\'t do anything until I\'m given permission to do so. You can ask a mod to review and address the issue',
+			"I'm a well educated girl, so I won't do anything until I'm given permission to do so. You can ask a mod to review and address the issue",
 		),
 		ja: paragraph(
 			'I don\t have the required permissions to execute the command or action that you requested in this channel',
-			'I\'m a well educated girl, so I won\'t do anything until I\'m given permission to do so. You can ask a mod to review and address the issue',
+			"I'm a well educated girl, so I won't do anything until I'm given permission to do so. You can ask a mod to review and address the issue",
 		),
 	},
 
@@ -538,13 +542,13 @@ const localesObject = ({
 	},
 	aislarNoUpdatedMembers: {
 		es: '⚠️ No pude actualizar ninguno de los miembros mencionados. Revisa que tenga permisos para administrar miembros',
-		en: '⚠️ None of the mentioned members were updated. It could be that I don\'t have permission to manage members',
-		ja: '⚠️ None of the mentioned members were updated. It could be that I don\'t have permission to manage members',
+		en: "⚠️ None of the mentioned members were updated. It could be that I don't have permission to manage members",
+		ja: "⚠️ None of the mentioned members were updated. It could be that I don't have permission to manage members",
 	},
 
 	anarquiaCouldNotLoadEmoji: {
 		es: '⚠️ No pude cargar la imagen del emote que mencionaste. ¡Prueba una vez más! Si sigues sin poder, puede ser un problema con el emote en cuestión',
-		en: '⚠️ Couldn\'t load the image for the emote you mentioned. Try it again! If you still can\'t, it could be due to an issue with the emote in question',
+		en: "⚠️ Couldn't load the image for the emote you mentioned. Try it again! If you still can't, it could be due to an issue with the emote in question",
 		ja: '⚠️ 指定したエモートの画像を読み込めませんでした。もう一度お試しください！それでも読み込めない場合は、問題のエモートに問題がある可能性があります',
 	},
 	anarquiaSkillIssue: {
@@ -641,12 +645,12 @@ const localesObject = ({
 	},
 	transferHumanExpected: {
 		es: '❌ No se puede transferir <:prc:1097208828946301123> a bots',
-		en: '❌ Can\'t transfer <:prc:1097208828946301123> to bots',
+		en: "❌ Can't transfer <:prc:1097208828946301123> to bots",
 		ja: '❌ <:prc:1097208828946301123>をボットに転送できません',
 	},
 	transferOtherExpected: {
 		es: '❌ No puedes transferirte <:prc:1097208828946301123> a ti mismo',
-		en: '❌ You can\'t transfer <:prc:1097208828946301123> to yourself',
+		en: "❌ You can't transfer <:prc:1097208828946301123> to yourself",
 		ja: '❌ <:prc:1097208828946301123>を自分自身に譲渡することはできません',
 	},
 	transferAmountTooLow: {
@@ -825,7 +829,7 @@ const localesObject = ({
 	},
 	queueDequeueTitleTrackNotFound: {
 		es: 'No se encontró la pista a quitar',
-		en: 'Couldn\'t find the track to remove',
+		en: "Couldn't find the track to remove",
 		ja: '削除するトラックが見つかりませんでした',
 	},
 	queueDequeueDescriptionTrackNotFound: {
@@ -861,15 +865,15 @@ const localesObject = ({
 	queueLoopDescAutoplayEnabled: {
 		es: paragraph(
 			'El modo de repetición no se puede alternar porque el <:headphonessimple:1360868342411427892> Auto-DJ está activo.',
-			`Debes desactivar el <:headphonessimple:1360868342411427892> Auto-DJ para usar este botón. También puedes usar \`${subl(0), '/'}repetir\`.`,
+			`Debes desactivar el <:headphonessimple:1360868342411427892> Auto-DJ para usar este botón. También puedes usar \`${subl(0, '/')}repetir\`.`,
 		),
 		en: paragraph(
 			'Loop mode cannot be toggled because <:headphonessimple:1360868342411427892> Auto-DJ is active.',
-			`You must turn off <:headphonessimple:1360868342411427892> Auto DJ to use this button. You can also use \`${subl(0), '/'}loop\`.`,
+			`You must turn off <:headphonessimple:1360868342411427892> Auto DJ to use this button. You can also use \`${subl(0, '/')}loop\`.`,
 		),
 		ja: paragraph(
 			'リピートモードは、<:headphonessimple:1360868342411427892> オート DJ がアクティブなため変更できません。',
-			`このボタンを使用するには、<:headphonessimple:1360868342411427892> オート DJ をオフにする必要があります。\`${subl(0), '/'}loop\`を使用することもできます。`,
+			`このボタンを使用するには、<:headphonessimple:1360868342411427892> オート DJ をオフにする必要があります。\`${subl(0, '/')}loop\`を使用することもできます。`,
 		),
 	},
 	queueLoopTitle: {
@@ -961,7 +965,7 @@ const localesObject = ({
 	},
 	imgurRegisterDesc: {
 		es: 'Precisarás la ID de cliente de la misma para registrar la aplicación en Bot de Puré. Si no tienes cuenta de Imgur, deberás crear una primero',
-		en: 'You\'ll need this App\'s client ID to register it within Bot de Puré. If you don\'t have an Imgur account, you\'ll have to sign up first',
+		en: "You'll need this App's client ID to register it within Bot de Puré. If you don't have an Imgur account, you'll have to sign up first",
 		ja: 'Bot de Puréにアプリを登録するには、アプリのクライアント ID が必要になります。Imgur アカウントをお持ちでない場合は、まずアカウントを作成する必要があります',
 	},
 	imgurRegisterAuthTypeValue: {
@@ -1021,7 +1025,7 @@ const localesObject = ({
 	imgurUploadSuccessTitle: {
 		es: 'Tu imagen',
 		en: 'Your image',
-		ja: 'あなたのイメーギ'
+		ja: 'あなたのイメーギ',
 	},
 	imgurUploadErrorTitle: {
 		es: `⚠️ No se pudo subir la imagen Nº${subl(0)}`,
@@ -1046,7 +1050,7 @@ const localesObject = ({
 	},
 	saucenaoRegisterAccountValue: {
 		es: 'Si no tienes una cuenta de SauceNAO, puedes crearla [aquí](https://saucenao.com/user.php)',
-		en: 'If you don\' have a SauceNAO account, you can create one [here](https://saucenao.com/user.php)',
+		en: "If you don' have a SauceNAO account, you can create one [here](https://saucenao.com/user.php)",
 		ja: 'SauceNAO アカウントをお持ちでない場合は、[こちら](https://saucenao.com/user.php)から作成できます',
 	},
 	saucenaoRegisterFooter: {
@@ -1068,7 +1072,7 @@ const localesObject = ({
 		en: paragraph(
 			'1. Log in to SauceNAO and go [here](https://saucenao.com/user.php?page=search-api)',
 			'2. Copy the API key that is presented to you',
-			'3. Press the button below this message and paste the key'
+			'3. Press the button below this message and paste the key',
 		),
 		ja: paragraph(
 			'1. SauceNAO にログインして[こちら](https://saucenao.com/user.php?page=search-api)へ',
@@ -1094,15 +1098,15 @@ const localesObject = ({
 	saucenaoUnregisteredNotice: {
 		es: paragraph(
 			'❌ Para usar este comando, debes [registrarte en SauceNAO](https://saucenao.com/user.php) y usar `p!saucenao --registrar`.',
-			'Luego de haberte registrado en SauceNAO, puedes copiar tu clave API [aquí](https://saucenao.com/user.php?page=search-api "Este enlace lleva a tu panel de control de SauceNAO")'
+			'Luego de haberte registrado en SauceNAO, puedes copiar tu clave API [aquí](https://saucenao.com/user.php?page=search-api "Este enlace lleva a tu panel de control de SauceNAO")',
 		),
 		en: paragraph(
 			'❌ To use this command, you need to [sign up on SauceNAO](https://saucenao.com/user.php) and use `p!saucenao --register`.',
-			'After signing up, you can copy your API key [here](https://saucenao.com/user.php?page=search-api "This link will take you to your SauceNAO dashboard")'
+			'After signing up, you can copy your API key [here](https://saucenao.com/user.php?page=search-api "This link will take you to your SauceNAO dashboard")',
 		),
 		ja: paragraph(
 			'❌ このコマンドを使用するには、[SauceNAO にサインアップ](https://saucenao.com/user.php)して`p!saucenao --register`を使用する必要があります。',
-			'登録後、API キー[こちら](https://saucenao.com/user.php?page=search-api "このリンクは SauceNAO ダッシュボードにリンクします")からコピーできます'
+			'登録後、API キー[こちら](https://saucenao.com/user.php?page=search-api "このリンクは SauceNAO ダッシュボードにリンクします")からコピーできます',
 		),
 	},
 	saucenaoInvalidImage: {
@@ -1198,8 +1202,8 @@ const localesObject = ({
 	},
 	pollAnswersValueEmpty: {
 		es: 'No has añadido respuestas todavía',
-		en: 'You haven\'t added any answers yet',
-		ja: 'You haven\'t added any answers yet',
+		en: "You haven't added any answers yet",
+		ja: "You haven't added any answers yet",
 	},
 	pollAnswerPromptInput: {
 		es: 'Respuesta',
@@ -1445,12 +1449,12 @@ const localesObject = ({
 	},
 	feedDeletePostTagsInaccessible: {
 		es: 'Puede que el Post eliminado de Discord haya sido también eliminado del Booru del que se originó, pues no se pudieron recuperar sus tags',
-		en: 'The Post just deleted from Discord may have also been deleted from the Booru, given that I couldn\'t retrieve its tags',
+		en: "The Post just deleted from Discord may have also been deleted from the Booru, given that I couldn't retrieve its tags",
 		ja: 'Discord から削除された投稿は、タグを取得できなかったため、Booru からも削除された可能性があります',
 	},
 	feedDeletePostTagsUnknownError: {
 		es: 'Post eliminado (no se pudo recuperar la información del Post y/o sus tags)',
-		en: 'Post deleted (couldn\'t retrieve the Post information and/or its tags)',
+		en: "Post deleted (couldn't retrieve the Post information and/or its tags)",
 		ja: '投稿が削除されました（投稿情報やタグを取得できませんでした）',
 	},
 	feedPostTagsInaccessible: {
@@ -1465,7 +1469,7 @@ const localesObject = ({
 		),
 		en: paragraph(
 			'⚠️ There was a problem contacting the Booru to retrieve the tags.',
-			'Please try again. If the problem persists, it\'s likely that the target is unavailable or there\'s a bug on my end',
+			"Please try again. If the problem persists, it's likely that the target is unavailable or there's a bug on my end",
 		),
 		ja: paragraph(
 			'⚠️ booru サービスに接続してタグを取得できませんでした。',
@@ -1474,7 +1478,7 @@ const localesObject = ({
 	},
 	feedContributeNoPendingRequest: {
 		es: '¡Este post ya no tiene pedidos pendientes relevantes! ¡Bien!',
-		en: 'This post doesn\'t have relevant pending requests anymore! Sweet!',
+		en: "This post doesn't have relevant pending requests anymore! Sweet!",
 		ja: 'このポストには関連する保留中の注文がなくなりました。素晴らしい！',
 	},
 	feedContributeDescription: {
@@ -1489,7 +1493,7 @@ const localesObject = ({
 	},
 	feedContributeDanbooruFooter: {
 		es: 'Este Post fue automáticamente portado desde Danbooru, por lo que es mejor concretar los pedidos ahí. Los cambios utilitarios hechos en Danbooru se verán reflejados en Gelbooru.',
-		en: 'This post was automatically ported from Danbooru, so it\'s best to concrete the requests there. Utility changes made in Danbooru will be reflected in Gelbooru.',
+		en: "This post was automatically ported from Danbooru, so it's best to concrete the requests there. Utility changes made in Danbooru will be reflected in Gelbooru.",
 		ja: 'この投稿は Danbooru から自動的に移行されたため、リクエストは Danbooru へ送信することをお勧めします。Danbooru で行われたユーティリティの変更は Gelbooru にも反映されます。',
 	},
 	feedFeedbackExpired: {
@@ -1610,11 +1614,7 @@ const localesObject = ({
 			`Verification Level **${subl(0)}**`,
 			`MFA Level **${subl(1)}**`,
 		),
-		ja: paragraph(
-			'### 安全',
-			`検証レベル **${subl(0)}**`,
-			`多要素認証レベル **${subl(1)}**`,
-		),
+		ja: paragraph('### 安全', `検証レベル **${subl(0)}**`, `多要素認証レベル **${subl(1)}**`),
 	},
 	infoStatsMemberMessageCountItem: {
 		es: `<@${subl(0)}>: **${subl(1)}** mensajes`,
@@ -1694,7 +1694,7 @@ const localesObject = ({
 	},
 	inforolNoMembersFound: {
 		es: '⚠️ No se encontró ningún miembro con los roles indicados...',
-		en: '⚠️ Couldn\'t find any member with the provided roles...',
+		en: "⚠️ Couldn't find any member with the provided roles...",
 		ja: '⚠️ 指定されたロールを持つメンバーが見つかりませんでした…',
 	},
 	inforolDashboardTitle: {
@@ -1821,7 +1821,7 @@ const localesObject = ({
 
 	horaDateButNoTime: {
 		es: '⚠️️ No puedes indicar una `--fecha` si no especificas una `<hora>`',
-		en: '⚠️️ You can\'t provide a `--date` if you don\'t specify a `<time>`',
+		en: "⚠️️ You can't provide a `--date` if you don't specify a `<time>`",
 		ja: '⚠️️ `<time>`を指定しないと`--date`を指定することはできません',
 	},
 	horaAdaptedToYourTimezone: {
@@ -1847,7 +1847,7 @@ const localesObject = ({
 	},
 	recordarNoReminders: {
 		es: '_No tienes ningún recordatorio pendiente_',
-		en: '_You don\'t have any pending reminders_',
+		en: "_You don't have any pending reminders_",
 		ja: '_保留中のリマインダーはありません_',
 	},
 	recordarReminderContentTooLong: {
@@ -1974,7 +1974,7 @@ const localesObject = ({
 	},
 	voiceWizardWelcome: {
 		es: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
-		en: 'If this is your first time setting up a PuréVoice System, don\'t worry! Just follow the Wizard\'s instructions and adapt your Feed to what you want',
+		en: "If this is your first time setting up a PuréVoice System, don't worry! Just follow the Wizard's instructions and adapt your Feed to what you want",
 		ja: '初めて PuréVoice システムをセットアップする場合でも、心配する必要はありません。ウィザードの指示に従って、必要に応じてフィードを調整するだけです',
 	},
 	voiceInstallationStartFieldName: {
@@ -2040,7 +2040,7 @@ const localesObject = ({
 		es: paragraph(
 			'⚠️ Ocurrió un error al inyectar PuréVoice en una categoría.',
 			'Asegúrate de que tenga los permisos necesarios para realizar esta acción (administrar canales).',
-			'También, verifica que el nombre ingresado no esté ya ocupado por alguna otra categoría o canal'
+			'También, verifica que el nombre ingresado no esté ya ocupado por alguna otra categoría o canal',
 		),
 		en: paragraph(
 			'⚠️ An error occurred while injecting PuréVoice into a category.',
@@ -2079,7 +2079,7 @@ const localesObject = ({
 	},
 	voiceRelocatedFieldValue: {
 		es: 'Se reubicó el Sistema PuréVoice asociado al servidor',
-		en: 'This server\'s PuréVoice System has been relocated',
+		en: "This server's PuréVoice System has been relocated",
 		ja: 'サーバーに関連付けられている PuréVoice システムは移転されました',
 	},
 	voiceUninstalledFieldName: {
@@ -2089,7 +2089,7 @@ const localesObject = ({
 	},
 	voiceUninstalledFieldValue: {
 		es: 'Se eliminó el Sistema PuréVoice asociado al servidor',
-		en: 'This server\'s PuréVoice System has been removed',
+		en: "This server's PuréVoice System has been removed",
 		ja: 'サーバーに関連付けられた PuréVoice システムが削除されました',
 	},
 	voiceCancelledFieldValue: {
@@ -2119,7 +2119,7 @@ const localesObject = ({
 	},
 	voiceSameChannelExpected: {
 		es: '❌ Ya estoy conectada a otro chat de voz. ¡Ven conmigo antes de hacer eso!',
-		en: '❌ I\'m already connected to another voice channel. Come here before doing that!',
+		en: "❌ I'm already connected to another voice channel. Come here before doing that!",
 		ja: '❌ すでに別の音声チャネルに接続しています。その前にここに来てください！',
 	},
 	voiceButtonRelocate: {
@@ -2150,7 +2150,7 @@ const localesObject = ({
 		),
 		en: paragraph(
 			'⚠️ You must enter a session name to execute this command.',
-			'If you\'re trying to start the configuration Wizard, use the `--wizard` or `-w` flag.',
+			"If you're trying to start the configuration Wizard, use the `--wizard` or `-w` flag.",
 			`Use \`${subl(0)}help voice\` for more information`,
 		),
 		ja: paragraph(
@@ -2320,7 +2320,7 @@ const localesObject = ({
 	},
 	voiceSessionNewSessionAutonameValue: {
 		es: 'Si no escribes un nombre de sesión en 3 minutos, se nombrará automáticamente',
-		en: 'If you don\'t enter a session name within 3 minutes, it\'ll be automatically renamed',
+		en: "If you don't enter a session name within 3 minutes, it'll be automatically renamed",
 		ja: '3分以内にセッション名を入力しないと、自動的に名前が変更されます',
 	},
 	voiceSessionRenameInvalidEmoji: {
@@ -2330,9 +2330,9 @@ const localesObject = ({
 			'También, ten en cuenta que algunos emotes estándar de Discord no son *tan estándar* y __no se espera__ que se detecten/funcionen correctamente',
 		),
 		en: paragraph(
-			'⚠️️ The supplied emoji isn\'t a valid Unicode emoji',
+			"⚠️️ The supplied emoji isn't a valid Unicode emoji",
 			'Remember that you cannot use custom emotes for channel names.',
-			'Also, keep in mind that some standard Discord emotes aren\'t *so standard* and are __not expected__ to be detected/function correctly',
+			"Also, keep in mind that some standard Discord emotes aren't *so standard* and are __not expected__ to be detected/function correctly",
 		),
 		ja: paragraph(
 			'⚠️️ 示された絵文字は、サポートされている Unicode 絵文字ではありません。',
@@ -2534,7 +2534,7 @@ const localesObject = ({
 			'Puedes comenzar a seguir tags en cualquier canal con un Sistema PuréFeed instalado',
 		),
 		en: paragraph(
-			'You\'re not subscribed to any image Feeds!',
+			"You're not subscribed to any image Feeds!",
 			'You can start following tags in any channel that has a PuréFeed system installed',
 		),
 		ja: paragraph(
@@ -2629,7 +2629,7 @@ const localesObject = ({
 	},
 	yoVoiceMenuPingAlwaysDesc: {
 		es: 'Serás mencionado al crear o unirte a una sesión',
-		en: 'You\'ll be pinged when creating or joining a session',
+		en: "You'll be pinged when creating or joining a session",
 		ja: 'セッションを作成または参加するときにメンションされます',
 	},
 	yoVoiceMenuPingOnCreateLabel: {
@@ -2639,12 +2639,12 @@ const localesObject = ({
 	},
 	yoVoiceMenuPingOnCreateDesc: {
 		es: 'Solo serás mencionado al crear una nueva sesión',
-		en: 'You\'ll only be pinged when creating a new session',
+		en: "You'll only be pinged when creating a new session",
 		ja: '新しいセッションを作成するときにのみメンションされます',
 	},
 	yoVoiceMenuPingNeverDesc: {
 		es: 'No serás mencionado al crear o unirte a una sesión',
-		en: 'You won\'t be pinged when creating or joining a session',
+		en: "You won't be pinged when creating or joining a session",
 		ja: 'セッションの作成時またはセッションへの参加時にメンションされることはありません',
 	},
 	yoConversionServiceName: {
@@ -2744,24 +2744,27 @@ const localesObject = ({
 	},
 	yoTagsValueDefault: {
 		es: '<Todavía no sigues ninguna tag>',
-		en: '<You aren\'t following any tag yet>',
+		en: "<You aren't following any tag yet>",
 		ja: '【まだタグをフォローしていません】',
 	},
-}) as const;
+} as const;
 
 export type LocaleIds = keyof typeof localesObject;
 
 /**@type {Map<ConditionString, (a: String, b: String) => Boolean>}*/
 const conditionFns: Map<ConditionString, (a: string, b: string) => boolean> = new Map();
 conditionFns
-	.set('=',  (a, b) => a === b)
+	.set('=', (a, b) => a === b)
 	.set('!=', (a, b) => a !== b)
-	.set('<',  (a, b) => a <   b)
-	.set('>',  (a, b) => a >   b)
-	.set('<=', (a, b) => a <=  b)
-	.set('>=', (a, b) => a >=  b);
+	.set('<', (a, b) => a < b)
+	.set('>', (a, b) => a > b)
+	.set('<=', (a, b) => a <= b)
+	.set('>=', (a, b) => a >= b);
 
-const reverseDateMappers: Record<LocaleKey, (a?: number, b?: number, c?: number) => ({ day?: number, month?: number, year?: number })> = {
+const reverseDateMappers: Record<
+	LocaleKey,
+	(a?: number, b?: number, c?: number) => { day?: number; month?: number; year?: number }
+> = {
 	en: (a, b, c) => ({ day: b, month: a, year: c }),
 	es: (a, b, c) => ({ day: a, month: b, year: c }),
 	ja: (a, b, c) => ({ day: c, month: b, year: a }),
@@ -2773,7 +2776,7 @@ export class Translator {
 
 	/**@param locale lenguaje al que traduce esta instancia*/
 	constructor(locale: LocaleKey) {
-		if(!locale) throw ReferenceError('Un Translator requiere un lenguaje para operar');
+		if (!locale) throw ReferenceError('Un Translator requiere un lenguaje para operar');
 		this.#locale = locale;
 	}
 
@@ -2798,8 +2801,8 @@ export class Translator {
 
 	/**@description Devuelve la siguiente clave del lenguaje del traductor actual.*/
 	get next(): LocaleKey {
-		if(this.is('en')) return 'es';
-		if(this.is('es')) return 'ja';
+		if (this.is('en')) return 'es';
+		if (this.is('es')) return 'ja';
 		return 'en';
 	}
 
@@ -2822,34 +2825,52 @@ export class Translator {
 	 */
 	static getText(id: LocaleIds, locale: LocaleKey, ...values: unknown[]) {
 		const localeSet = localesObject[id];
-		if(!localeSet) throw ReferenceError(`Se esperaba una id de texto localizado válido. Se recibió: ${id}`);
+		if (!localeSet)
+			throw ReferenceError(
+				`Se esperaba una id de texto localizado válido. Se recibió: ${id}`,
+			);
 		const translationTemplate = localeSet[locale];
-		if(translationTemplate == null) throw RangeError(`Se esperaba una clave de localización válida. Se recibió: ${id} :: ${locale}`);
+		if (translationTemplate == null)
+			throw RangeError(
+				`Se esperaba una clave de localización válida. Se recibió: ${id} :: ${locale}`,
+			);
 
 		//Ejemplo: 1{...}<?{'por defecto'}
-		const subLocaleRegex = /(\d+){\.\.\.}(?:<!{((?:[!=<>]{1,2}):[^|]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
-		const translation = translationTemplate.replace(subLocaleRegex, (_match, /**@type {String}*/i: string, /**@type {String}*/condition: string, /**@type {String}*/whenTrue: string, /**@type {String}*/defaultValue: string) => {
-			const value = values[i];
+		const subLocaleRegex =
+			/(\d+){\.\.\.}(?:<!{((?:[!=<>]{1,2}):[^|]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
+		const translation = translationTemplate.replace(
+			subLocaleRegex,
+			(
+				_match,
+				/**@type {String}*/ i: string,
+				/**@type {String}*/ condition: string,
+				/**@type {String}*/ whenTrue: string,
+				/**@type {String}*/ defaultValue: string,
+			) => {
+				const value = values[i];
 
-			if(condition != undefined) {
-				const leftValue = (typeof value === 'boolean') ? `__${value}__` : `${value}`;
-				const [ operator, rightValue ] = condition.split(':') as [ ConditionString, string];
+				if (condition != null) {
+					const leftValue = typeof value === 'boolean' ? `__${value}__` : `${value}`;
+					const [operator, rightValue] = condition.split(':') as [
+						ConditionString,
+						string,
+					];
 
-				if(!conditionFns.has(operator))
-					throw 'Operador inválido';
+					if (!conditionFns.has(operator)) throw 'Operador inválido';
 
-				const conditionFn = conditionFns.get(operator);
-				return conditionFn(leftValue, rightValue) ? whenTrue : (defaultValue ?? '');
-			}
+					const conditionFn = conditionFns.get(operator);
+					return conditionFn(leftValue, rightValue) ? whenTrue : (defaultValue ?? '');
+				}
 
-			if(value != undefined)
-				return value;
+				if (value != null) return value;
 
-			if(defaultValue != undefined)
-				return defaultValue;
+				if (defaultValue != null) return defaultValue;
 
-			throw ReferenceError(`Se esperaba un valor de reemplazo en índice [${i}] para texto localizado ${id} :: ${locale}`);
-		});
+				throw ReferenceError(
+					`Se esperaba un valor de reemplazo en índice [${i}] para texto localizado ${id} :: ${locale}`,
+				);
+			},
+		);
 
 		return translation;
 	}
@@ -2861,19 +2882,29 @@ export class Translator {
 	 * @param component2 segundo componente de fecha, en orden traducido
 	 * @param component3 tercer componente de fecha, en orden traducido
 	 */
-	static mapReverseDateUTCComponents(locale: LocaleKey, component1: number | undefined = null, component2: number | undefined = null, component3: number | undefined = null) {
+	static mapReverseDateUTCComponents(
+		locale: LocaleKey,
+		component1: number | undefined = null,
+		component2: number | undefined = null,
+		component3: number | undefined = null,
+	) {
 		const { day, month, year } = reverseDateMappers[locale](component1, component2, component3);
 		const tzNow = new Date(Date.now());
 		const utcNow = new Date(
 			Date.UTC(
-				tzNow.getUTCFullYear(), tzNow.getUTCMonth(), tzNow.getUTCDate(),
-				tzNow.getUTCHours(), tzNow.getUTCMinutes(), tzNow.getUTCSeconds(), tzNow.getUTCMilliseconds()
-			)
+				tzNow.getUTCFullYear(),
+				tzNow.getUTCMonth(),
+				tzNow.getUTCDate(),
+				tzNow.getUTCHours(),
+				tzNow.getUTCMinutes(),
+				tzNow.getUTCSeconds(),
+				tzNow.getUTCMilliseconds(),
+			),
 		);
 
 		return {
 			day: day ?? utcNow.getUTCDate(),
-			month: month ?? (utcNow.getUTCMonth() + 1),
+			month: month ?? utcNow.getUTCMonth() + 1,
 			year: year ?? utcNow.getUTCFullYear(),
 		};
 	}
@@ -2885,8 +2916,18 @@ export class Translator {
 	 * @param component2 segundo componente de fecha, en orden traducido
 	 * @param component3 tercer componente de fecha, en orden traducido
 	 */
-	static reverseSearchUTCDate(id: LocaleKey, component1: number | undefined = null, component2: number | undefined = null, component3: number | undefined = null) {
-		const { day, month, year } = this.mapReverseDateUTCComponents(id, component1, component2, component3);
+	static reverseSearchUTCDate(
+		id: LocaleKey,
+		component1: number | undefined = null,
+		component2: number | undefined = null,
+		component3: number | undefined = null,
+	) {
+		const { day, month, year } = Translator.mapReverseDateUTCComponents(
+			id,
+			component1,
+			component2,
+			component3,
+		);
 		return new Date(year, month, day, 0, 0, 0, 0);
 	}
 
@@ -2896,7 +2937,8 @@ export class Translator {
 	 */
 	static getTranslation(id: LocaleIds): Translation {
 		const localeSet = localesObject[id];
-		if(!localeSet) throw ReferenceError(`Se esperaba una id de traducción válida. Se recibió: ${id}`);
+		if (!localeSet)
+			throw ReferenceError(`Se esperaba una id de traducción válida. Se recibió: ${id}`);
 		return localeSet;
 	}
 }

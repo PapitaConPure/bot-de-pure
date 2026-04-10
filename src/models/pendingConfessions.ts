@@ -21,8 +21,9 @@ const PendingConfessionSchema = new Mongoose.Schema({
 
 const PendingConfession = Mongoose.model('PendingConfession', PendingConfessionSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() { return new PendingConfession({}); }
-export type PendingConfessionDocument = ReturnType<(typeof m)>;
+function m() {
+	return new PendingConfession({});
+}
+export type PendingConfessionDocument = ReturnType<typeof m>;
 
 export default PendingConfession;

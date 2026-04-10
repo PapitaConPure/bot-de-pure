@@ -1,80 +1,78 @@
 import { EmbedBuilder } from 'discord.js';
-import { CommandOptions, CommandTags, Command, CommandParam } from '../commons';
 import { useMainPlayer } from 'discord-player';
+import { shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import { saveTracksQueue, tryRecoverSavedTracksQueue } from '@/models/playerQueue.js';
 import { isPlayerUnavailable, SERVICES } from '@/systems/others/musicPlayer.js';
-import { shortenText } from '@/func';
+import { Command, CommandOptions, CommandParam, CommandTags } from '../commons';
 
-const options = new CommandOptions()
-	.addOptions(
-		new CommandParam('búsqueda', 'TEXT')
-			.setDesc('para realizar una búsqueda')
-			.setAutocomplete(async (interaction, query) => {
-				if(!query)
-					return interaction.respond([]);
+const options = new CommandOptions().addOptions(
+	new CommandParam('búsqueda', 'TEXT')
+		.setDesc('para realizar una búsqueda')
+		.setAutocomplete(async (interaction, query) => {
+			if (!query) return interaction.respond([]);
 
-				const player = useMainPlayer();
-				const results = await player.search(query, {
-					searchEngine: 'auto',
-					fallbackSearchEngine: 'autoSearch',
-				});
+			const player = useMainPlayer();
+			const results = await player.search(query, {
+				searchEngine: 'auto',
+				fallbackSearchEngine: 'autoSearch',
+			});
 
-				return interaction.respond(
-					results.tracks
-						.filter(t => t.url.length <= 100)
-						.slice(0, 10)
-						.map(t => ({
-							name: shortenText(t.title, 100),
-							value: t.url,
-						})),
-				);
-			})
-	);
-
-const tags = new CommandTags().add(
-	'COMMON',
-	'MUSIC',
+			return interaction.respond(
+				results.tracks
+					.filter((t) => t.url.length <= 100)
+					.slice(0, 10)
+					.map((t) => ({
+						name: shortenText(t.title, 100),
+						value: t.url,
+					})),
+			);
+		}),
 );
 
+const tags = new CommandTags().add('COMMON', 'MUSIC');
+
 const command = new Command('reproducir', tags)
-	.setAliases(
-		'tocar',
-		'play',
-		'p',
-	)
+	.setAliases('tocar', 'play', 'p')
 	.setBriefDescription('Reproduce pistas de audio')
-	.setLongDescription(
-		'Reproduce una pista de audio según la `búsqueda` realizada.',
-	)
+	.setLongDescription('Reproduce una pista de audio según la `búsqueda` realizada.')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.userId);
 
-		if(args.empty)
-			return request.reply({ content: translator.getText('playSearchExpected'), ephemeral: true });
+		if (args.empty)
+			return request.reply({
+				content: translator.getText('playSearchExpected'),
+				ephemeral: true,
+			});
 
 		const channel = request.member.voice?.channel;
-		if(!channel)
-			return request.reply({ content: translator.getText('voiceExpected') });
+		if (!channel) return request.reply({ content: translator.getText('voiceExpected') });
 
-		if(isPlayerUnavailable(channel))
-			return request.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
+		if (isPlayerUnavailable(channel))
+			return request.reply({
+				content: translator.getText('voiceSameChannelExpected'),
+				ephemeral: true,
+			});
 
 		const query = args.getString('búsqueda', true);
-		if(!query)
-			return request.reply({ content: translator.getText('playSearchExpected'), ephemeral: true });
+		if (!query)
+			return request.reply({
+				content: translator.getText('playSearchExpected'),
+				ephemeral: true,
+			});
 
 		await request.deferReply();
 
 		/**@param {import('discord.js').ColorResolvable} color*/
-		const makeReplyEmbed = (color) => new EmbedBuilder()
-			.setColor(color)
-			.setAuthor({
-				name: request.member.displayName,
-				iconURL: request.member.displayAvatarURL({ size: 128 })
-			})
-			.setTimestamp(Date.now());
+		const makeReplyEmbed = (color) =>
+			new EmbedBuilder()
+				.setColor(color)
+				.setAuthor({
+					name: request.member.displayName,
+					iconURL: request.member.displayAvatarURL({ size: 128 }),
+				})
+				.setTimestamp(Date.now());
 
 		try {
 			await tryRecoverSavedTracksQueue(request, false);
@@ -85,12 +83,21 @@ const command = new Command('reproducir', tags)
 			});
 
 			const service = SERVICES[track.source];
-			const trackSourceName = service.name ?? translator.getText('playValueTrackSourceArbitrary');
-			const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
+			const trackSourceName =
+				service.name ?? translator.getText('playValueTrackSourceArbitrary');
+			const queueInfo = queue.size
+				? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted)
+				: translator.getText('playFooterTextQueueEmpty');
 			const trackEmbed = makeReplyEmbed(service.color)
-				.setTitle(queue.size ? translator.getText('playTitleQueueAdded') : translator.getText('playTitleQueueNew'))
+				.setTitle(
+					queue.size
+						? translator.getText('playTitleQueueAdded')
+						: translator.getText('playTitleQueueNew'),
+				)
 				.setDescription(`[${track.title}](${track.url})`)
-				.setThumbnail(track.thumbnail || request.client.user.displayAvatarURL({ size: 256 }))
+				.setThumbnail(
+					track.thumbnail || request.client.user.displayAvatarURL({ size: 256 }),
+				)
 				.setFooter({
 					text: `${channel.name ?? '???'} • ${queueInfo}`,
 					iconURL: service.iconUrl || request.client.user.displayAvatarURL({ size: 256 }),
@@ -110,7 +117,7 @@ const command = new Command('reproducir', tags)
 
 			return Promise.all([
 				saveTracksQueue(request, queue),
-				request.editReply({ embeds: [ trackEmbed ] }),
+				request.editReply({ embeds: [trackEmbed] }),
 			]);
 		} catch (e) {
 			console.error(e);
@@ -121,7 +128,7 @@ const command = new Command('reproducir', tags)
 					name: 'Error',
 					value: `\`\`\`\n${e?.message ?? e?.name ?? e ?? 'Error desconocido'}\n\`\`\``,
 				});
-			return request.editReply({ embeds: [ errorEmbed ] });
+			return request.editReply({ embeds: [errorEmbed] });
 		}
 	});
 

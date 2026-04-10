@@ -8,7 +8,8 @@ export interface ContentfulConverterPayloadData {
 	content: string;
 }
 
-export type ContentfulConverterPayload = ConverterBasePayload<true> & ContentfulConverterPayloadData;
+export type ContentfulConverterPayload = ConverterBasePayload<true> &
+	ContentfulConverterPayloadData;
 
 export type ConverterPayload = EmptyConverterPayload | ContentfulConverterPayload;
 

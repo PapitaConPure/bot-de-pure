@@ -1,8 +1,4 @@
-import type {
-	RuntimeValue,
-	NativeFunction,
-	TextValue,
-	BooleanValue} from '../../values';
+import type { RuntimeValue, NativeFunction, TextValue, BooleanValue } from '../../values';
 import {
 	ValueKinds,
 	makeBoolean,
@@ -17,44 +13,44 @@ import {
 import { expectParam, psFileRegex, psLinkRegex, psImageRegex } from '../nativeUtils';
 import type { NativeFunctionEntry } from '.';
 
-const esNúmero: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [ x ]) => {
+const esNúmero: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [x]) => {
 	const test = isOperable(x);
 	return makeBoolean(test);
 };
 
-const esTexto: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [ x ]) => {
+const esTexto: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [x]) => {
 	const test = isValidText(x);
 	return makeBoolean(test);
 };
 
-const esLogico: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [ x ]) => {
+const esLogico: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [x]) => {
 	const test = isBoolean(x);
 	return makeBoolean(test);
 };
 
-const esLista: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [ x ]) => {
+const esLista: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [x]) => {
 	const test = isList(x);
 	return makeBoolean(test);
 };
 
-const esRegistro: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [ x ]) => {
+const esRegistro: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [x]) => {
 	const test = isRegistry(x);
 	return makeBoolean(test);
 };
 
-const esMarco: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [ x ]) => {
+const esMarco: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [x]) => {
 	const test = isEmbed(x);
 	return makeBoolean(test);
 };
 
-const esNada: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [ x ]) => {
+const esNada: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [x]) => {
 	const test = isNada(x);
 	return makeBoolean(test);
 };
 
 const esEnlace: NativeFunction<null, [RuntimeValue], BooleanValue> = (
 	_self,
-	[ x ]: [TextValue],
+	[x]: [TextValue],
 	scope,
 ) => {
 	const xResult = expectParam('x', x, ValueKinds.TEXT, scope);
@@ -64,7 +60,7 @@ const esEnlace: NativeFunction<null, [RuntimeValue], BooleanValue> = (
 
 const esArchivo: NativeFunction<null, [RuntimeValue], BooleanValue> = (
 	_self,
-	[ x ]: [TextValue],
+	[x]: [TextValue],
 	scope,
 ) => {
 	const xResult = expectParam('x', x, ValueKinds.TEXT, scope);
@@ -74,7 +70,7 @@ const esArchivo: NativeFunction<null, [RuntimeValue], BooleanValue> = (
 
 const esImagen: NativeFunction<null, [RuntimeValue], BooleanValue> = (
 	_self,
-	[ x ]: [TextValue],
+	[x]: [TextValue],
 	scope,
 ) => {
 	const xResult = expectParam('x', x, ValueKinds.TEXT, scope);

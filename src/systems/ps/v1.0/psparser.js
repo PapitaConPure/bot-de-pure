@@ -848,7 +848,7 @@ class TuberParser {
 
 		const dataTypeValue = this.#digest().value;
 		const targetType = LanguageDataToParserType.get(dataTypeValue);
-		if(targetType == undefined)
+		if(targetType == null)
 			throw this.TuberParserError(`Se esperaba un literal de tipo de dato, pero se recibió: ${dataTypeValue}`);
 
 		const reception = /**@type {import('./commons.js').ParserExpressionNode}*/(this.#parseCombination());
@@ -1105,15 +1105,15 @@ class TuberParser {
 	 */
 	#parseArgumentsList() {
 		const args = [ this.#parseArgument() ];
-		let foundOptional = args[0].default != undefined;
+		let foundOptional = args[0].default != null;
 
 		while(this.#current.type === LexerTokenTypes.Comma && this.#digest()) {
 			const arg = this.#parseArgument();
-			if(foundOptional && arg.default == undefined)
+			if(foundOptional && arg.default == null)
 				throw this.TuberParserError(`Los parámetros obligatorios deben escribirse antes que los parámetros opcionales en las declaraciones de función`);
 
 			args.push(arg);
-			foundOptional ||= arg.default != undefined;
+			foundOptional ||= arg.default != null;
 		}
 
 		return args;

@@ -1,16 +1,16 @@
-import type { Message, User, Snowflake } from 'discord.js';
-import { EmbedBuilder, Collection } from 'discord.js';
+import type { Message, Snowflake, User } from 'discord.js';
+import { Collection, EmbedBuilder } from 'discord.js';
 import { paginateRaw } from '@/func';
-import { CommandOptions, CommandTags, Command } from '../commons';
+import { Command, CommandOptions, CommandTags } from '../commons';
 
-const options = new CommandOptions()
-	.addParam('tiempo', 'NUMBER', 'para establecer la duración del evento, en segundos', { optional: true });
-
-const tags = new CommandTags().add(
-	'MEME',
-	'GAME',
-	'CHAOS',
+const options = new CommandOptions().addParam(
+	'tiempo',
+	'NUMBER',
+	'para establecer la duración del evento, en segundos',
+	{ optional: true },
 );
+
+const tags = new CommandTags().add('MEME', 'GAME', 'CHAOS');
 
 const command = new Command('uwus', tags)
 	.setBriefDescription('Inicia un evento UwU en el canal')
@@ -26,24 +26,23 @@ const command = new Command('uwus', tags)
 		const uwuUsers = new Map<Snowflake, number>();
 		let lastUwu: User;
 		const filter = (m: Message) => !m.author.bot && m.content.toLowerCase().includes('uwu');
-		const coll = request.channel.createMessageCollector({ filter: filter, time: (secs * 1000) });
+		const coll = request.channel.createMessageCollector({ filter: filter, time: secs * 1000 });
 
-		coll.on('collect', m => {
+		coll.on('collect', (m) => {
 			const userId = m.author.id;
 
-			if(m.content.toLowerCase().includes('antiuwu'))
-				return coll.stop();
+			if (m.content.toLowerCase().includes('antiuwu')) return coll.stop();
 
 			uwuUsers[userId] ??= 0;
 			uwuUsers[userId] += 1;
 			lastUwu = m.author;
 		});
 
-		coll.on('end', async collected => {
+		coll.on('end', async (collected) => {
 			let bestId: Snowflake;
 			let max = 0;
-			for(const [ uid, count ] of uwuUsers.entries()) {
-				if(count >= max) {
+			for (const [uid, count] of uwuUsers.entries()) {
+				if (count >= max) {
 					bestId = uid;
 					max = count;
 				}
@@ -69,11 +68,11 @@ const command = new Command('uwus', tags)
 
 			try {
 				return await Promise.all([
-					...collectedSlices.map(slice => {
+					...collectedSlices.map((slice) => {
 						const sliceCollection = new Collection<Snowflake, Message>(slice);
 						return request.channel.bulkDelete(sliceCollection);
 					}),
-					request.channel.send({ embeds: [ embed ] }),
+					request.channel.send({ embeds: [embed] }),
 				]);
 			} catch (message) {
 				return console.error(message);
@@ -95,9 +94,12 @@ const command = new Command('uwus', tags)
 					value: `**${secs}** segundos.`,
 				},
 			)
-			.setAuthor({ name: `Evento iniciado por ${user.username}`, iconURL: user.avatarURL({ size: 256 }) });
+			.setAuthor({
+				name: `Evento iniciado por ${user.username}`,
+				iconURL: user.avatarURL({ size: 256 }),
+			});
 
-		return request.reply({ embeds: [ embed ] });
+		return request.reply({ embeds: [embed] });
 	});
 
 export default command;

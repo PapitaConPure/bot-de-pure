@@ -1,8 +1,9 @@
 function* iotaGenerator(first: number) {
 	let value = first;
-	while(true) yield value++;
+	while (true) yield value++;
 }
 
+// biome-ignore lint/complexity/noStaticOnlyClass: Generator
 class Ut {
 	static #iota: Generator<number, void, unknown>;
 
@@ -19,8 +20,7 @@ class Ut {
 	 * Devuelve el siguiente valor del generador Iota actual
 	 */
 	static get iota(): number {
-		if(Ut.#iota == null)
-			return Ut.Iota();
+		if (Ut.#iota == null) return Ut.Iota();
 
 		const value = Ut.#iota.next().value;
 		return value as number;
@@ -28,7 +28,7 @@ class Ut {
 
 	/**@description Limita el valor al rango descrito (inclusive)*/
 	static clamp(value: number, min: number, max: number): number {
-		if(min > max) {
+		if (min > max) {
 			const temp = min;
 			min = max;
 			max = temp;
@@ -39,3 +39,6 @@ class Ut {
 }
 
 export default Ut;
+
+export const INT32_MIN = -0x80000000;
+export const INT32_MAX = 0x7fffffff;

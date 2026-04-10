@@ -1,15 +1,16 @@
+import { Command, CommandOptions, CommandTags } from '../commons';
 import { CommandPermissions } from '../commons/cmdPerms';
-import { CommandTags, Command, CommandOptions } from '../commons';
 
 const perms = new CommandPermissions('ManageGuild');
 
-const options = new CommandOptions()
-	.addFlag('c', 'canal', 'para especificar el canal al cuál enviar la bienvenida', { name: 'cn', type: 'CHANNEL' });
-
-const flags = new CommandTags().add(
-	'MOD',
-	'MAINTENANCE',
+const options = new CommandOptions().addFlag(
+	'c',
+	'canal',
+	'para especificar el canal al cuál enviar la bienvenida',
+	{ name: 'cn', type: 'CHANNEL' },
 );
+
+const flags = new CommandTags().add('MOD', 'MAINTENANCE');
 
 const command = new Command('bienvenida', flags)
 	.setBriefDescription('Configura una bienvenida para este servidor')

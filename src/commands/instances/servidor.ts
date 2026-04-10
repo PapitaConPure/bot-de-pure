@@ -1,18 +1,25 @@
-import { Command, CommandPermissions, CommandTags } from '../commons';
-import type { Guild} from 'discord.js';
-import { ContainerBuilder, MessageFlags, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } from 'discord.js';
+import type { Guild } from 'discord.js';
+import {
+	ContainerBuilder,
+	MessageFlags,
+	SeparatorSpacingSize,
+	StringSelectMenuBuilder,
+	StringSelectMenuOptionBuilder,
+} from 'discord.js';
 import { tenshiColor } from '@/data/globalProps';
-import { Locales, Translator } from '@/i18n';
 import { compressId } from '@/func';
+import { Locales, Translator } from '@/i18n';
+import { Command, CommandPermissions, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('MOD', 'MAINTENANCE');
 
-const permissions = new CommandPermissions()
-	.requireAnyOf([ 'ManageGuild' ]);
+const permissions = new CommandPermissions().requireAnyOf(['ManageGuild']);
 
 const command = new Command('servidor', tags)
 	.setAliases('server', 'guild', 'sv')
-	.setBriefDescription('Para ver y configurar las preferencias del servidor por medio de un Asistente')
+	.setBriefDescription(
+		'Para ver y configurar las preferencias del servidor por medio de un Asistente',
+	)
 	.setLongDescription(
 		'Para ver y configurar las preferencias del servidor.',
 		'Si quieres cambiar alguna configuración, puedes presionar cualquier botón para proceder con el Asistente',
@@ -24,48 +31,51 @@ const command = new Command('servidor', tags)
 		console.log('wa');
 		return request.reply({
 			flags: MessageFlags.IsComponentsV2,
-			components: [ makeDashboardContainer(compressedUserId, request.guild, translator) ],
+			components: [makeDashboardContainer(compressedUserId, request.guild, translator)],
 		});
 	});
 
 function makeDashboardContainer(compressedUserId: string, guild: Guild, translator: Translator) {
 	const container = new ContainerBuilder()
 		.setAccentColor(tenshiColor)
-		.addSectionComponents(section =>
+		.addSectionComponents((section) =>
 			section
 				.addTextDisplayComponents(
-					textDisplay => textDisplay.setContent(
-						translator.getText('serverDashboardServerEpigraph')
-					),
-					textDisplay => textDisplay.setContent(`## ${guild.name}`),
+					(textDisplay) =>
+						textDisplay.setContent(translator.getText('serverDashboardServerEpigraph')),
+					(textDisplay) => textDisplay.setContent(`## ${guild.name}`),
 				)
-				.setThumbnailAccessory(thumbnail =>
+				.setThumbnailAccessory((thumbnail) =>
 					thumbnail
 						.setDescription(translator.getText('infoGuildIconAlt'))
-						.setURL(guild.iconURL({ size: 512 }))
-				)
+						.setURL(guild.iconURL({ size: 512 })),
+				),
 		)
-		.addSeparatorComponents(separator => separator.setDivider(true))
-		.addTextDisplayComponents(textDisplay =>
-			textDisplay.setContent(translator.getText('serverDashboardLanguageName'))
+		.addSeparatorComponents((separator) => separator.setDivider(true))
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(translator.getText('serverDashboardLanguageName')),
 		)
-		.addActionRowComponents(actionRow =>
+		.addActionRowComponents((actionRow) =>
 			actionRow.addComponents(
 				new StringSelectMenuBuilder()
 					.setCustomId(`server_selectLanguage_${compressedUserId}`)
 					.setPlaceholder(translator.getText('languageMenuPlaceholder'))
-					.setOptions(Object.values(Locales).map(locale => {
-						const subTranslator = new Translator(locale);
-						return new StringSelectMenuOptionBuilder()
-							.setLabel(subTranslator.getText('currentLanguage'))
-							.setEmoji(subTranslator.getText('currentLanguageEmojiId'))
-							.setValue(locale)
-							.setDefault(translator.locale === subTranslator.locale);
-					})),
-			)
+					.setOptions(
+						Object.values(Locales).map((locale) => {
+							const subTranslator = new Translator(locale);
+							return new StringSelectMenuOptionBuilder()
+								.setLabel(subTranslator.getText('currentLanguage'))
+								.setEmoji(subTranslator.getText('currentLanguageEmojiId'))
+								.setValue(locale)
+								.setDefault(translator.locale === subTranslator.locale);
+						}),
+					),
+			),
 		)
-		.addSeparatorComponents(separator => separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large))
-		.addActionRowComponents(actionRow =>
+		.addSeparatorComponents((separator) =>
+			separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
+		)
+		.addActionRowComponents((actionRow) =>
 			actionRow.addComponents(
 				new StringSelectMenuBuilder()
 					.setCustomId(`server_selectConfig_${compressedUserId}`)
@@ -89,9 +99,8 @@ function makeDashboardContainer(compressedUserId: string, guild: Guild, translat
 							value: 'confessions',
 						},
 					]),
-			)
+			),
 		);
-
 
 	return container;
 }

@@ -7,7 +7,7 @@ import type { RuntimeValue } from '../interpreter/values';
 import type { Scope } from '../interpreter/scope';
 
 /**@description Contiene tipos de sentencia.*/
-export const StatementKinds = ({
+export const StatementKinds = {
 	PROGRAM: 'ProgramStatement',
 
 	BLOCK: 'BlockStatement',
@@ -30,19 +30,18 @@ export const StatementKinds = ({
 	END: 'EndStatement',
 	STOP: 'StopStatement',
 	SEND: 'SendStatement',
-}) as const;
+} as const;
 export type StatementKind = ValuesOf<typeof StatementKinds>;
 
-export const ScopeAbortKinds: StatementKind[] = [
-	StatementKinds.RETURN,
-	StatementKinds.END,
-];
+export const ScopeAbortKinds: StatementKind[] = [StatementKinds.RETURN, StatementKinds.END];
 
 export interface EmptyStatement<T extends StatementKind> {
 	kind: Readonly<NonNullable<T>>;
 }
 
-export interface BaseStatementData<T extends StatementKind> extends EmptyStatement<T>, NodeMetadata {}
+export interface BaseStatementData<T extends StatementKind>
+	extends EmptyStatement<T>,
+		NodeMetadata {}
 
 export type BlockBody = Statement[];
 
@@ -50,7 +49,9 @@ export interface BlockStatementData {
 	body: BlockBody;
 }
 
-export interface ProgramStatement extends BaseStatementData<'ProgramStatement'>, BlockStatementData {}
+export interface ProgramStatement
+	extends BaseStatementData<'ProgramStatement'>,
+		BlockStatementData {}
 export interface BlockStatement extends BaseStatementData<'BlockStatement'>, BlockStatementData {}
 
 export interface ConditionalStatementData {
@@ -59,7 +60,9 @@ export interface ConditionalStatementData {
 	alternate?: Statement;
 }
 
-export interface ConditionalStatement extends BaseStatementData<'ConditionalStatement'>, ConditionalStatementData {}
+export interface ConditionalStatement
+	extends BaseStatementData<'ConditionalStatement'>,
+		ConditionalStatementData {}
 
 export interface WhileStatementData {
 	test: Expression;
@@ -68,14 +71,18 @@ export interface WhileStatementData {
 
 export interface WhileStatement extends BaseStatementData<'WhileStatement'>, WhileStatementData {}
 
-export interface DoUntilStatement extends BaseStatementData<'DoUntilStatement'>, WhileStatementData {}
+export interface DoUntilStatement
+	extends BaseStatementData<'DoUntilStatement'>,
+		WhileStatementData {}
 
 export interface RepeatStatementData {
 	times: Expression;
 	body: BlockStatement;
 }
 
-export interface RepeatStatement extends BaseStatementData<'RepeatStatement'>, RepeatStatementData {}
+export interface RepeatStatement
+	extends BaseStatementData<'RepeatStatement'>,
+		RepeatStatementData {}
 
 export interface ForEachStatementData {
 	identifier: string;
@@ -83,7 +90,9 @@ export interface ForEachStatementData {
 	body: BlockStatement;
 }
 
-export interface ForEachStatement extends BaseStatementData<'ForEachStatement'>, ForEachStatementData {}
+export interface ForEachStatement
+	extends BaseStatementData<'ForEachStatement'>,
+		ForEachStatementData {}
 
 export interface BaseForStatementData {
 	identifier: string;
@@ -115,11 +124,17 @@ export interface ExpressionStatementData {
 	expression: Expression;
 }
 
-export interface ExpressionStatement extends BaseStatementData<'ExpressionStatement'>, ExpressionStatementData {}
+export interface ExpressionStatement
+	extends BaseStatementData<'ExpressionStatement'>,
+		ExpressionStatementData {}
 
 export type ReadStatementPreModifier = (arg: string, it: Interpreter, scope: Scope) => string;
 
-export type ReadStatementModifier = (v: RuntimeValue, it: Interpreter, scope: Scope) => RuntimeValue;
+export type ReadStatementModifier = (
+	v: RuntimeValue,
+	it: Interpreter,
+	scope: Scope,
+) => RuntimeValue;
 
 export interface ReadStatementData {
 	dataKind: Token;
@@ -137,7 +152,9 @@ export interface DeclarationStatementData {
 	dataKind: Token | null;
 }
 
-export interface DeclarationStatement extends BaseStatementData<'DeclarationStatement'>, DeclarationStatementData {}
+export interface DeclarationStatement
+	extends BaseStatementData<'DeclarationStatement'>,
+		DeclarationStatementData {}
 
 export interface SaveStatementData {
 	identifier: string;
@@ -150,7 +167,9 @@ export interface BaseLoadStatementData {
 	identifier: string;
 }
 
-export interface BaseLoadStatement extends BaseStatementData<'LoadStatement'>, BaseLoadStatementData {}
+export interface BaseLoadStatement
+	extends BaseStatementData<'LoadStatement'>,
+		BaseLoadStatementData {}
 
 export interface UnconditionalLoadStatementData {
 	conditional: false;
@@ -161,7 +180,9 @@ export interface ConditionalLoadStatementData {
 	expressions: Expression[];
 }
 
-export interface UnconditionalLoadStatement extends BaseLoadStatement, UnconditionalLoadStatementData {}
+export interface UnconditionalLoadStatement
+	extends BaseLoadStatement,
+		UnconditionalLoadStatementData {}
 
 export interface ConditionalLoadStatement extends BaseLoadStatement, ConditionalLoadStatementData {}
 
@@ -171,7 +192,9 @@ export interface DeleteStatementData {
 	identifier: string;
 }
 
-export interface DeleteStatement extends BaseStatementData<'DeleteStatement'>, DeleteStatementData {}
+export interface DeleteStatement
+	extends BaseStatementData<'DeleteStatement'>,
+		DeleteStatementData {}
 
 export interface AssignmentStatementData {
 	operator: Token;
@@ -179,7 +202,9 @@ export interface AssignmentStatementData {
 	reception: Expression | null;
 }
 
-export interface AssignmentStatement extends BaseStatementData<'AssignmentStatement'>, AssignmentStatementData {}
+export interface AssignmentStatement
+	extends BaseStatementData<'AssignmentStatement'>,
+		AssignmentStatementData {}
 
 export interface InsertionStatementData {
 	receptor: Expression;
@@ -187,9 +212,13 @@ export interface InsertionStatementData {
 	index: Expression;
 }
 
-export interface InsertionStatement extends BaseStatementData<'InsertionStatement'>, InsertionStatementData {}
+export interface InsertionStatement
+	extends BaseStatementData<'InsertionStatement'>,
+		InsertionStatementData {}
 
-export interface ReturnStatement extends BaseStatementData<'ReturnStatement'>, ExpressionStatementData {}
+export interface ReturnStatement
+	extends BaseStatementData<'ReturnStatement'>,
+		ExpressionStatementData {}
 
 export interface StopStatementData {
 	stopMessage: Expression;
@@ -198,7 +227,9 @@ export interface StopStatementData {
 
 export interface StopStatement extends BaseStatementData<'StopStatement'>, StopStatementData {}
 
-export interface SendStatement extends BaseStatementData<'SendStatement'>, ExpressionStatementData {}
+export interface SendStatement
+	extends BaseStatementData<'SendStatement'>,
+		ExpressionStatementData {}
 
 export type EndStatement = BaseStatementData<'EndStatement'>;
 
@@ -226,6 +257,4 @@ export type SimpleStatement =
 	| SendStatement
 	| EndStatement;
 
-export type Statement =
-	| ControlStatement
-	| SimpleStatement;
+export type Statement = ControlStatement | SimpleStatement;

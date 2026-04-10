@@ -53,8 +53,9 @@ const SakiSchema = new Mongoose.Schema({
 
 const Saki = Mongoose.model('Hourai', SakiSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() { return new Saki({}); }
-export type SakiDocument = ReturnType<(typeof m)>;
+function m() {
+	return new Saki({});
+}
+export type SakiDocument = ReturnType<typeof m>;
 
 export default Saki;

@@ -1,10 +1,10 @@
+import type { GuildMember, Interaction, User } from 'discord.js';
+import { noDataBase } from '../data/globalProps';
 import type { LocaleKey } from '../i18n';
 import type { UserConfigDocument } from '../models/userconfigs';
 import UserConfigs from '../models/userconfigs';
-import { noDataBase } from '../data/globalProps';
-import type { AnyRequest } from '../types/commands';
 import type { AcceptedTwitterConverterKey } from '../systems/converters/pureet';
-import type { GuildMember, Interaction, User } from 'discord.js';
+import type { AnyRequest } from '../types/commands';
 
 export type UserCache = {
 	language: LocaleKey;
@@ -13,12 +13,7 @@ export type UserCache = {
 	banned: boolean;
 };
 
-export type UserCacheResolvable =
-	| AnyRequest
-	| Interaction
-	| User
-	| GuildMember
-	| string;
+export type UserCacheResolvable = AnyRequest | Interaction | User | GuildMember | string;
 
 const userCache = new Map<string, UserCache>();
 
@@ -28,15 +23,15 @@ const userCache = new Map<string, UserCache>();
  */
 export async function cacheUser(user: UserCacheResolvable) {
 	const userId = resolveUserCacheId(user);
-	if(!userId) throw ReferenceError('Se esperaba una ID de usuario');
+	if (!userId) throw ReferenceError('Se esperaba una ID de usuario');
 
 	const userQuery = { userId };
 	let userConfigs: UserConfigDocument;
-	if(noDataBase) {
+	if (noDataBase) {
 		userConfigs = new UserConfigs(userQuery);
 	} else {
 		userConfigs = await UserConfigs.findOne(userQuery);
-		if(!userConfigs) {
+		if (!userConfigs) {
 			userConfigs = new UserConfigs(userQuery);
 			await userConfigs.save();
 		}
@@ -65,20 +60,17 @@ export async function recacheUser(user: UserCacheResolvable) {
  */
 export async function fetchUserCache(user: UserCacheResolvable): Promise<UserCache> {
 	const userId = resolveUserCacheId(user);
-	if(!userId) throw ReferenceError('Se esperaba una ID de usuario al recolectar caché');
+	if (!userId) throw ReferenceError('Se esperaba una ID de usuario al recolectar caché');
 
-	if(!userCache.has(userId))
-		await cacheUser(userId);
+	if (!userCache.has(userId)) await cacheUser(userId);
 
 	return userCache.get(userId);
 }
 
 export function resolveUserCacheId(data: UserCacheResolvable) {
-	if(typeof data === 'string')
-		return data;
+	if (typeof data === 'string') return data;
 
-	if('member' in data)
-		return data.member.user.id;
+	if ('member' in data) return data.member.user.id;
 
 	return data.id;
 }

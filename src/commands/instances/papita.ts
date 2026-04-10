@@ -1,5 +1,5 @@
-import { randRange, isNSFWChannel } from '@/func';
-import { CommandOptions, CommandTags, Command } from '../commons';
+import { isNSFWChannel, randRange } from '@/func';
+import { Command, CommandOptions, CommandTags } from '../commons';
 
 const paputa = [
 	'Romper al bot <:sagumeBlush:1108315844045455410>',
@@ -13,13 +13,14 @@ const paputa = [
 ];
 
 const flags = new CommandTags().add('MEME');
-const options = new CommandOptions()
-	.addParam('frase', 'TEXT', 'para indicar una frase a patentar', { optional: true });
+const options = new CommandOptions().addParam(
+	'frase',
+	'TEXT',
+	'para indicar una frase a patentar',
+	{ optional: true },
+);
 const command = new Command('papita', flags)
-	.setAliases(
-		'papa', 'apita', 'ure', 'uré',
-		'potato', '🥔',
-	)
+	.setAliases('papa', 'apita', 'ure', 'uré', 'potato', '🥔')
 	.setBriefDescription('Comando de frases de Papita con Puré')
 	.setLongDescription(
 		'Comando de frases de Papita con Puré. Si se ingresa texto, se lo patentará, si no, dependiendo del canal...',
@@ -29,15 +30,14 @@ const command = new Command('papita', flags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const words = args.getString('frase')?.split(/[ \n]+/);
-		if(words?.length) {
+		if (words?.length) {
 			const newmsg = `***:copyright: ${words.shift()}:registered: ${words.join(' ').replace(/[a-zA-Z0-9áéíóúÁÉÍÓÚüÑñ;:]+/g, '$&:tm:')}***`;
 			return request.reply({ content: newmsg });
 		}
 
-		if(isNSFWChannel(request.channel))
+		if (isNSFWChannel(request.channel))
 			return request.reply({ content: 'https://www.youtube.com/watch?v=pwEvEY-7p9o' });
-		else
-			return request.reply({ content: `**${paputa[randRange(0, paputa.length)]}**` });
+		else return request.reply({ content: `**${paputa[randRange(0, paputa.length)]}**` });
 	});
 
 export default command;

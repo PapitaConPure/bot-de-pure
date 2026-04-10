@@ -1,19 +1,13 @@
 import { ButtonBuilder, ButtonStyle } from 'discord.js';
-import { CommandTags, Command } from '../commons';
-import { Translator } from '@/i18n';
 import { useMainPlayer } from 'discord-player';
-import { isPlayerUnavailable, SERVICES, makePuréMusicEmbed } from '@/systems/others/musicPlayer';
+import { Translator } from '@/i18n';
+import { isPlayerUnavailable, makePuréMusicEmbed, SERVICES } from '@/systems/others/musicPlayer';
+import { Command, CommandTags } from '../commons';
 
-const tags = new CommandTags().add(
-	'COMMON',
-	'MUSIC',
-);
+const tags = new CommandTags().add('COMMON', 'MUSIC');
 
 const command = new Command('pausar', tags)
-	.setAliases(
-		'pausa',
-		'pause',
-	)
+	.setAliases('pausa', 'pause')
 	.setBriefDescription('Pausa una pista de audio en reproducción')
 	.setLongDescription(
 		'Pausa la reproducción de la pista de audio actual, si es que se estaba reproduciendo alguna.',
@@ -25,43 +19,47 @@ const command = new Command('pausar', tags)
 			.setLabel('¿Cómo resumo una pista pausada?')
 			.setStyle(ButtonStyle.Secondary),
 	)
-	.setExecution(async request => {
+	.setExecution(async (request) => {
 		const translator = await Translator.from(request.userId);
 
 		const channel = request.member.voice?.channel;
-		if(!channel)
+		if (!channel)
 			return request.reply({ content: translator.getText('voiceExpected'), ephemeral: true });
 
-		if(isPlayerUnavailable(channel))
-			return request.reply({ content: translator.getText('voiceSameChannelExpected'), ephemeral: true });
+		if (isPlayerUnavailable(channel))
+			return request.reply({
+				content: translator.getText('voiceSameChannelExpected'),
+				ephemeral: true,
+			});
 
 		const player = useMainPlayer();
 		const queue = player.queues.get(request.guildId);
 
-		if(!queue?.currentTrack) {
-			const embed = makePuréMusicEmbed(request)
-				.setTitle(translator.getText('pauseTitleNoTrack'));
-			return request.reply({ embeds: [ embed ], ephemeral: true });
+		if (!queue?.currentTrack) {
+			const embed = makePuréMusicEmbed(request).setTitle(
+				translator.getText('pauseTitleNoTrack'),
+			);
+			return request.reply({ embeds: [embed], ephemeral: true });
 		}
 
 		const currentTrack = queue.currentTrack;
 		const service = SERVICES[currentTrack.source];
-		const queueInfo = queue.size ? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted) : translator.getText('playFooterTextQueueEmpty');
-		const embed = makePuréMusicEmbed(request, service.color, service.iconUrl, [ queueInfo ])
+		const queueInfo = queue.size
+			? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted)
+			: translator.getText('playFooterTextQueueEmpty');
+		const embed = makePuréMusicEmbed(request, service.color, service.iconUrl, [queueInfo])
 			.setDescription(`[${currentTrack.title}](${currentTrack.url})`)
 			.setThumbnail(currentTrack.thumbnail);
 
-		if(queue.node.isPaused()) {
+		if (queue.node.isPaused()) {
 			embed.setTitle(translator.getText('pauseTitleTrackAlreadyPaused'));
-			return request.reply({ embeds: [ embed ], ephemeral: true });
+			return request.reply({ embeds: [embed], ephemeral: true });
 		}
 
 		queue.node.pause();
 
-		embed
-			.setTitle(translator.getText('pauseTitlePaused'))
-			.setTimestamp(Date.now());
-		return request.reply({ embeds: [ embed ] });
+		embed.setTitle(translator.getText('pauseTitlePaused')).setTimestamp(Date.now());
+		return request.reply({ embeds: [embed] });
 	});
 
 export default command;

@@ -1,15 +1,22 @@
-import { ContextMenuAction } from '../commons/actionBuilder';
-import { MessageFlags, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	EmbedBuilder,
+	MessageFlags,
+} from 'discord.js';
 import { Translator } from '@/i18n';
+import { ContextMenuAction } from '../commons/actionBuilder';
 
-const action = new ContextMenuAction('actionGetSticker', 'Message')
-	.setMessageResponse(async interaction => {
+const action = new ContextMenuAction('actionGetSticker', 'Message').setMessageResponse(
+	async (interaction) => {
 		const message = interaction.targetMessage;
 		const uid = interaction.user.id;
+		// biome-ignore lint/correctness/noUnusedVariables: TODO: Traducir
 		const translator = await Translator.from(uid);
 
 		const sticker = await message.stickers.first()?.fetch().catch(console.error);
-		if(!sticker)
+		if (!sticker)
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: 'No se encontraron stickers...',
@@ -30,9 +37,10 @@ const action = new ContextMenuAction('actionGetSticker', 'Message')
 		);
 
 		return interaction.reply({
-			embeds: [ embed ],
-			components: [ row ],
+			embeds: [embed],
+			components: [row],
 		});
-	});
+	},
+);
 
 export default action;

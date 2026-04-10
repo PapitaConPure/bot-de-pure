@@ -1,15 +1,18 @@
+import type {
+	RESTPostAPIChatInputApplicationCommandsJSONBody,
+	RESTPostAPIContextMenuApplicationCommandsJSONBody,
+} from 'discord.js';
 import { Collection } from 'discord.js';
-import type { RESTPostAPIChatInputApplicationCommandsJSONBody, RESTPostAPIContextMenuApplicationCommandsJSONBody } from 'discord.js';
-import type { Command } from '../commands/commons';
 import type { ContextMenuAction } from '../actions/commons/actionBuilder';
+import type { Command } from '../commands/commons';
 
-const puré = ({
-	commands   : new Collection<string, Command>(),
-	actions    : new Collection<string, ContextMenuAction>(),
-	emotes     : new Collection<string, Command>(),
-	slash      : new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
-	slashSaki  : new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
+const puré = {
+	commands: new Collection<string, Command>(),
+	actions: new Collection<string, ContextMenuAction>(),
+	emotes: new Collection<string, Command>(),
+	slash: new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
+	slashSaki: new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
 	contextMenu: new Collection<string, RESTPostAPIContextMenuApplicationCommandsJSONBody>(),
-}) as const;
+} as const;
 
 export default puré;

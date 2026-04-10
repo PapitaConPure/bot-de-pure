@@ -10,9 +10,7 @@
 	},
 	"formatter": {
 		"enabled": true,
-		"includes": [
-			"src/**/*.ts"
-		],
+		"includes": ["src/**/*.ts"],
 		"indentStyle": "tab",
 		"indentWidth": 4,
 		"attributePosition": "auto",
@@ -27,9 +25,7 @@
 	},
 	"linter": {
 		"enabled": true,
-		"includes": [
-			"src/**/*.ts"
-		],
+		"includes": ["src/**/*.ts"],
 		"rules": {
 			"recommended": true,
 			"style": {
@@ -48,11 +44,23 @@
 	},
 	"javascript": {
 		"formatter": {
+			"enabled": true,
 			"arrowParentheses": null,
 			"attributePosition": "auto",
 			"bracketSameLine": false,
 			"bracketSpacing": true,
-			"quoteStyle": "single"
+			"quoteStyle": "single",
+			"indentStyle": "tab",
+			"indentWidth": 4,
+			"expand": "auto",
+			"jsxQuoteStyle": "single",
+			"lineEnding": "auto",
+			"lineWidth": 100,
+			"operatorLinebreak": "before",
+			"quoteProperties": "asNeeded",
+			"semicolons": "always",
+			"trailingCommas": "all",
+			"trailingNewline": true
 		}
 	},
 	"assist": {

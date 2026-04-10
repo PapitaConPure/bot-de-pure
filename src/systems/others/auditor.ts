@@ -1,53 +1,62 @@
-import { Command } from '@/commands/commons/commandBuilder';
+import { type APIEmbedField, Colors, EmbedBuilder, type Interaction, type User } from 'discord.js';
 import type { CommandRequest } from 'types/commands';
+import { Command } from '@/commands/commons/commandBuilder';
 import { globalConfigs } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
-import { EmbedBuilder, Colors, type Interaction, type User, type APIEmbedField } from 'discord.js';
 
 function generateRequestRecord(request: CommandRequest | Interaction) {
-    // @ts-expect-error Alguno de los dos va a existir
+	// @ts-expect-error Alguno de los dos va a existir
 	const user: User = request.user ?? request.author;
-	const embed = new EmbedBuilder()
-        // @ts-expect-error request.url puede existir
-		.setAuthor({ name: `${request.guild.name} • ${request.channel.name}`, iconURL: user.avatarURL({ size: 128 }), url: request.url || request.channel?.url || 'https://discordapp.com' });
+	const embed = new EmbedBuilder().setAuthor({
+		name: `${request.guild.name} • ${request.channel.name}`,
+		iconURL: user.avatarURL({ size: 128 }),
+		// @ts-expect-error Alguno de los dos va a existir
+		url: request.url || request.channel?.url || 'https://discordapp.com',
+	});
 	return embed;
 }
 
-function getRequestContent(request: CommandRequest | Interaction<import('discord.js').CacheType>) {
-	if(Command.requestIsInteraction(request)) {
-		if(request.isContextMenuCommand())
+function getRequestContent(request: CommandRequest | Interaction) {
+	if (Command.requestIsInteraction(request)) {
+		if (request.isContextMenuCommand())
 			return `**\\*. ${request.commandName}** ${request.options?.data?.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
 
-		if(request.isChatInputCommand())
+		if (request.isChatInputCommand())
 			return `**/${request.commandName}** ${request.options?.data?.map(({ name, value }) => `${name}:\`${value}\``).join(' ')}`;
 
-		if(request.isMessageComponent())
-			return `**-=-[**\`${request.customId}\`**]**`;
+		if (request.isMessageComponent()) return `**-=-[**\`${request.customId}\`**]**`;
 
-		if(request.isModalSubmit())
+		if (request.isModalSubmit())
 			return `**[[${request.customId}]]** ${request.fields.fields?.map((modalData) => `\`${modalData.customId}\``).join(' ')}`;
 
-		if(request.isAutocomplete())
-			return `**?:${request.commandName}** ${request.valueOf()}`;
+		if (request.isAutocomplete()) return `**?:${request.commandName}** ${request.valueOf()}`;
 	}
 
-	if(Command.requestIsMessage(request))
+	if (Command.requestIsMessage(request))
 		return request.content?.slice(0, 1023) || '*Mensaje vacío.*';
 
 	return `**${request.type}/${request.id}**`;
 }
 
 export async function auditRequest(request: CommandRequest | Interaction) {
-	if('customId' in request && request.customId?.startsWith('confesión')) return;
+	if ('customId' in request && request.customId?.startsWith('confesión')) return;
 
 	const userTag = ('author' in request ? request.author : request.user).tag;
-	const embed = generateRequestRecord(request)
-		.addFields({ name: userTag, value: getRequestContent(request) });
+	const embed = generateRequestRecord(request).addFields({
+		name: userTag,
+		value: getRequestContent(request),
+	});
 
-	if('attachments' in request && request.attachments?.size)
-		embed.addFields({ name: 'Adjuntado:', value: request.attachments.map(attf => attf.url ?? 'https://discord.com/').join('\n').slice(0, 1023) });
+	if ('attachments' in request && request.attachments?.size)
+		embed.addFields({
+			name: 'Adjuntado:',
+			value: request.attachments
+				.map((attf) => attf.url ?? 'https://discord.com/')
+				.join('\n')
+				.slice(0, 1023),
+		});
 
-	return globalConfigs.logch?.send({ embeds: [ embed ] }).catch(console.error);
+	return globalConfigs.logch?.send({ embeds: [embed] }).catch(console.error);
 }
 
 export async function auditSystem(title: string, ...fields: Array<APIEmbedField>) {
@@ -55,10 +64,9 @@ export async function auditSystem(title: string, ...fields: Array<APIEmbedField>
 		.setColor(Colors.DarkVividPink)
 		.setAuthor({ name: 'Mensaje de sistema' })
 		.setTitle(title);
-	if(fields.length)
-		embed.setFields(fields);
+	if (fields.length) embed.setFields(fields);
 
-	return globalConfigs.logch?.send({ embeds: [ embed ] }).catch(console.error);
+	return globalConfigs.logch?.send({ embeds: [embed] }).catch(console.error);
 }
 
 export async function auditAction(action: string, ...fields: Array<APIEmbedField>) {
@@ -66,35 +74,47 @@ export async function auditAction(action: string, ...fields: Array<APIEmbedField
 		.setColor(Colors.Orange)
 		.setAuthor({ name: 'Acción realizada' })
 		.setTitle(action);
-	if(fields.length)
-		embed.setFields(fields);
+	if (fields.length) embed.setFields(fields);
 
-	return globalConfigs.logch?.send({ embeds: [ embed ] }).catch(console.error);
+	return globalConfigs.logch?.send({ embeds: [embed] }).catch(console.error);
 }
 
 interface AuditErrorOptions {
-    request?: CommandRequest | Interaction<import('discord.js').CacheType>;
-    brief?: string;
-    details?: string;
-    ping?: boolean;
+	request?: CommandRequest | Interaction<import('discord.js').CacheType>;
+	brief?: string;
+	details?: string;
+	ping?: boolean;
 }
 
-export async function auditError(error: Error, { request = undefined, brief = undefined, details = undefined, ping = false }: AuditErrorOptions = { ping: false }) {
-	const embed = (request ? generateRequestRecord(request) : new EmbedBuilder())
-		.setColor(0x0000ff);
+export async function auditError(
+	error: Error,
+	{
+		request = undefined,
+		brief = undefined,
+		details = undefined,
+		ping = false,
+	}: AuditErrorOptions = { ping: false },
+) {
+	const embed = (request ? generateRequestRecord(request) : new EmbedBuilder()).setColor(
+		0x0000ff,
+	);
 
-	if(request) {
+	if (request) {
 		const userTag = ('author' in request ? request.author : request.user).tag;
 		embed.addFields({ name: userTag, value: getRequestContent(request) });
 	}
 
-	embed.addFields({ name: brief || 'Ha ocurrido un error al ejecutar una acción', value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\`` });
+	embed.addFields({
+		name: brief || 'Ha ocurrido un error al ejecutar una acción',
+		value: `\`\`\`\n${error.name || 'error desconocido'}:\n${error.message || 'sin mensaje'}\n\`\`\``,
+	});
 
-	if(details)
-		embed.addFields({ name: 'Detalle', value: details });
+	if (details) embed.addFields({ name: 'Detalle', value: details });
 
-	return globalConfigs.logch?.send({
-		content: ping ? `<@${userIds.papita}>` : null,
-		embeds: [ embed ],
-	}).catch(console.error);
+	return globalConfigs.logch
+		?.send({
+			content: ping ? `<@${userIds.papita}>` : null,
+			embeds: [embed],
+		})
+		.catch(console.error);
 }

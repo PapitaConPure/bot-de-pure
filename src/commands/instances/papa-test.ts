@@ -1,7 +1,7 @@
 import { EmbedBuilder, MessageFlags } from 'discord.js';
-import { CommandTags, Command, CommandOptions } from '../commons';
-import { searchCommand, getWikiPageComponentsV2 } from '@/systems/others/wiki.js';
+import { getWikiPageComponentsV2, searchCommand } from '@/systems/others/wiki.js';
 import { p_pure } from '@/utils/prefixes';
+import { Command, CommandOptions, CommandTags } from '../commons';
 
 const options = new CommandOptions()
 	.addParam('texto', 'TEXT', 'Parámetro de Texto', { optional: true })
@@ -22,12 +22,11 @@ const command = new Command('papa-test', tags)
 		const guildPrefix = p_pure(request.guildId).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;
 
-		if(!search)
-			return request.reply({ content: 'wah' });
+		if (!search) return request.reply({ content: 'wah' });
 
 		const foundCommand = await searchCommand(request, search);
 
-		if(!foundCommand) {
+		if (!foundCommand) {
 			const embed = new EmbedBuilder()
 				.setColor(0xe44545)
 				.setTitle('Sin resultados')
@@ -37,7 +36,7 @@ const command = new Command('papa-test', tags)
 				});
 
 			return request.reply({
-				embeds: [ embed ],
+				embeds: [embed],
 			});
 		}
 

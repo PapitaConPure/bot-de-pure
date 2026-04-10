@@ -1,15 +1,38 @@
-import type { AnySelectMenuInteraction, Attachment, AutocompleteInteraction, ButtonInteraction, ChatInputCommandInteraction, Collection, CommandInteractionOptionResolver, Guild, GuildBasedChannel, GuildMember, InteractionDeferReplyOptions, InteractionEditReplyOptions, InteractionReplyOptions, Message, MessageContextMenuCommandInteraction, MessagePayload, MessageReplyOptions, ModalSubmitInteraction, PermissionsBitField, Role, Snowflake, User } from 'discord.js';
+import type {
+	AnySelectMenuInteraction,
+	Attachment,
+	AutocompleteInteraction,
+	ButtonInteraction,
+	ChatInputCommandInteraction,
+	Collection,
+	CommandInteractionOptionResolver,
+	Guild,
+	GuildBasedChannel,
+	GuildMember,
+	InteractionDeferReplyOptions,
+	InteractionEditReplyOptions,
+	InteractionReplyOptions,
+	Message,
+	MessageContextMenuCommandInteraction,
+	MessagePayload,
+	MessageReplyOptions,
+	ModalSubmitInteraction,
+	PermissionsBitField,
+	Role,
+	Snowflake,
+	User,
+} from 'discord.js';
 
 /**@description Representa los tipos de petición de comando.*/
 export type CommandRequest =
 	| Message<true>
 	| Omit<ChatInputCommandInteraction<'cached'>, 'reply' | 'deferReply'>;
 
-export type CommandReplyOptions =
-	Omit<MessagePayload | MessageReplyOptions, 'flags'> & InteractionReplyOptions;
+export type CommandReplyOptions = Omit<MessagePayload | MessageReplyOptions, 'flags'> &
+	InteractionReplyOptions;
 
-export type CommandEditReplyOptions =
-	Omit<MessagePayload | MessageReplyOptions, 'flags'> & InteractionEditReplyOptions;
+export type CommandEditReplyOptions = Omit<MessagePayload | MessageReplyOptions, 'flags'> &
+	InteractionEditReplyOptions;
 
 /**@description Extensiones para {@link CommandRequest}.*/
 export interface ExtendedCommandRequest {
@@ -24,7 +47,7 @@ export interface ExtendedCommandRequest {
 	/**Infers the command as a cached Slash Command Interaction. Throws an error if the command isn't really a Slash Command.*/
 	inferAsSlash: () => ChatInputCommandInteraction<'cached'>;
 	/**If the command is a message command, returns the message's activity (if any).*/
-	activity?: import ('discord.js').MessageActivity;
+	activity?: import('discord.js').MessageActivity;
 	/**A collection of the command's attachments, if it's a message command and it has attachments.*/
 	attachments: Collection<Snowflake, Attachment>;
 	/**The permissions of the application or bot in the current channel.*/
@@ -42,7 +65,9 @@ export interface ExtendedCommandRequest {
 	/**If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply.*/
 	replyFirst: (options?: CommandReplyOptions) => Promise<Message<boolean>>;
 	/**If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply.*/
-	deferReply(options?: InteractionDeferReplyOptions & { fetchReply?: true }): Promise<Message<boolean>>;
+	deferReply(
+		options?: InteractionDeferReplyOptions & { fetchReply?: true },
+	): Promise<Message<boolean>>;
 	/**Deletes the original message if the command is a message command.*/
 	delete: () => Promise<Message<boolean>>;
 	/**Deletes the initial reply.*/
@@ -67,9 +92,7 @@ export type SlashArguments =
 	| Omit<CommandInteractionOptionResolver<'cached'>, 'getMessage' | 'getFocused'>;
 
 /**@description Argumentos de comando de mensaje o barra.*/
-export type CommandArguments =
-	| MessageArguments
-	| SlashArguments;
+export type CommandArguments = MessageArguments | SlashArguments;
 
 /**@description Representa los tipos de interacciones sobre mensajes.*/
 export type ComponentInteraction =
@@ -79,16 +102,14 @@ export type ComponentInteraction =
 	| MessageContextMenuCommandInteraction<'cached'>;
 
 /**@description Representa los tipos de petición de comando o manejos de interacciones de componentes.*/
-export type AnyRequest =
-	| ComplexCommandRequest
-	| ComponentInteraction;
+export type AnyRequest = ComplexCommandRequest | ComponentInteraction;
 
 export type AnyCommandInteraction =
 	| ButtonInteraction<'cached'>
 	| AnySelectMenuInteraction<'cached'>
-	| ModalSubmitInteraction<'cached'>
+	| ModalSubmitInteraction<'cached'>;
 
-export type ParamTypeStrict = { name: string; expression: string | number; };
+export type ParamTypeStrict = { name: string; expression: string | number };
 
 export type BaseParamType =
 	| 'NUMBER'
@@ -118,24 +139,34 @@ export interface ParamTypeSpecification {
 	help: string;
 }
 
-export type ParamResult = number |
-	string |
-	boolean |
-	User |
-	GuildMember |
-	Guild |
-	GuildBasedChannel |
-	Message<boolean> |
-	Role |
-	Attachment |
-	Date |
-	undefined;
+export type ParamResult =
+	| number
+	| string
+	| boolean
+	| User
+	| GuildMember
+	| Guild
+	| GuildBasedChannel
+	| Message<boolean>
+	| Role
+	| Attachment
+	| Date
+	| undefined;
 
-export type FlagCallback<TResult extends ParamResult = ParamResult> = (value: ParamResult, isSlash: boolean) => TResult;
+export type FlagCallback<TResult extends ParamResult = ParamResult> = (
+	value: ParamResult,
+	isSlash: boolean,
+) => TResult;
 
-export type CommandArgumentGetFunction<TResult extends ParamResult = ParamResult> = (identifier: string, required?: boolean) => TResult;
+export type CommandArgumentGetFunction<TResult extends ParamResult = ParamResult> = (
+	identifier: string,
+	required?: boolean,
+) => TResult;
 
-export interface FeedbackOptions<TCallback extends ParamResult = ParamResult, TFallback extends ParamResult = ParamResult> {
+export interface FeedbackOptions<
+	TCallback extends ParamResult = ParamResult,
+	TFallback extends ParamResult = ParamResult,
+> {
 	callback?: FlagCallback<TCallback> | TCallback;
 	fallback?: TFallback;
 }

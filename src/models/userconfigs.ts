@@ -21,11 +21,11 @@ const UserConfigSchema = new Mongoose.Schema({
 
 	prc: {
 		type: Number,
-		default: 0
+		default: 0,
 	},
 	lastCultivate: {
 		type: Number,
-		default: 0
+		default: 0,
 	},
 	reactionsReceivedToday: {
 		type: Number,
@@ -46,14 +46,16 @@ const UserConfigSchema = new Mongoose.Schema({
 
 	feedTagSuscriptions: {
 		type: Map,
-		of: [ String ],
-		default: () => { return new Map(); },
+		of: [String],
+		default: () => {
+			return new Map();
+		},
 		required: true,
 	},
 	voice: {
 		ping: {
 			type: String,
-			enum: [ 'always', 'onCreate', 'never' ],
+			enum: ['always', 'onCreate', 'never'],
 			default: 'always',
 		},
 		autoname: {
@@ -76,7 +78,7 @@ const UserConfigSchema = new Mongoose.Schema({
 	},
 	pixivConverter: {
 		type: String,
-		enum: [ '', 'phixiv' ],
+		enum: ['', 'phixiv'],
 		default: 'phixiv',
 	},
 	twitterPrefix: {
@@ -100,8 +102,9 @@ const UserConfigSchema = new Mongoose.Schema({
 
 export const UserConfigs = Mongoose.model('UserConfig', UserConfigSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() { return new UserConfigs({}); }
-export type UserConfigDocument = ReturnType<(typeof m)>;
+function m() {
+	return new UserConfigs({});
+}
+export type UserConfigDocument = ReturnType<typeof m>;
 
 export default UserConfigs;

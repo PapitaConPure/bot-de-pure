@@ -1,51 +1,51 @@
-import { CommandTags, Command, CommandOptions } from '../commons';
-import { fetchChannel, fetchRole, compressId, fetchMember } from '@/func';
-import type { ComplexCommandRequest } from 'types/commands';
-import { Translator } from '@/i18n';
 import { Groq } from 'groq-sdk';
+import type { ComplexCommandRequest } from 'types/commands';
+import { compressId, fetchChannel, fetchMember, fetchRole } from '@/func';
+import { Translator } from '@/i18n';
+import { Command, CommandOptions, CommandTags } from '../commons';
 
 const groq = new Groq({
 	apiKey: process.env.GROQ_KEY,
 });
 
-const options = new CommandOptions()
-	.addParam('mensaje', 'TEXT', 'para hacer una consulta a Bot de Puré');
+const options = new CommandOptions().addParam(
+	'mensaje',
+	'TEXT',
+	'para hacer una consulta a Bot de Puré',
+);
 
 const tags = new CommandTags().add('COMMON');
 
 const command = new Command('preguntar', tags)
-	.setAliases(
-		'pregunta',
-		'question',
-		'ia', 'ai',
-		'prompt', 'ask',
-	)
+	.setAliases('pregunta', 'question', 'ia', 'ai', 'prompt', 'ask')
 	.setLongDescription('Muestra el tiempo de respuesta del Bot y la API')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const [ translator ] = await Promise.all([
+		const [translator] = await Promise.all([
 			Translator.from(request.user),
 			request.deferReply(),
 		]);
 
-		if(args.empty)
-			return request.editReply({ content: translator.getText('invalidInput') });
+		if (args.empty) return request.editReply({ content: translator.getText('invalidInput') });
 
 		const rawUserPrompt = args.rawArgs ?? args.getString('mensaje');
 		const mentionRegex = /<(?:@|@&|#)([0-9]{16,24})>/g;
 		const namesMap = new Map();
-		const ids = Array.from(new Set([ ...rawUserPrompt.matchAll(mentionRegex) ].map(m => m[1])));
+		const ids = Array.from(new Set([...rawUserPrompt.matchAll(mentionRegex)].map((m) => m[1])));
 
-		for(const id of ids) {
-			const name = fetchChannel(id, request.guild)?.name
+		for (const id of ids) {
+			const name =
+				fetchChannel(id, request.guild)?.name
 				|| fetchRole(id, request.guild)?.name
 				|| fetchMemberName(id, request);
 
-			if(name)
-				namesMap.set(id, name);
+			if (name) namesMap.set(id, name);
 		}
 
-		const userPrompt = rawUserPrompt.replace(mentionRegex, (match, id) => namesMap.get(id) || match);
+		const userPrompt = rawUserPrompt.replace(
+			mentionRegex,
+			(match, id) => namesMap.get(id) || match,
+		);
 
 		const chatCompletion = await groq.chat.completions.create({
 			messages: [
@@ -76,19 +76,21 @@ The User's Discord name is: "${request.member.displayName || request.user.userna
 				},
 				{
 					role: 'user',
-					content: 'oye pero por qué tu padre se llama papita con puré'
+					content: 'oye pero por qué tu padre se llama papita con puré',
 				},
 				{
 					role: 'assistant',
-					content: 'pero mira si me voy a poner a hablarte de mi papá, maraca conchetumare 💢',
+					content:
+						'pero mira si me voy a poner a hablarte de mi papá, maraca conchetumare 💢',
 				},
 				{
 					role: 'user',
-					content: 'bueno, ¿cómo pongo música en VC?'
+					content: 'bueno, ¿cómo pongo música en VC?',
 				},
 				{
 					role: 'assistant',
-					content: 'mira la cuestión es que no me acuerdo, vai a tener que usar `p!ayuda` 🥺',
+					content:
+						'mira la cuestión es que no me acuerdo, vai a tener que usar `p!ayuda` 🥺',
 				},
 				{
 					role: 'user',
@@ -105,23 +107,22 @@ The User's Discord name is: "${request.member.displayName || request.user.userna
 		});
 
 		const responseChunks: string[] = new Array(1_000_000);
-		for await(const chunk of chatCompletion)
+		for await (const chunk of chatCompletion)
 			responseChunks.push(chunk.choices[0]?.delta?.content || '');
 
 		const chunkSize = 1990;
 		const response = responseChunks.join('');
 
-		if(response.length <= chunkSize)
-			return request.editReply({ content: response });
+		if (response.length <= chunkSize) return request.editReply({ content: response });
 
 		const responseParts = [];
-		for(let i = 0; i < response.length; i += chunkSize)
+		for (let i = 0; i < response.length; i += chunkSize)
 			responseParts.push(response.slice(i, i + chunkSize));
 
 		request.editReply({ content: responseParts.shift() });
 
-		for(const responsePart of responseParts)
-			await request.channel.send({ content: '...' + responsePart });
+		for (const responsePart of responseParts)
+			await request.channel.send({ content: `...${responsePart}` });
 	});
 
 function fetchMemberName(id: string, request: ComplexCommandRequest) {

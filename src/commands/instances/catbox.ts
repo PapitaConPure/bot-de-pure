@@ -1,16 +1,24 @@
-import { EmbedBuilder, Colors } from 'discord.js';
-import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
-import { Translator } from '@/i18n';
+import fs from 'node:fs';
+import { pipeline } from 'node:stream/promises';
+import { Colors, EmbedBuilder } from 'discord.js';
 import { Catbox } from 'node-catbox';
-import { pipeline } from 'stream/promises';
-import fs from 'fs';
+import { Translator } from '@/i18n';
 import { fetchExt } from '@/utils/fetchext';
+import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
 
 const client = new Catbox();
 
 const options = new CommandOptions()
-	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
-	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 });
+	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', {
+		optional: true,
+		poly: 'MULTIPLE',
+		polymax: 5,
+	})
+	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', {
+		optional: true,
+		poly: 'MULTIPLE',
+		polymax: 5,
+	});
 
 const tags = new CommandTags().add('COMMON');
 
@@ -23,34 +31,41 @@ const command = new Command('catbox', tags)
 
 		await request.deferReply();
 
-		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
-		const attachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
-		const imageStreams: NodeJS.ReadableStream[] = await Promise.all(attachments
-			.slice(0, 5)
-			.map(async attachment => {
+		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(
+			(u) => u,
+		);
+		const attachments = CommandOptionSolver.asAttachments(
+			args.parsePolyParamSync('imagens'),
+		).filter((a) => a);
+		const imageStreams: NodeJS.ReadableStream[] = await Promise.all(
+			attachments.slice(0, 5).map(async (attachment) => {
 				const fetchResult = await fetchExt(attachment.url, { type: 'nodeStream' });
 				return fetchResult.success ? fetchResult.data : undefined;
-			}));
+			}),
+		);
 
-		const urlUploads: UrlPayload[] = imageUrls.map(url => ({ type: 'url', image: url }));
-		const streamUploads: StreamPayload[] = imageStreams.map(stream => ({ type: 'stream', image: stream }));
-		const uploads: Payload[] = [
-			...urlUploads,
-			...streamUploads,
-		];
+		const urlUploads: UrlPayload[] = imageUrls.map((url) => ({ type: 'url', image: url }));
+		const streamUploads: StreamPayload[] = imageStreams.map((stream) => ({
+			type: 'stream',
+			image: stream,
+		}));
+		const uploads: Payload[] = [...urlUploads, ...streamUploads];
 
-		if(!uploads.length)
+		if (!uploads.length)
 			return request.editReply({
 				content: translator.getText('catboxInvalidImage'),
 			});
 
 		let count = 1;
 
-		const filePaths: (Promise<string | null>)[] = [];
-		for(const upload of streamUploads) {
+		const filePaths: Promise<string | null>[] = [];
+		for (const upload of streamUploads) {
 			const filePath = `./temp_${request.id}_${count++}.png`;
 
-			const filePathResult: Promise<string | null> = pipeline(upload.image, fs.createWriteStream(filePath))
+			const filePathResult: Promise<string | null> = pipeline(
+				upload.image,
+				fs.createWriteStream(filePath),
+			)
 				.then(() => filePath)
 				.catch(() => null);
 
@@ -58,46 +73,52 @@ const command = new Command('catbox', tags)
 		}
 
 		const readyFilePaths: string[] = await Promise.all(filePaths);
-		const filePathsPendingForDeletion: string[] = readyFilePaths.filter(p => p);
+		const filePathsPendingForDeletion: string[] = readyFilePaths.filter((p) => p);
 
 		const successes: EmbedBuilder[] = [];
 		const failures: EmbedBuilder[] = [];
 		let imageUrl: string;
 		count = 1;
-		for(const upload of uploads) {
+		for (const upload of uploads) {
 			try {
-				if(upload.type === 'url') {
+				if (upload.type === 'url') {
 					const url = upload.image;
 					imageUrl = await client.uploadURL({ url });
 				} else {
 					const path = readyFilePaths.shift();
-					if(!path)
-						throw new FileStreamError('Unable to create a file write stream for the specified data.');
+					if (!path)
+						throw new FileStreamError(
+							'Unable to create a file write stream for the specified data.',
+						);
 					imageUrl = await client.uploadFile({ path });
 				}
 
-				successes.push(new EmbedBuilder()
-					.setTitle(translator.getText('imgurUploadSuccessTitle'))
-					.setColor(Colors.Green)
-					.setURL(imageUrl)
-					.setDescription(imageUrl)
-					.setImage(imageUrl));
-			} catch(err) {
-				failures.push(new EmbedBuilder()
-					.setTitle(translator.getText('imgurUploadErrorTitle', count))
-					.setColor(Colors.Red)
-					.addFields({
-						name: err.name || 'Error',
-						value: `\`\`\`\n${err.message || err}\n\`\`\``,
-					}));
+				successes.push(
+					new EmbedBuilder()
+						.setTitle(translator.getText('imgurUploadSuccessTitle'))
+						.setColor(Colors.Green)
+						.setURL(imageUrl)
+						.setDescription(imageUrl)
+						.setImage(imageUrl),
+				);
+			} catch (err) {
+				failures.push(
+					new EmbedBuilder()
+						.setTitle(translator.getText('imgurUploadErrorTitle', count))
+						.setColor(Colors.Red)
+						.addFields({
+							name: err.name || 'Error',
+							value: `\`\`\`\n${err.message || err}\n\`\`\``,
+						}),
+				);
 			}
 
 			count++;
 		}
 
-		await Promise.allSettled(filePathsPendingForDeletion.map(p => fs.promises.unlink(p)));
+		await Promise.allSettled(filePathsPendingForDeletion.map((p) => fs.promises.unlink(p)));
 
-		return request.editReply({ embeds: [ ...successes, ...failures ] });
+		return request.editReply({ embeds: [...successes, ...failures] });
 	});
 
 export default command;

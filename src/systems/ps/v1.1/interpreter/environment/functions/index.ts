@@ -8,4 +8,4 @@ export interface NativeFunctionEntry {
 	fn: NativeFunction;
 }
 
-export const NativeFunctions = [ ...utilFunctions, ...kindFunctions, ...discordFunctions ];
+export const NativeFunctions = [...utilFunctions, ...kindFunctions, ...discordFunctions];

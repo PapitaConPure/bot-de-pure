@@ -1,25 +1,44 @@
-import { ModalBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ButtonStyle, EmbedBuilder, LabelBuilder, ActionRowBuilder, Colors } from 'discord.js';
-import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	Colors,
+	EmbedBuilder,
+	LabelBuilder,
+	ModalBuilder,
+	TextInputBuilder,
+	TextInputStyle,
+} from 'discord.js';
+import { Translator } from '@/i18n';
+import ImgurUser from '@/models/imgurUsers';
 import type { ImgurImagePayload } from '@/utils/imgur';
 import { ImgurClient } from '@/utils/imgur';
-import ImgurUser from '@/models/imgurUsers';
-import { Translator } from '@/i18n';
-
 import Logger from '@/utils/logs';
+import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
+
 const { error } = Logger('WARN', '/imgur');
 
 const options = new CommandOptions()
-	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
-	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
-	.addFlag('r', [ 'registrar', 'register' ], 'para registrar una ID de cliente y evitar el límite global');
+	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', {
+		optional: true,
+		poly: 'MULTIPLE',
+		polymax: 5,
+	})
+	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', {
+		optional: true,
+		poly: 'MULTIPLE',
+		polymax: 5,
+	})
+	.addFlag(
+		'r',
+		['registrar', 'register'],
+		'para registrar una ID de cliente y evitar el límite global',
+	);
 
 const tags = new CommandTags().add('COMMON');
 
 const command = new Command('imgur', tags)
-	.setAliases(
-		'subir',
-		'upload',
-	)
+	.setAliases('subir', 'upload')
 	.setBriefDescription('Permite subir imágenes con Imgur')
 	.setLongDescription(
 		'Permite subir imágenes por medio de la plataforma de Imgur, limitado a un máximo diario global.',
@@ -29,33 +48,34 @@ const command = new Command('imgur', tags)
 	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.userId);
 
-		if(args.hasFlag('registrar')) {
-			const embeds = [ new EmbedBuilder()
-				.setColor('#1bb76e')
-				.setTitle(translator.getText('imgurRegisterTitle'))
-				.setURL('https://api.imgur.com/oauth2/addclient')
-				.setDescription(translator.getText('imgurRegisterDesc'))
-				.addFields(
-					{
-						name: 'Authorization Type',
-						value: translator.getText('imgurRegisterAuthTypeValue'),
-						inline: true,
-					},
-					{
-						name: 'Authorization Callback URL',
-						value: '`https://imgur.com/`',
-						inline: true,
-					},
-					{
-						name: translator.getText('imgurRegisterFillFormName'),
-						value: translator.getText('imgurRegisterFillFormValue'),
-						inline: true,
-					},
-					{
-						name: translator.getText('imgurRegisterLastlyName'),
-						value: translator.getText('imgurRegisterLastlyValue'),
-					},
-				),
+		if (args.hasFlag('registrar')) {
+			const embeds = [
+				new EmbedBuilder()
+					.setColor('#1bb76e')
+					.setTitle(translator.getText('imgurRegisterTitle'))
+					.setURL('https://api.imgur.com/oauth2/addclient')
+					.setDescription(translator.getText('imgurRegisterDesc'))
+					.addFields(
+						{
+							name: 'Authorization Type',
+							value: translator.getText('imgurRegisterAuthTypeValue'),
+							inline: true,
+						},
+						{
+							name: 'Authorization Callback URL',
+							value: '`https://imgur.com/`',
+							inline: true,
+						},
+						{
+							name: translator.getText('imgurRegisterFillFormName'),
+							value: translator.getText('imgurRegisterFillFormValue'),
+							inline: true,
+						},
+						{
+							name: translator.getText('imgurRegisterLastlyName'),
+							value: translator.getText('imgurRegisterLastlyValue'),
+						},
+					),
 			];
 
 			const components = [
@@ -77,20 +97,26 @@ const command = new Command('imgur', tags)
 
 		await request.deferReply();
 
-		const imgurUser = (await ImgurUser.findOne({ userId: request.userId })) || new ImgurUser({ userId: request.userId });
+		const imgurUser =
+			(await ImgurUser.findOne({ userId: request.userId }))
+			|| new ImgurUser({ userId: request.userId });
 		const clientId = imgurUser.clientId ?? process.env.IMGUR_CLIENT_ID;
 		const client = new ImgurClient(clientId);
 
-		const directUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
-		const attachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
-		const attachmentUrls = attachments.map(attachment => attachment.url);
+		const directUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(
+			(u) => u,
+		);
+		const attachments = CommandOptionSolver.asAttachments(
+			args.parsePolyParamSync('imagens'),
+		).filter((a) => a);
+		const attachmentUrls = attachments.map((attachment) => attachment.url);
 
 		const uploads: ImgurImagePayload[] = [
-			...directUrls.map(url => ({ type: 'url' as const, image: url })),
-			...attachmentUrls.map(url => ({ type: 'url' as const, image: url })),
+			...directUrls.map((url) => ({ type: 'url' as const, image: url })),
+			...attachmentUrls.map((url) => ({ type: 'url' as const, image: url })),
 		];
 
-		if(!uploads.length)
+		if (!uploads.length)
 			return request.editReply({
 				content: translator.getText('imgurInvalidImage'),
 			});
@@ -98,41 +124,49 @@ const command = new Command('imgur', tags)
 		let count = 1;
 		const successes = [];
 		const failures = [];
-		for(const upload of uploads) {
+		for (const upload of uploads) {
 			const result = await client.upload(upload);
 
-			if(result.success === true) {
-				successes.push(new EmbedBuilder()
-					.setTitle(translator.getText('imgurUploadSuccessTitle'))
-					.setColor(Colors.Green)
-					.setURL(result.data.link)
-					.setDescription(result.data.link)
-					.setImage(result.data.link));
+			if (result.success === true) {
+				successes.push(
+					new EmbedBuilder()
+						.setTitle(translator.getText('imgurUploadSuccessTitle'))
+						.setColor(Colors.Green)
+						.setURL(result.data.link)
+						.setDescription(result.data.link)
+						.setImage(result.data.link),
+				);
 			} else {
 				error(result.error);
-				failures.push(new EmbedBuilder()
-					.setTitle(translator.getText('imgurUploadErrorTitle', count))
-					.setDescription(translator.getText('imgurUploadErrorDesc'))
-					.setColor(Colors.Red)
-					.addFields({
-						name: `Error ${result.status}`,
-						value: `\`\`\`\n${result.statusText}\n\`\`\``,
-					}));
+				failures.push(
+					new EmbedBuilder()
+						.setTitle(translator.getText('imgurUploadErrorTitle', count))
+						.setDescription(translator.getText('imgurUploadErrorDesc'))
+						.setColor(Colors.Red)
+						.addFields({
+							name: `Error ${result.status}`,
+							value: `\`\`\`\n${result.statusText}\n\`\`\``,
+						}),
+				);
 			}
 
 			count++;
 		}
 
-		return request.editReply({ embeds: [ ...successes, ...failures ] });
-	}).setButtonResponse(async function onButtonRegisterRequest(interaction) {
+		return request.editReply({ embeds: [...successes, ...failures] });
+	})
+	.setButtonResponse(async function onButtonRegisterRequest(interaction) {
 		const translator = await Translator.from(interaction.user.id);
 
 		const modal = makeRegisterModal(translator);
 		return interaction.showModal(modal);
-	}).setModalResponse(async function onRegisterRequest(interaction) {
+	})
+	.setModalResponse(async function onRegisterRequest(interaction) {
 		const translator = await Translator.from(interaction.user.id);
 
-		const imgurUser = (await ImgurUser.findOne({ userId: interaction.user.id })) || new ImgurUser({ userId: interaction.user.id });
+		const imgurUser =
+			(await ImgurUser.findOne({ userId: interaction.user.id }))
+			|| new ImgurUser({ userId: interaction.user.id });
 		const clientId = interaction.fields.getTextInputValue('clientId');
 		imgurUser.clientId = clientId;
 		await imgurUser.save();
@@ -156,7 +190,7 @@ function makeRegisterModal(translator: Translator) {
 				.setMinLength(8)
 				.setMaxLength(32)
 				.setStyle(TextInputStyle.Short)
-				.setPlaceholder('XXXXXXXXXXXXXXX')
+				.setPlaceholder('XXXXXXXXXXXXXXX'),
 		);
 
 	const modal = new ModalBuilder()

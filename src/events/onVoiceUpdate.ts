@@ -1,6 +1,9 @@
-import { PureVoiceUpdateHandler, getOrchestrator } from '../systems/others/purevoice.js';
+import { getOrchestrator, PureVoiceUpdateHandler } from '../systems/others/purevoice.js';
 
-export async function onVoiceUpdate(oldState: import('discord.js').VoiceState, state: import('discord.js').VoiceState) {
+export async function onVoiceUpdate(
+	oldState: import('discord.js').VoiceState,
+	state: import('discord.js').VoiceState,
+) {
 	const guildId = state.guild.id;
 
 	const updateHandler = new PureVoiceUpdateHandler(oldState, state);

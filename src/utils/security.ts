@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv } from 'crypto';
+import { createCipheriv, createDecipheriv } from 'node:crypto';
 
 const key = process.env.ENCRYPTION_KEY;
 const iv = process.env.IV;

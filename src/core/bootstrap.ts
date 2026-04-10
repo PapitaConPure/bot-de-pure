@@ -1,12 +1,12 @@
 import { getRuntimeEnvHint } from '@/utils/runtime';
-import { initializeClient } from './client';
-import * as events from '../events';
 import { discordToken } from '../data/globalProps';
+import * as events from '../events';
+import { initializeClient } from './client';
 
 export async function bootstrap() {
 	console.log('Inicializando bot...');
 
-	if(!process.env?.MONGODB_URI) {
+	if (!process.env?.MONGODB_URI) {
 		const hint = getRuntimeEnvHint();
 		throw new Error(`Missing MongoDB database environment variable.\n\n${hint}`);
 	}
@@ -23,15 +23,33 @@ export async function bootstrap() {
 
 	console.time('Registro de eventos del cliente');
 	client.on('clientReady', events.onStartup);
-	client.on('messageCreate', message => events.onMessage(message).catch(events.onCriticalError));
-	client.on('messageReactionAdd', (reaction, user) => events.onReactionAdd(reaction, user).catch(events.onCriticalError));
-	client.on('messageReactionRemove', (reaction, user) => events.onReactionRemove(reaction, user).catch(events.onCriticalError));
-	client.on('messageDelete', message => events.onMessageDelete(message).catch(events.onCriticalError));
-	client.on('interactionCreate', interaction => events.onInteraction(interaction).catch(events.onCriticalError));
-	client.on('voiceStateUpdate', (oldState, newState) => events.onVoiceUpdate(oldState, newState).catch(events.onCriticalError));
-	client.on('guildMemberAdd', member => { events.onGuildMemberAdd(member).catch(events.onCriticalError); });
-	client.on('guildMemberRemove', member => { events.onGuildMemberRemove(member).catch(events.onCriticalError); });
-	client.on('guildMemberUpdate', (oldMember, newMember) => { events.onGuildMemberUpdate(oldMember, newMember).catch(events.onCriticalError); });
+	client.on('messageCreate', (message) =>
+		events.onMessage(message).catch(events.onCriticalError),
+	);
+	client.on('messageReactionAdd', (reaction, user) =>
+		events.onReactionAdd(reaction, user).catch(events.onCriticalError),
+	);
+	client.on('messageReactionRemove', (reaction, user) =>
+		events.onReactionRemove(reaction, user).catch(events.onCriticalError),
+	);
+	client.on('messageDelete', (message) =>
+		events.onMessageDelete(message).catch(events.onCriticalError),
+	);
+	client.on('interactionCreate', (interaction) =>
+		events.onInteraction(interaction).catch(events.onCriticalError),
+	);
+	client.on('voiceStateUpdate', (oldState, newState) =>
+		events.onVoiceUpdate(oldState, newState).catch(events.onCriticalError),
+	);
+	client.on('guildMemberAdd', (member) => {
+		events.onGuildMemberAdd(member).catch(events.onCriticalError);
+	});
+	client.on('guildMemberRemove', (member) => {
+		events.onGuildMemberRemove(member).catch(events.onCriticalError);
+	});
+	client.on('guildMemberUpdate', (oldMember, newMember) => {
+		events.onGuildMemberUpdate(oldMember, newMember).catch(events.onCriticalError);
+	});
 	client.rest.on('rateLimited', events.onRateLimit);
 
 	client.login(discordToken);

@@ -1,13 +1,12 @@
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
+import { tenshiColor } from '@/data/globalProps';
+import type { Tubercle } from '@/systems/ps/common/executeTuber';
+import { CURRENT_PS_VERSION, executeTuber } from '@/systems/ps/common/executeTuber';
+import { fetchExt } from '@/utils/fetchext';
+import { p_pure } from '@/utils/prefixes';
+import { CommandOptions } from '../commons/cmdOpts';
 import { CommandTags } from '../commons/cmdTags';
 import { Command } from '../commons/commandBuilder';
-import type { Tubercle } from '@/systems/ps/common/executeTuber';
-import { executeTuber, CURRENT_PS_VERSION } from '@/systems/ps/common/executeTuber';
-import { CommandOptions } from '../commons/cmdOpts';
-import { ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
-import { p_pure } from '@/utils/prefixes';
-import { tenshiColor } from '@/data/globalProps';
-import { makeButtonRowBuilder } from '@/utils/tsCasts';
-import { fetchExt } from '@/utils/fetchext';
 
 export const psEditorButton = new ButtonBuilder()
 	.setURL('https://papitaconpure.github.io/ps/')
@@ -21,10 +20,13 @@ export const psDocsButton = new ButtonBuilder()
 	.setEmoji('📖')
 	.setStyle(ButtonStyle.Link);
 
-async function getScriptString(args: import('../commons/cmdOpts').CommandOptionSolver, rawArgs?: string) {
+async function getScriptString(
+	args: import('../commons/cmdOpts').CommandOptionSolver,
+	rawArgs?: string,
+) {
 	const file = args.getAttachment('archivo');
 
-	if(file && file.name.toLowerCase().endsWith('.tuber')) {
+	if (file?.name.toLowerCase().endsWith('.tuber')) {
 		const importCode = async () => {
 			const fetchResult = await fetchExt(file.url, { type: 'text' });
 
@@ -39,7 +41,7 @@ async function getScriptString(args: import('../commons/cmdOpts').CommandOptionS
 	}
 
 	let script: string;
-	if(args.isInteractionSolver()) {
+	if (args.isInteractionSolver()) {
 		script = args.getString('script').trim();
 	} else {
 		script = rawArgs
@@ -48,11 +50,12 @@ async function getScriptString(args: import('../commons/cmdOpts').CommandOptionS
 			.trim();
 	}
 
-	if(!script.length)
+	if (!script.length)
 		return {
 			status: 400,
-			statusText: 'Se requiere que ingreses código PuréScript válido. Nótese que solo los Tubérculos pueden usar las características de registro y lectura Entradas de Usuario',
-			result: /**@type {null}*/(null),
+			statusText:
+				'Se requiere que ingreses código PuréScript válido. Nótese que solo los Tubérculos pueden usar las características de registro y lectura Entradas de Usuario',
+			result: /**@type {null}*/ (null),
 		};
 
 	return {
@@ -79,18 +82,15 @@ const command = new Command('purescript', flags)
 		'',
 		'Puedes usar el editor web de PuréScript [aquí](https://papitaconpure.github.io/ps/)',
 		'Puedes leer la documentación de PuréScript [aquí](https://papitaconpure.github.io/ps-docs/)',
-		`Última versión: **v${CURRENT_PS_VERSION}**`
+		`Última versión: **v${CURRENT_PS_VERSION}**`,
 	)
-	.addWikiRow(
-		psEditorButton,
-		psDocsButton,
-	)
+	.addWikiRow(psEditorButton, psDocsButton)
 	.setOptions(options)
-	.setExecution(async function (request, args, rawArgs) {
+	.setExecution(async (request, args, rawArgs) => {
 		const helpString = `-# Usa \`${p_pure(request.guildId).raw}ayuda puréscript\` para más información`;
 		const scriptResult = await getScriptString(args, rawArgs);
 
-		if(scriptResult.status !== 200)
+		if (scriptResult.status !== 200)
 			return request.reply({
 				content: `⚠️️ ${scriptResult.statusText}\n${helpString}`,
 				embeds: [
@@ -99,7 +99,12 @@ const command = new Command('purescript', flags)
 						.setTitle('¿Nunca programaste en PuréScript?')
 						.setDescription('¡Revisa la documentación oficial!'),
 				],
-				components: [ makeButtonRowBuilder().addComponents(psEditorButton, psDocsButton) ],
+				components: [
+					new ActionRowBuilder<ButtonBuilder>().addComponents(
+						psEditorButton,
+						psDocsButton,
+					),
+				],
 			});
 
 		const script = scriptResult.result;
@@ -118,13 +123,14 @@ const command = new Command('purescript', flags)
 			await request.deferReply();
 			await executeTuber(request, tuber, { isTestDrive: false, args: [] });
 			console.log(`PuréScript ejecutado: ${tuber}`);
-		} catch(error) {
+		} catch (error) {
 			console.log('Ocurrió un error al ejecutar código PuréScript');
 			console.error(error);
-			const errorContent = { content: '❌ Hay un problema con el código que intentaste ejecutar' };
+			const errorContent = {
+				content: '❌ Hay un problema con el código que intentaste ejecutar',
+			};
 
-			if(request.wasReplied())
-				return null;
+			if (request.wasReplied()) return null;
 
 			return request.wasDeferred()
 				? request.editReply(errorContent)

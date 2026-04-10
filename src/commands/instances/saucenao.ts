@@ -1,86 +1,100 @@
-import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../commons';
-import { EmbedBuilder, Colors, ButtonBuilder, ButtonStyle, TextInputBuilder, TextInputStyle, ModalBuilder } from 'discord.js';
-import { pourSauce, testSauceNAOToken } from '@/systems/others/saucenao';
-import { encryptString } from '@/utils/security';
-import { makeButtonRowBuilder, makeTextInputRowBuilder } from '@/utils/tsCasts';
-import SauceNAOUser from '@/models/saucenaoUsers';
-import { Translator } from '@/i18n';
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	Colors,
+	EmbedBuilder,
+	ModalBuilder,
+	TextInputBuilder,
+	TextInputStyle,
+} from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
-
+import { Translator } from '@/i18n';
+import SauceNAOUser from '@/models/saucenaoUsers';
+import { pourSauce, testSauceNAOToken } from '@/systems/others/saucenao';
 import Logger from '@/utils/logs';
+import { encryptString } from '@/utils/security';
+import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
+
 const { debug } = Logger('ERROR', 'p!saucenao');
 
 const options = new CommandOptions()
-	.addParam('mensaje', 'MESSAGE', 'para dar un mensaje por respuesta o por ID/enlace (Slash)', { optional: true })
-	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
-	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', { optional: true, poly: 'MULTIPLE', polymax: 5 })
-	.addFlag('r', [ 'registrar', 'register' ], 'para registrar una ID de usuario de SauceNAO');
+	.addParam('mensaje', 'MESSAGE', 'para dar un mensaje por respuesta o por ID/enlace (Slash)', {
+		optional: true,
+	})
+	.addParam('enlaces', 'TEXT', 'para indicar enlaces de imágenes a subir', {
+		optional: true,
+		poly: 'MULTIPLE',
+		polymax: 5,
+	})
+	.addParam('imagens', 'IMAGE', 'para indicar archivos de imágenes a subir', {
+		optional: true,
+		poly: 'MULTIPLE',
+		polymax: 5,
+	})
+	.addFlag('r', ['registrar', 'register'], 'para registrar una ID de usuario de SauceNAO');
 
 const flags = new CommandTags().add('COMMON');
 
 const command = new Command('saucenao', flags)
-	.setAliases(
-		'salsa', 'fuente',
-		'sauce', 'source',
-	)
+	.setAliases('salsa', 'fuente', 'sauce', 'source')
 	.setBriefDescription('Permite buscar fuentes de imágenes con SauceNAO')
-	.setLongDescription('Permite realizar búsqueda reversa de imágenes por medio de la plataforma de SauceNAO.')
+	.setLongDescription(
+		'Permite realizar búsqueda reversa de imágenes por medio de la plataforma de SauceNAO.',
+	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.userId);
 
 		debug('Verificando flag --registrar');
-		if(args.hasFlag('registrar'))
-			return makeRegisterRequestResponse(request, translator);
+		if (args.hasFlag('registrar')) return makeRegisterRequestResponse(request, translator);
 
-		const sauceNAOUser = (await SauceNAOUser.findOne({ userId: request.userId }));
-		if(!sauceNAOUser) {
+		const sauceNAOUser = await SauceNAOUser.findOne({ userId: request.userId });
+		if (!sauceNAOUser) {
 			debug('Usuario no tiene una cuenta de sauceNAO válida. Abortando...');
 			const embed = new EmbedBuilder()
 				.setColor(0x151515)
 				.setDescription(translator.getText('saucenaoUnregisteredNotice'));
 
 			return request.reply({
-				embeds: [ embed ],
+				embeds: [embed],
 				ephemeral: true,
 			});
 		}
 
-		const message = (request.isInteraction && await args.getMessage('mensaje'))
-			|| (request.isMessage && request.channel.messages.cache.get(request.inferAsMessage().reference?.messageId));
+		const message =
+			(request.isInteraction && (await args.getMessage('mensaje')))
+			|| (request.isMessage
+				&& request.channel.messages.cache.get(
+					request.inferAsMessage().reference?.messageId,
+				));
 		const messageAttachments = message?.attachments
 			? message.attachments.values()
-			: /**@type {Array<import('discord.js').Attachment>}*/([]);
+			: /**@type {Array<import('discord.js').Attachment>}*/ ([]);
 
-		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(u => u);
-		const commandAttachments = CommandOptionSolver.asAttachments(args.parsePolyParamSync('imagens')).filter(a => a);
+		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(
+			(u) => u,
+		);
+		const commandAttachments = CommandOptionSolver.asAttachments(
+			args.parsePolyParamSync('imagens'),
+		).filter((a) => a);
 
-		const attachments = [
-			...messageAttachments,
-			...commandAttachments,
-		];
+		const attachments = [...messageAttachments, ...commandAttachments];
 
-		const attachmentUrls = attachments.map(att => att.url);
+		const attachmentUrls = attachments.map((att) => att.url);
 		const otherMessageUrls = message?.embeds
-			? (message.embeds
-				?.flatMap(e => [ e.image?.url, e.thumbnail?.url ])
-				.filter(u => u))
+			? message.embeds?.flatMap((e) => [e.image?.url, e.thumbnail?.url]).filter((u) => u)
 			: [];
 
-		const queries = [
-			...imageUrls,
-			...attachmentUrls,
-			...otherMessageUrls,
-		].slice(0, 5);
+		const queries = [...imageUrls, ...attachmentUrls, ...otherMessageUrls].slice(0, 5);
 
 		debug('queries = ', queries);
 
-		if(!queries.length) {
-			if(message?.stickers.size)
-				queries.push(...message.stickers.map(s => s.url));
+		if (!queries.length) {
+			if (message?.stickers.size) queries.push(...message.stickers.map((s) => s.url));
 		}
 
-		if(!queries.length)
+		if (!queries.length)
 			return request.reply({
 				content: translator.getText('saucenaoInvalidImage'),
 				ephemeral: true,
@@ -93,21 +107,23 @@ const command = new Command('saucenao', flags)
 
 		await pourSauce(sauceNAOUser.clientId, queries, request, { successes, failures });
 
-		if(!successes.length && !failures.length)
+		if (!successes.length && !failures.length)
 			return request.editReply({ content: translator.getText('saucenaoInvalidImage') });
 
-		return request.editReply({ embeds: [ ...successes, ...failures ] });
-	}).setButtonResponse(async function onButtonRegisterRequest(interaction) {
+		return request.editReply({ embeds: [...successes, ...failures] });
+	})
+	.setButtonResponse(async function onButtonRegisterRequest(interaction) {
 		const translator = await Translator.from(interaction.user.id);
 
 		const modal = makeRegisterModal(translator);
 		return interaction.showModal(modal);
-	}).setModalResponse(async function onRegisterRequest(interaction) {
+	})
+	.setModalResponse(async function onRegisterRequest(interaction) {
 		const translator = await Translator.from(interaction.user.id);
 
 		const clientId = interaction.fields.getTextInputValue('clientId').trim();
 
-		if(!testSauceNAOToken(clientId)) {
+		if (!testSauceNAOToken(clientId)) {
 			return interaction.reply({
 				embeds: [
 					new EmbedBuilder()
@@ -117,7 +133,9 @@ const command = new Command('saucenao', flags)
 			});
 		}
 
-		const sauceNAOUser = (await SauceNAOUser.findOne({ userId: interaction.user.id })) || new SauceNAOUser({ userId: interaction.user.id });
+		const sauceNAOUser =
+			(await SauceNAOUser.findOne({ userId: interaction.user.id }))
+			|| new SauceNAOUser({ userId: interaction.user.id });
 		sauceNAOUser.clientId = encryptString(clientId);
 		await sauceNAOUser.save();
 		return interaction.reply({
@@ -132,31 +150,34 @@ const command = new Command('saucenao', flags)
 
 function makeRegisterRequestResponse(request: ComplexCommandRequest, translator: Translator) {
 	debug('Se enviará el mensaje de registro');
-	const embeds = [ new EmbedBuilder()
-		.setColor(0x151515)
-		.setTitle(translator.getText('saucenaoRegisterTitle'))
-		.setFooter({
-			text: translator.getText('saucenaoRegisterFooter'),
-		})
-		.addFields(
-			{
-				name: translator.getText('saucenaoRegisterAccountName'),
-				value: translator.getText('saucenaoRegisterAccountValue'),
-			},
-			{
-				name: translator.getText('saucenaoRegisterAfterName'),
-				value: translator.getText('saucenaoRegisterAfterValue'),
-			},
-		),
+	const embeds = [
+		new EmbedBuilder()
+			.setColor(0x151515)
+			.setTitle(translator.getText('saucenaoRegisterTitle'))
+			.setFooter({
+				text: translator.getText('saucenaoRegisterFooter'),
+			})
+			.addFields(
+				{
+					name: translator.getText('saucenaoRegisterAccountName'),
+					value: translator.getText('saucenaoRegisterAccountValue'),
+				},
+				{
+					name: translator.getText('saucenaoRegisterAfterName'),
+					value: translator.getText('saucenaoRegisterAfterValue'),
+				},
+			),
 	];
 
-	const components = [ makeButtonRowBuilder().addComponents(
-		new ButtonBuilder()
-			.setCustomId(`saucenao_onButtonRegisterRequest`)
-			.setLabel(translator.getText('buttonRegister'))
-			.setEmoji('1355488586883137697')
-			.setStyle(ButtonStyle.Primary),
-	) ];
+	const components = [
+		new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder()
+				.setCustomId(`saucenao_onButtonRegisterRequest`)
+				.setLabel(translator.getText('buttonRegister'))
+				.setEmoji('1355488586883137697')
+				.setStyle(ButtonStyle.Primary),
+		),
+	];
 
 	return request.reply({
 		embeds,
@@ -166,7 +187,7 @@ function makeRegisterRequestResponse(request: ComplexCommandRequest, translator:
 }
 
 function makeRegisterModal(translator: Translator) {
-	const clientIdRow = makeTextInputRowBuilder().addComponents(
+	const clientIdRow = new ActionRowBuilder<TextInputBuilder>().addComponents(
 		new TextInputBuilder()
 			.setCustomId('clientId')
 			.setLabel(translator.getText('saucenaoRegisterModalApiKeyLabel'))

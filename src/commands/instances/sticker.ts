@@ -1,8 +1,11 @@
-import { CommandTags, Command, CommandOptions } from '../commons';
-import { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
+import { Command, CommandOptions, CommandTags } from '../commons';
 
-const options = new CommandOptions()
-	.addParam('mensaje', 'MESSAGE', 'para especificar un mensaje por ID, enlace o respuesta');
+const options = new CommandOptions().addParam(
+	'mensaje',
+	'MESSAGE',
+	'para especificar un mensaje por ID, enlace o respuesta',
+);
 
 const tags = new CommandTags().add('COMMON');
 
@@ -11,16 +14,18 @@ const command = new Command('sticker', tags)
 	.setDescription('Muestra el enlace del sticker especificado')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const message = (await args.getMessage('mensaje', true))
-			?? (request.isMessage ? request.channel.messages.cache.get(request.inferAsMessage().reference?.messageId) : null)
+		const message =
+			(await args.getMessage('mensaje', true))
+			?? (request.isMessage
+				? request.channel.messages.cache.get(request.inferAsMessage().reference?.messageId)
+				: null)
 			?? (request.isMessage ? request.inferAsMessage() : null);
 
-		if(!message || !message.stickers.size)
+		if (!message?.stickers.size)
 			return request.reply({ content: '⚠️️ Debes especificar un mensaje con un sticker' });
 
 		const sticker = await message.stickers.first()?.fetch().catch(console.error);
-		if(!sticker)
-			return request.reply({ content: 'No se encontraron stickers...' });
+		if (!sticker) return request.reply({ content: 'No se encontraron stickers...' });
 
 		const embed = new EmbedBuilder()
 			.setColor('Blurple')
@@ -37,8 +42,8 @@ const command = new Command('sticker', tags)
 		);
 
 		return request.reply({
-			embeds: [ embed ],
-			components: [ row ],
+			embeds: [embed],
+			components: [row],
 		});
 	});
 

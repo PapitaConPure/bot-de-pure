@@ -1,13 +1,13 @@
 import { ButtonBuilder, ButtonStyle } from 'discord.js';
-import { CommandTags, Command } from '../commons';
 import { randRange } from '@/func';
+import { Command, CommandTags } from '../commons';
 
 const phrases = [
 	'Ahora sí vení que te saco la cresta',
 	'Vení que te dejo la cagá en la cara',
 	'Ah mira que bacán. Vení que te rajo',
 	'Aweonao recontraculiao ijoelamaraca',
-	'Avíspate po\'',
+	"Avíspate po'",
 	'Te voy a pegar el meo pape, maraco ctm',
 	'Chúpalo gil qliao',
 	'Te tiraste',
@@ -30,11 +30,11 @@ const command = new Command('rakkidei', flags)
 			.setURL('https://www.pixiv.net/users/58442175')
 			.setEmoji('1334816111270563880'),
 	)
-	.setExecution(async function (request) {
-		return request.reply({
+	.setExecution(async (request) =>
+		request.reply({
 			content: phrases[randRange(0, phrases.length)],
-			files: [ tenshiurl ],
-		});
-	});
+			files: [tenshiurl],
+		}),
+	);
 
 export default command;

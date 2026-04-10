@@ -9,8 +9,7 @@ export const slashPrefixPair = { raw: '/', regex: /\//i } as const;
  * @returns Un objeto conteniendo el texto crudo y RegExp del prefijo
  */
 export function p_pure(context: ComplexCommandRequest | string = '0'): PrefixPair {
-	if(typeof context === 'string')
-		return prefixes[context] || prefixes['0'];
+	if (typeof context === 'string') return prefixes[context] || prefixes['0'];
 
 	return context.isInteraction ? slashPrefixPair : p_pure(context.guildId);
 }

@@ -560,7 +560,7 @@ function isRuntimeValue(node) {
  * @returns {runtime is IdentifierValue}
  */
 function isIdentifier(runtime) {
-	return runtime.type === 'Identifier' && runtime.name != undefined;
+	return runtime.type === 'Identifier' && runtime.name != null;
 }
 //#endregion
 //#endregion
@@ -802,7 +802,7 @@ function isNativeFunction(runtime) {
  * @returns {Boolean}
  */
 function isNada(node) {
-	if(node == undefined)
+	if(node == null)
 		return true;
 
 	if(node.type === 'Nada')
@@ -828,7 +828,7 @@ function isNada(node) {
  * @returns {Boolean}
  */
 function isNotOperable(value) {
-	return value == undefined || isNaN(value) || !isFinite(value);
+	return value == null || isNaN(value) || !isFinite(value);
 }
 
 /**
@@ -1294,7 +1294,7 @@ function makeRuntimeValueFromParserNode(node, type) {
  * @param {RuntimeValue} runtime
  */
 function extractFromRuntimeValue(runtime) {
-	if(runtime == undefined)
+	if(runtime == null)
 		return undefined;
 
 	if(runtime.type === 'List')

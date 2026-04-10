@@ -1,4 +1,9 @@
-import type { EnvironmentProvider, PSChannel, PSMember, PSRole} from '../v1.1/interpreter/environment/environmentProvider';
+import type {
+	EnvironmentProvider,
+	PSChannel,
+	PSMember,
+	PSRole,
+} from '../v1.1/interpreter/environment/environmentProvider';
 import { PSGuild, PSUser } from '../v1.1/interpreter/environment/environmentProvider';
 
 export default class TestEnvironmentProvider implements EnvironmentProvider {
@@ -19,7 +24,7 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 			bannerUrlHandler: this.testUrlHandler,
 			splashUrlHandler: this.testUrlHandler,
 			premiumTier: 0,
-			channels:  [
+			channels: [
 				{
 					id: '123456789012345680',
 					name: 'canal-de-prueba-2',
@@ -47,7 +52,7 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 						displayName: 'Usuario de Prueba',
 					}),
 					displayAvatarUrlHandler: () => 'https://i.imgur.com/P9eeVWC.png',
-					roleIds: [ '123456789012345682' ],
+					roleIds: ['123456789012345682'],
 				},
 				{
 					user: new PSUser({
@@ -59,7 +64,7 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 					displayAvatarUrlHandler: () => 'https://i.imgur.com/P9eeVWC.png',
 					roleIds: [],
 				},
-			]
+			],
 		});
 
 		this.channel = this.guild.registerChannel({
@@ -77,7 +82,7 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 			user: this.user,
 			nickname: 'Bot de Puré',
 			displayAvatarUrlHandler: () => 'https://i.imgur.com/P9eeVWC.png',
-			roleIds: [ '123456789012345681', '123456789012345682' ],
+			roleIds: ['123456789012345681', '123456789012345682'],
 		});
 	}
 
@@ -98,16 +103,16 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 	}
 
 	fetchChannel(query: string) {
-		if(!isNaN(+query)) {
+		if (!Number.isNaN(+query)) {
 			const channel = this.guild.channels.get(query);
-			if(channel) return channel;
+			if (channel) return channel;
 		}
 
 		let bestScore = 0;
 		let bestMatch = null;
 
-		for(const channel of this.guild.channels.values()) {
-			if(channel.name.includes(query) && channel.name.length > bestScore) {
+		for (const channel of this.guild.channels.values()) {
+			if (channel.name.includes(query) && channel.name.length > bestScore) {
 				bestScore = channel.name.length;
 				bestMatch = channel;
 			}
@@ -117,16 +122,16 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 	}
 
 	fetchRole(query: string) {
-		if(!isNaN(+query)) {
+		if (!Number.isNaN(+query)) {
 			const role = this.guild.roles.get(query);
-			if(role) return role;
+			if (role) return role;
 		}
 
 		let bestScore = 0;
 		let bestMatch = null;
 
-		for(const roles of this.guild.roles.values()) {
-			if(roles.name.includes(query) && roles.name.length > bestScore) {
+		for (const roles of this.guild.roles.values()) {
+			if (roles.name.includes(query) && roles.name.length > bestScore) {
 				bestScore = roles.name.length;
 				bestMatch = roles;
 			}
@@ -136,17 +141,17 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 	}
 
 	fetchMember(query: string) {
-		if(!isNaN(+query)) {
+		if (!Number.isNaN(+query)) {
 			const member = this.guild.members.get(query);
-			if(member) return member;
+			if (member) return member;
 		}
 
 		let bestScore = 0;
 		let bestMatch = null;
 
-		for(const member of this.guild.members.values()) {
+		for (const member of this.guild.members.values()) {
 			const tryName = (/**@type {string?}*/ name: string | null) => {
-				if(name && name.includes(query) && name.length > bestScore) {
+				if (name?.includes(query) && name.length > bestScore) {
 					bestScore = name.length;
 					bestMatch = member;
 					return true;
@@ -154,9 +159,9 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 				return false;
 			};
 
-			if(tryName(member.nickname)) continue;
-			if(tryName(member.user.displayName)) continue;
-			if(tryName(member.user.username)) continue;
+			if (tryName(member.nickname)) continue;
+			if (tryName(member.user.displayName)) continue;
+			if (tryName(member.user.username)) continue;
 		}
 
 		return bestMatch;

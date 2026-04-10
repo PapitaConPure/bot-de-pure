@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { model, Schema } from 'mongoose';
 
 export const pureTableAssets = {
 	defaultEmote: '1267233873864032318',
@@ -7,25 +7,30 @@ export const pureTableAssets = {
 
 const PuretableSchema = new Schema({
 	cells: {
-		type: [ [ String ] ],
-		default: Array(16).fill(null).map(() => Array(16).fill(pureTableAssets.defaultEmote))
+		type: [[String]],
+		default: Array(16)
+			.fill(null)
+			.map(() => Array(16).fill(pureTableAssets.defaultEmote)),
 	},
 });
 
-const AnarchyUserSkillSubschema = new Schema({
-	hline: { type: Number, default: 1 },
-	vline: { type: Number, default: 1 },
-	x: { type: Number, default: 1 },
-	square: { type: Number },
-	circle: { type: Number },
-	diamond: { type: Number },
-	heart: { type: Number },
-	tetris: { type: Number },
-	p: { type: Number },
-	exclamation: { type: Number },
-	a: { type: Number },
-	ultimate: { type: Number },
-}, { _id: false });
+const AnarchyUserSkillSubschema = new Schema(
+	{
+		hline: { type: Number, default: 1 },
+		vline: { type: Number, default: 1 },
+		x: { type: Number, default: 1 },
+		square: { type: Number },
+		circle: { type: Number },
+		diamond: { type: Number },
+		heart: { type: Number },
+		tetris: { type: Number },
+		p: { type: Number },
+		exclamation: { type: Number },
+		a: { type: Number },
+		ultimate: { type: Number },
+	},
+	{ _id: false },
+);
 
 const AnarchyUserSchema = new Schema({
 	userId: { type: String },
@@ -37,10 +42,12 @@ const AnarchyUserSchema = new Schema({
 export const PureTable = model('PureTable', PuretableSchema);
 export const AnarchyUser = model('AnarchyUser', AnarchyUserSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function ptm() { return new PureTable({}); }
-export type PureTableDocument = ReturnType<(typeof ptm)>;
+function ptm() {
+	return new PureTable({});
+}
+export type PureTableDocument = ReturnType<typeof ptm>;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function aum() { return new AnarchyUser({}); }
-export type AnarchyUserDocument = ReturnType<(typeof aum)>;
+function aum() {
+	return new AnarchyUser({});
+}
+export type AnarchyUserDocument = ReturnType<typeof aum>;

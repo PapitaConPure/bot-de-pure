@@ -1,14 +1,10 @@
 import { makeGuideMenu } from '@/systems/others/wiki.js';
-import { CommandTags, Command } from '../commons/index.js';
+import { Command, CommandTags } from '../commons/index.js';
 
 const tags = new CommandTags().add('GUIDE');
 
 const command = new Command('g-parametros', tags)
-	.setAliases(
-		'g-parámetros', 'g-argumentos',
-		'g-parameters', 'g-arguments',
-		'g-param', 'g-args',
-	)
+	.setAliases('g-parámetros', 'g-argumentos', 'g-parameters', 'g-arguments', 'g-param', 'g-args')
 	.setLongDescription(
 		'Algunos comandos pueden requerir `<parámetros>`',
 		'Los parámetros generalmente se escriben en un cierto orden, y piden un cierto _(tipo)_ de valor',

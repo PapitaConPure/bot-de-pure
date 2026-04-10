@@ -1,8 +1,8 @@
-import { CommandTags, CommandOptions, Command, CommandOptionSolver } from '../commons';
-import { CommandPermissions } from '../commons/cmdPerms';
-import { Translator } from '@/i18n';
-import type { GuildMember} from 'discord.js';
+import type { GuildMember } from 'discord.js';
 import { MessageFlags } from 'discord.js';
+import { Translator } from '@/i18n';
+import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
+import { CommandPermissions } from '../commons/cmdPerms';
 
 const perms = new CommandPermissions('ModerateMembers');
 
@@ -24,43 +24,53 @@ const command = new Command('aislar', tags)
 	.setExecution(async (request, args) => {
 		const translator = await Translator.from(request.member);
 
-		if(args.empty)
+		if (args.empty)
 			return request.reply({
-				flags: MessageFlags.Ephemeral ,
+				flags: MessageFlags.Ephemeral,
 				content: translator.getText('aislarNoTimeProvided'),
 			});
 
 		let duration = args.getNumber('duración');
-		if(isNaN(duration) || duration < 0)
-			return request.reply({ content: translator.getText('aislarInvalidTime'), ephemeral: true });
+		if (Number.isNaN(+duration) || duration < 0)
+			return request.reply({
+				content: translator.getText('aislarInvalidTime'),
+				ephemeral: true,
+			});
 
-		if(duration === 0)
-			duration = null;
-		else
-			duration = duration * 60e3;
+		if (duration === 0) duration = null;
+		else duration = duration * 60e3;
 
-		const members = CommandOptionSolver.asMembers(args.parsePolyParamSync('miembros', { regroupMethod: 'MENTIONABLES-WITH-SEP' }));
-		if(!members.length)
-			return request.reply({ content: translator.getText('aislarNoMembersMentioned'), ephemeral: true });
+		const members = CommandOptionSolver.asMembers(
+			args.parsePolyParamSync('miembros', { regroupMethod: 'MENTIONABLES-WITH-SEP' }),
+		);
+		if (!members.length)
+			return request.reply({
+				content: translator.getText('aislarNoMembersMentioned'),
+				ephemeral: true,
+			});
 
-		if(members.some(member => !member))
+		if (members.some((member) => !member))
 			await request.reply({ content: translator.getText('aislarSomeMembersWereInvalid') });
 
 		const succeeded: GuildMember[] = [];
-		const failed   : GuildMember[] = [];
+		const failed: GuildMember[] = [];
 
-		await Promise.all(members
-			.filter(member => member)
-			.map(member => member
-				.timeout(duration, `Aislado por ${request.member.user.tag}`)
-				.then(() => succeeded.push(member))
-				.catch(() => failed.push(member))
-			));
+		await Promise.all(
+			members
+				.filter((member) => member)
+				.map((member) =>
+					member
+						.timeout(duration, `Aislado por ${request.member.user.tag}`)
+						.then(() => succeeded.push(member))
+						.catch(() => failed.push(member)),
+				),
+		);
 
-		if(!succeeded.length)
+		if (!succeeded.length)
 			return request.reply({ content: translator.getText('aislarNoUpdatedMembers') });
 
-		const membersList = (members: GuildMember[]) => members.map(member => member.user.tag).join(', ');
+		const membersList = (members: GuildMember[]) =>
+			members.map((member) => member.user.tag).join(', ');
 		return request.reply({
 			content: [
 				duration

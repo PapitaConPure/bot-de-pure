@@ -3,14 +3,15 @@ import Mongoose from 'mongoose';
 /**Describe la configuración de un sistema PureVoice de servidor.*/
 const SauceNAOUserSchema = new Mongoose.Schema({
 	userId: { type: String },
-    /**ID de cliente de SauceNAO*/
+	/**ID de cliente de SauceNAO*/
 	clientId: { type: String, required: true },
 });
 
 const SauceNAOUser = Mongoose.model('SauceNAOUser', SauceNAOUserSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() { return new SauceNAOUser({}); }
-export type SauceNAOUserDocument = ReturnType<(typeof m)>;
+function m() {
+	return new SauceNAOUser({});
+}
+export type SauceNAOUserDocument = ReturnType<typeof m>;
 
 export default SauceNAOUser;

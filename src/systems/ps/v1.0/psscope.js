@@ -150,7 +150,7 @@ class TuberScope {
 		}
         // console.log('No lo tiene');
 
-		if(this.#parent == undefined) {
+		if(this.#parent == null) {
 			if(mustBeDeclared)
 				throw TuberInterpreterError(`El identificador "${identifier}" no representa ninguna variable ni función`, this.#currentStatement);
             // console.log('Va a tocar nulo');

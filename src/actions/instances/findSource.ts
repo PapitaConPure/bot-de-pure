@@ -4,35 +4,30 @@ import SauceNAOUser from '@/models/saucenaoUsers';
 import { Translator } from '@/i18n';
 import type { Attachment } from 'discord.js';
 
-const action = new ContextMenuAction('actionFindSource', 'Message')
-	.setMessageResponse(async interaction => {
+const action = new ContextMenuAction('actionFindSource', 'Message').setMessageResponse(
+	async (interaction) => {
 		const message = interaction.targetMessage;
 		const uid = interaction.user.id;
 		const translator = await Translator.from(uid);
 
-		const sauceNAOUser = (await SauceNAOUser.findOne({ userId: interaction.user.id }));
-		if(!sauceNAOUser)
+		const sauceNAOUser = await SauceNAOUser.findOne({ userId: interaction.user.id });
+		if (!sauceNAOUser)
 			return interaction.reply({
 				content: translator.getText('saucenaoUnregisteredNotice'),
 				ephemeral: true,
 			});
 
 		const messageAttachments = message.attachments
-			? [ ...message.attachments.values() ]
-			: [] as Attachment[];
+			? [...message.attachments.values()]
+			: ([] as Attachment[]);
 
-		const attachmentUrls = messageAttachments.map(att => att.url);
-		const otherMessageUrls = message.embeds
-			?.flatMap(e => [ e.image?.url, e.thumbnail?.url ])
-			.filter(u => u)
-			|| [];
+		const attachmentUrls = messageAttachments.map((att) => att.url);
+		const otherMessageUrls =
+			message.embeds?.flatMap((e) => [e.image?.url, e.thumbnail?.url]).filter((u) => u) || [];
 
-		const queries = [
-			...attachmentUrls,
-			...otherMessageUrls,
-		].slice(0, 5);
+		const queries = [...attachmentUrls, ...otherMessageUrls].slice(0, 5);
 
-		if(!queries.length)
+		if (!queries.length)
 			return interaction.reply({
 				content: translator.getText('saucenaoInvalidImage'),
 				ephemeral: true,
@@ -45,10 +40,11 @@ const action = new ContextMenuAction('actionFindSource', 'Message')
 
 		await pourSauce(sauceNAOUser.clientId, queries, interaction, { successes, failures });
 
-		if(!successes.length && !failures.length)
+		if (!successes.length && !failures.length)
 			return interaction.editReply({ content: translator.getText('saucenaoInvalidImage') });
 
-		return interaction.editReply({ embeds: [ ...successes, ...failures ] });
-	});
+		return interaction.editReply({ embeds: [...successes, ...failures] });
+	},
+);
 
 export default action;

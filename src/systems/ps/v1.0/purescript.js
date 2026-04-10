@@ -52,9 +52,9 @@ const logOptions = {
  * @returns {tuber is AdvancedTubercle}
  */
 function isAdvanced(tuber) {
-	return tuber.content == undefined
-        && tuber.files == undefined
-        && /**@type {AdvancedTubercle}*/(tuber).script != undefined;
+	return tuber.content == null
+        && tuber.files == null
+        && /**@type {AdvancedTubercle}*/(tuber).script != null;
 }
 
 /**

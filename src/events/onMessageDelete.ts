@@ -1,17 +1,23 @@
-import { deleteMessageCascade, getMessageCascade } from '../systems/others/messageCascades';
-import { channelIsBlocked, isUsageBanned, fetchMessage } from '@/func';
 import type { Message, PartialMessage } from 'discord.js';
+import { channelIsBlocked, fetchMessage, isUsageBanned } from '@/func';
+import { deleteMessageCascade, getMessageCascade } from '../systems/others/messageCascades';
 
 export async function onMessageDelete(message: Message | PartialMessage) {
 	const { author } = message;
 
-	if(!author || author.bot || !message.inGuild() || channelIsBlocked(message.channel) || (await isUsageBanned(author)))
+	if (
+		!author
+		|| author.bot
+		|| !message.inGuild()
+		|| channelIsBlocked(message.channel)
+		|| (await isUsageBanned(author))
+	)
 		return;
 
 	const { id: messageId, guild, channel } = message;
 
 	const otherMessageId = getMessageCascade(messageId);
-	if(!otherMessageId) return;
+	if (!otherMessageId) return;
 
 	const otherMessage = await fetchMessage(otherMessageId, { guild, channel });
 	deleteMessageCascade(messageId);

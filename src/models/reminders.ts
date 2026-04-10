@@ -16,7 +16,7 @@ const reminderSchema = new Mongoose.Schema({
 	content: {
 		type: String,
 		required: true,
-		minLength: [ 1, 'El contenido del recordatorio no puede estar vacío' ],
+		minLength: [1, 'El contenido del recordatorio no puede estar vacío'],
 	},
 	date: {
 		type: Date,
@@ -26,8 +26,9 @@ const reminderSchema = new Mongoose.Schema({
 
 const Reminder = Mongoose.model('reminder', reminderSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() { return new Reminder({}); }
-export type ReminderDocument = ReturnType<(typeof m)>;
+function m() {
+	return new Reminder({});
+}
+export type ReminderDocument = ReturnType<typeof m>;
 
 export default Reminder;

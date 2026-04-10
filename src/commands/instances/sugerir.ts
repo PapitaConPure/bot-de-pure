@@ -1,16 +1,19 @@
 import { EmbedBuilder } from 'discord.js';
-import { CommandTags, Command } from '../commons';
-import { tenshiColor, reportFormUrl } from '@/data/globalProps';
+import { reportFormUrl, tenshiColor } from '@/data/globalProps';
+import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
 
 const command = new Command('sugerir', tags)
 	.setAliases('reportar', 'informar')
 	.setDescription('Para sugerir mejoras sobre Bot de Puré, o reportar un error')
-	.setExecution(async request => {
+	.setExecution(async (request) => {
 		const embed = new EmbedBuilder()
 			.setColor(tenshiColor)
-			.setAuthor({ name: 'Bot de Puré • Comentarios', iconURL: request.client.user.avatarURL({ size: 256, extension: 'jpg' }) })
+			.setAuthor({
+				name: 'Bot de Puré • Comentarios',
+				iconURL: request.client.user.avatarURL({ size: 256, extension: 'jpg' }),
+			})
 			.setThumbnail('https://i.imgur.com/Ah7G6iV.jpg')
 			.addFields(
 				{
@@ -30,7 +33,7 @@ const command = new Command('sugerir', tags)
 				},
 			);
 
-		return request.reply({ embeds: [ embed ] });
+		return request.reply({ embeds: [embed] });
 	});
 
 export default command;

@@ -22,7 +22,7 @@ export class Stack<T> {
 	push(value: T) {
 		const node = new LinkedListNode(value);
 
-		if(this.#head == null) {
+		if (this.#head == null) {
 			this.#head = node;
 		} else {
 			const temp = this.#head;
@@ -34,7 +34,7 @@ export class Stack<T> {
 	}
 
 	pop() {
-		if(this.#head == null) return null;
+		if (this.#head == null) return null;
 
 		const node = this.#head;
 		this.#head = this.#head.next;
@@ -65,7 +65,7 @@ export class Queue<T> {
 	enqueue(value: T) {
 		const node = new LinkedListNode(value);
 
-		if(this.#tail == null) {
+		if (this.#tail == null) {
 			this.#head = node;
 			this.#tail = node;
 		} else {
@@ -77,13 +77,12 @@ export class Queue<T> {
 	}
 
 	dequeue() {
-		if(this.#head == null) return null;
+		if (this.#head == null) return null;
 
 		const node = this.#head;
 		this.#head = this.#head.next;
 
-		if(this.#head == null)
-			this.#tail = null;
+		if (this.#head == null) this.#tail = null;
 
 		this.count--;
 

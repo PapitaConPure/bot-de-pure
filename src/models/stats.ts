@@ -7,7 +7,7 @@ const StatsSchema = new Mongoose.Schema({
 	},
 	read: {
 		type: Number,
-		default: 0
+		default: 0,
 	},
 	commands: {
 		type: Object,
@@ -15,21 +15,23 @@ const StatsSchema = new Mongoose.Schema({
 		failed: { type: Number },
 		default: {
 			succeeded: 0,
-			failed: 0
+			failed: 0,
 		},
-	}
+	},
 });
 
 export const Stats = Mongoose.model('Stats', StatsSchema);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() { return new Stats({}); }
-export type StatsDocument = ReturnType<(typeof m)>;
+function m() {
+	return new Stats({});
+}
+export type StatsDocument = ReturnType<typeof m>;
 
 const ChannelStatsSchema = new Mongoose.Schema({
 	guildId: {
 		type: String,
-		required: true
+		required: true,
 	},
 	channelId: {
 		type: String,
@@ -47,6 +49,7 @@ const ChannelStatsSchema = new Mongoose.Schema({
 
 export const ChannelStats = Mongoose.model('ChannelStats', ChannelStatsSchema);
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function cm() { return new ChannelStats({}); }
-export type ChannelStatsDocument = ReturnType<(typeof cm)>;
+function cm() {
+	return new ChannelStats({});
+}
+export type ChannelStatsDocument = ReturnType<typeof cm>;
