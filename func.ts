@@ -1,4 +1,4 @@
-import Discord from 'discord.js'; //Discord.js
+import { AnyThreadChannel, AttachmentBuilder, Client as DiscordClient, Collection, ContainerBuilder, Guild, GuildBasedChannel, GuildMember, GuildTextBasedChannel, MessageFlags, User, Message, Role, Snowflake, Emoji, ButtonBuilder, StringSelectMenuBuilder } from 'discord.js'; //js
 import { globalConfigs, tenshiColor } from './data/globalProps';
 import images from './data/images.json';
 import Canvas from '@napi-rs/canvas'; //Node Canvas
@@ -15,10 +15,10 @@ const concol = {
 };
 
 //WARNING: Esta función permanece por compatibilidad. NO TOCAR
-export function paginateRaw<T>(array: Discord.Collection<string, T>, pagemax?: number): [string, T][][];
+export function paginateRaw<T>(array: Collection<string, T>, pagemax?: number): [string, T][][];
 export function paginateRaw<T>(array: T[], pagemax?: number): T[][];
-export function paginateRaw<T>(values: T[] | Discord.Collection<string, T>, pagemax: number): T[][] | ([string, T])[][];
-export function paginateRaw<T>(values: T[] | Discord.Collection<string, T>, pagemax: number = 10): T[][] | ([string, T])[][] {
+export function paginateRaw<T>(values: T[] | Collection<string, T>, pagemax: number): T[][] | ([string, T])[][];
+export function paginateRaw<T>(values: T[] | Collection<string, T>, pagemax: number = 10): T[][] | ([string, T])[][] {
 	if(!Array.isArray(values)) {
 		const intermediate = [ ...values.entries() ];
 		return intermediate
@@ -38,29 +38,22 @@ export function sleep(ms: number): Promise<void> {
 }
 
 //#region Comprobadores
-export const isNotModerator = (member: Discord.GuildMember) => !(member.permissions.has('ManageRoles') || member.permissions.has('ManageMessages'));
+export const isNotModerator = (member: GuildMember) => !(member.permissions.has('ManageRoles') || member.permissions.has('ManageMessages'));
 
-export async function isUsageBanned(user: Discord.User | Discord.GuildMember) {
+export async function isUsageBanned(user: User | GuildMember) {
 	const userCache = await fetchUserCache(user);
 	return userCache.banned;
 }
 
-/**@param {Discord.GuildMember} member*/
-export function isBoosting(member: Discord.GuildMember) {
+export function isBoosting(member: GuildMember) {
 	return member.roles.premiumSubscriberRole ? true : false;
 }
 
-/**
- *
- * @param {Discord.GuildBasedChannel} channel
- * @returns {channel is Discord.AnyThreadChannel}
- */
-export function isThread(channel: Discord.GuildBasedChannel): channel is Discord.AnyThreadChannel {
+export function isThread(channel: GuildBasedChannel): channel is AnyThreadChannel {
 	return [ ChannelType.PublicThread, ChannelType.PrivateThread, ChannelType.AnnouncementThread ].includes(channel.type);
 }
 
-/**@param {import('discord.js').GuildTextBasedChannel} channel*/
-export function channelIsBlocked(channel: import('discord.js').GuildTextBasedChannel) {
+export function channelIsBlocked(channel: GuildTextBasedChannel) {
 	const member = channel?.guild?.members.me;
 	if(!member?.permissionsIn(channel)?.any?.([ 'SendMessages', 'SendMessagesInThreads' ], true)) return true;
 	if(globalConfigs.maintenance.length === 0) return false;
@@ -73,9 +66,10 @@ export function channelIsBlocked(channel: import('discord.js').GuildTextBasedCha
 
 //#region Anuncios
 /**
+ * @description
  * Se debe llamar {@link fetchGuildMembers} antes para obtener buenos resultados.
  */
-export function calculateRealMemberCount(guild: Discord.Guild) {
+export function calculateRealMemberCount(guild: Guild) {
 	const members = guild.members.cache;
 	return members.filter(member => !member.user.bot).size;
 }
@@ -176,7 +170,7 @@ interface CanvasAvatarDrawOptions {
 	circleStrokeFactor?: number;
 }
 
-export async function drawCircularImage(ctx: import('@napi-rs/canvas').SKRSContext2D, user: Discord.User, xcenter: number, ycenter: number, radius: number, options: CanvasAvatarDrawOptions = {}): Promise<void> {
+export async function drawCircularImage(ctx: import('@napi-rs/canvas').SKRSContext2D, user: User, xcenter: number, ycenter: number, radius: number, options: CanvasAvatarDrawOptions = {}): Promise<void> {
 	options.circleStrokeColor ??= '#000000';
 	options.circleStrokeFactor ??= 0.02;
 
@@ -200,7 +194,7 @@ export async function drawCircularImage(ctx: import('@napi-rs/canvas').SKRSConte
 	ctx.restore();
 }
 
-export async function sendWelcomeMessage(member: Discord.GuildMember) {
+export async function sendWelcomeMessage(member: GuildMember) {
 	if(member == null || typeof member !== 'object')
 		throw ReferenceError('Se esperaba un miembro a cual dar la bienvenida.');
 
@@ -277,10 +271,10 @@ export async function sendWelcomeMessage(member: Discord.GuildMember) {
 		//Foto de perfil
 		await drawCircularImage(ctx, user, canvas.width / 2, (canvas.height - 56) / 2, 200, { circleStrokeFactor: strokeFactor });
 
-		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'bienvenida.webp' });
+		const attachment = new AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'bienvenida.webp' });
 		const memberCount = calculateRealMemberCount(guild);
 
-		const container = new Discord.ContainerBuilder()
+		const container = new ContainerBuilder()
 			.setAccentColor(tenshiColor)
 			.addMediaGalleryComponents(mediaGallery =>
 				mediaGallery.addItems(item =>
@@ -297,7 +291,7 @@ export async function sendWelcomeMessage(member: Discord.GuildMember) {
 			);
 
 		return channel.send({
-			flags: Discord.MessageFlags.IsComponentsV2,
+			flags: MessageFlags.IsComponentsV2,
 			components: [ container ],
 			files: [ attachment ],
 		});
@@ -307,7 +301,7 @@ export async function sendWelcomeMessage(member: Discord.GuildMember) {
 	}
 }
 
-export async function sendFarewellMessage(member: Discord.GuildMember) {
+export async function sendFarewellMessage(member: GuildMember) {
 	const { guild } = member;
 	const channel = guild.systemChannel;
 
@@ -354,11 +348,11 @@ export async function sendFarewellMessage(member: Discord.GuildMember) {
 		await drawCircularImage(ctx, member.user, canvas.width / 2, 80 + 200, 200, { circleStrokeFactor: strokeFactor });
 
 		//Enviar imagen y mensaje extra
-		const attachment = new Discord.AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'despedida.webp' });
+		const attachment = new AttachmentBuilder(canvas.toBuffer('image/webp'), { name: 'despedida.webp' });
 		const members = guild.members.cache;
 		const memberCount = members.filter(member => !member.user.bot).size;
 
-		const container = new Discord.ContainerBuilder()
+		const container = new ContainerBuilder()
 			.setAccentColor(tenshiColor)
 			.addMediaGalleryComponents(mediaGallery =>
 				mediaGallery.addItems(item =>
@@ -372,7 +366,7 @@ export async function sendFarewellMessage(member: Discord.GuildMember) {
 			);
 
 		await channel.send({
-			flags: Discord.MessageFlags.IsComponentsV2,
+			flags: MessageFlags.IsComponentsV2,
 			components: [ container ],
 			files: [ attachment ],
 		});
@@ -395,7 +389,7 @@ export function extractUserID(data: string): string {
 }
 
 interface MemberMatch {
-	member: Discord.GuildMember;
+	member: GuildMember;
 	rawTarget: string;
 	length: number;
 	matchIndex: number;
@@ -423,7 +417,7 @@ function memberMatchComparer(a: MemberMatch, b: MemberMatch): number {
 	return 0;
 }
 
-export function findMemberByUsername(members: Discord.Collection<string, Discord.GuildMember>, query: string): Discord.GuildMember {
+export function findMemberByUsername(members: Collection<string, GuildMember>, query: string): GuildMember {
 	const processedMembers = members.map(m => ({
 		member: m,
 		rawTarget: m.user.username,
@@ -440,7 +434,7 @@ export function findMemberByUsername(members: Discord.Collection<string, Discord
 	return undefined;
 }
 
-export function findMemberByNickname(members: Discord.Collection<string, Discord.GuildMember>, query: string): Discord.GuildMember {
+export function findMemberByNickname(members: Collection<string, GuildMember>, query: string): GuildMember {
 	const processedMembers = members
 		.filter(m => m.nickname)
 		.map(m => ({
@@ -459,7 +453,7 @@ export function findMemberByNickname(members: Discord.Collection<string, Discord
 	return undefined;
 }
 
-export function findMemberByGlobalName(members: Discord.Collection<string, Discord.GuildMember>, query: string): Discord.GuildMember {
+export function findMemberByGlobalName(members: Collection<string, GuildMember>, query: string): GuildMember {
 	const processedMembers = members
 		.filter(m => m.user.globalName)
 		.map(m => ({
@@ -482,13 +476,13 @@ export function findMemberByGlobalName(members: Discord.Collection<string, Disco
  * @description
  * Busca miembros de Discord según la consulta y el contexto proporcionados.
  *
- * Devuelve el {@link Discord.GuildMember miembro} de mayor coincidencia.
+ * Devuelve el {@link GuildMember miembro} de mayor coincidencia.
  * Si no se encuentra ningún miembro, se devuelve `undefined`.
  * @param query La consulta a realizar para obtener un miembro.
  * @param context El contexto del cuál obtener un miembro con la consulta.
  * @returns El miembro encontrado.
  */
-export function fetchMember(query: Discord.GuildMember | string, context: FetchUserContext): Discord.GuildMember {
+export function fetchMember(query: GuildMember | string, context: FetchUserContext): GuildMember {
 	if(!query)
 		throw new Error('fetchMember: Se requiere un criterio de búsqueda');
 
@@ -536,21 +530,21 @@ export function fetchMember(query: Discord.GuildMember | string, context: FetchU
 }
 
 interface FetchUserContext {
-	guild?: Discord.Guild;
-	client?: Discord.Client;
+	guild?: Guild;
+	client?: DiscordClient;
 }
 
 /**
  * @description
  * Busca usuarios de Discord según la consulta y el contexto proporcionados.
  *
- * Devuelve el {@link Discord.User usuario} de mayor coincidencia.
+ * Devuelve el {@link User usuario} de mayor coincidencia.
  * Si no se encuentra ningún usuario, se devuelve `undefined`.
  * @param query La consulta a realizar para obtener un usuario.
  * @param context El contexto del cuál obtener un usuario con la consulta.
  * @returns El usuario encontrado.
  */
-export function fetchUser(query: Discord.User | string, context: FetchUserContext): Discord.User {
+export function fetchUser(query: User | string, context: FetchUserContext): User {
 	if(!query)
 		throw new Error('fetchUser: Se requiere un criterio de búsqueda');
 
@@ -602,7 +596,7 @@ export function fetchUser(query: Discord.User | string, context: FetchUserContex
  * @param context El contexto del cuál obtener un usuario con la consulta.
  * @returns La ID del usuario encontrado.
  */
-export async function fetchUserID(query: Discord.User | string, context: FetchUserContext): Promise<string> {
+export async function fetchUserID(query: User | string, context: FetchUserContext): Promise<string> {
 	const user = fetchUser(query, context);
 	return (user != null) ? user.id : undefined;
 }
@@ -616,7 +610,7 @@ export async function fetchUserID(query: Discord.User | string, context: FetchUs
  * @param query La consulta a realizar para obtener un servidor.
  * @returns El servidor encontrado.
  */
-export async function fetchGuild(query: string): Promise<Discord.Guild> {
+export async function fetchGuild(query: string): Promise<Guild> {
 	if(typeof query !== 'string' || !query.length) return;
 
 	if(!isNaN(+query))
@@ -648,7 +642,7 @@ export async function fetchGuild(query: string): Promise<Discord.Guild> {
  * @param guild El servidor en el cual buscar el canal.
  * @returns El canal encontrado.
  */
-export function fetchChannel(query: string, guild: Discord.Guild): Discord.GuildBasedChannel {
+export function fetchChannel(query: string, guild: Guild): GuildBasedChannel {
 	if(typeof query !== 'string' || !query.length) return;
 
 	const ccache = guild.channels.cache;
@@ -667,8 +661,8 @@ export function fetchChannel(query: string, guild: Discord.Guild): Discord.Guild
 }
 
 interface FetchMessageContext {
-	guild?: Discord.Guild;
-	channel?: Discord.GuildTextBasedChannel;
+	guild?: Guild;
+	channel?: GuildTextBasedChannel;
 }
 
 /**
@@ -681,7 +675,7 @@ interface FetchMessageContext {
  * @param context El contexto del cuál obtener un mensaje con la consulta.
  * @returns El mensaje encontrado.
  */
-export async function fetchMessage(data: string, context: FetchMessageContext = {}): Promise<Discord.Message> {
+export async function fetchMessage(data: string, context: FetchMessageContext = {}): Promise<Message> {
 	if(typeof data !== 'string' || !data.length) return;
 
 	const acceptedChannelTypes = [
@@ -715,7 +709,7 @@ export async function fetchMessage(data: string, context: FetchMessageContext = 
  * @param guild El servidor en el cual buscar el rol.
  * @returns El rol encontrado.
  */
-export function fetchRole(data: string, guild: Discord.Guild): Discord.Role {
+export function fetchRole(data: string, guild: Guild): Role {
 	if(typeof data !== 'string' || !data.length) return;
 
 	const rcache = guild.roles.cache;
@@ -726,8 +720,8 @@ export function fetchRole(data: string, guild: Discord.Guild): Discord.Role {
 	return role;
 }
 
-/**@deprecated Mantenido por compatibilidad. No debe reusarse nunca hoy en día, y en su lugar: deben usarse componentes de entrada de usuario de Discord.*/
-export const fetchArrows = (emojiscache: Discord.Collection<Discord.Snowflake, Discord.Emoji>): [Discord.Emoji, Discord.Emoji] => [ emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460') ];
+/**@deprecated Mantenido por compatibilidad. No debe reusarse nunca hoy en día, y en su lugar: deben usarse componentes de entrada de usuario de */
+export const fetchArrows = (emojiscache: Collection<Snowflake, Emoji>): [Emoji, Emoji] => [ emojiscache.get('681963688361590897'), emojiscache.get('681963688411922460') ];
 
 /**
  * @param args An array of words, which may contain double-quote groups
@@ -865,7 +859,7 @@ export function defaultEmoji(emoji: string): string | null {
 }
 
 /**@description Devuelve el primer emoji de servidor encontrado con el string.*/
-export function guildEmoji(emoji: string, guild: Discord.Guild): Discord.Emoji | null {
+export function guildEmoji(emoji: string, guild: Guild): Emoji | null {
 	if(typeof emoji !== 'string') return null;
 	if(!guild.emojis) throw TypeError('Debes ingresar una Guild');
 	const parsedEmoji = emoji.match(/^<a*:\w+:[0-9]+>\B/gu)?.[0];
@@ -875,7 +869,7 @@ export function guildEmoji(emoji: string, guild: Discord.Guild): Discord.Emoji |
 }
 
 /**@description Devuelve el primer emoji global o de servidor encontrado en el string.*/
-export const emoji = (emoji: string, guild: import('discord.js').Guild): Discord.Emoji | string | null => defaultEmoji(emoji) ?? guildEmoji(emoji, guild);
+export const emoji = (emoji: string, guild: import('discord.js').Guild): Emoji | string | null => defaultEmoji(emoji) ?? guildEmoji(emoji, guild);
 
 export function isNSFWChannel(channel: import('discord.js').GuildBasedChannel) {
 	if(channel.isThread())
@@ -1007,29 +1001,29 @@ export function navigationRows(commandFilename: string, page: number, lastPage: 
 
 	return [
 		makeButtonRowBuilder().addComponents(
-			new Discord.ButtonBuilder()
+			new ButtonBuilder()
 				.setCustomId(`${commandFilename}_loadPage_0_START`)
 				.setEmoji('934430008586403900')
 				.setStyle(ButtonStyle.Secondary),
-			new Discord.ButtonBuilder()
+			new ButtonBuilder()
 				.setCustomId(`${commandFilename}_loadPage_${backward}_BACKWARD`)
 				.setEmoji('934430008343158844')
 				.setStyle(ButtonStyle.Secondary),
-			new Discord.ButtonBuilder()
+			new ButtonBuilder()
 				.setCustomId(`${commandFilename}_loadPage_${forward}_FORWARD`)
 				.setEmoji('934430008250871818')
 				.setStyle(ButtonStyle.Secondary),
-			new Discord.ButtonBuilder()
+			new ButtonBuilder()
 				.setCustomId(`${commandFilename}_loadPage_${lastPage}_END`)
 				.setEmoji('934430008619962428')
 				.setStyle(ButtonStyle.Secondary),
-			new Discord.ButtonBuilder()
+			new ButtonBuilder()
 				.setCustomId(`${commandFilename}_loadPage_${page}_RELOAD`)
 				.setEmoji('1292310983527632967')
 				.setStyle(ButtonStyle.Primary),
 		),
 		makeStringSelectMenuRowBuilder().addComponents(
-			new Discord.StringSelectMenuBuilder()
+			new StringSelectMenuBuilder()
 				.setCustomId(`${commandFilename}_loadPageExact`)
 				.setPlaceholder('Seleccionar página')
 				.setOptions(Array(Math.min(lastPage + 1, 25)).fill(null).map(() => ({

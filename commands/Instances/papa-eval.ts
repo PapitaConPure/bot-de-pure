@@ -2,7 +2,7 @@
 
 import { p_pure } from '../../utils/prefixes';
 import { CommandOptions, CommandTags, Command } from '../Commons/';
-import Discord from 'discord.js';
+import { EmbedBuilder } from 'discord.js';
 
 import * as GlobalProps from '../../data/globalProps';
 import * as func from '../../func';
@@ -50,7 +50,7 @@ const command = new Command('papa-eval', tags)
 			await eval(fnString);
 			await message.react('✅');
 		} catch(error) {
-			const embed = new Discord.EmbedBuilder()
+			const embed = new EmbedBuilder()
 				.setColor(0x0000ff)
 				.setAuthor({ name: `${message.guild.name} • ${message.channel.name}`, iconURL: message.author.avatarURL(), url: message.url })
 				.addFields({

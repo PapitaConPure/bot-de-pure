@@ -1,9 +1,10 @@
 import { User, GuildMember, Message, GuildChannel, CommandInteractionOptionResolver, Role, Attachment, Guild, GuildBasedChannel, AutocompleteInteraction } from 'discord.js';
 import { fetchUser, fetchMember, fetchChannel, fetchMessage, fetchRole, fetchSentence, regroupText, fetchGuild } from '../../func';
-
-import Logger from '../../utils/logs';
 import { getDateComponentsFromString, makeDateFromComponents, parseTimeFromNaturalLanguage, relativeDates } from '../../utils/datetime';
 import { CommandArguments, CommandRequest, ComplexCommandRequest } from './typings';
+import { LocaleKey } from '../../i18n';
+
+import Logger from '../../utils/logs';
 const { warn } = Logger('WARN', 'CmdOpts');
 
 export type ParamTypeStrict = { name: string; expression: string | number; };
@@ -233,7 +234,7 @@ export class CommandParam extends CommandOption {
 
 	/**
 	 * @param name El nombre del parámetro.
-	 * @param {Exclude<ParamType | ParamType[], undefined | null>} type El tipo del parámetro.
+	 * @param type El tipo del parámetro.
 	 */
 	constructor(name: string, type: Exclude<ParamType | ParamType[], undefined | null>) {
 		super();
@@ -422,8 +423,8 @@ export class CommandFlagExpressive extends CommandFlag {
 
 	/**
 	 * @constructor
-	 * @param {string} name El nombre de entrada de la bandera
-	 * @param {Exclude<ParamType, undefined | null>} type El tipo de entrada de la bandera
+	 * @param name El nombre de entrada de la bandera
+	 * @param type El tipo de entrada de la bandera
 	 */
 	constructor(name: string, type: Exclude<ParamType, undefined | null>) {
 		super();
@@ -504,7 +505,7 @@ export class CommandOptions {
 	/**@description Contexto de Request.*/
 	#request: CommandRequest | null;
 
-	/**@param {CommandRequest?} request El contexto de Request actual. Esto solo se ingresa dentro de una ejecución.*/
+	/**@param request El contexto de Request actual. Esto solo se ingresa dentro de una ejecución.*/
 	constructor(request: CommandRequest | null = null) {
 		this.options = new Map();
 		this.params = new Map();
@@ -517,10 +518,10 @@ export class CommandOptions {
 
 	/**
 	 * @description Añade un parámetro al administrador.
-	 * @param {string} name El nombre del parámetro.
+	 * @param name El nombre del parámetro.
 	 * @param {Exclude<ParamType | ParamType[], undefined | null>} type El tipo de parámetro.
-	 * @param {string} desc La descripción del parámetro.
-	 * @param {{ poly?: ParamPoly, polymax?: Number, optional?: Boolean }} optionModifiers Los modificadores del parámetro.
+	 * @param desc La descripción del parámetro.
+	 * @param optionModifiers Los modificadores del parámetro.
 	 */
 	addParam(name: string, type: Exclude<ParamType | ParamType[], undefined | null>, desc: string, optionModifiers: { poly?: ParamPoly; polymax?: number; optional?: boolean; } = { poly: undefined, polymax: undefined, optional: undefined }) {
 		if(optionModifiers && typeof optionModifiers !== 'object')
@@ -1204,7 +1205,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 
 	/**
 	 * @description Obtiene componentes de fecha de una opción de comando Slash.
-	 * @param {string} identifier El identificador del {@linkcode CommandParam}.
+	 * @param identifier El identificador del {@linkcode CommandParam}.
 	 */
 	#getDateComponentsFromInteraction(identifier: string) {
 		if(this.isInteractionSolver(this.#args) === false)
@@ -1224,11 +1225,11 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 
 	/**
 	 * Obtiene un objeto {@link Date} cuyo valor equivale la fecha localizada especificada, sin componentes horarios en UTC.
-	 * @param {string} identifier El identificador del {@linkcode CommandParam}.
-	 * @param {import('../../i18n').LocaleKey} locale La clave del idioma en el cual interpretar la fecha.
-	 * @param {string} tzCode El código de zona horaria en el que se espera la fecha a interpretar.
+	 * @param identifier El identificador del {@linkcode CommandParam}.
+	 * @param locale La clave del idioma en el cual interpretar la fecha.
+	 * @param tzCode El código de zona horaria en el que se espera la fecha a interpretar.
 	 */
-	getDate(identifier: string, locale: import('../../i18n').LocaleKey, tzCode: string = 'Etc/UTC') {
+	getDate(identifier: string, locale: LocaleKey, tzCode: string = 'Etc/UTC') {
 		const str = this.isInteractionSolver(this.#args)
 			? this.#args.getString(identifier)
 			: this.#getRelativeDateCompatibleMessageArgs();
@@ -1323,7 +1324,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 
 	/**
 	 * Obtiene un texto de hora en lenguaje natural a partir de una opción de comando Slash
-	 * @param {string} identifier El identificador del {@linkcode CommandParam}
+	 * @param identifier El identificador del {@linkcode CommandParam}
 	 */
 	#getTimeStringFromInteraction(identifier: string) {
 		if(this.isInteractionSolver(this.#args) === false)
@@ -1769,7 +1770,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		return finalResult;
 	}
 
-	async#getResultFromParam(identifier: string, getRestOfMessageWords: boolean = false): Promise<ParamResult> {
+	async #getResultFromParam(identifier: string, getRestOfMessageWords: boolean = false): Promise<ParamResult> {
 		if(!this.isMessageSolver(this.#args))
 			throw 'Se esperaban argumentos de comando de mensaje';
 

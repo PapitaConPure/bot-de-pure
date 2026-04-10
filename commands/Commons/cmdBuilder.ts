@@ -192,7 +192,7 @@ export class Command {
 		return this;
 	}
 
-	setPermissions(permissions: import('./cmdPerms').CommandPermissions) {
+	setPermissions(permissions: CommandPermissions) {
 		if(typeof (permissions?.isAllowed) !== 'function')
 			throw new TypeError('Las opciones deben ser una instancia de CommandPermissions');
 
@@ -200,7 +200,7 @@ export class Command {
 		return this;
 	}
 
-	setOptions(options: import('./cmdOpts').CommandOptions) {
+	setOptions(options: CommandOptions) {
 		if(!options.options) throw new Error('Las opciones deben ser un CommandOptions');
 		this.options = options;
 		this.callx = options.callSyntax;

@@ -1,11 +1,11 @@
-import Discord, { Message, MessageFlags } from 'discord.js';
+import { AutocompleteInteraction, EmbedBuilder, Message, MessageFlags } from 'discord.js';
 import serverIds from '../../data/serverIds.json';
 import { navigationRows, rand, paginateRaw } from '../../func';
 import { CommandOptions, CommandTags, Command } from '../Commons/';
 import { InteractionType } from 'discord.js';
-import { ComplexCommandRequest } from '../Commons/typings';
+import { AnyRequest, ComplexCommandRequest } from '../Commons/typings';
 
-function getEmotesList(interaction: import('../Commons/typings').AnyRequest) {
+function getEmotesList(interaction: AnyRequest) {
 	const perritoNames = [
 		'perrito', 'otirrep', 'od', 'do', 'cerca', 'muycerca', 'lejos', 'muylejos', 'invertido', 'dormido', 'pistola', 'sad', 'gorrito', 'gorra', 'almirante', 'detective',
 		'ban', 'helado', 'corona', 'Bern', 'enojado', 'policia', 'ladron', 'importado', 'peleador', 'doge', 'cheems', 'jugo', 'Papita', 'mano', 'Mima', 'chad', 'Marisa',
@@ -21,7 +21,7 @@ function getEmotesList(interaction: import('../Commons/typings').AnyRequest) {
 	return emotes;
 }
 
-async function loadPageNumber(request: Exclude<import('../Commons/typings').AnyRequest, Discord.AutocompleteInteraction>, page: number) {
+async function loadPageNumber(request: Exclude<AnyRequest, AutocompleteInteraction>, page: number) {
 	const emotes = getEmotesList(request);
 	const emotePages = paginateRaw(emotes, 10)
 		.map(page => page
@@ -38,7 +38,7 @@ async function loadPageNumber(request: Exclude<import('../Commons/typings').AnyR
 
 	const perritoComun = emotes.find(perrito => perrito.name === 'perrito');
 
-	const embed = new Discord.EmbedBuilder()
+	const embed = new EmbedBuilder()
 		.setColor(0xe4d0c9)
 		.setTitle(`Perritos ${perritoComun}`)
 		.setAuthor({ name: `${emotes.length} perritos en total` })

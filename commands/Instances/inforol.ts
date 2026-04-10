@@ -1,4 +1,4 @@
-import Discord, { EmbedBuilder } from 'discord.js';
+import { ButtonBuilder, ButtonInteraction, ButtonStyle, Collection, EmbedBuilder, GuildMember, InteractionReplyOptions, InteractionUpdateOptions, MessagePayload, Role } from 'discord.js';
 import { compressId } from '../../func';
 import { CommandOptions, CommandTags, Command, CommandOptionSolver } from '../Commons/';
 import { CommandPermissions } from '../Commons/cmdPerms';
@@ -11,8 +11,8 @@ const MEMBERS_PER_PAGE = 10;
 
 type InforolQuery = {
 	strict: boolean;
-	roles: Discord.Role[];
-	members: Discord.Collection<string, Discord.GuildMember>;
+	roles: Role[];
+	members: Collection<string, GuildMember>;
 };
 
 const perms = new CommandPermissions('ManageRoles');
@@ -72,16 +72,16 @@ const command = new Command('inforol', flags)
 		return showInforolPage(interaction, +page, requestId, translator, query);
 	}, { userFilterIndex: 2 });
 
-function showInforolPage(request: ComplexCommandRequest | Discord.ButtonInteraction<'cached'>, page: number, requestId: string, translator: Translator, query: InforolQuery) {
+function showInforolPage(request: ComplexCommandRequest | ButtonInteraction<'cached'>, page: number, requestId: string, translator: Translator, query: InforolQuery) {
 	const { strict, roles, members } = query;
 	const { guild, user } = request;
 
 	const isCommand = compressId(request.id) === requestId;
 
-	const replyOrUpdate = (replyBody: Discord.MessagePayload | (Discord.InteractionReplyOptions & Discord.InteractionUpdateOptions)) =>
+	const replyOrUpdate = (replyBody: MessagePayload | (InteractionReplyOptions & InteractionUpdateOptions)) =>
 		isCommand
 			? ((request as ComplexCommandRequest).reply(replyBody as CommandReplyOptions))
-			: ((request as Discord.ButtonInteraction).update(replyBody));
+			: ((request as ButtonInteraction).update(replyBody));
 
 	const membersCount = members.size;
 	if(!membersCount)
@@ -93,18 +93,18 @@ function showInforolPage(request: ComplexCommandRequest | Discord.ButtonInteract
 
 	const authorId = compressId(user.id);
 	const components = [ makeButtonRowBuilder().addComponents(
-		new Discord.ButtonBuilder()
+		new ButtonBuilder()
 			.setCustomId(`inforol_showPage_0_${requestId}_${authorId}_F`)
 			.setEmoji('1087075525245272104')
-			.setStyle(Discord.ButtonStyle.Primary),
-		new Discord.ButtonBuilder()
+			.setStyle(ButtonStyle.Primary),
+		new ButtonBuilder()
 			.setCustomId(`inforol_showPage_${previousPage}_${requestId}_${authorId}_P`)
 			.setEmoji('934430008343158844')
-			.setStyle(Discord.ButtonStyle.Secondary),
-		new Discord.ButtonBuilder()
+			.setStyle(ButtonStyle.Secondary),
+		new ButtonBuilder()
 			.setCustomId(`inforol_showPage_${nextPage}_${requestId}_${authorId}_N`)
 			.setEmoji('934430008250871818')
-			.setStyle(Discord.ButtonStyle.Secondary),
+			.setStyle(ButtonStyle.Secondary),
 	) ];
 
 	let embed: EmbedBuilder;
@@ -113,7 +113,7 @@ function showInforolPage(request: ComplexCommandRequest | Discord.ButtonInteract
 		const humansCount = membersCount - botsCount;
 		const rolesContent = roles.map(r => `${r}`).join(', ');
 
-		embed = new Discord.EmbedBuilder()
+		embed = new EmbedBuilder()
 			.setColor(0xff00ff)
 			.setTitle(translator.getText('inforolDashboardTitle'))
 			.setThumbnail(guild.iconURL({ size: 256 }))
@@ -138,7 +138,7 @@ function showInforolPage(request: ComplexCommandRequest | Discord.ButtonInteract
 			.slice(pageStart, pageEnd)
 			.join('\n');
 
-		embed = new Discord.EmbedBuilder()
+		embed = new EmbedBuilder()
 			.setColor(0xff00ff)
 			.setTitle(translator.getText('inforolDetailTitle'))
 			.setAuthor({ name: translator.getText('commandByName', user.username), iconURL: user.avatarURL() })

@@ -9,7 +9,6 @@ import { searchCommand, searchCommands, getWikiPageComponentsV2, makeCategoriesR
 import { ComplexCommandRequest } from '../Commons/typings';
 
 const makeExcludedTags = (request: ComplexCommandRequest | StringSelectMenuInteraction<'cached'>) => {
-	/**@type {Array<import('../Commons/cmdTags').CommandTagResolvable>}*/
 	const excludedTags: Array<import('../Commons/cmdTags').CommandTagResolvable> = [ 'GUIDE' ];
 
 	isNotModerator(request.member) && excludedTags.push('MOD');
