@@ -75,7 +75,7 @@ npm install
 <br>
 
 ### Configurar variables de entorno
-Crea un archivo `.env` en la raíz del proyecto y ábrelo para editarlo. Completa los valores necesarios en base a esta referencia:
+Crea un archivo `.env.production` en la raíz del proyecto y ábrelo para editarlo. Completa los valores necesarios en base a esta referencia:
 
 ```env
 DISCORD_TOKEN=
@@ -121,7 +121,7 @@ Alternativamente, si no te queda claro, puedes revisar el archivo `.env.example`
 > [!WARNING]
 > Los archivos `.env` son de naturaleza sensible, **nunca** los subas a Internet.
 > 
-> **NUNCA** completes el archivo `.env.example` con datos reales. Crea un nuevo archivo llamado `.env` en su lugar.
+> **NUNCA** completes el archivo `.env.example` con datos reales. Crea un nuevo archivo llamado `.env.production` en su lugar.
 
 ### Comprobar scripts y dependencias
 **Puedes saltarte este paso si estás usando Bun.**
@@ -135,7 +135,7 @@ Si estás usando Node, abre el archivo `package.json` y edita las partes indicad
   },
   "main": "index.js",
   "scripts": {
-    "dev": "node --env-file=.env .",
+    "dev": "node --env-file=.env.dev .",
     "prod": "node --env-file=.env.production .",
     // (...)
   },

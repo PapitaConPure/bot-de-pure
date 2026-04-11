@@ -12,6 +12,7 @@ import type {
 import { REST } from 'discord.js';
 import { Routes } from 'discord-api-types/v9';
 import { connect, set } from 'mongoose';
+import { databaseUri } from '@/core/db';
 import { initializeWebhookMessageOwners } from '@/utils/discordagent';
 import { fetchAllGuildMembers, setupGuildRateKeeper } from '@/utils/guildratekeeper';
 import { fetchActionsFromFiles } from '../actions/commons/actionDiscovery';
@@ -71,10 +72,10 @@ export async function onStartup(client: Client) {
 		client.user.setActivity({
 			type: 4,
 			name: 'loading',
-			state: `⏳ Despertando...`
+			state: `⏳ Despertando...`,
 		});
 		confirm();
-	} catch(error) {
+	} catch (error) {
 		console.log(
 			chalk.bold.redBright(
 				'Ocurrió un error al intentar mostrar la actividad para "cargando" durante la inicialización del bot.',
@@ -171,7 +172,8 @@ export async function onStartup(client: Client) {
 	//Cargado de datos de base de datos
 	console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
 	console.log(chalk.gray('Conectando a Cluster en la nube...'));
-	const mongoUri: string = process.env.MONGODB_URI;
+	const mongoUri: string = databaseUri.resolve();
+	databaseUri.redact();
 	set('strictQuery', false);
 	connect(mongoUri, {
 		//@ts-expect-error Quizá sí existen estas 2
@@ -257,23 +259,17 @@ export async function onStartup(client: Client) {
 	for (const cell of emoteCells) globalConfigs.loademotes[cell.id] = cell.image;
 
 	console.log(chalk.gray('Preparando imágenes extra...'));
-	const slot3Emojis = /**@type {import('discord.js').Guild}*/ (globalConfigs.slots.slot3)
-		.emojis.cache;
+	const slot3Emojis = /**@type {import('discord.js').Guild}*/ (globalConfigs.slots.slot3).emojis
+		.cache;
 	const [WHITE, BLACK, pawn] = await Promise.all([
 		loadImage(
-			slot3Emojis
-				.find((e) => e.name === 'wCell')
-				.imageURL({ extension: 'png', size: 256 }),
+			slot3Emojis.find((e) => e.name === 'wCell').imageURL({ extension: 'png', size: 256 }),
 		),
 		loadImage(
-			slot3Emojis
-				.find((e) => e.name === 'bCell')
-				.imageURL({ extension: 'png', size: 256 }),
+			slot3Emojis.find((e) => e.name === 'bCell').imageURL({ extension: 'png', size: 256 }),
 		),
 		loadImage(
-			slot3Emojis
-				.find((e) => e.name === 'pawn')
-				.imageURL({ extension: 'png', size: 256 }),
+			slot3Emojis.find((e) => e.name === 'pawn').imageURL({ extension: 'png', size: 256 }),
 		),
 	]);
 	// biome-ignore lint/complexity/useLiteralKeys: 'chess' no está garantizado en loademotes

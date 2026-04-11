@@ -1,0 +1,30 @@
+import { readFileSync } from 'node:fs';
+import { getRuntimeEnvHint } from '@/utils/runtime';
+
+let redacted = false;
+
+export const databaseUri = {
+	redact: () => {
+		process.env.MONGODB_URI = null;
+		process.env.MONGODB_PASSWORD = null;
+		redacted = true;
+	},
+	resolve() {
+		if(redacted)
+			throw new Error('Access to this method was blocked by the application.');
+
+		if (process.env?.MONGODB_URI) return process.env?.MONGODB_URI;
+
+		if (process.env.MONGODB_USERNAME && process.env.MONGODB_PASSWORD) {
+			const config = getSecretConfig();
+			return `mongodb://${config.username}:${config.password}@db-prod-local:27017/bot-prod-local?authSource=admin`;
+		}
+
+		const hint = getRuntimeEnvHint();
+		throw new Error(`Missing MongoDB database environment variable.\n\n${hint}`);
+	},
+};
+
+function getSecretConfig() {
+	return JSON.parse(readFileSync('/run/secrets/mongo_config', 'utf-8'));
+}

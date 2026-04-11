@@ -1,15 +1,12 @@
-import { getRuntimeEnvHint } from '@/utils/runtime';
 import { discordToken } from '../data/globalProps';
 import * as events from '../events';
 import { initializeClient } from './client';
+import { databaseUri } from './db';
 
 export async function bootstrap() {
 	console.log('Inicializando bot...');
 
-	if (!process.env?.MONGODB_URI) {
-		const hint = getRuntimeEnvHint();
-		throw new Error(`Missing MongoDB database environment variable.\n\n${hint}`);
-	}
+	databaseUri.resolve();
 
 	console.time('Creación de cliente de Discord');
 	const client = initializeClient();
