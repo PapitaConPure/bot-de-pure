@@ -1,0 +1,48 @@
+name: bot_de_pure
+
+services:
+  bot-prod:
+    build: .
+    env_file:
+      - .env.production
+    profiles: [prod]
+
+  db-prod-local:
+    image: mongo:7
+    volumes:
+      - mongo_prod_volume:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+    profiles: [prod-local]
+  
+  bot-prod-local:
+    depends_on:
+      - db-prod-local
+    build: .
+    env_file:
+      - .env.production
+    profiles: [prod-local]
+  
+  db-dev:
+    image: mongo:7
+    ports:
+      - 27017:27017
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: 123456
+    profiles: [dev]
+  
+  bot-dev:
+    depends_on:
+      - db-dev
+    build: .
+    env_file:
+      - .env.dev
+    environment:
+      MONGODB_URI: mongodb://admin:123456@db-dev:27017/bot-dev?authSource=admin
+    profiles: [dev]
+
+volumes:
+  mongo_prod_volume:
