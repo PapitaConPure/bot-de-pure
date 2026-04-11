@@ -31,16 +31,16 @@
     "@discord-player/extractor": "^7.2.0",
     "@distube/ytdl-core": "^4.16.12",
     "@napi-rs/canvas": "^0.1.97",
-    "chalk": "^4.1.2",
+    "chalk": "^5.6.2",
     "date-fns": "^4.1.0",
     "discord-player": "^7.2.0",
     "discord-player-googlevideo": "^0.2.5",
     "discord-player-soundcloud": "^1.0.7",
     "discord.js": "^14.26.2",
-    "groq-sdk": "^0.29.0",
-    "mongoose": "^6.13.9",
+    "groq-sdk": "^1.1.2",
+    "mongoose": "^7.8.9",
     "mongoose-int32": "^0.6.0",
-    "node-catbox": "^3.4.0",
+    "node-catbox": "^4.2.0",
     "object-sizeof": "^2.6.5",
     "sagiri": "^4.3.0"
   },
@@ -51,6 +51,6 @@
   },
   "private": true,
   "peerDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^6.0.2"
   }
 }
