@@ -10,13 +10,14 @@ const StatsSchema = new Mongoose.Schema({
 		default: 0,
 	},
 	commands: {
-		type: Object,
-		succeeded: { type: Number },
-		failed: { type: Number },
-		default: {
-			succeeded: 0,
-			failed: 0,
-		},
+		type: new Mongoose.Schema(
+			{
+				succeeded: { type: Number, default: 0 },
+				failed: { type: Number, default: 0 },
+			},
+			{ _id: false },
+		),
+		required: true,
 	},
 });
 

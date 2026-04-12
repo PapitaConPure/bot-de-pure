@@ -15,7 +15,7 @@ const PuretableSchema = new Schema({
 	},
 });
 
-const AnarchyUserSkillSubschema = new Schema(
+const AnarchyUserSkillSchema = new Schema(
 	{
 		hline: { type: Number, default: 1 },
 		vline: { type: Number, default: 1 },
@@ -37,7 +37,7 @@ const AnarchyUserSchema = new Schema({
 	userId: { type: String },
 	last: { type: Number, default: 0 },
 	exp: { type: Number, default: 0 },
-	skills: AnarchyUserSkillSubschema,
+	skills: AnarchyUserSkillSchema,
 });
 
 export const PureTable = model('PureTable', PuretableSchema);

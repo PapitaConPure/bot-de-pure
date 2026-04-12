@@ -25,6 +25,32 @@ const TuberInputSchema = new Mongoose.Schema({
 	},
 });
 
+const TuberValueSchema = new Mongoose.Schema(
+	{
+		name: {
+			type: String,
+			required: true,
+		},
+		desc: {
+			type: String,
+			default: null,
+		},
+		kind: {
+			type: String,
+			required: true,
+		},
+		optional: {
+			type: Boolean,
+			required: true,
+		},
+		spread: {
+			type: Boolean,
+			required: true,
+		},
+	},
+	{ _id: false },
+);
+
 const TuberSchema = new Mongoose.Schema({
 	id: {
 		type: String,
@@ -48,7 +74,6 @@ const TuberSchema = new Mongoose.Schema({
 	},
 	content: {
 		type: String,
-		required: false,
 	},
 	files: {
 		type: [String],
@@ -56,7 +81,6 @@ const TuberSchema = new Mongoose.Schema({
 	script: {
 		type: String,
 		default: null,
-		required: false,
 	},
 	psVersion: {
 		type: Number,
@@ -64,29 +88,7 @@ const TuberSchema = new Mongoose.Schema({
 	},
 	saved: {
 		type: Map,
-		of: {
-			name: {
-				type: String,
-				required: true,
-			},
-			desc: {
-				type: String,
-				default: null,
-			},
-			kind: {
-				type: String,
-				required: true,
-			},
-			optional: {
-				type: Boolean,
-				required: true,
-			},
-			spread: {
-				type: Boolean,
-				required: true,
-			},
-		},
-		required: false,
+		of: TuberValueSchema,
 	},
 });
 

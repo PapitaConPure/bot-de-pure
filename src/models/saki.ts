@@ -11,43 +11,45 @@ const SakiSchema = new Mongoose.Schema({
 	},
 	customRoles: { type: Object, default: {} },
 	mentionRoles: {
-		type: Object,
-		GAMES: {
-			type: Object,
-			functionName: 'selectGame',
-			rolePool: [],
-			exclusive: false,
-			required: true,
-		},
-		DRINKS: {
-			functionName: 'selectDrink',
-			rolePool: [],
-			exclusive: false,
-			required: true,
-		},
-		FAITH: {
-			functionName: 'selectReligion',
-			rolePool: [],
-			exclusive: true,
-			required: true,
-		},
-		default: {
+		type: new Mongoose.Schema({
 			GAMES: {
+				type: Object,
 				functionName: 'selectGame',
 				rolePool: [],
 				exclusive: false,
+				required: true,
 			},
 			DRINKS: {
 				functionName: 'selectDrink',
 				rolePool: [],
 				exclusive: false,
+				required: true,
 			},
 			FAITH: {
 				functionName: 'selectReligion',
 				rolePool: [],
 				exclusive: true,
+				required: true,
 			},
-		},
+			default: {
+				GAMES: {
+					functionName: 'selectGame',
+					rolePool: [],
+					exclusive: false,
+				},
+				DRINKS: {
+					functionName: 'selectDrink',
+					rolePool: [],
+					exclusive: false,
+				},
+				FAITH: {
+					functionName: 'selectReligion',
+					rolePool: [],
+					exclusive: true,
+				},
+			},
+		}, { _id: false }),
+		required: true,
 	},
 });
 

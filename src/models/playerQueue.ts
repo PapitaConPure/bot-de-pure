@@ -11,7 +11,7 @@ const PlayerQueueSchema = new Mongoose.Schema({
 		unique: true,
 	},
 	serializedTracks: {
-		type: Array,
+		type: [String],
 		default: () => [],
 	},
 });

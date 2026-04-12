@@ -3,7 +3,7 @@ import Mongoose from 'mongoose';
 /** Describe la configuración de un servidor. */
 const QueueSchema = new Mongoose.Schema({
 	queueId: { type: String },
-	content: { type: Array, of: Number, default: [] },
+	content: { type: [Number], default: [] },
 });
 
 export const QueueModel = Mongoose.model('Queue', QueueSchema);
@@ -82,5 +82,5 @@ export const getQueueItem = async (
 	queue.markModified('content');
 	await queue.save();
 
-	return item;
+	return item ?? 0;
 };

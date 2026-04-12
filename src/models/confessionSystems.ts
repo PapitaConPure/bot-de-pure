@@ -22,7 +22,7 @@ const ConfessionSystemSchema = new Mongoose.Schema({
 		),
 	},
 	pending: {
-		type: Array,
+		type: [String],
 		default: [],
 	},
 });

@@ -2,6 +2,29 @@ import Mongoose from 'mongoose';
 import Locales from '../i18n/locales';
 import { acceptedTwitterConverters } from '../systems/converters/pureet';
 
+const UserConfigVoiceSchema = new Mongoose.Schema(
+	{
+		ping: {
+			type: String,
+			enum: ['always', 'onCreate', 'never'],
+			default: 'always',
+		},
+		autoname: {
+			type: String,
+			default: '',
+		},
+		autoemoji: {
+			type: String,
+			default: '',
+		},
+		killDelay: {
+			type: Number,
+			default: 0,
+		},
+	},
+	{ _id: false },
+);
+
 const UserConfigSchema = new Mongoose.Schema({
 	userId: {
 		type: String,
@@ -53,28 +76,7 @@ const UserConfigSchema = new Mongoose.Schema({
 		required: true,
 	},
 	voice: {
-		type: new Mongoose.Schema(
-			{
-				ping: {
-					type: String,
-					enum: ['always', 'onCreate', 'never'],
-					default: 'always',
-				},
-				autoname: {
-					type: String,
-					default: '',
-				},
-				autoemoji: {
-					type: String,
-					default: '',
-				},
-				killDelay: {
-					type: Number,
-					default: 0,
-				},
-			},
-			{ _id: false },
-		),
+		type: UserConfigVoiceSchema,
 		required: true,
 	},
 	flags: {

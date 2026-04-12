@@ -23,7 +23,7 @@ const PureVoiceSchema = new Mongoose.Schema({
 	},
 	/**Listado de Sesiones del sistema*/
 	sessions: {
-		type: Array,
+		type: [String],
 		default: [],
 	},
 });

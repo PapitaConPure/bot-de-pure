@@ -1,6 +1,5 @@
 import Mongoose from 'mongoose';
 
-/**Describe una encuesta en progreso*/
 const PollSchema = new Mongoose.Schema({
 	id: { type: String, required: true },
 	pollChannelId: { type: String, required: true },
@@ -10,13 +9,17 @@ const PollSchema = new Mongoose.Schema({
 	locale: { type: String, required: true },
 	question: { type: String, required: true },
 	answers: {
-		type: Array,
+		type: [String],
 		required: true,
 		length: { minlength: 2, maxlength: 18 },
 	},
 	votes: { type: Map, default: () => new Map() },
 });
 
+/**
+ * @description Describe una encuesta en progreso
+ * @deprecated
+ */
 const Poll = Mongoose.model('Poll', PollSchema);
 
 export default Poll;
