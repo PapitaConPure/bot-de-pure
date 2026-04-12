@@ -4,6 +4,7 @@ import {
 	ButtonStyle,
 	Colors,
 	type EmbedBuilder,
+	MessageFlags,
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
@@ -34,7 +35,7 @@ const command = new Command('repetir', tags)
 
 		const channel = request.member.voice?.channel;
 		if (!channel)
-			return request.reply({ content: translator.getText('voiceExpected'), ephemeral: true });
+			return request.reply({ content: translator.getText('voiceExpected'), flags: MessageFlags.Ephemeral });
 
 		const embed = makePuréMusicEmbed(request).setTitle(translator.getText('queueLoopTitle'));
 
@@ -77,14 +78,14 @@ const command = new Command('repetir', tags)
 		if (!channel)
 			return interaction.reply({
 				content: translator.getText('voiceExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		try {
 			if (isPlayerUnavailable(channel))
 				return interaction.reply({
 					content: translator.getText('voiceSameChannelExpected'),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 			const player = useMainPlayer();
@@ -97,7 +98,7 @@ const command = new Command('repetir', tags)
 				);
 				return interaction.reply({
 					embeds: [embed],
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			}
 

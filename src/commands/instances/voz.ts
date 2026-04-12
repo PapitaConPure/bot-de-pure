@@ -68,7 +68,7 @@ const command = new Command('voz', tags)
 						'voiceCommandRenameMemberExpected',
 						p_pure(request).raw,
 					),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				})
 				.catch(console.error);
 
@@ -79,7 +79,7 @@ const command = new Command('voz', tags)
 		if (!sessionName)
 			return request.reply({
 				content: translator.getText('voiceSessionNameExpected', p_pure(request).raw),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (!voiceState?.channelId) return warnNotInSession();
@@ -87,7 +87,7 @@ const command = new Command('voz', tags)
 		if (sessionName.length > 24)
 			return request.reply({
 				content: translator.getText('voiceSessionNameTooLong'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (!sessionEmote)
@@ -146,12 +146,12 @@ const command = new Command('voz', tags)
 
 			return request.reply({
 				content: translator.getText('voiceSessionRenameSuccess'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 		} catch {
 			return request.reply({
 				content: translator.getText('voiceSessionRenameError'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 		}
 	})
@@ -572,7 +572,7 @@ const command = new Command('voz', tags)
 			interaction
 				.reply({
 					content: translator.getText('voiceSessionJoinExpected'),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				})
 				.catch(console.error);
 
@@ -649,7 +649,7 @@ const command = new Command('voz', tags)
 		return interaction.editReply({ content: translator.getText('voiceSessionRenameSuccess') });
 	})
 	.setButtonResponse(async function freezeSession(interaction) {
-		await interaction.deferReply({ ephemeral: true });
+		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 		const { member } = interaction;
 		const translator = await Translator.from(member);
@@ -769,7 +769,7 @@ const command = new Command('voz', tags)
 				`> 🎧【Música de Fondo】`,
 				`> 🎉【Aniversario】`,
 			].join('\n'),
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	});
 

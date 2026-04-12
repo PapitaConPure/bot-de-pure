@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
 import { globalConfigs, tenshiColor } from '@/data/globalProps';
 import { compressId, improveNumber, sleep } from '@/func';
@@ -21,7 +21,7 @@ const command = new Command('transferir', flags)
 	.setExecution(async (request, args) => {
 		const [translator] = await Promise.all([
 			Translator.from(request.userId),
-			request.deferReply({ ephemeral: true }),
+			request.deferReply({ flags: MessageFlags.Ephemeral }),
 		]);
 
 		if (args.isMessageSolver(args.args)) swapIfNeeded(args.args);

@@ -1,4 +1,4 @@
-import type { User } from 'discord.js';
+import { MessageFlags, type User } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
 import { randRange } from '@/func';
 import { p_pure } from '@/utils/prefixes';
@@ -55,14 +55,14 @@ const command = new Command('pinguear', flags)
 			return request.isInteraction
 				? request.reply({
 						content: '⏳ Pero no seas tan degenerado, aflójale un poco',
-						ephemeral: true,
+						flags: MessageFlags.Ephemeral,
 					})
 				: request.inferAsMessage().react('⏳');
 
 		if (request.isMessage && args.count < 2)
 			return request.reply({
 				content: `⚠️ Debes ingresar 2 parámetros (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		let repeats = -1;
@@ -81,7 +81,7 @@ const command = new Command('pinguear', flags)
 			} else {
 				return request.reply({
 					content: `⚠️ Debes indicar un número y un usuario: (\`${p_pure(request.guild.id).raw}pinguear <cantidad> <usuario>\`)`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			}
 		}
@@ -89,13 +89,13 @@ const command = new Command('pinguear', flags)
 		if (repeats < 2 || repeats > 10)
 			return request.reply({
 				content: '⚠️ Solo puedes pinguear a alguien entre 2 y 10 veces',
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (!user)
 			return request.reply({
 				content: '⚠️ Usuario inválido',
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		command.memory.set(uid, +now);

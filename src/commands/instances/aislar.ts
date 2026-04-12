@@ -34,7 +34,7 @@ const command = new Command('aislar', tags)
 		if (duration === undefined || Number.isNaN(+duration) || duration < 0)
 			return request.reply({
 				content: translator.getText('aislarInvalidTime'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (duration === 0) duration = null;
@@ -46,7 +46,7 @@ const command = new Command('aislar', tags)
 		if (!members.length)
 			return request.reply({
 				content: translator.getText('aislarNoMembersMentioned'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (members.some((member) => !member))
@@ -80,7 +80,7 @@ const command = new Command('aislar', tags)
 					? `❌ No se ha podido actualizar a **${membersList(failed)}**. Puede que tenga(n) más poder que yo`
 					: '',
 			].join('\n'),
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	});
 

@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 import { useMainPlayer } from 'discord-player';
 import { shortenText } from '@/func';
 import { Translator } from '@/i18n';
@@ -43,7 +43,7 @@ const command = new Command('reproducir', tags)
 		if (args.empty)
 			return request.reply({
 				content: translator.getText('playSearchExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const channel = request.member.voice?.channel;
@@ -52,14 +52,14 @@ const command = new Command('reproducir', tags)
 		if (isPlayerUnavailable(channel))
 			return request.reply({
 				content: translator.getText('voiceSameChannelExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const query = args.getString('búsqueda', true);
 		if (!query)
 			return request.reply({
 				content: translator.getText('playSearchExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		await request.deferReply();

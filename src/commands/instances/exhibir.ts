@@ -1,6 +1,6 @@
 import { getUnixTime } from 'date-fns';
 import type { GuildTextBasedChannel } from 'discord.js';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder } from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder, MessageFlags } from 'discord.js';
 import { saki } from '@/data/sakiProps';
 import serverIds from '@/data/serverIds.json';
 import { DiscordAgent } from '@/utils/discordagent';
@@ -43,12 +43,12 @@ const command = new Command('exhibir', flags)
 						.setStyle(ButtonStyle.Secondary),
 				),
 			],
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	})
 	.setButtonResponse(async function flushPins(interaction, userId) {
 		if (interaction.user.id !== userId)
-			return interaction.reply({ content: '❌ No permitido', ephemeral: true });
+			return interaction.reply({ content: '❌ No permitido', flags: MessageFlags.Ephemeral });
 
 		interaction.deferUpdate();
 		const { channel } = interaction;
@@ -144,7 +144,7 @@ const command = new Command('exhibir', flags)
 	})
 	.setButtonResponse(async function cancelFlush(interaction, userId) {
 		if (interaction.user.id !== userId)
-			return interaction.reply({ content: '❌ No permitido', ephemeral: true });
+			return interaction.reply({ content: '❌ No permitido', flags: MessageFlags.Ephemeral });
 
 		const embed = new EmbedBuilder().setTitle('Traslado cancelado').addFields({
 			name: 'Se canceló la operación',

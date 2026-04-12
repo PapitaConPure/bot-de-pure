@@ -97,7 +97,7 @@ const command = new Command('confesión', tags)
 		return request.reply({
 			embeds: [embed],
 			components: rows,
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	})
 	.setButtonResponse(async function installSystem(interaction) {
@@ -173,7 +173,7 @@ const command = new Command('confesión', tags)
 		if (!confessionalChannel || confessionalChannel.type !== ChannelType.GuildText)
 			return interaction.reply({
 				content: '⚠️ El canal de confesionario indicado no existe o no es de texto común',
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const logChannel = fetchChannel(
@@ -183,7 +183,7 @@ const command = new Command('confesión', tags)
 		if (!logChannel || logChannel.type !== ChannelType.GuildText)
 			return interaction.reply({
 				content: '⚠️ El canal de auditoría indicado no existe o no es de texto común',
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const confessionsChannel = fetchChannel(
@@ -193,7 +193,7 @@ const command = new Command('confesión', tags)
 		if (!confessionsChannel || confessionsChannel.type !== ChannelType.GuildText)
 			return interaction.reply({
 				content: '⚠️ El canal de confesiones indicado no existe o no es de texto común',
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		confSystem = new ConfessionSystems({
@@ -257,7 +257,7 @@ const command = new Command('confesión', tags)
 	.setModalResponse(async function confessionFilled(interaction, anonymous) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if (data.success === false)
-			return interaction.reply({ content: data.message, ephemeral: true });
+			return interaction.reply({ content: data.message, flags: MessageFlags.Ephemeral });
 
 		const { confSystem, logChannel } = data;
 
@@ -334,7 +334,7 @@ const command = new Command('confesión', tags)
 	.setButtonResponse(async function acceptConfession(interaction, confId, userId, messageId) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if (data.success === false)
-			return interaction.reply({ content: data.message, ephemeral: true });
+			return interaction.reply({ content: data.message, flags: MessageFlags.Ephemeral });
 
 		const { confSystem, confChannel } = data;
 
@@ -424,7 +424,7 @@ const command = new Command('confesión', tags)
 	.setButtonResponse(async function rejectConfession(interaction, confId) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if (data.success === false)
-			return interaction.reply({ content: data.message, ephemeral: true });
+			return interaction.reply({ content: data.message, flags: MessageFlags.Ephemeral });
 
 		const { confSystem } = data;
 
@@ -454,7 +454,7 @@ const command = new Command('confesión', tags)
 	.setButtonResponse(async function timeoutConfessant(interaction, confId, userId) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if (data.success === false)
-			return interaction.reply({ content: data.message, ephemeral: true });
+			return interaction.reply({ content: data.message, flags: MessageFlags.Ephemeral });
 
 		const { confSystem } = data;
 
@@ -517,7 +517,7 @@ const command = new Command('confesión', tags)
 	.setButtonResponse(async function banConfessant(interaction, confId, userId) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if (data.success === false)
-			return interaction.reply({ content: data.message, ephemeral: true });
+			return interaction.reply({ content: data.message, flags: MessageFlags.Ephemeral });
 
 		const { confSystem } = data;
 
@@ -599,7 +599,7 @@ const command = new Command('confesión', tags)
 	.setModalResponse(async function replyAnon(interaction) {
 		const data = await getConfessionSystemAndChannels(interaction);
 		if (data.success === false)
-			return interaction.reply({ content: data.message, ephemeral: true });
+			return interaction.reply({ content: data.message, flags: MessageFlags.Ephemeral });
 
 		const { confSystem, logChannel } = data;
 		const { message } = interaction;

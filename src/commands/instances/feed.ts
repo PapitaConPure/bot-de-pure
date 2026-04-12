@@ -67,12 +67,12 @@ const generateFeedOptions = async (
 
 	if (!gcfg) return [];
 
-	const feedOptions = Object.entries(gcfg.feeds)
+	const feedOptions = [...gcfg.feeds.entries()]
 		.map(([chid, feed]) => {
 			const channel = interaction.guild?.channels.cache.get(chid);
 			if (!channel) {
-				delete gcfg.feeds[chid];
-				gcfg.markModified('feeds');
+				gcfg.feeds.delete(chid);
+				gcfg.markModified(`feeds.${chid}`);
 				return null;
 			}
 			return {
@@ -194,7 +194,7 @@ const command = new Command('feed', tags)
 		]);
 		const gcfg = promises[0] || new GuildConfig(guildQuery);
 		const translator = promises[1];
-		const premade = gcfg.feeds && Object.keys(gcfg.feeds).length;
+		const hasFeeds = gcfg.feeds.size;
 
 		const authorId = compressId(interaction.user.id);
 		const wizard = new EmbedBuilder()
@@ -223,7 +223,7 @@ const command = new Command('feed', tags)
 						.setEmoji('1458130451834081513')
 						.setLabel(translator.getText('buttonDelete'))
 						.setStyle(ButtonStyle.Danger)
-						.setDisabled(!premade),
+						.setDisabled(!hasFeeds),
 					finishButton(translator, authorId),
 				),
 				new ActionRowBuilder<ButtonBuilder>().addComponents(
@@ -232,19 +232,19 @@ const command = new Command('feed', tags)
 						.setEmoji('921788204540100608')
 						.setLabel(translator.getText('buttonEdit'))
 						.setStyle(ButtonStyle.Primary)
-						.setDisabled(!premade),
+						.setDisabled(!hasFeeds),
 					new ButtonBuilder()
 						.setCustomId(`feed_selectCustomize_${authorId}`)
 						.setEmoji('1288444896331698241')
 						.setLabel(translator.getText('buttonCustomize'))
 						.setStyle(ButtonStyle.Primary)
-						.setDisabled(!premade),
+						.setDisabled(!hasFeeds),
 					new ButtonBuilder()
 						.setCustomId(`feed_selectView_${authorId}`)
 						.setEmoji('1087075525245272104')
 						.setLabel(translator.getText('buttonView'))
 						.setStyle(ButtonStyle.Primary)
-						.setDisabled(!premade),
+						.setDisabled(!hasFeeds),
 				),
 			],
 		});
@@ -289,16 +289,16 @@ const command = new Command('feed', tags)
 				: textChannels.get(input);
 
 			if (!fetchedChannel)
-				return interaction.reply({ content: '⚠️ Canal inválido', ephemeral: true });
+				return interaction.reply({ content: '⚠️ Canal inválido', flags: MessageFlags.Ephemeral });
 
 			const guildQuery = { guildId: interaction.guild.id };
 			const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
 
-			if (gcfg?.feeds && Object.hasOwn(gcfg.feeds, fetchedChannel.id))
+			if (gcfg.feeds.has(fetchedChannel.id))
 				return interaction.reply({
 					content:
 						'⚠️ Ya existe un Feed en el canal solicitado. Prueba editarlo o crear un Feed en otro canal',
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 			const wizard = tagsSetupPrompt(interaction, fetchedChannel.id, translator);
@@ -323,18 +323,22 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function editTags(interaction, channelId, authorId) {
-			const tagsInput = new TextInputBuilder()
-				.setCustomId('tagsInput')
-				.setPlaceholder('rating:general touhou animated* -chibi')
-				.setLabel('Tags')
-				.setStyle(TextInputStyle.Paragraph)
-				.setRequired(true)
-				.setMaxLength(4000);
-			const row = new ActionRowBuilder<TextInputBuilder>().addComponents(tagsInput);
 			const modal = new ModalBuilder()
 				.setCustomId(`feed_setTags_${channelId}_${authorId}`)
 				.setTitle('Personalización de Feed')
-				.addComponents(row);
+				.addLabelComponents((label) =>
+					label
+						.setLabel('Tags')
+						.setTextInputComponent((textInput) =>
+							textInput
+								.setCustomId('tagsInput')
+								.setPlaceholder('rating:general touhou animated* -chibi')
+								.setStyle(TextInputStyle.Paragraph)
+								.setRequired(true)
+								.setMaxLength(4000),
+						),
+				);
+
 			return interaction.showModal(modal);
 		},
 		{ userFilterIndex: 1 },
@@ -352,14 +356,15 @@ const command = new Command('feed', tags)
 				});
 
 			const guildQuery = { guildId: interaction.guild.id };
-			const gcfg = /**@type {import('@/models/guildconfigs.js').GuildConfigDocument}*/ (
-				(await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery)
-			);
-			gcfg.feeds ??= {};
-			gcfg.feeds[fetchedChannel.id] ??= { tags: input };
-			gcfg.feeds[fetchedChannel.id].lastFetchedAt = new Date(Date.now());
+			const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
+			const feedId = fetchedChannel.id;
+
+			if (!gcfg.feeds.get(feedId)) return interaction.deleteReply();
+
+			gcfg.setFeedField(feedId, 'tags', input);
+			gcfg.setFeedField(feedId, 'lastFetchedAt', new Date(Date.now()));
+
 			const firstUpdateDelay = addGuildToFeedUpdateStack(interaction.guild);
-			gcfg.markModified('feeds');
 			await gcfg.save();
 
 			const concludedEmbed = new EmbedBuilder()
@@ -416,7 +421,7 @@ const command = new Command('feed', tags)
 			if (!feeds.length)
 				return interaction.reply({
 					content: '⚠️ No hay Feeds para mostrar',
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			return interaction.update({
 				embeds: [wizard],
@@ -457,7 +462,7 @@ const command = new Command('feed', tags)
 			if (!feeds.length)
 				return interaction.reply({
 					content: '⚠️ No hay Feeds para mostrar',
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			return interaction.update({
 				embeds: [wizard],
@@ -498,7 +503,7 @@ const command = new Command('feed', tags)
 			if (!feeds.length)
 				return interaction.reply({
 					content: '⚠️ No hay Feeds para mostrar',
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			return interaction.update({
 				embeds: [wizard],
@@ -539,7 +544,7 @@ const command = new Command('feed', tags)
 			if (!feeds.length)
 				return interaction.reply({
 					content: '⚠️ No hay Feeds para mostrar',
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			return interaction.update({
 				embeds: [wizard],
@@ -679,7 +684,7 @@ const command = new Command('feed', tags)
 		async function selectedView(interaction, authorId) {
 			const [translator] = await Promise.all([
 				Translator.from(interaction.user.id),
-				interaction.deferReply({ ephemeral: true }),
+				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 			]);
 
 			const feedChannel = interaction.guild.channels.cache.get(
@@ -694,7 +699,7 @@ const command = new Command('feed', tags)
 			if (!gcfg)
 				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
-			const feed = gcfg.feeds[feedChannel.id];
+			const feed = gcfg.feeds.get(feedChannel.id);
 			if (!feed)
 				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
@@ -816,7 +821,7 @@ const command = new Command('feed', tags)
 			if (!gcfg)
 				throw new ReferenceError('GuildConfigs not found during deleteOne() user command.');
 
-			delete gcfg.feeds[channelId];
+			gcfg.feeds.delete(channelId);
 			gcfg.markModified('feeds');
 			return Promise.all([
 				gcfg.save(),
@@ -948,6 +953,7 @@ const command = new Command('feed', tags)
 					.setStyle(ButtonStyle.Secondary),
 				cancelbutton(authorId),
 			);
+
 			return interaction.update({
 				embeds: [wizard],
 				components: [row],
@@ -957,18 +963,21 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function customizeTitle(interaction, channelId, authorId) {
-			const titleInput = new TextInputBuilder()
-				.setCustomId('titleInput')
-				.setLabel('Título')
-				.setPlaceholder('Ej: GIFs PixelArt')
-				.setStyle(TextInputStyle.Short)
-				.setRequired(true)
-				.setMaxLength(255);
-			const row = new ActionRowBuilder<TextInputBuilder>().addComponents(titleInput);
 			const modal = new ModalBuilder()
 				.setCustomId(`feed_setCustomTitle_${channelId}_${authorId}`)
 				.setTitle('Personalización de Feed')
-				.addComponents(row);
+				.addLabelComponents((label) =>
+					label
+						.setLabel('Título')
+						.setTextInputComponent((textInput) =>
+							textInput
+								.setCustomId('titleInput')
+								.setPlaceholder('Ej: GIFs PixelArt')
+								.setStyle(TextInputStyle.Short)
+								.setRequired(true)
+								.setMaxLength(255),
+						),
+				);
 
 			interaction.showModal(modal);
 		},
@@ -976,19 +985,22 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function customizeTags(interaction, channelId, authorId) {
-			const tagsInput = new TextInputBuilder()
-				.setCustomId('tagsInput')
-				.setLabel('Cantidad de tags a mostrar')
-				.setPlaceholder('Introduce 0 para no mostrar tags')
-				.setStyle(TextInputStyle.Short)
-				.setRequired(true)
-				.setMinLength(1)
-				.setMaxLength(2);
-			const row = new ActionRowBuilder<TextInputBuilder>().addComponents(tagsInput);
 			const modal = new ModalBuilder()
 				.setCustomId(`feed_setCustomMaxTags_${channelId}_${authorId}`)
 				.setTitle('Personalización de Feed')
-				.addComponents(row);
+				.addLabelComponents((label) =>
+					label
+						.setLabel('Cantidad de tags a mostrar')
+						.setTextInputComponent((textInput) =>
+							textInput
+								.setCustomId('tagsInput')
+								.setPlaceholder('Introduce 0 para no mostrar tags')
+								.setStyle(TextInputStyle.Short)
+								.setRequired(true)
+								.setMinLength(1)
+								.setMaxLength(2),
+						),
+				);
 
 			interaction.showModal(modal);
 		},
@@ -996,18 +1008,21 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function customizeSubtitle(interaction, channelId, authorId) {
-			const footerInput = new TextInputBuilder()
-				.setCustomId('subtitleInput')
-				.setLabel('Antetítulo')
-				.setPlaceholder('Texto encima del título')
-				.setStyle(TextInputStyle.Short)
-				.setRequired(true)
-				.setMaxLength(255);
-			const row = new ActionRowBuilder<TextInputBuilder>().addComponents(footerInput);
 			const modal = new ModalBuilder()
 				.setCustomId(`feed_setCustomSubtitle_${channelId}_${authorId}`)
 				.setTitle('Personalización de Feed')
-				.addComponents(row);
+				.addLabelComponents((label) =>
+					label
+						.setLabel('Antetítulo')
+						.setTextInputComponent((textInput) =>
+							textInput
+								.setCustomId('subtitleInput')
+								.setPlaceholder('Texto encima del título')
+								.setStyle(TextInputStyle.Short)
+								.setRequired(true)
+								.setMaxLength(255),
+						),
+				);
 
 			interaction.showModal(modal);
 		},
@@ -1015,18 +1030,21 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function customizeFooter(interaction, channelId, authorId) {
-			const footerInput = new TextInputBuilder()
-				.setCustomId('footerInput')
-				.setLabel('Pie de imagen')
-				.setPlaceholder('Ej: ¡Es una imagen muy bonita~!')
-				.setStyle(TextInputStyle.Short)
-				.setRequired(true)
-				.setMaxLength(255);
-			const row = new ActionRowBuilder<TextInputBuilder>().addComponents(footerInput);
 			const modal = new ModalBuilder()
 				.setCustomId(`feed_setCustomFooter_${channelId}_${authorId}`)
 				.setTitle('Personalización de Feed')
-				.addComponents(row);
+				.addLabelComponents((label) =>
+					label
+						.setLabel('Pie de imagen')
+						.setTextInputComponent((textInput) =>
+							textInput
+								.setCustomId('footerInput')
+								.setPlaceholder('Ej: ¡Es una imagen muy bonita~!')
+								.setStyle(TextInputStyle.Short)
+								.setRequired(true)
+								.setMaxLength(255),
+						),
+				);
 
 			interaction.showModal(modal);
 		},
@@ -1034,18 +1052,21 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function customizeIcon(interaction, channelId, authorId) {
-			const iconInput = new TextInputBuilder()
-				.setCustomId('iconInput')
-				.setLabel('Enlace de ícono de esquina')
-				.setPlaceholder('Ejemplo: https://i.imgur.com/LFzqoJX.jpeg')
-				.setStyle(TextInputStyle.Paragraph)
-				.setRequired(true)
-				.setMaxLength(255);
-			const row = new ActionRowBuilder<TextInputBuilder>().addComponents(iconInput);
 			const modal = new ModalBuilder()
 				.setCustomId(`feed_setCustomIcon_${channelId}_${authorId}`)
 				.setTitle('Personalización de Feed')
-				.addComponents(row);
+				.addLabelComponents((label) =>
+					label
+						.setLabel('Enlace de ícono de esquina')
+						.setTextInputComponent((textInput) =>
+							textInput
+								.setCustomId('iconInput')
+								.setPlaceholder('Ejemplo: https://i.imgur.com/LFzqoJX.jpeg')
+								.setStyle(TextInputStyle.Paragraph)
+								.setRequired(true)
+								.setMaxLength(255),
+						),
+				);
 
 			interaction.showModal(modal);
 		},
@@ -1056,12 +1077,13 @@ const command = new Command('feed', tags)
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 			if (!gcfg) return interaction.deleteReply();
 
+			if (!gcfg.feeds.get(channelId)) return interaction.deleteReply();
+
 			const input = interaction.fields.getTextInputValue('titleInput');
-			gcfg.feeds[channelId].title = input;
-			gcfg.markModified('feeds');
+			gcfg.setFeedField(channelId, 'title', input);
 			gcfg.save();
 
-			return interaction.reply({ content: '✅ Título actualizado', ephemeral: true });
+			return interaction.reply({ content: '✅ Título actualizado', flags: MessageFlags.Ephemeral });
 		},
 		{ userFilterIndex: 1 },
 	)
@@ -1078,13 +1100,14 @@ const command = new Command('feed', tags)
 					content: '⚠️ Cantidad inválida. Introduce un número entre 0 y 50',
 				});
 
-			gcfg.markModified('feeds');
+			if (!gcfg.feeds.get(channelId)) return interaction.deleteReply();
+
+			gcfg.setFeedField(channelId, 'maxTags', maxTags);
 			gcfg.save();
-			gcfg.feeds[channelId].maxTags = maxTags;
 
 			return interaction.reply({
 				content: '✅ Cantidad de tags máxima actualizada',
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 		},
 		{ userFilterIndex: 1 },
@@ -1096,11 +1119,12 @@ const command = new Command('feed', tags)
 
 			const input = interaction.fields.getTextInputValue('subtitleInput');
 
-			gcfg.feeds[channelId].subtitle = input;
-			gcfg.markModified('feeds');
+			if (!gcfg.feeds.get(channelId)) return interaction.deleteReply();
+
+			gcfg.setFeedField(channelId, 'subtitle', input);
 			gcfg.save();
 
-			return interaction.reply({ content: '✅ Antetítulo actualizado', ephemeral: true });
+			return interaction.reply({ content: '✅ Antetítulo actualizado', flags: MessageFlags.Ephemeral });
 		},
 		{ userFilterIndex: 1 },
 	)
@@ -1111,11 +1135,12 @@ const command = new Command('feed', tags)
 
 			const input = interaction.fields.getTextInputValue('footerInput');
 
-			gcfg.feeds[channelId].footer = input;
-			gcfg.markModified('feeds');
+			if (!gcfg.feeds.get(channelId)) return interaction.deleteReply();
+
+			gcfg.setFeedField(channelId, 'footer', input);
 			gcfg.save();
 
-			return interaction.reply({ content: '✅ Pie de imagen actualizado', ephemeral: true });
+			return interaction.reply({ content: '✅ Pie de imagen actualizado', flags: MessageFlags.Ephemeral });
 		},
 		{ userFilterIndex: 1 },
 	)
@@ -1123,7 +1148,7 @@ const command = new Command('feed', tags)
 		async function setCustomIcon(interaction, channelId) {
 			const [gcfg] = await Promise.all([
 				GuildConfig.findOne({ guildId: interaction.guild.id }),
-				interaction.deferReply({ ephemeral: true }),
+				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 			]);
 			if (!gcfg) return interaction.deleteReply();
 
@@ -1137,7 +1162,12 @@ const command = new Command('feed', tags)
 			try {
 				const sent = await interaction.channel?.send({ embeds: [testEmbed] });
 				console.log(sent?.embeds[0].author);
-				if (sent?.embeds[0].author?.iconURL) gcfg.feeds[channelId].cornerIcon = input;
+				if (sent?.embeds[0].author?.iconURL) {
+					if (!gcfg.feeds.get(channelId)) return interaction.deleteReply();
+
+					gcfg.setFeedField(channelId, 'cornerIcon', input);
+					gcfg.save();
+				}
 				setTimeout(() => {
 					if (sent?.deletable) sent.delete().catch(console.error);
 				}, 1500);
@@ -1158,11 +1188,15 @@ const command = new Command('feed', tags)
 		async function removeCustomTitle(interaction, channelId, authorId) {
 			const translator = await Translator.from(interaction.user.id);
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
+
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
 
-			delete gcfg.feeds[channelId].title;
-			gcfg.markModified('feeds');
+			const feed = gcfg.feeds.get(channelId);
+			if (!feed) return interaction.deleteReply();
+
+			delete feed.title;
+			gcfg.feeds.set(channelId, feed);
 			await gcfg.save();
 
 			const concludedEmbed = new EmbedBuilder()
@@ -1174,7 +1208,7 @@ const command = new Command('feed', tags)
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha eliminado el título personalizado del Feed con las tags _"${safeTags(gcfg.feeds[channelId].tags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha eliminado el título personalizado del Feed con las tags _"${safeTags(gcfg.feeds.get(channelId)?.tags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
@@ -1194,11 +1228,15 @@ const command = new Command('feed', tags)
 		async function removeCustomTags(interaction, channelId, authorId) {
 			const translator = await Translator.from(interaction.user.id);
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
+
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
 
-			delete gcfg.feeds[channelId].maxTags;
-			gcfg.markModified('feeds');
+			const feed = gcfg.feeds.get(channelId);
+			if (!feed) return interaction.deleteReply();
+
+			delete feed.maxTags;
+			gcfg.feeds.set(channelId, feed);
 			await gcfg.save();
 
 			const concludedEmbed = new EmbedBuilder()
@@ -1210,7 +1248,7 @@ const command = new Command('feed', tags)
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha restaurado la cantidad de tags máxima por defecto del Feed con las tags _"${safeTags(gcfg.feeds[channelId].tags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha restaurado la cantidad de tags máxima por defecto del Feed con las tags _"${safeTags(gcfg.feeds.get(channelId)?.tags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
@@ -1233,8 +1271,11 @@ const command = new Command('feed', tags)
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
 
-			delete gcfg.feeds[fetchedChannel.id].subtitle;
-			gcfg.markModified('feeds');
+			const feed = gcfg.feeds.get(channelId);
+			if (!feed) return interaction.deleteReply();
+
+			delete feed.subtitle;
+			gcfg.feeds.set(channelId, feed);
 			await gcfg.save();
 
 			const concludedEmbed = new EmbedBuilder()
@@ -1246,7 +1287,7 @@ const command = new Command('feed', tags)
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha eliminado el subtítulo personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha eliminado el subtítulo personalizado del Feed con las tags _"${safeTags(gcfg.feeds.get(fetchedChannel.id)?.tags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
@@ -1269,8 +1310,11 @@ const command = new Command('feed', tags)
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
 
-			delete gcfg.feeds[fetchedChannel.id].footer;
-			gcfg.markModified('feeds');
+			const feed = gcfg.feeds.get(channelId);
+			if (!feed) return interaction.deleteReply();
+
+			delete feed.footer;
+			gcfg.feeds.set(channelId, feed);
 			await gcfg.save();
 
 			const concludedEmbed = new EmbedBuilder()
@@ -1282,7 +1326,7 @@ const command = new Command('feed', tags)
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha eliminado el texto de pie personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha eliminado el texto de pie personalizado del Feed con las tags _"${safeTags(gcfg.feeds.get(fetchedChannel.id)?.tags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
@@ -1305,8 +1349,11 @@ const command = new Command('feed', tags)
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
 			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
 
-			delete gcfg.feeds[fetchedChannel.id].cornerIcon;
-			gcfg.markModified('feeds');
+			const feed = gcfg.feeds.get(channelId);
+			if (!feed) return interaction.deleteReply();
+
+			delete feed.cornerIcon;
+			gcfg.feeds.set(channelId, feed);
 			await gcfg.save();
 
 			const concludedEmbed = new EmbedBuilder()
@@ -1318,7 +1365,7 @@ const command = new Command('feed', tags)
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha eliminado el ícono de esquina personalizado del Feed con las tags _"${safeTags(gcfg.feeds[fetchedChannel.id].tags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha eliminado el ícono de esquina personalizado del Feed con las tags _"${safeTags(gcfg.feeds.get(fetchedChannel.id)?.tags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
@@ -1554,7 +1601,7 @@ const command = new Command('feed', tags)
 		if (manageableBy !== interaction.user.id && isNotModerator(interaction.member))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const { message } = interaction;
@@ -1564,7 +1611,7 @@ const command = new Command('feed', tags)
 			return Promise.all([
 				interaction.reply({
 					content: `**${translator.getText('feedDeletePostTitle')}**`,
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				}),
 				message.delete().catch(console.error),
 			]);
@@ -1577,7 +1624,7 @@ const command = new Command('feed', tags)
 				return Promise.all([
 					interaction.reply({
 						content: `<:gelbooru:919398540172750878> **${translator.getText('feedDeletePostTitle')}** <${url}>`,
-						ephemeral: true,
+						flags: MessageFlags.Ephemeral,
 					}),
 					message.delete().catch(console.error),
 				]);
@@ -1608,7 +1655,7 @@ const command = new Command('feed', tags)
 				interaction.reply({
 					embeds: [embed],
 					components: [row],
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				}),
 				message.delete().catch(console.error),
 			]);
@@ -1619,13 +1666,13 @@ const command = new Command('feed', tags)
 			if (error instanceof BooruUnknownPostError)
 				return interaction.reply({
 					content: translator.getText('feedDeletePostTagsInaccessible'),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 			return Promise.all([
 				interaction.reply({
 					content: translator.getText('feedDeletePostTagsUnknownError'),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				}),
 				message.delete().catch(console.error),
 			]);
@@ -1650,7 +1697,7 @@ const command = new Command('feed', tags)
 			if (!requestTags.length) {
 				return interaction.reply({
 					content: translator.getText('feedContributeNoPendingRequest'),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			}
 
@@ -1670,7 +1717,7 @@ const command = new Command('feed', tags)
 
 			return interaction.reply({
 				embeds: [embed],
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 		} catch (error) {
 			console.error(error);
@@ -1679,12 +1726,12 @@ const command = new Command('feed', tags)
 			if (error instanceof BooruUnknownPostError)
 				return interaction.reply({
 					content: translator.getText('feedPostTagsInaccessible'),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 
 			return interaction.reply({
 				content: translator.getText('feedPostTagsUnknownError'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 		}
 	})
@@ -1694,13 +1741,13 @@ const command = new Command('feed', tags)
 		if (isNotModerator(member))
 			return interaction.reply({
 				content: '❌ No tienes permiso para hacer eso, teehee~',
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
-		return interaction.reply({ content: 'Shock aplicado.', ephemeral: true });
+		return interaction.reply({ content: 'Shock aplicado.', flags: MessageFlags.Ephemeral });
 	})
 	.setButtonResponse(async function giveFeedback(interaction, type) {
 		const translator = await Translator.from(interaction.user);
-		//return interaction.reply({ content: translator.getText('feedFeedbackExpired'), ephemeral: true });
+		//return interaction.reply({ content: translator.getText('feedFeedbackExpired'), flags: MessageFlags.Ephemeral });
 
 		//type = 'Y' | 'N' | 'F'
 		if (type === 'Y' || type === 'N') {
@@ -1711,14 +1758,14 @@ const command = new Command('feed', tags)
 
 			return interaction.reply({
 				content: translator.getText('feedFeedbackThanks'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 		}
 
 		if (type !== 'F')
 			return interaction.reply({
 				content: translator.getText('unknownInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const modal = new ModalBuilder()
@@ -1749,7 +1796,7 @@ const command = new Command('feed', tags)
 
 		return interaction.reply({
 			content: translator.getText('feedFeedbackThanks'),
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	});
 

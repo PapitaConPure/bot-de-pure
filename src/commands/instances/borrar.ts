@@ -59,7 +59,7 @@ const command = new Command('borrar', tags)
 		if (!user && !amount) {
 			const sent = await request.reply({
 				content: '⚠️ Debes especificar la cantidad o el autor de los mensajes a borrar',
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 			return request.isMessage && deleteOriginalAndReply(request, sent);
 		}
@@ -69,7 +69,7 @@ const command = new Command('borrar', tags)
 				content:
 					'⚠️ Debes especificar la cantidad de mensajes a borrar\n'
 					+ `Revisa \`${p_pure(request.guildId).raw}ayuda borrar\` para más información`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 			return deleteOriginalAndReply(request, sent);
 		}

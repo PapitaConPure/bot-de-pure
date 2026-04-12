@@ -1,14 +1,12 @@
-import type {
-	ButtonInteraction,
-	Collection,
-	GuildMember,
-	InteractionReplyOptions,
-	InteractionUpdateOptions,
-	MessagePayload,
-	Role,
+import type { ButtonInteraction, Collection, GuildMember, Role } from 'discord.js';
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+	EmbedBuilder,
+	MessageFlags,
 } from 'discord.js';
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
-import type { CommandReplyOptions, ComplexCommandRequest } from 'types/commands';
+import type { ComplexCommandRequest } from 'types/commands';
 import { compressId } from '@/func';
 import { Translator } from '@/i18n';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
@@ -74,7 +72,10 @@ const command = new Command('inforol', flags)
 
 		const roleIds = roles.map((role) => role?.id);
 		if (!roleIds.length || roles.some((role) => role == null))
-			return request.reply({ content: translator.getText('invalidRole'), ephemeral: true });
+			return request.reply({
+				content: translator.getText('invalidRole'),
+				flags: MessageFlags.Ephemeral,
+			});
 
 		const members = request.guild.members.cache.filter((member) => {
 			const rolesCache = member.roles.cache;
@@ -113,19 +114,23 @@ function showInforolPage(
 
 	const isCommand = compressId(request.id) === requestId;
 
-	const replyOrUpdate = (
-		replyBody: MessagePayload | (InteractionReplyOptions & InteractionUpdateOptions),
-	) =>
+	const replyOrUpdate = (options: {
+		content?: string;
+		embeds?: EmbedBuilder[];
+		components?: ActionRowBuilder<ButtonBuilder>[];
+	}) =>
 		isCommand
-			? (request as ComplexCommandRequest).reply(replyBody as CommandReplyOptions)
-			: (request as ButtonInteraction).update(replyBody);
+			? (request as ComplexCommandRequest).reply({
+					flags: MessageFlags.Ephemeral,
+					...options,
+				})
+			: (request as ButtonInteraction).update(options);
 
 	const membersCount = members.size;
 	if (!membersCount)
-		return replyOrUpdate({
+		return {
 			content: translator.getText('inforolNoMembersFound'),
-			ephemeral: true,
-		});
+		};
 
 	const lastPage = Math.ceil(membersCount / MEMBERS_PER_PAGE);
 	const previousPage = page > 0 ? page - 1 : lastPage;

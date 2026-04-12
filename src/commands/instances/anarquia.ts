@@ -358,7 +358,7 @@ const command = new Command('anarquia', tags)
 			//Tiempo de enfriamiento por usuario
 			if (Date.now() - auser.last < 5000) {
 				reactIfMessage('⌛');
-				return request.reply({ content: '⌛ ¡No tan rápido!', ephemeral: true });
+				return request.reply({ content: '⌛ ¡No tan rápido!', flags: MessageFlags.Ephemeral });
 			} else auser.last = Date.now();
 
 			const emoteMatch = emote?.match(emojiRegex);
@@ -366,7 +366,7 @@ const command = new Command('anarquia', tags)
 				reactIfMessage('⚠️');
 				return request.reply({
 					content: translator.getText('invalidEmoji'),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			}
 			const emoteId = emoteMatch[1];
@@ -376,7 +376,7 @@ const command = new Command('anarquia', tags)
 				return request.reply({
 					content:
 						'⚠️️ No reconozco ese emoji. Solo puedo usar emojis de servidores en los que esté',
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			}
 
@@ -420,7 +420,7 @@ const command = new Command('anarquia', tags)
 				reactIfMessage('⚠️');
 				return request.reply({
 					content: translator.getText('anarquiaCouldNotLoadEmoji'),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			}
 
@@ -487,7 +487,7 @@ const command = new Command('anarquia', tags)
 				react('❌');
 				return interaction.reply({
 					content: translator.getText('anarquiaSkillIssue'),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			}
 
@@ -509,7 +509,7 @@ const command = new Command('anarquia', tags)
 				react('⚠️');
 				return interaction.reply({
 					content: translator.getText('anarquiaCouldNotLoadEmoji'),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			}
 

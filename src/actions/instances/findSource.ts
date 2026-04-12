@@ -1,4 +1,9 @@
-import type { Attachment, EmbedBuilder, GuildTextBasedChannel } from 'discord.js';
+import {
+	type Attachment,
+	type EmbedBuilder,
+	type GuildTextBasedChannel,
+	MessageFlags,
+} from 'discord.js';
 import { Translator } from '@/i18n';
 import SauceNAOUser from '@/models/saucenaoUsers';
 import { pourSauce } from '@/systems/others/saucenao';
@@ -14,7 +19,7 @@ const action = new ContextMenuAction('actionFindSource', 'Message').setMessageRe
 		if (!sauceNAOUser)
 			return interaction.reply({
 				content: translator.getText('saucenaoUnregisteredNotice'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const messageAttachments = message.attachments
@@ -32,10 +37,10 @@ const action = new ContextMenuAction('actionFindSource', 'Message').setMessageRe
 		if (!queries.length)
 			return interaction.reply({
 				content: translator.getText('saucenaoInvalidImage'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
-		await interaction.deferReply({ ephemeral: true });
+		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 		const successes: EmbedBuilder[] = [];
 		const failures: EmbedBuilder[] = [];

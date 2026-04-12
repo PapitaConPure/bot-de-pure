@@ -1,4 +1,4 @@
-import { ButtonBuilder, ButtonStyle } from 'discord.js';
+import { ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 import { useMainPlayer } from 'discord-player';
 import { Translator } from '@/i18n';
 import { isPlayerUnavailable, makePuréMusicEmbed, SERVICES } from '@/systems/others/musicPlayer';
@@ -24,12 +24,12 @@ const command = new Command('pausar', tags)
 
 		const channel = request.member.voice?.channel;
 		if (!channel)
-			return request.reply({ content: translator.getText('voiceExpected'), ephemeral: true });
+			return request.reply({ content: translator.getText('voiceExpected'), flags: MessageFlags.Ephemeral });
 
 		if (isPlayerUnavailable(channel))
 			return request.reply({
 				content: translator.getText('voiceSameChannelExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const player = useMainPlayer();
@@ -39,7 +39,7 @@ const command = new Command('pausar', tags)
 			const embed = makePuréMusicEmbed(request).setTitle(
 				translator.getText('pauseTitleNoTrack'),
 			);
-			return request.reply({ embeds: [embed], ephemeral: true });
+			return request.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		const currentTrack = queue.currentTrack;
@@ -53,7 +53,7 @@ const command = new Command('pausar', tags)
 
 		if (queue.node.isPaused()) {
 			embed.setTitle(translator.getText('pauseTitleTrackAlreadyPaused'));
-			return request.reply({ embeds: [embed], ephemeral: true });
+			return request.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		queue.node.pause();

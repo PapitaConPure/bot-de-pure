@@ -5,6 +5,7 @@ import {
 	ButtonStyle,
 	Colors,
 	EmbedBuilder,
+	MessageFlags,
 	ModalBuilder,
 	StringSelectMenuBuilder,
 	TextInputBuilder,
@@ -315,7 +316,7 @@ const command = new Command('roles', flags)
 							],
 				),
 			],
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	})
 	.setInteractionResponse(async function selectColor(interaction) {
@@ -326,7 +327,7 @@ const command = new Command('roles', flags)
 		return interaction.reply({
 			content: saki.images.colors,
 			components: [colorsRow],
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	})
 	.setInteractionResponse(async function selectAnnouncement(interaction) {
@@ -352,7 +353,7 @@ const command = new Command('roles', flags)
 						.setStyle(hasNews ? ButtonStyle.Primary : ButtonStyle.Secondary),
 				]),
 			],
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	})
 	.setInteractionResponse(async function selectGame(interaction, sectionNumber, edit) {
@@ -374,11 +375,14 @@ const command = new Command('roles', flags)
 				...getPaginationControls(mentionRoles, 'GAMES', section),
 				...getEditButtonRow(interaction.member, 'GAMES'),
 			],
-			ephemeral: true,
 		};
 
 		if (edit) return interaction.isMessageComponent() && interaction.update(messageActions);
-		return interaction.isRepliable() && interaction.reply(messageActions);
+
+		return (
+			interaction.isRepliable()
+			&& interaction.reply({ flags: MessageFlags.Ephemeral, ...messageActions })
+		);
 	})
 	.setInteractionResponse(async function selectDrink(interaction, sectionNumber, edit) {
 		if (!interaction.isRepliable()) return;
@@ -400,11 +404,10 @@ const command = new Command('roles', flags)
 				...getPaginationControls(mentionRoles, 'DRINKS', section),
 				...getEditButtonRow(interaction.member, 'DRINKS'),
 			],
-			ephemeral: true,
 		};
 
 		if (edit) return 'update' in interaction && interaction.update(messageActions);
-		return interaction.reply(messageActions);
+		return interaction.reply({ flags: MessageFlags.Ephemeral, ...messageActions });
 	})
 	.setSelectMenuResponse(async function selectReligion(interaction, sectionNumber) {
 		const section = parseInt(sectionNumber, 10);
@@ -430,7 +433,7 @@ const command = new Command('roles', flags)
 				...getPaginationControls(mentionRoles, 'FAITH', section),
 				...getEditButtonRow(interaction.member, 'FAITH'),
 			],
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	})
 	.setInteractionResponse(async function selectGacha(interaction) {
@@ -440,7 +443,7 @@ const command = new Command('roles', flags)
 
 		return interaction.reply({
 			content: '🚫 Desactivado por tiempo indefinido',
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	})
 	.setInteractionResponse(async function selectCandy(interaction) {
@@ -451,7 +454,7 @@ const command = new Command('roles', flags)
 		if (!interaction.member.roles.cache.has('1107831054791876691'))
 			return interaction.reply({
 				content: '🚫 No tienes permiso para hacer eso',
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const candyRole = saki.candyRoleId;
@@ -476,18 +479,21 @@ const command = new Command('roles', flags)
 						.setStyle(hasCandy ? ButtonStyle.Primary : ButtonStyle.Secondary),
 				]),
 			],
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	})
 	.setButtonResponse(async function addRole(interaction, roleId, category, requested) {
 		const { member } = interaction;
 
 		if (member.roles.cache.has(roleId))
-			return interaction.reply({ content: '⚠️️ Ya tienes ese rol', ephemeral: true });
+			return interaction.reply({
+				content: '⚠️️ Ya tienes ese rol',
+				flags: MessageFlags.Ephemeral,
+			});
 
 		if (requested === 'q') {
 			await Promise.all([
-				interaction.deferReply({ ephemeral: true }),
+				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 				interaction.member.roles.add(roleId),
 			]);
 			return interaction.editReply({
@@ -531,11 +537,14 @@ const command = new Command('roles', flags)
 		const { member } = interaction;
 
 		if (!member.roles.cache.has(roleId))
-			return interaction.reply({ content: '⚠️️ No tienes ese rol', ephemeral: true });
+			return interaction.reply({
+				content: '⚠️️ No tienes ese rol',
+				flags: MessageFlags.Ephemeral,
+			});
 
 		if (requested === 'q') {
 			await Promise.all([
-				interaction.deferReply({ ephemeral: true }),
+				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 				interaction.member.roles.remove(roleId),
 			]);
 			return interaction.editReply({
@@ -581,7 +590,7 @@ const command = new Command('roles', flags)
 		if (!rolePool.length)
 			return interaction.reply({
 				content: '❌ No tienes ningún rol de esta categoría',
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const newComponents = interaction.message.components;
@@ -613,7 +622,7 @@ const command = new Command('roles', flags)
 					return interaction.reply({
 						content:
 							'⚠️ ¡Tu rol ya fue creado! Si cancelaste la configuración o la interacción falló, selecciona la categoría nuevamente para editarlo',
-						ephemeral: true,
+						flags: MessageFlags.Ephemeral,
 					});
 
 				const customRole = await interaction.guild.roles.create({
@@ -705,7 +714,7 @@ const command = new Command('roles', flags)
 		if (!customRole)
 			return interaction.reply({
 				content: '⚠️ No se encontró el rol personalizado. Intenta crearlo otra vez',
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 		const roleName = interaction.fields.getTextInputValue('nameInput');
 		const roleColor = interaction.fields.getTextInputValue('colorInput');
@@ -758,7 +767,10 @@ const command = new Command('roles', flags)
 
 		replyStack.push('✅ Edición de Rol Personalizado finalizada');
 
-		await Promise.all([interaction.deferReply({ ephemeral: true }), ...editStack]);
+		await Promise.all([
+			interaction.deferReply({ flags: MessageFlags.Ephemeral }),
+			...editStack,
+		]);
 		interaction.editReply({ content: replyStack.join('\n') });
 	});
 

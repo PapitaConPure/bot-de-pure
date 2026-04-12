@@ -561,14 +561,14 @@ const command = new Command('yo', tags)
 
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
 		if (!userConfigs)
-			return interaction.reply({ content: userNotAvailableText, ephemeral: true });
+			return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
 
 		const translator = new Translator(userConfigs.language);
 
 		if (compressId(user.id) !== authorId)
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		return interaction.update({
@@ -581,7 +581,7 @@ const command = new Command('yo', tags)
 
 			const userConfigs = await UserConfigs.findOne({ userId: user.id });
 			if (!userConfigs)
-				return interaction.reply({ content: userNotAvailableText, ephemeral: true });
+				return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
 
 			let translator = new Translator(userConfigs.language);
 
@@ -605,7 +605,7 @@ const command = new Command('yo', tags)
 
 			const userConfigs = await UserConfigs.findOne({ userId: user.id });
 			if (!userConfigs)
-				return interaction.reply({ content: userNotAvailableText, ephemeral: true });
+				return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
 
 			const translator = new Translator(userConfigs.language);
 
@@ -643,7 +643,7 @@ const command = new Command('yo', tags)
 		if (!userConfigs)
 			return interaction.reply({
 				content: userNotAvailableText,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const translator = new Translator(userConfigs.language);
@@ -680,14 +680,14 @@ const command = new Command('yo', tags)
 
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
 		if (!userConfigs)
-			return interaction.reply({ content: userNotAvailableText, ephemeral: true });
+			return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
 
 		const translator = new Translator(userConfigs.language);
 
 		if (user.id !== decompressId(compressedAuthorId))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		userConfigs.voice.ping ??= 'always';
@@ -727,7 +727,7 @@ const command = new Command('yo', tags)
 
 			const userConfigs = await UserConfigs.findOne({ userId: user.id });
 			if (!userConfigs)
-				return interaction.reply({ content: userNotAvailableText, ephemeral: true });
+				return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
 
 			const translator = new Translator(userConfigs.language as LocaleKey);
 
@@ -750,7 +750,7 @@ const command = new Command('yo', tags)
 
 			const userConfigs = await UserConfigs.findOne({ userId: user.id });
 			if (!userConfigs)
-				return interaction.reply({ content: userNotAvailableText, ephemeral: true });
+				return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
 
 			const translator = new Translator(userConfigs.language);
 
@@ -795,7 +795,7 @@ const command = new Command('yo', tags)
 		{ userFilterIndex: 0 },
 	)
 	.setModalResponse(async function applyVoiceAutoname(interaction) {
-		await interaction.deferReply({ ephemeral: true });
+		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 		const { user } = interaction;
 
@@ -825,7 +825,7 @@ const command = new Command('yo', tags)
 
 			const userConfigs = await UserConfigs.findOne({ userId: user.id });
 			if (!userConfigs)
-				return interaction.reply({ content: userNotAvailableText, ephemeral: true });
+				return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
 
 			const translator = new Translator(userConfigs.language as LocaleKey);
 
@@ -858,7 +858,7 @@ const command = new Command('yo', tags)
 		{ userFilterIndex: 0 },
 	)
 	.setModalResponse(async function applyVoiceKillDelay_PENDING(interaction) {
-		await interaction.deferReply({ ephemeral: true });
+		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 		const { user } = interaction;
 
@@ -979,7 +979,7 @@ const command = new Command('yo', tags)
 
 			const userConfigs = await UserConfigs.findOne({ userId: user.id });
 			if (!userConfigs)
-				return interaction.reply({ content: userNotAvailableText, ephemeral: true });
+				return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
 
 			const translator = new Translator(userConfigs.language);
 
@@ -1019,7 +1019,7 @@ const command = new Command('yo', tags)
 		if (compressId(user.id) !== authorId)
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const tagsLabel = new LabelBuilder().setTextInputComponent((textInput) =>

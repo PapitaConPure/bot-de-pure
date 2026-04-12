@@ -1,4 +1,4 @@
-import { Colors, EmbedBuilder } from 'discord.js';
+import { Colors, EmbedBuilder, MessageFlags } from 'discord.js';
 import { randRange } from '@/func';
 import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
 
@@ -23,7 +23,7 @@ const command = new Command('elegir', flags)
 		if (choices.length < 2)
 			return request.reply({
 				content: `⚠️️ Debes ingresar al menos dos opciones separadas por comas`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const embed = new EmbedBuilder().setColor(Colors.Greyple).addFields({

@@ -5,6 +5,7 @@ import {
 	ButtonStyle,
 	Colors,
 	EmbedBuilder,
+	MessageFlags,
 	ModalBuilder,
 	TextInputBuilder,
 	TextInputStyle,
@@ -59,7 +60,7 @@ const command = new Command('saucenao', flags)
 
 			return request.reply({
 				embeds: [embed],
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 		}
 
@@ -98,7 +99,7 @@ const command = new Command('saucenao', flags)
 		if (!queries.length)
 			return request.reply({
 				content: translator.getText('saucenaoInvalidImage'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		await request.deferReply();
@@ -145,7 +146,7 @@ const command = new Command('saucenao', flags)
 					.setColor(0x151515)
 					.setTitle(translator.getText('saucenaoRegisterSuccess')),
 			],
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	});
 
@@ -183,7 +184,7 @@ function makeRegisterRequestResponse(request: ComplexCommandRequest, translator:
 	return request.reply({
 		embeds,
 		components,
-		ephemeral: true,
+		flags: MessageFlags.Ephemeral,
 	});
 }
 

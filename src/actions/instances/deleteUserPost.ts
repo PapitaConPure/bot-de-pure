@@ -1,3 +1,4 @@
+import { MessageFlags } from 'discord.js';
 import { Translator } from '@/i18n';
 import { deleteAgentMessage, getAgentMessageOwnerId } from '@/utils/discordagent';
 import { ContextMenuAction } from '../commons/actionBuilder';
@@ -14,7 +15,7 @@ const action = new ContextMenuAction('actionDeleteUserPost', 'Message').setMessa
 		)
 			return interaction.reply({
 				content: translator.getText('invalidMessage'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (
@@ -24,14 +25,14 @@ const action = new ContextMenuAction('actionDeleteUserPost', 'Message').setMessa
 		) {
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 		}
 
 		return Promise.all([
 			interaction.reply({
 				content: `**${translator.getText('feedDeletePostTitle')}**`,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			}),
 			deleteAgentMessage(message),
 		]);

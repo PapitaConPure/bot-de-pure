@@ -5,6 +5,7 @@ import {
 	Colors,
 	EmbedBuilder,
 	LabelBuilder,
+	MessageFlags,
 	ModalBuilder,
 	TextInputBuilder,
 	TextInputStyle,
@@ -91,7 +92,7 @@ const command = new Command('imgur', tags)
 			return request.reply({
 				embeds,
 				components,
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 		}
 
@@ -176,7 +177,7 @@ const command = new Command('imgur', tags)
 					.setColor('#1bb76e')
 					.setTitle(translator.getText('imgurRegisterSuccess')),
 			],
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	});
 

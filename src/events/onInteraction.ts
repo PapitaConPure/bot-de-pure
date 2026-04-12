@@ -1,9 +1,10 @@
-import type {
-	ApplicationCommandOptionChoiceData,
-	AutocompleteInteraction,
-	ChatInputCommandInteraction,
-	ContextMenuCommandInteraction,
-	Interaction,
+import {
+	type ApplicationCommandOptionChoiceData,
+	type AutocompleteInteraction,
+	type ChatInputCommandInteraction,
+	type ContextMenuCommandInteraction,
+	type Interaction,
+	MessageFlags,
 } from 'discord.js';
 import type { AnyCommandInteraction } from 'types/commands';
 import { channelIsBlocked, decompressId, isUsageBanned } from '@/func';
@@ -132,7 +133,7 @@ async function handleCommand(
 		if (exception)
 			return interaction.reply({
 				embeds: [generateExceptionEmbed(exception, { cmdString: `/${commandName}` })],
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const request = Command.requestize(interaction);
@@ -221,7 +222,7 @@ async function handleComponent(interaction: AnyCommandInteraction) {
 				const translator = await Translator.from(interaction.user.id);
 				return interaction.reply({
 					content: translator.getText('unauthorizedInteraction'),
-					ephemeral: true,
+					flags: MessageFlags.Ephemeral,
 				});
 			}
 		}
@@ -283,7 +284,7 @@ async function handleBlockedInteraction(interaction: Interaction) {
 	if (interaction.isRepliable()) {
 		return interaction.reply({
 			content: translator.getText('blockedInteraction', userIds.papita),
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	} else {
 		interaction.respond([]);
@@ -295,7 +296,7 @@ async function handleUnknownInteraction(interaction: Interaction) {
 	if (interaction.isRepliable()) {
 		return interaction.reply({
 			content: translator.getText('unknownInteraction'),
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	} else {
 		interaction.respond([]);
@@ -307,7 +308,7 @@ async function handleHuskInteraction(interaction: Interaction) {
 	if (interaction.isRepliable()) {
 		return interaction.reply({
 			content: translator.getText('huskInteraction'),
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	} else {
 		interaction.respond([]);

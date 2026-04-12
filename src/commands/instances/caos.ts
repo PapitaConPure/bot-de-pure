@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 import GuildConfig from '@/models/guildconfigs.js';
 import { p_pure } from '@/utils/prefixes';
 import { CommandPermissions } from '../commons/cmdPerms.js';
@@ -29,7 +29,7 @@ const command = new Command('caos', tags)
 		if (activate && deactivate)
 			return request.reply({
 				content: '⚠️️ Elige solo una de las banderas de activación',
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (activate || deactivate) {
@@ -65,7 +65,7 @@ const command = new Command('caos', tags)
 
 		return request.reply({
 			embeds: [embed],
-			ephemeral: true,
+			flags: MessageFlags.Ephemeral,
 		});
 	});
 

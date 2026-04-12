@@ -49,20 +49,20 @@ const command = new Command('cola', tags)
 		if (authorId && interaction.user.id !== decompressId(authorId))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const channel = interaction.member.voice?.channel;
 		if (!channel)
 			return interaction.reply({
 				content: translator.getText('voiceExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (isPlayerUnavailable(channel))
 			return interaction.reply({
 				content: translator.getText('voiceSameChannelExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const modal = new ModalBuilder()
@@ -91,13 +91,13 @@ const command = new Command('cola', tags)
 		if (!channel)
 			return interaction.reply({
 				content: translator.getText('voiceExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (isPlayerUnavailable(channel))
 			return interaction.reply({
 				content: translator.getText('voiceSameChannelExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const query = interaction.fields.getTextInputValue('query');
@@ -164,20 +164,20 @@ const command = new Command('cola', tags)
 		if (authorId && interaction.user.id !== decompressId(authorId))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const channel = interaction.member.voice?.channel;
 		if (!channel)
 			return interaction.reply({
 				content: translator.getText('voiceExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (isPlayerUnavailable(channel))
 			return interaction.reply({
 				content: translator.getText('voiceSameChannelExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const player = useMainPlayer();
@@ -187,7 +187,7 @@ const command = new Command('cola', tags)
 			const embed = makePuréMusicEmbed(interaction, Colors.Blurple).setTitle(
 				translator.getText('pauseTitleNoTrack'),
 			);
-			return interaction.reply({ embeds: [embed], ephemeral: true });
+			return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		const currentTrack = queue.currentTrack;
@@ -201,7 +201,7 @@ const command = new Command('cola', tags)
 				.setTitle(translator.getText('pauseTitleTrackAlreadyPaused'))
 				.setDescription(currentTrackHyperlink)
 				.setThumbnail(currentTrack.thumbnail);
-			return interaction.reply({ embeds: [embed], ephemeral: true });
+			return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		queue.node.pause();
@@ -224,20 +224,20 @@ const command = new Command('cola', tags)
 		if (authorId && interaction.user.id !== decompressId(authorId))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const channel = interaction.member.voice?.channel;
 		if (!channel)
 			return interaction.reply({
 				content: translator.getText('voiceExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (isPlayerUnavailable(channel))
 			return interaction.reply({
 				content: translator.getText('voiceSameChannelExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const player = useMainPlayer();
@@ -247,7 +247,7 @@ const command = new Command('cola', tags)
 			const embed = makePuréMusicEmbed(interaction).setTitle(
 				translator.getText('resumirTitleNoTrack'),
 			);
-			return interaction.reply({ embeds: [embed], ephemeral: true });
+			return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		const currentTrack = queue.currentTrack;
@@ -261,7 +261,7 @@ const command = new Command('cola', tags)
 				.setTitle(translator.getText('resumirTitleTrackAlreadyResumed'))
 				.setDescription(currentTrackHyperlink)
 				.setThumbnail(currentTrack.thumbnail);
-			return interaction.reply({ embeds: [embed], ephemeral: true });
+			return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		queue.node.resume();
@@ -284,20 +284,20 @@ const command = new Command('cola', tags)
 		if (authorId && interaction.user.id !== decompressId(authorId))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const channel = interaction.member.voice?.channel;
 		if (!channel)
 			return interaction.reply({
 				content: translator.getText('voiceExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (isPlayerUnavailable(channel))
 			return interaction.reply({
 				content: translator.getText('voiceSameChannelExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const player = useMainPlayer();
@@ -308,7 +308,7 @@ const command = new Command('cola', tags)
 			const embed = makePuréMusicEmbed(interaction).setTitle(
 				translator.getText('queueSkipTitleNoTrack'),
 			);
-			return interaction.reply({ embeds: [embed], ephemeral: true });
+			return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		const {
@@ -341,20 +341,20 @@ const command = new Command('cola', tags)
 		if (authorId && interaction.user.id !== decompressId(authorId))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const channel = interaction.member.voice?.channel;
 		if (!channel)
 			return interaction.reply({
 				content: translator.getText('voiceExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (isPlayerUnavailable(channel))
 			return interaction.reply({
 				content: translator.getText('voiceSameChannelExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const player = useMainPlayer();
@@ -365,7 +365,7 @@ const command = new Command('cola', tags)
 			const embed = makePuréMusicEmbed(interaction).setTitle(
 				translator.getText('queueSkipTitleNoTrack'),
 			);
-			return interaction.reply({ embeds: [embed], ephemeral: true });
+			return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		queue.setRepeatMode(
@@ -383,20 +383,20 @@ const command = new Command('cola', tags)
 		if (authorId && interaction.user.id !== decompressId(authorId))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const channel = interaction.member.voice?.channel;
 		if (!channel)
 			return interaction.reply({
 				content: translator.getText('voiceExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (isPlayerUnavailable(channel))
 			return interaction.reply({
 				content: translator.getText('voiceSameChannelExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const player = useMainPlayer();
@@ -407,7 +407,7 @@ const command = new Command('cola', tags)
 			const embed = makePuréMusicEmbed(interaction).setTitle(
 				translator.getText('queueSkipTitleNoTrack'),
 			);
-			return interaction.reply({ embeds: [embed], ephemeral: true });
+			return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		if (queue.repeatMode === QueueRepeatMode.AUTOPLAY) {
@@ -416,7 +416,7 @@ const command = new Command('cola', tags)
 				.setDescription(
 					translator.getText('queueLoopDescAutoplayEnabled', p_pure(interaction.guildId)),
 				);
-			return interaction.reply({ embeds: [embed], ephemeral: true });
+			return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		const repeatModeWheel: Map<QueueRepeatMode, QueueRepeatMode> = new Map();
@@ -435,7 +435,7 @@ const command = new Command('cola', tags)
 		if (authorId && interaction.user.id !== decompressId(authorId))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const channel = interaction.member.voice?.channel;
@@ -479,14 +479,14 @@ const command = new Command('cola', tags)
 		if (authorId && interaction.user.id !== decompressId(authorId))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const channel = interaction.member.voice?.channel;
 		if (!channel)
 			return interaction.reply({
 				content: translator.getText('voiceExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (
@@ -495,7 +495,7 @@ const command = new Command('cola', tags)
 		)
 			return interaction.reply({
 				content: translator.getText('voiceSameChannelExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const player = useMainPlayer();
@@ -505,7 +505,7 @@ const command = new Command('cola', tags)
 			const embed = makePuréMusicEmbed(interaction).setDescription(
 				translator.getText('queueDescriptionEmptyQueue'),
 			);
-			return interaction.reply({ embeds: [embed], ephemeral: true });
+			return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		queue.clear();
@@ -525,14 +525,14 @@ const command = new Command('cola', tags)
 		if (authorId && interaction.user.id !== decompressId(authorId))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const channel = interaction.member.voice?.channel;
 		if (!channel)
 			return interaction.reply({
 				content: translator.getText('voiceExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		if (
@@ -541,7 +541,7 @@ const command = new Command('cola', tags)
 		)
 			return interaction.reply({
 				content: translator.getText('voiceSameChannelExpected'),
-				ephemeral: true,
+				flags: MessageFlags.Ephemeral,
 			});
 
 		const player = useMainPlayer();
@@ -559,7 +559,7 @@ const command = new Command('cola', tags)
 			const embed = makePuréMusicEmbed(interaction)
 				.setTitle(translator.getText('queueDequeueTitleTrackNotFound'))
 				.setDescription(translator.getText('queueDequeueDescriptionTrackNotFound'));
-			return interaction.reply({ embeds: [embed], ephemeral: true });
+			return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		const track = queue.tracks.at(delIndex);
@@ -567,7 +567,7 @@ const command = new Command('cola', tags)
 			const embed = makePuréMusicEmbed(interaction)
 				.setTitle(translator.getText('queueDequeueTitleTrackNotFound'))
 				.setDescription(translator.getText('queueDequeueDescriptionTrackNotFound'));
-			return interaction.reply({ embeds: [embed], ephemeral: true });
+			return interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
 		}
 
 		const { title: removedTitle, url: removedUrl, thumbnail: removedThumbnail } = track;
