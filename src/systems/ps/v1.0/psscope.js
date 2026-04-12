@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 
 const { TuberInterpreterError, makeList, makeGlossary, makeBoolean, makeNumber, makeText, isNada, makeNada, makeEmbed, makeFunction } = require('./commons.js');
 

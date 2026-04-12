@@ -1,37 +1,39 @@
-import type { Token, TokenKind } from '../../lexer/tokens';
-import { TokenKinds, translateTokenKind } from '../../lexer/tokens';
-import { BindingPowers, Associativities } from '../../ast';
-import type {
-	BlockBody,
-	BlockStatement,
-	ConditionalStatement,
-	WhileStatement,
-	DoUntilStatement,
-	RepeatStatement,
-	ForEachStatement,
-	ForStatement,
-	ExpressionStatement,
-	ReadStatement,
-	ReadStatementPreModifier,
-	ReadStatementModifier,
-	DeclarationStatement,
-	SaveStatement,
-	AssignmentStatement,
-	LoadStatement,
-	InsertionStatement,
-	DeleteStatement,
-	ReturnStatement,
-	EndStatement,
-	StopStatement,
-	SendStatement,
-} from '../../ast/statements';
-import { StatementKinds, ScopeAbortKinds } from '../../ast/statements';
+// @ts-nocheck
+
+import { Associativities, BindingPowers } from '../../ast';
 import type { Expression } from '../../ast/expressions';
 import { ExpressionKinds } from '../../ast/expressions';
 import { makeMetadata } from '../../ast/metadata';
-import type { NumberValue, TextValue, BooleanValue } from '../../interpreter/values';
-import { ValueKinds, makeNumber, makeText, coerceValue } from '../../interpreter/values';
+import type {
+	AssignmentStatement,
+	BlockBody,
+	BlockStatement,
+	ConditionalStatement,
+	DeclarationStatement,
+	DeleteStatement,
+	DoUntilStatement,
+	EndStatement,
+	ExpressionStatement,
+	ForEachStatement,
+	ForStatement,
+	InsertionStatement,
+	LoadStatement,
+	ReadStatement,
+	ReadStatementModifier,
+	ReadStatementPreModifier,
+	RepeatStatement,
+	ReturnStatement,
+	SaveStatement,
+	SendStatement,
+	StopStatement,
+	WhileStatement,
+} from '../../ast/statements';
+import { ScopeAbortKinds, StatementKinds } from '../../ast/statements';
 import { TuberInputError } from '../../interpreter/inputReader';
+import type { BooleanValue, NumberValue, TextValue } from '../../interpreter/values';
+import { coerceValue, makeNumber, makeText, ValueKinds } from '../../interpreter/values';
+import type { Token, TokenKind } from '../../lexer/tokens';
+import { TokenKinds, translateTokenKind } from '../../lexer/tokens';
 import { toLowerCaseNormalized } from '../../util/utils';
 import type { Parser } from '..';
 

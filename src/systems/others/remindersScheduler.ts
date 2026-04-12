@@ -147,7 +147,9 @@ async function sendReminder(channel: GuildTextBasedChannel, user: User, reminder
 export function clearScheduledReminder(reminder: ReminderDocument): NodeJS.Timeout | undefined;
 /**@description Limpia cualquier posible timeout previamente asociado a la ID de recordatorio especificada.*/
 export function clearScheduledReminder(reminderId: string): NodeJS.Timeout | undefined;
-export function clearScheduledReminder(reminder: ReminderDocument | string): NodeJS.Timeout | undefined {
+export function clearScheduledReminder(
+	reminder: ReminderDocument | string,
+): NodeJS.Timeout | undefined {
 	const id: string = typeof reminder === 'string' ? reminder : reminder.id;
 
 	const samePreviousReminderTimeout = scheduledIds.get(id);

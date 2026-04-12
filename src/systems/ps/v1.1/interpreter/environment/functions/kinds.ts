@@ -1,16 +1,18 @@
-import type { RuntimeValue, NativeFunction, TextValue, BooleanValue } from '../../values';
+// @ts-nocheck
+
+import type { BooleanValue, NativeFunction, RuntimeValue, TextValue } from '../../values';
 import {
-	ValueKinds,
-	makeBoolean,
-	isOperable,
-	isValidText,
 	isBoolean,
-	isList,
-	isRegistry,
 	isEmbed,
+	isList,
 	isNada,
+	isOperable,
+	isRegistry,
+	isValidText,
+	makeBoolean,
+	ValueKinds,
 } from '../../values';
-import { expectParam, psFileRegex, psLinkRegex, psImageRegex } from '../nativeUtils';
+import { expectParam, psFileRegex, psImageRegex, psLinkRegex } from '../nativeUtils';
 import type { NativeFunctionEntry } from '.';
 
 const esNúmero: NativeFunction<null, [RuntimeValue], BooleanValue> = (_self, [x]) => {

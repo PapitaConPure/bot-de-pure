@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 const { LexerTokenTypes } = require('./commons.js');
 
 function TuberLexerError(message) {

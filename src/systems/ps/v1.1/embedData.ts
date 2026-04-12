@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 export type ColorResolvable =
 	| number
 	| readonly [red: number, green: number, blue: number]

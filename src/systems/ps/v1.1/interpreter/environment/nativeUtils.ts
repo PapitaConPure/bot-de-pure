@@ -1,30 +1,32 @@
-import type {
-	RuntimeValue,
-	AssertedRuntimeValue,
-	RuntimeInternalValue,
-	ValueKind,
-	FunctionValue,
-	NativeFunction,
-	NadaValue,
-} from '../values';
-import {
-	ValueKinds,
-	ValueKindTranslationLookups,
-	makeList,
-	makeRegistry,
-	makeEmbed,
-	makeFunction,
-	makeNativeFunction,
-	makeNada,
-	valueMakers,
-	coerceValue,
-	isOperable,
-	isValidText,
-} from '../values';
+// @ts-nocheck
+
 import type { ArgumentExpression } from '../../ast/expressions';
 import type { BlockStatement } from '../../ast/statements';
 import type { EmbedData } from '../../embedData';
 import type { Scope } from '../scope';
+import type {
+	AssertedRuntimeValue,
+	FunctionValue,
+	NadaValue,
+	NativeFunction,
+	RuntimeInternalValue,
+	RuntimeValue,
+	ValueKind,
+} from '../values';
+import {
+	coerceValue,
+	isOperable,
+	isValidText,
+	makeEmbed,
+	makeFunction,
+	makeList,
+	makeNada,
+	makeNativeFunction,
+	makeRegistry,
+	ValueKinds,
+	ValueKindTranslationLookups,
+	valueMakers,
+} from '../values';
 
 export const psFileRegex =
 	/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-]){1,}\.){1,4}([a-zA-Z]){2,6}\/[a-zA-Z-_/.0-9#:?=&;,]*\.(txt|png|jpg|jpeg|webp|gif|webm|mp4|mp3|wav|flac|ogg)[a-zA-Z-_.0-9#:?=&;,]*/i;

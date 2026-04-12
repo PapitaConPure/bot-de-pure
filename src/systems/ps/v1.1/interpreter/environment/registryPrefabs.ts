@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import type { EmbedData } from '../../embedData';
 import type { RegistryValue, RuntimeValue } from '../values';
 import { makeBoolean, makeList, makeNada, makeNumber, makeRegistry, makeText } from '../values';

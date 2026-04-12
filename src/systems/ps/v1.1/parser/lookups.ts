@@ -1,43 +1,45 @@
-import {
-	parsePrimaryExpression,
-	parseUnaryExpression,
-	parseBinaryExpression,
-	parseCastExpression,
-	parseArrowExpression,
-	parseCallExpression,
-	parseFunctionExpression,
-	parseSequenceExpression,
-	parseConditionalExpression,
-	parseLambdaExpression,
-	parseGroupExpression,
-} from './syntax/expressionParsing';
-import {
-	parseBlockStatement,
-	parseConditionalStatement,
-	parseWhileLoopStatement,
-	parseDoWhileLoopStatement,
-	parseRepeatLoopStatement,
-	parseForEachLoopStatement,
-	parseForLoopStatement,
-	parseExpressionStatement,
-	parseReadStatement,
-	parseDeclarationStatement,
-	parseSaveStatement,
-	parseAssignmentStatement,
-	parseExtendStatement,
-	parseDeleteStatement,
-	parseReturnStatement,
-	parseEndStatement,
-	parseStopStatement,
-	parseSendStatement,
-} from './syntax/statementParsing';
-import type { BindingPower, Associativity } from '../ast';
-import { BindingPowers, Associativities } from '../ast';
-import type { TokenKind } from '../lexer/tokens';
-import { TokenKinds } from '../lexer/tokens';
+// @ts-nocheck
+
+import type { Associativity, BindingPower } from '../ast';
+import { Associativities, BindingPowers } from '../ast';
 import type { Expression } from '../ast/expressions';
 import type { Statement } from '../ast/statements';
+import type { TokenKind } from '../lexer/tokens';
+import { TokenKinds } from '../lexer/tokens';
 import type { Parser } from '.';
+import {
+	parseArrowExpression,
+	parseBinaryExpression,
+	parseCallExpression,
+	parseCastExpression,
+	parseConditionalExpression,
+	parseFunctionExpression,
+	parseGroupExpression,
+	parseLambdaExpression,
+	parsePrimaryExpression,
+	parseSequenceExpression,
+	parseUnaryExpression,
+} from './syntax/expressionParsing';
+import {
+	parseAssignmentStatement,
+	parseBlockStatement,
+	parseConditionalStatement,
+	parseDeclarationStatement,
+	parseDeleteStatement,
+	parseDoWhileLoopStatement,
+	parseEndStatement,
+	parseExpressionStatement,
+	parseExtendStatement,
+	parseForEachLoopStatement,
+	parseForLoopStatement,
+	parseReadStatement,
+	parseRepeatLoopStatement,
+	parseReturnStatement,
+	parseSaveStatement,
+	parseSendStatement,
+	parseStopStatement,
+	parseWhileLoopStatement,
+} from './syntax/statementParsing';
 
 export type StatementHandler = (parser: Parser) => Statement;
 

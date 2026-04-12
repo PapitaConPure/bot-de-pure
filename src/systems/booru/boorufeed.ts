@@ -1,12 +1,6 @@
 import chalk from 'chalk';
 import { getUnixTime, minutesToMilliseconds } from 'date-fns';
-import type {
-	Client,
-	Guild,
-	GuildTextBasedChannel,
-	Message,
-	Snowflake,
-} from 'discord.js';
+import type { Client, Guild, GuildTextBasedChannel, Message, Snowflake } from 'discord.js';
 import { Collection, MessageFlags } from 'discord.js';
 import type { AnyBulkWriteOperation } from 'mongoose';
 import { ClientNotFoundError, client } from '@/core/client';

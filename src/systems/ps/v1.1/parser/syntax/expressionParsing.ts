@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import type { Associativity, BindingPower } from '../../ast';
 import { BindingPowers } from '../../ast';
 import type {

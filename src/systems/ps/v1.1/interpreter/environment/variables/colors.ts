@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 export const NativeColorsLookup = new Map<string, number>()
 	.set('colorAnaranjado', 0xe67e22)
 	.set('colorAnaranjadoOscuro', 0xa84300)

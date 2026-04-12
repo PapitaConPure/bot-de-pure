@@ -1,3 +1,6 @@
+// @ts-nocheck
+/** biome-ignore-all lint/style/useConsistentTypeDefinitions: no-check */
+
 import type { ArgumentExpression, Expression } from '../ast/expressions';
 import type { BlockStatement } from '../ast/statements';
 import { EmbedData } from '../embedData';

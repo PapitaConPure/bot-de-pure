@@ -610,7 +610,9 @@ export class MathEvaluator {
 				return this.#evaluateFunctionCall(node.identifier, node.argument);
 
 			default:
-				return fatal(new MathEvaluatorError(`Nodo inesperado: ${(node as MathNode)?.type}`));
+				return fatal(
+					new MathEvaluatorError(`Nodo inesperado: ${(node as MathNode)?.type}`),
+				);
 		}
 	}
 

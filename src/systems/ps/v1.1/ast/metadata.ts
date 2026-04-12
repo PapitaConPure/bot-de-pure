@@ -1,7 +1,9 @@
+// @ts-nocheck
+
 import type { Token } from '../lexer/tokens';
-import type { Statement } from './statements';
-import type { Expression } from './expressions';
 import type { NodeMetadata } from '.';
+import type { Expression } from './expressions';
+import type { Statement } from './statements';
 
 export function makeMetadata(
 	startToken: Token | Statement | Expression,

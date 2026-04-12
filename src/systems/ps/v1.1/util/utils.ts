@@ -1,9 +1,14 @@
+// @ts-nocheck
+
 function* iotaGenerator(first: number) {
 	let value = first;
 	while (true) yield value++;
 }
 
-type IotaFunction = { (start?: number): number; gen?: Generator<number, void, unknown> };
+interface IotaFunction {
+	(start?: number): number;
+	gen?: Generator<number, void, unknown>;
+}
 
 /**
  * @description

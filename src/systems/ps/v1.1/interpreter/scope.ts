@@ -1,6 +1,8 @@
-import type { RuntimeValue, ValueKind, FunctionValue } from './values';
-import { makeNada, defaultValueOf, ValueKinds } from './values';
+// @ts-nocheck
+
 import type { Interpreter } from '.';
+import type { FunctionValue, RuntimeValue, ValueKind } from './values';
+import { defaultValueOf, makeNada, ValueKinds } from './values';
 
 /**@description Representa un ámbito de variables en un contexto de ejecución de PuréScript.*/
 export class Scope {

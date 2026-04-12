@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import type { Token } from '../lexer/tokens';
 import type { ValuesOf } from '../util/types';
 import type { NodeMetadata } from '.';

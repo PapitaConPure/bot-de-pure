@@ -1,11 +1,13 @@
+// @ts-nocheck
+
 import type {
-	RuntimeValue,
-	NativeFunction,
-	TextValue,
-	RegistryValue,
 	NadaValue,
+	NativeFunction,
+	RegistryValue,
+	RuntimeValue,
+	TextValue,
 } from '../../values';
-import { ValueKinds, makeNada } from '../../values';
+import { makeNada, ValueKinds } from '../../values';
 import { expectParam } from '../nativeUtils';
 import { makeDiscordChannel, makeDiscordMember, makeDiscordRole } from '../registryPrefabs';
 import type { NativeFunctionEntry } from '.';

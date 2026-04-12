@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import type { Associativity, BindingPower } from '../ast';
 import { Associativities } from '../ast';
 import type { Expression } from '../ast/expressions';

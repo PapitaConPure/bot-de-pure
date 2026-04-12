@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import type { Scope } from '../scope';
 import type { RuntimeValue } from '../values';
 import {

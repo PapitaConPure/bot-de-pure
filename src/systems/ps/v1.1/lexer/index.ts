@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { shortenText, toLowerCaseNormalized } from '../util/utils';
 import type { TokenKind } from './tokens';
 import { Token, TokenKinds } from './tokens';

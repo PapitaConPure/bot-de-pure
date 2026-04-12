@@ -45,7 +45,10 @@ export interface PostFormatData {
 	disableActions?: boolean;
 }
 
-export type SourceStyle = { emoji?: string; color: number };
+export interface SourceStyle {
+	emoji?: string;
+	color: number;
+}
 
 /**
  * Algunos enlaces pueden pertenecer a dominios asociados de un sitio para alojar recursos. Cosas como enlaces de CDNs.

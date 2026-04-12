@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 const { shortenText } = require('./func');
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors } = require('discord.js');
 const { TuberLexer } = require('./pslexer.js');

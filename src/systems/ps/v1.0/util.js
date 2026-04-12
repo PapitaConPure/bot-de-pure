@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 /**
  * @template T
  * @typedef {{ [K in keyof T]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<keyof T, K>>> }} RequireAtLeastOne

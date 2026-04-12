@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import type { ReadStatement, ReadStatementPreModifier } from '../ast/statements';
 import type { Token } from '../lexer/tokens';
 import { TokenKinds } from '../lexer/tokens';

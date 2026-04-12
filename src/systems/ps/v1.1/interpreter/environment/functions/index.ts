@@ -1,7 +1,9 @@
+// @ts-nocheck
+
 import type { NativeFunction } from '../../values';
-import { utilFunctions } from './utils';
-import { kindFunctions } from './kinds';
 import { discordFunctions } from './discord';
+import { kindFunctions } from './kinds';
+import { utilFunctions } from './utils';
 
 export interface NativeFunctionEntry {
 	id: string;

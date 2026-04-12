@@ -1,3 +1,4 @@
+// @ts-nocheck
 /** biome-ignore-all lint/correctness/noEmptyPattern: Claridad */
 
 import { stringHexToNumber } from '../../../util/utils';

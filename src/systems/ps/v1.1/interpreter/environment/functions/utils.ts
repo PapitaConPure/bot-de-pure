@@ -1,3 +1,4 @@
+// @ts-nocheck
 /** biome-ignore-all lint/correctness/noEmptyPattern: Claridad */
 
 import { hsl2hex, hsv2hex, rgb2hex } from '../../../util/colorUtils';

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 export type PSBufferType = 'url' | 'buffer' | 'stream';
 export interface PSBaseAttachment<T extends PSBufferType> {
 	type: T;

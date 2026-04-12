@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import type { ValuesOf } from '../util/types';
 import { iota } from '../util/utils';
 

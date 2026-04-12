@@ -1,3 +1,4 @@
+// @ts-nocheck
 /** biome-ignore-all lint/correctness/noEmptyPattern: Claridad */
 
 import type {

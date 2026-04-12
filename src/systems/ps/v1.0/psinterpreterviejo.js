@@ -1,5 +1,4 @@
 // @ts-nocheck
-/* eslint-disable */
 
 const { ParserNodeTypes, ParserToLanguageType } = require('./psparser.js');
 const { TuberScope } = require('./psscope.js');

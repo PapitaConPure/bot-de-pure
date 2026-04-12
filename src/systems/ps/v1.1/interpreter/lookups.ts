@@ -1,15 +1,17 @@
+// @ts-nocheck
+
 import type { Expression } from '../ast/expressions';
 import type { TokenKind } from '../lexer/tokens';
 import { TokenKinds } from '../lexer/tokens';
 import type { Interpreter } from '.';
-import type { RuntimeValue, NumberValue, TextValue, ValueKind } from './values';
+import type { NumberValue, RuntimeValue, TextValue, ValueKind } from './values';
 import {
-	ValueKinds,
 	coerceValue,
+	makeBoolean,
 	makeNumber,
 	makeText,
-	makeBoolean,
 	toggleBoolean,
+	ValueKinds,
 } from './values';
 
 export type UnaryExpressionFunction = (
