@@ -29,7 +29,8 @@
 		"rules": {
 			"recommended": true,
 			"style": {
-				"useImportType": "error"
+				"useImportType": "error",
+				"useConsistentTypeDefinitions": "error"
 			},
 			"suspicious": {
 				"useIterableCallbackReturn": {
@@ -38,7 +39,8 @@
 						"checkForEach": false
 					}
 				},
-				"noConfusingVoidType": "off"
+				"noConfusingVoidType": "off",
+				"noRedundantUseStrict": "off"
 			}
 		}
 	},
