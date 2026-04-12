@@ -47,12 +47,20 @@ const extendedCommandRequestBlank: ExtendedCommandRequest = {
 	channel: undefined as unknown as GuildBasedChannel,
 	member: undefined as unknown as GuildMember,
 
-	reply: undefined as unknown as (options?: CommandReplyOptions | undefined) => Promise<Message<boolean>>,
-	replyFirst: undefined as unknown as (options?: CommandReplyOptions | undefined) => Promise<Message<boolean>>,
-	deferReply: undefined as unknown as (options?: (InteractionDeferReplyOptions & { fetchReply?: true;}) | undefined) => Promise<Message<boolean>>,
+	reply: undefined as unknown as (
+		options?: CommandReplyOptions | undefined,
+	) => Promise<Message<boolean>>,
+	replyFirst: undefined as unknown as (
+		options?: CommandReplyOptions | undefined,
+	) => Promise<Message<boolean>>,
+	deferReply: undefined as unknown as (
+		options?: (InteractionDeferReplyOptions & { fetchReply?: true }) | undefined,
+	) => Promise<Message<boolean>>,
 	delete: undefined as unknown as () => Promise<Message<boolean>>,
 	deleteReply: undefined as unknown as () => Promise<Message<boolean>>,
-	editReply: undefined as unknown as (options: CommandEditReplyOptions) => Promise<Message<boolean>>,
+	editReply: undefined as unknown as (
+		options: CommandEditReplyOptions,
+	) => Promise<Message<boolean>>,
 	wasDeferred: undefined as unknown as () => boolean,
 	wasReplied: undefined as unknown as () => boolean,
 };
@@ -67,10 +75,14 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 			throw 'Invalid inference of a Message Command into a Slash Command';
 		};
 
-		extension.appPermisions = request.guild.members.me ? request.guild.members.me.permissionsIn(request.channel) : new PermissionsBitField(0n);
+		extension.appPermisions = request.guild.members.me
+			? request.guild.members.me.permissionsIn(request.channel)
+			: new PermissionsBitField(0n);
 		extension.deferred = false;
 		extension.replied = false;
-		extension.memberPermissions = request.member ? request.member.permissionsIn(request.channel) : new PermissionsBitField(0n);
+		extension.memberPermissions = request.member
+			? request.member.permissionsIn(request.channel)
+			: new PermissionsBitField(0n);
 		extension.user = request.author;
 		extension.userId = request.author.id;
 
@@ -130,9 +142,12 @@ type ExecutionFunctionWithOptions = (
 	rawArgs?: string,
 ) => Promise<unknown>;
 
-type ExecutionFunctionWithoutOptions = (request: ComplexCommandRequest) => Promise<unknown>
+type ExecutionFunctionWithoutOptions = (request: ComplexCommandRequest) => Promise<unknown>;
 
-type ExecutionFunction<TOptions extends CommandOptions | undefined> = TOptions extends CommandOptions ? ExecutionFunctionWithOptions : ExecutionFunctionWithoutOptions;
+type ExecutionFunction<TOptions extends CommandOptions | undefined> =
+	TOptions extends CommandOptions
+		? ExecutionFunctionWithOptions
+		: ExecutionFunctionWithoutOptions;
 
 type InteractionResponseFunction = (
 	interaction: Interaction,

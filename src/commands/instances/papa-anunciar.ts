@@ -22,8 +22,7 @@ const command = new Command('papa-anunciar', tags)
 		const title = args.parseFlagExpr('título');
 		const announcement = args.getString('anuncio', true);
 
-		if(!announcement)
-			return request.deleteReply();
+		if (!announcement) return request.deleteReply();
 
 		const guilds = request.client.guilds.cache;
 		guilds.forEach((guild) => {

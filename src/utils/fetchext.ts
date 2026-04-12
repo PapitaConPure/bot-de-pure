@@ -1,14 +1,14 @@
 import { default as stream } from 'node:stream';
 import type { ReadableStream as WebReadableStream } from 'node:stream/web';
 
-type FetchDataMap<TSchema> = {
+interface FetchDataMap<TSchema> {
 	json: TSchema;
 	text: string;
 	arrayBuffer: ArrayBuffer;
 	buffer: Buffer<ArrayBuffer>;
 	webStream: ReadableStream;
 	nodeStream: NodeJS.ReadableStream;
-};
+}
 type FetchType = keyof FetchDataMap<unknown> & {};
 
 type AssertedFetchData<TFetch extends FetchType, TSchema = unknown> = FetchDataMap<TSchema>[TFetch];

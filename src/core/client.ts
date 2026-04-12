@@ -33,7 +33,9 @@ export function initializeClient() {
 
 export class ClientNotFoundError extends Error {
 	constructor() {
-		super('Discord Client was expected but it was never initialized or registered in the system.');
+		super(
+			'Discord Client was expected but it was never initialized or registered in the system.',
+		);
 		this.name = 'ClientNotFoundError';
 	}
 }

@@ -100,7 +100,8 @@ export class CommandPermissions {
 
 		if (typeof permissions === 'bigint') return permissions;
 
-		if (typeof permissions === 'string') return BigInt((PermissionFlagsBits as { [ K: string ]: bigint })[permissions]);
+		if (typeof permissions === 'string')
+			return BigInt((PermissionFlagsBits as { [K: string]: bigint })[permissions]);
 
 		if (permissions instanceof BitField) return BigInt(permissions.bitfield);
 

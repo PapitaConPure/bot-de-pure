@@ -100,7 +100,7 @@ const command = new Command('voz', tags)
 		if (!session) return warnNotInSession();
 
 		const schemaMember = session.members.get(request.member.id);
-		if(!schemaMember) return warnNotInSession();
+		if (!schemaMember) return warnNotInSession();
 
 		const sessionMember = new PureVoiceSessionMember(schemaMember);
 
@@ -363,8 +363,7 @@ const command = new Command('voz', tags)
 			const guildQuery = { guildId: interaction.guildId };
 			const pv = await PureVoice.findOne(guildQuery);
 
-			if(!pv)
-				return interaction.deleteReply();
+			if (!pv) return interaction.deleteReply();
 
 			const modal = new ModalBuilder()
 				.setCustomId(`voz_relocateSystem_${authorId}`)
@@ -671,7 +670,9 @@ const command = new Command('voz', tags)
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if (!session) return warnNotInSession();
 
-		const sessionMember = new PureVoiceSessionMember(session.members.get(member.id) ?? { id: '' });
+		const sessionMember = new PureVoiceSessionMember(
+			session.members.get(member.id) ?? { id: '' },
+		);
 		if (sessionMember.isGuest())
 			return interaction.editReply({
 				content: translator.getText('voiceSessionAdminOrModExpected'),

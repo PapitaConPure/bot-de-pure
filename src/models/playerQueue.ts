@@ -48,8 +48,8 @@ export async function tryRecoverSavedTracksQueue(
 ) {
 	console.log('Attempting recovery of possible saved queue');
 	const { guild } = request;
-	if(!guild) return;
-	
+	if (!guild) return;
+
 	const guildId = guild.id;
 
 	const player = useMainPlayer();

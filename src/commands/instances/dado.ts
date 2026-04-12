@@ -74,7 +74,7 @@ const command = new Command('dados', flags)
 		const diceInputs = CommandOptionSolver.asStrings(
 			args.parsePolyParamSync('dados', {
 				messageSep: ' ',
-				fallback: '1d6'
+				fallback: '1d6',
 			}),
 		).map((v) => v.match(diceRegex));
 
@@ -94,7 +94,10 @@ const command = new Command('dados', flags)
 		const embed = new EmbedBuilder().setColor(0x3f4581).addFields({
 			name: 'Salió:',
 			value: dices
-				.map((dice) => `${dice?.d} x 🎲(${dice?.f}) → [${dice?.r.join(',')}] = **${dice?.t}**`)
+				.map(
+					(dice) =>
+						`${dice?.d} x 🎲(${dice?.f}) → [${dice?.r.join(',')}] = **${dice?.t}**`,
+				)
 				.join('\n**+** '),
 		});
 
@@ -109,12 +112,14 @@ const command = new Command('dados', flags)
 		});
 	});
 
-function parseDice(diceInput: RegExpMatchArray): ({
-	d: number;
-	f: number;
-	r: Array<number>;
-	t: number;
-}) | undefined {
+function parseDice(diceInput: RegExpMatchArray):
+	| {
+			d: number;
+			f: number;
+			r: Array<number>;
+			t: number;
+	  }
+	| undefined {
 	if (!diceInput) return;
 
 	const [, dices, faces] = diceInput;

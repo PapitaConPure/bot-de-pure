@@ -35,21 +35,24 @@ function m() {
 }
 export type PureVoiceDocument = ReturnType<typeof m>;
 
-const PureVoiceSessionMemberSchema = new Mongoose.Schema({
-	id: {
-		type: String,
-		required: true,
+const PureVoiceSessionMemberSchema = new Mongoose.Schema(
+	{
+		id: {
+			type: String,
+			required: true,
+		},
+		role: Object,
+		whitelisted: {
+			type: Boolean,
+			required: true,
+		},
+		banned: {
+			type: Boolean,
+			required: true,
+		},
 	},
-	role: Object,
-	whitelisted: {
-		type: Boolean,
-		required: true,
-	},
-	banned: {
-		type: Boolean,
-		required: true,
-	},
-}, { _id: false });
+	{ _id: false },
+);
 
 /** */
 const PureVoiceSessionSchema = new Mongoose.Schema({

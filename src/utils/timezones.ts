@@ -94,7 +94,9 @@ export function toUtcOffset(sanitizedTzCode: string): number | null {
 }
 
 /**@example "UTC+XX:XX", "UTC-XX:XX", ""*/
-export function utcOffsetDisplay(sanitizedTzCode: string): `UTC${'+'|'-'}${string}:${string}` | '' {
+export function utcOffsetDisplay(
+	sanitizedTzCode: string,
+): `UTC${'+' | '-'}${string}:${string}` | '' {
 	if (!sanitizedTzCode?.length) return '';
 
 	const utcOffset = toUtcOffset(sanitizedTzCode) ?? 0;

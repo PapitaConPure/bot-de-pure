@@ -13,7 +13,7 @@ const command = new Command('decir', flags)
 
 		const sentence = args.getString('mensaje', true);
 
-		if(!sentence)
+		if (!sentence)
 			return request.reply({ content: '⚠️ tienes que especificar lo que quieres que diga.' });
 
 		if (deleteFlag && request.guild.members.me?.permissions.has('ManageMessages'))

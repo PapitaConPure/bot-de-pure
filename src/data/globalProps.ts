@@ -8,7 +8,6 @@ import type { GuildFeedChunk } from '@/systems/booru/boorufeed';
 /**@description Si se está en un entorno de producción (`true`) o de desarrollo (`false`, por defecto).*/
 export const remoteStartup: boolean = process.env.NODE_ENV === 'production';
 
-
 //Claves
 
 if (!process.env.DISCORD_TOKEN)
@@ -60,7 +59,10 @@ export const booruApiKey: string = process.env.GELBOORU_APIKEY;
 export const booruUserId: string = process.env.GELBOORU_USERID;
 
 //Prefijos
-export type PrefixPair = { raw: string; regex: RegExp };
+export interface PrefixPair {
+	raw: string;
+	regex: RegExp;
+}
 export const prefixes: Record<string, PrefixPair> = {
 	'0': {
 		raw: 'p!',

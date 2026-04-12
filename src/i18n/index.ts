@@ -769,7 +769,7 @@ const localesObject = {
 
 	queueExpected: {
 		es: '⚠️ No se encontró una cola de reproducción',
-		en: '⚠️ Couldn\'t find a player queue',
+		en: "⚠️ Couldn't find a player queue",
 		ja: '⚠️ 再生キューが見つかりません',
 	},
 	queueTitle: {
@@ -2850,13 +2850,7 @@ export class Translator {
 			/(\d+){\.\.\.}(?:<!{((?:[!=<>]{1,2}):[^|]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
 		const translation = translationTemplate.replace(
 			subLocaleRegex,
-			(
-				_match,
-				i: string,
-				condition: string,
-				whenTrue: string,
-				defaultValue: string,
-			) => {
+			(_match, i: string, condition: string, whenTrue: string, defaultValue: string) => {
 				const value = values[+i];
 
 				if (condition != null) {

@@ -124,16 +124,22 @@ function setupOptionBuilders(slash: SlashCommandBuilder, options: CommandOptions
 
 		const optionBuilder = <T extends AnySlashCommandOption>(option: T): T => {
 			if (f.long && !Array.isArray(f.long))
-				throw new UnexpectedValueError(`Malformed long command flags for option: ${option.name}`, {
-					expected: 'string[]',
-					received: f.long,
-				});
+				throw new UnexpectedValueError(
+					`Malformed long command flags for option: ${option.name}`,
+					{
+						expected: 'string[]',
+						received: f.long,
+					},
+				);
 
 			if (f.short && typeof f !== 'string' && !Array.isArray(f.short))
-				throw new UnexpectedValueError(`Malformed short command flags for option: ${option.name}`, {
-					expected: 'string[]',
-					received: f.long,
-				});
+				throw new UnexpectedValueError(
+					`Malformed short command flags for option: ${option.name}`,
+					{
+						expected: 'string[]',
+						received: f.long,
+					},
+				);
 
 			if (!f.long && !f.short) throw new Error('Malformed command flags.');
 

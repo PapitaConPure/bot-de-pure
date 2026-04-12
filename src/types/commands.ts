@@ -113,25 +113,28 @@ export type AnyCommandInteraction =
 	| AnySelectMenuInteraction<'cached'>
 	| ModalSubmitInteraction<'cached'>;
 
-export type ParamTypeStrict = { name: string; expression: string | number };
+export interface ParamTypeStrict {
+	name: string;
+	expression: string | number;
+}
 
-export type BaseParamTypeMap = {
-	NUMBER: number,
-	TEXT: string,
-	USER: User,
-	MEMBER: GuildMember,
-	GUILD: Guild,
-	CHANNEL: GuildBasedChannel,
-	MESSAGE: Message<boolean>,
-	ROLE: Role,
-	EMOTE: string,
-	IMAGE: string | Attachment,
-	FILE: string | Attachment,
-	URL: URL,
-	ID: string,
-	DATE: Date,
-	TIME: Date,
-};
+export interface BaseParamTypeMap {
+	NUMBER: number;
+	TEXT: string;
+	USER: User;
+	MEMBER: GuildMember;
+	GUILD: Guild;
+	CHANNEL: GuildBasedChannel;
+	MESSAGE: Message<boolean>;
+	ROLE: Role;
+	EMOTE: string;
+	IMAGE: string | Attachment;
+	FILE: string | Attachment;
+	URL: URL;
+	ID: string;
+	DATE: Date;
+	TIME: Date;
+}
 
 export type BaseParamType = keyof BaseParamTypeMap;
 

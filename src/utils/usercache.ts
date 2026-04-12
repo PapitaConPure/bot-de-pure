@@ -4,12 +4,12 @@ import UserConfigs from '../models/userconfigs';
 import type { AcceptedTwitterConverterKey } from '../systems/converters/pureet';
 import type { AnyRequest } from '../types/commands';
 
-export type UserCache = {
+export interface UserCache {
 	language: LocaleKey;
 	pixivConverter: 'phixiv' | '';
 	twitterPrefix: AcceptedTwitterConverterKey | '';
 	banned: boolean;
-};
+}
 
 export type UserCacheResolvable = AnyRequest | Interaction | User | GuildMember | string;
 

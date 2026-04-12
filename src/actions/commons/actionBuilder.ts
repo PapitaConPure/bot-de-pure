@@ -55,7 +55,9 @@ export class ContextMenuAction {
 
 	/** @param responseFn Acción a realizar al indicarse su ejecución*/
 	setUserResponse(
-		responseFn: ContextMenuActionHandler<UserContextMenuCommandInteraction<'cached'> & { targetMember: GuildMember }>,
+		responseFn: ContextMenuActionHandler<
+			UserContextMenuCommandInteraction<'cached'> & { targetMember: GuildMember }
+		>,
 	) {
 		this.execute = responseFn as ContextMenuActionHandler;
 		return this;

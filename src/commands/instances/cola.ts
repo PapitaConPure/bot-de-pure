@@ -1,4 +1,11 @@
-import { ButtonBuilder, ButtonStyle, Colors, MessageFlags, ModalBuilder, TextInputStyle } from 'discord.js';
+import {
+	ButtonBuilder,
+	ButtonStyle,
+	Colors,
+	MessageFlags,
+	ModalBuilder,
+	TextInputStyle,
+} from 'discord.js';
 import { QueueRepeatMode, useMainPlayer } from 'discord-player';
 import { decompressId, sleep } from '@/func';
 import { Translator } from '@/i18n';
@@ -450,7 +457,7 @@ const command = new Command('cola', tags)
 		const player = useMainPlayer();
 		const queue = player.queues.get(interaction.guildId);
 
-		if(!queue)
+		if (!queue)
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('queueExpected'),
@@ -540,7 +547,7 @@ const command = new Command('cola', tags)
 		const player = useMainPlayer();
 		const queue = player.queues.get(interaction.guildId);
 
-		if(!queue)
+		if (!queue)
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('queueExpected'),

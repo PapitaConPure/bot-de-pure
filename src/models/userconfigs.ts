@@ -53,25 +53,28 @@ const UserConfigSchema = new Mongoose.Schema({
 		required: true,
 	},
 	voice: {
-		type: new Mongoose.Schema({
-			ping: {
-				type: String,
-				enum: ['always', 'onCreate', 'never'],
-				default: 'always',
+		type: new Mongoose.Schema(
+			{
+				ping: {
+					type: String,
+					enum: ['always', 'onCreate', 'never'],
+					default: 'always',
+				},
+				autoname: {
+					type: String,
+					default: '',
+				},
+				autoemoji: {
+					type: String,
+					default: '',
+				},
+				killDelay: {
+					type: Number,
+					default: 0,
+				},
 			},
-			autoname: {
-				type: String,
-				default: '',
-			},
-			autoemoji: {
-				type: String,
-				default: '',
-			},
-			killDelay: {
-				type: Number,
-				default: 0,
-			},
-		}, { _id: false }),
+			{ _id: false },
+		),
 		required: true,
 	},
 	flags: {

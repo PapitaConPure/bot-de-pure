@@ -1,12 +1,12 @@
 import { Readable } from 'node:stream';
 import { fetchExt } from './fetchext';
 
-type ImgurImageMap = {
+interface ImgurImageMap {
 	url: string | URL;
 	buffer: Buffer<ArrayBuffer>;
 	stream: NodeJS.ReadableStream;
 	blob: Blob;
-};
+}
 
 export type ImgurImageKey = keyof ImgurImageMap & {};
 

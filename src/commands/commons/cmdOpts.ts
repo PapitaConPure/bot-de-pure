@@ -1124,9 +1124,12 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	/**@param identifier El identificador del {@linkcode CommandParam}.*/
-	getNumber<TDefault extends number | undefined = undefined>(identifier: string, defaultValue?: TDefault): number | TDefault {
+	getNumber<TDefault extends number | undefined = undefined>(
+		identifier: string,
+		defaultValue?: TDefault,
+	): number | TDefault {
 		if (this.isInteractionSolver(this.#args))
-			return this.#args.getNumber(identifier) ?? defaultValue as TDefault;
+			return this.#args.getNumber(identifier) ?? (defaultValue as TDefault);
 
 		const result = this.#getResultFromParamSync(identifier, false) ?? defaultValue;
 		return CommandOptionSolver.asNumberOrUndefined(result) as TDefault;
@@ -1730,12 +1733,10 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		type: TParam,
 		value: ParamResult,
 	): BaseParamTypeMap[TParam] | undefined {
-		if (value == null)
-			return undefined;
+		if (value == null) return undefined;
 
 		const validator = typeValidators[type];
-		if (!validator(value))
-			throw new MalformedParameterError();
+		if (!validator(value)) throw new MalformedParameterError();
 
 		return value;
 	}

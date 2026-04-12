@@ -203,7 +203,10 @@ const command = new Command('confesión', tags)
 		});
 
 		const embed = new EmbedBuilder()
-			.setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL() ?? undefined })
+			.setAuthor({
+				name: interaction.guild.name,
+				iconURL: interaction.guild.iconURL() ?? undefined,
+			})
 			.setTitle('Confesionario')
 			.setColor(0x8334eb)
 			.addFields({ name: 'Canal de confesiones', value: `${confessionsChannel}` });
@@ -347,7 +350,7 @@ const command = new Command('confesión', tags)
 			const actualMessageId = decompressId(messageId);
 			const message = await confChannel.messages.fetch(actualMessageId);
 			const thread = message.hasThread
-				? message.thread as AnyThreadChannel
+				? (message.thread as AnyThreadChannel)
 				: await message.startThread({
 						name: 'Respuestas',
 						reason: 'Aprobación de respuesta anónima a confesión',

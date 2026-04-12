@@ -8,13 +8,15 @@ const QueueSchema = new Mongoose.Schema({
 
 export const QueueModel = Mongoose.model('Queue', QueueSchema);
 
-type QueueQuery = { queueId: string };
+interface QueueQuery {
+	queueId: string;
+}
 
-type QueueGenerationOptions = {
+interface QueueGenerationOptions {
 	length: number;
 	mapFn?: (v: number, k: number) => number;
 	sort: Sort;
-};
+}
 
 type QueueItem = number;
 
@@ -74,8 +76,7 @@ export const getQueueItem = async (
 	const { queueId, ...queueGenOptions } = subtractOptions;
 	const queueQuery = { queueId };
 	const queue = (await QueueModel.findOne(queueQuery)) || new QueueModel(queueQuery);
-	if (!queue.content?.length)
-		queue.content = generateQueue(queueGenOptions);
+	if (!queue.content?.length) queue.content = generateQueue(queueGenOptions);
 
 	const item = queue.content.shift();
 	queue.markModified('content');

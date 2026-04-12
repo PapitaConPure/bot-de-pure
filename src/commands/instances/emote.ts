@@ -1,4 +1,3 @@
-import type { Message } from 'discord.js';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { emojiRegex } from '@/func';
 import { Command, CommandOptions, CommandTags } from '../commons';

@@ -23,7 +23,9 @@ const action = new ContextMenuAction('actionFindSource', 'Message').setMessageRe
 
 		const attachmentUrls = messageAttachments.map((att) => att.url);
 		const otherMessageUrls =
-			message.embeds?.flatMap((e) => [e.image?.url, e.thumbnail?.url] as string[]).filter((u) => u) || [];
+			message.embeds
+				?.flatMap((e) => [e.image?.url, e.thumbnail?.url] as string[])
+				.filter((u) => u) || [];
 
 		const queries = [...attachmentUrls, ...otherMessageUrls].slice(0, 5);
 
@@ -38,7 +40,12 @@ const action = new ContextMenuAction('actionFindSource', 'Message').setMessageRe
 		const successes: EmbedBuilder[] = [];
 		const failures: EmbedBuilder[] = [];
 
-		await pourSauce(sauceNAOUser.clientId, queries, interaction as typeof interaction & { channel: GuildTextBasedChannel }, { successes, failures });
+		await pourSauce(
+			sauceNAOUser.clientId,
+			queries,
+			interaction as typeof interaction & { channel: GuildTextBasedChannel },
+			{ successes, failures },
+		);
 
 		if (!successes.length && !failures.length)
 			return interaction.editReply({ content: translator.getText('saucenaoInvalidImage') });

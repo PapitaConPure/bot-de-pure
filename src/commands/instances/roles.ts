@@ -26,7 +26,7 @@ interface RoleData {
 	id: string;
 	label: string;
 	emote: string;
-};
+}
 
 type CategoryIndex = 'GAMES' | 'DRINKS' | 'FAITH';
 

@@ -17,11 +17,11 @@ import { CommandPermissions } from '../commons/cmdPerms';
 
 const MEMBERS_PER_PAGE = 10;
 
-type InforolQuery = {
+interface InforolQuery {
 	strict: boolean;
 	roles: Role[];
 	members: Collection<string, GuildMember>;
-};
+}
 
 const perms = new CommandPermissions('ManageRoles');
 const options = new CommandOptions()

@@ -165,7 +165,7 @@ const command = new Command('tarjeta', tags)
 			});
 
 		let dateStr: string = request.isInteraction
-			? args.getString('fecha') as string
+			? (args.getString('fecha') as string)
 			: (args.args as string[]).slice(4).join('');
 		if (request.isMessage && !dateStr.length)
 			return request.reply({

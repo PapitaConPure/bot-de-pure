@@ -3,8 +3,12 @@ type Operator = '|' | '&';
 
 export type SimpleTypeExpr = 'string' | 'number' | 'boolean' | 'object' | 'null' | 'undefined';
 export type TypeArrayExpr<TValue extends string = string> = `${TValue}[]` | `Array<${TValue}>`;
-export type TypeObjectExpr<TValue extends string = string> = `{${Whitespace}${string}:${Whitespace}${TValue}${Whitespace}}`;
-export type TypeBinaryExpr<TLeft extends string = string, TRight extends string = string> = `${TLeft}${Whitespace}${Operator}${Whitespace}${TRight}`;
+export type TypeObjectExpr<TValue extends string = string> =
+	`{${Whitespace}${string}:${Whitespace}${TValue}${Whitespace}}`;
+export type TypeBinaryExpr<
+	TLeft extends string = string,
+	TRight extends string = string,
+> = `${TLeft}${Whitespace}${Operator}${Whitespace}${TRight}`;
 
 export type TypeExpr =
 	| SimpleTypeExpr
