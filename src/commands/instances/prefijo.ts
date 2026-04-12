@@ -23,8 +23,8 @@ const command = new Command('prefijo', flags)
 		const { raw: preraw, regex: preregex } = p_pure(request.guildId);
 
 		if (reset) {
-			await PrefixPair.findOneAndRemove(guildsearch);
-			prefixes[request.guildId] = null;
+			await PrefixPair.findOneAndDelete(guildsearch);
+			delete prefixes[request.guildId];
 			return request.reply({
 				content:
 					'Prefijo reestablecido a la configuración por defecto.\n'
@@ -53,7 +53,7 @@ const command = new Command('prefijo', flags)
 			return request.reply({ embeds: [embed] });
 		}
 
-		await PrefixPair.findOneAndRemove(guildsearch);
+		await PrefixPair.findOneAndDelete(guildsearch);
 		const pfpair = (await PrefixPair.findOne(guildsearch)) || new PrefixPair(guildsearch);
 		const regex = new RegExp(
 			`^${prefix.replace(/[a-z]/g, (l) => `[${l.toUpperCase()}${l}]`).replace('\\', '\\\\')}[\n ]*`,

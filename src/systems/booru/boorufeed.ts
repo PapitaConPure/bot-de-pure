@@ -3,20 +3,21 @@ import { getUnixTime, minutesToMilliseconds } from 'date-fns';
 import type {
 	Client,
 	Guild,
-	GuildBasedChannel,
 	GuildTextBasedChannel,
+	Message,
 	Snowflake,
 } from 'discord.js';
 import { Collection, MessageFlags } from 'discord.js';
+import type { AnyBulkWriteOperation } from 'mongoose';
+import { ClientNotFoundError, client } from '@/core/client';
 import { booruApiKey, booruUserId, globalConfigs } from '@/data/globalProps';
-import { paginateRaw } from '@/func';
-import GuildConfigs from '@/models/guildconfigs';
+import { isNSFWChannel, paginateRaw } from '@/func';
+import GuildConfigs, { type GuildConfigDocument } from '@/models/guildconfigs';
 import { Booru, type Post } from '@/systems/booru/boorufetch';
 import type { PostFormatData, Suscription } from '@/systems/booru/boorusend';
 import { formatBooruPostMessage, notifyUsers } from '@/systems/booru/boorusend';
 import { auditAction, auditError } from '@/systems/others/auditor';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
-
 import Logger from '@/utils/logs';
 
 const { debug, warn, error } = Logger('WARN', 'BooruSend');
@@ -72,7 +73,8 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 		feeds: { $exists: true, $ne: {} },
 	});
 
-	const bulkOps = [];
+	const bulkOps: (AnyBulkWriteOperation<GuildConfigDocument> | undefined)[] = [];
+
 	await Promise.all(
 		guildConfigs.map(async (gcfg) => {
 			const guild = guilds.get(gcfg.guildId);
@@ -83,12 +85,7 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 
 			await Promise.all(
 				Object.entries(gcfg.feeds).map(async ([channelId, feedData]) => {
-					const feed = new BooruFeed(
-						booru,
-						guild.channels.cache.get(channelId),
-						feedData.tags,
-						feedData,
-					);
+					const feed = new BooruFeed(booru, guild.id, channelId, feedData.tags, feedData);
 					if (!feed.isRunning) return;
 					if (!feed.isProcessable)
 						return feed.faults < 10 && bulkOps.push(feed.addFault());
@@ -109,15 +106,22 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 						if (!feedSuscription.has(channelId)) continue;
 
 						const followedTags = feedSuscription.get(channelId);
-						feedSuscriptions.push({ userId, followedTags });
+						if (followedTags) feedSuscriptions.push({ userId, followedTags });
 					}
 
 					//Comprobar recolectado en busca de imágenes nuevas
 					const channel = feed.channel;
-					const messagesToSend = /**@type {Array<Message<true>>}*/ ([]);
+					const messagesToSend: Message<true>[] = [];
+					let faultedDuringPostSend = false;
+
 					await Promise.all(
 						newPosts.map(async (post) => {
 							try {
+								if (!feed.channel) {
+									faultedDuringPostSend = true;
+									return;
+								}
+
 								const formattedContainer = await formatBooruPostMessage(
 									booru,
 									post,
@@ -131,7 +135,7 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 								messagesToSend.push(sent);
 							} catch (err) {
 								warn(
-									`Ocurrió un error al enviar la imagen de Feed: ${post.source ?? post.id} para ${channel.name}`,
+									`Ocurrió un error al enviar la imagen de Feed: ${post.source ?? post.id} para ${channel?.name}`,
 								);
 								error(err);
 								auditError(err, {
@@ -141,6 +145,9 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 							}
 						}),
 					);
+
+					if (faultedDuringPostSend)
+						return feed.faults < 10 && bulkOps.push(feed.addFault());
 
 					//Eliminar aquellos Posts no coincidentes con lo encontrado y guardar
 					toSave.lastFetchedAt = feed.lastFetchedAt;
@@ -162,7 +169,7 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 
 	debug.dir(bulkOps, { depth: null });
 
-	if (bulkOps.length) await GuildConfigs.bulkWrite(bulkOps);
+	if (bulkOps.length) await GuildConfigs.bulkWrite(bulkOps.filter((b) => b != null));
 }
 
 function getNextBaseUpdateStart(): number {
@@ -177,9 +184,9 @@ function getNextBaseUpdateStart(): number {
 }
 
 export interface GuildFeedChunk {
-	timestamp: Date;
-	tid: NodeJS.Timeout;
 	guilds: Array<[Snowflake, Guild]>;
+	tid: NodeJS.Timeout | null;
+	timestamp: Date | null;
 }
 
 /**@description Inicializa una cadena de actualización de Feeds en todas las Guilds que cuentan con uno.*/
@@ -192,7 +199,7 @@ export async function setupGuildFeedUpdateStack(client: Client) {
 			guildConfigs.some((gcfg) => gcfg.guildId === guild.id),
 		),
 		FEED_BATCH_MAX_COUNT,
-	).map((g) => ({ tid: null, guilds: g, timestamp: null }) as GuildFeedChunk);
+	).map((g) => ({ guilds: g, tid: null, timestamp: null }) as GuildFeedChunk);
 
 	const feedCount = guildConfigs
 		.filter((gcfg) => gcfg.feeds?.size)
@@ -265,7 +272,7 @@ export function addGuildToFeedUpdateStack(guild: Guild): number {
 				chunkUpdateStart -= FEED_UPDATE_INTERVAL;
 			if (!shortestTime || chunkUpdateStart < shortestTime) shortestTime = chunkUpdateStart;
 
-			clearTimeout(chunk.tid);
+			if (chunk.tid) clearTimeout(chunk.tid);
 			guildChunks[i].tid = setTimeout(
 				updateBooruFeeds,
 				chunkUpdateStart,
@@ -274,7 +281,7 @@ export function addGuildToFeedUpdateStack(guild: Guild): number {
 			guildChunks[i].timestamp = new Date(Date.now() + chunkUpdateStart);
 		});
 
-		newGuildChunkUpdateDelay = +guildChunks[chunkAmount - 1].timestamp - Date.now();
+		newGuildChunkUpdateDelay = +(guildChunks[chunkAmount - 1].timestamp as Date) - Date.now();
 
 		auditAction(
 			'Intervalos de Feed Reescritos',
@@ -292,7 +299,8 @@ export function addGuildToFeedUpdateStack(guild: Guild): number {
 		const chunkAmount = guildChunks.length;
 		newGuildChunkUpdateDelay =
 			feedUpdateStart + (FEED_UPDATE_INTERVAL * (chunkAmount - 1)) / chunkAmount;
-		clearTimeout(chunk.tid);
+
+		if (chunk.tid) clearTimeout(chunk.tid);
 		guildChunks[guildChunks.length - 1].tid = setTimeout(
 			updateBooruFeeds,
 			newGuildChunkUpdateDelay,
@@ -327,18 +335,15 @@ export function updateFollowedFeedTagsCache(
 
 	if (!feedTagSuscriptionsCache.has(userId)) feedTagSuscriptionsCache.set(userId, new Map());
 
-	const userMap = feedTagSuscriptionsCache.get(userId);
+	const userMap = feedTagSuscriptionsCache.get(userId) as Map<string, string[]>;
 
-	if (newTags.length) {
-		userMap.set(channelId, newTags);
+	if (!newTags.length) {
+		userMap.delete(channelId);
+		if (!userMap.size) feedTagSuscriptionsCache.delete(userId);
 		return;
 	}
 
-	userMap.delete(channelId);
-
-	if (!userMap.size) feedTagSuscriptionsCache.delete(userId);
-
-	return;
+	userMap.set(channelId, newTags);
 }
 
 export interface FeedOptions {
@@ -354,16 +359,19 @@ export interface FeedOptions {
 /**@class Representa un Feed programado de imágenes de {@linkcode Booru}.*/
 export class BooruFeed {
 	booru: Booru;
-	channel: GuildTextBasedChannel;
+	channel: GuildTextBasedChannel | null;
 	tags: string;
 
 	lastFetchedAt: Date;
 	faults: number;
 	maxTags: number;
-	cornerIcon: string;
-	title: string;
-	subtitle: string;
-	footer: string;
+	cornerIcon: string | undefined;
+	title: string | undefined;
+	subtitle: string | undefined;
+	footer: string | undefined;
+
+	#guildId: string;
+	#channelId: string;
 
 	/**
 	 * @description Crea una representación de un Feed programado de imágenes de {@linkcode Booru}.
@@ -371,11 +379,19 @@ export class BooruFeed {
 	 */
 	constructor(
 		booru: Booru,
-		channel: GuildBasedChannel,
+		guildId: string,
+		channelId: string,
 		tags: string,
-		options: FeedOptions = undefined,
+		options?: FeedOptions,
 	) {
+		if (!client) throw new ClientNotFoundError();
+
+		const guild = client?.guilds.cache.get(guildId);
+		const channel = guild?.channels.cache.get(channelId);
+
 		this.booru = booru;
+		this.#guildId = guildId;
+		this.#channelId = channelId;
 		this.channel = channel?.isTextBased() ? channel : null;
 		this.tags = tags;
 
@@ -384,16 +400,16 @@ export class BooruFeed {
 			options.lastFetchedAt ?? new Date(Math.floor(Date.now() - FEED_UPDATE_INTERVAL / 2));
 		this.faults = options.faults ?? 0;
 		this.maxTags = options.maxTags ?? 20;
-		this.cornerIcon = options.cornerIcon ?? null;
-		this.title = options.title ?? null;
-		this.subtitle = options.subtitle ?? null;
-		this.footer = options.footer ?? null;
+		this.cornerIcon = options.cornerIcon ?? undefined;
+		this.title = options.title ?? undefined;
+		this.subtitle = options.subtitle ?? undefined;
+		this.footer = options.footer ?? undefined;
 	}
 
 	get isProcessable() {
 		if (!this.booru || !this.channel || !this.tags) return false;
 
-		return this.channel.id && this.channel.guild?.channels.cache.has(this.channel.id);
+		return this.channel?.guild?.channels.cache.has(this.channelId);
 	}
 
 	get isRunning() {
@@ -428,8 +444,8 @@ export class BooruFeed {
 				),
 			);
 			console.log({
-				guildName: this.channel.guild.name,
-				channelId: this.channel.id,
+				guildName: this.channel?.guild?.name,
+				channelId: this.channelId,
 				feedTags: this.tags,
 			});
 			console.error(error);
@@ -442,9 +458,9 @@ export class BooruFeed {
 	 * @description Aumenta el número de fallas del Feed en pasos de 1.
 	 * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}, o `undefined` si ya se registraron 10 fallas.
 	 */
-	addFault() {
+	addFault(): AnyBulkWriteOperation<GuildConfigDocument> | undefined {
 		const channel = this.channel;
-		const guild = channel.guild;
+		const guild = channel?.guild;
 
 		auditAction(
 			'Comprobando eliminación de un Feed no disponible',
@@ -458,8 +474,8 @@ export class BooruFeed {
 		this.faults += 1;
 		return {
 			updateOne: {
-				filter: { guildId: guild.id },
-				update: { $set: { [`feeds.${channel.id}.faults`]: this.faults } },
+				filter: { guildId: this.guildId },
+				update: { $set: { [`feeds.${this.channelId}.faults`]: this.faults } },
 			},
 		};
 	}
@@ -468,18 +484,16 @@ export class BooruFeed {
 	 * @description Reduce progresivamente las fallas detectadas del Feed en pasos de 2.
 	 * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}.
 	 */
-	reduceFaults() {
-		const channel = this.channel;
-
+	reduceFaults(): AnyBulkWriteOperation<GuildConfigDocument> | undefined {
 		this.faults = Math.max(0, this.faults - 2);
 		this.lastFetchedAt = new Date(Date.now());
 		return {
 			updateOne: {
-				filter: { guildId: channel.guild.id },
+				filter: { guildId: this.guildId },
 				update: {
 					$set: {
-						[`feeds.${channel.id}.faults`]: this.faults,
-						[`feeds.${channel.id}.lastFetchedAt`]: this.lastFetchedAt,
+						[`feeds.${this.channelId}.faults`]: this.faults,
+						[`feeds.${this.channelId}.lastFetchedAt`]: this.lastFetchedAt,
 					},
 				},
 			},
@@ -487,8 +501,14 @@ export class BooruFeed {
 	}
 
 	get allowNSFW() {
-		if (this.channel.isThread()) return this.channel.parent.nsfw;
+		return this.channel ? isNSFWChannel(this.channel) : false;
+	}
 
-		return this.channel.nsfw;
+	get guildId() {
+		return this.channel?.guild?.id ?? this.#guildId;
+	}
+
+	get channelId() {
+		return this.channel?.id ?? this.#channelId;
 	}
 }

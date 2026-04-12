@@ -1,4 +1,4 @@
-import type { AnySelectMenuInteraction } from 'discord.js';
+import type { AnySelectMenuInteraction, GuildChannelResolvable, GuildMember } from 'discord.js';
 import { EmbedBuilder, MessageFlags } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
 import { tenshiColor } from '@/data/globalProps';
@@ -83,7 +83,7 @@ const command = new Command('ayuda', tags)
 				.setColor(tenshiColor)
 				.setAuthor({
 					name: 'Bot de Puré',
-					iconURL: request.client.user.avatarURL({ extension: 'png', size: 512 }),
+					iconURL: request.client.user.displayAvatarURL({ extension: 'png', size: 512 }),
 				})
 				.setTitle('Centro de Ayuda')
 				.addFields(
@@ -142,7 +142,10 @@ const command = new Command('ayuda', tags)
 				.setColor(tenshiColor)
 				.setAuthor({
 					name: 'Bot de Puré',
-					iconURL: interaction.client.user.avatarURL({ extension: 'png', size: 512 }),
+					iconURL: interaction.client.user.displayAvatarURL({
+						extension: 'png',
+						size: 512,
+					}),
 				})
 				.setTitle('Centro de Ayuda')
 				.addFields(
@@ -259,11 +262,11 @@ const command = new Command('ayuda', tags)
 export default command;
 
 export interface CommandsLookupQuery {
-	tags?: Array<import('../commons/cmdTags').CommandTagResolvable>;
-	excludedTags?: Array<import('../commons/cmdTags').CommandTagResolvable>;
+	tags?: CommandTagResolvable[];
+	excludedTags?: CommandTagResolvable[];
 	context?: {
-		member: import('discord.js').GuildMember;
-		channel: import('discord.js').GuildChannelResolvable;
+		member: GuildMember;
+		channel?: GuildChannelResolvable | null;
 	};
 }
 
@@ -274,10 +277,15 @@ export async function lookupCommands(query: CommandsLookupQuery = {}): Promise<C
 	const { tags, excludedTags, context } = query;
 
 	let commandIsAllowed: (command: Command) => boolean;
-	if (context)
-		commandIsAllowed = (command) =>
-			command.permissions?.isAllowedIn(context.member, context.channel) ?? true;
-	else commandIsAllowed = () => true;
+	if (context) {
+		if (context.channel != null)
+			commandIsAllowed = (command) =>
+				command.permissions?.isAllowedIn(
+					context.member,
+					context.channel as GuildChannelResolvable,
+				) ?? true;
+		else commandIsAllowed = (command) => command.permissions?.isAllowed(context.member) ?? true;
+	} else commandIsAllowed = () => true;
 
 	let commandMeetsCriteria: (command: Command) => boolean;
 	if (tags.length && excludedTags.length)

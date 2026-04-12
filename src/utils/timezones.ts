@@ -72,9 +72,11 @@ export function sanitizeTzCode(tzCode: string | number): string {
 		.replace(standardTimeEndRegex, '') //IANA no usa Standard Time de ISO
 		.replace(utcOffsetClockRegex, (_, sign?: string, hour?: string, minute?: string) => {
 			//Número a formato válido de offset para IAMA (+XX:XX/-XX:XX)
-			if (!minute) return `${sign || '+'}${hour.padStart(2, '0')}:00`;
+			sign ||= '+';
+			hour ||= hour?.padStart(2, '00') ?? '00';
+			minute ||= minute?.padStart(2, '00') ?? '00';
 
-			return `${sign || '+'}${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+			return `${sign}${hour}:${minute}`;
 		})
 		.trim();
 }
@@ -92,15 +94,18 @@ export function toUtcOffset(sanitizedTzCode: string): number | null {
 }
 
 /**@example "UTC+XX:XX", "UTC-XX:XX", ""*/
-export function utcOffsetDisplay(sanitizedTzCode: string): string {
+export function utcOffsetDisplay(sanitizedTzCode: string): `UTC${'+'|'-'}${string}:${string}` | '' {
 	if (!sanitizedTzCode?.length) return '';
 
-	const utcOffset = toUtcOffset(sanitizedTzCode);
-	let str = `UTC${utcOffset < 0 ? '-' : '+'}`;
-	str += `${Math.floor(Math.abs(utcOffset) / 60)}`.padStart(2, '0');
-	str += ':';
-	str += `${Math.abs(utcOffset) % 60}`.padStart(2, '0');
-	return str;
+	const utcOffset = toUtcOffset(sanitizedTzCode) ?? 0;
+	const hourNum = Math.floor(Math.abs(utcOffset) / 60);
+	const minuteNum = Math.abs(utcOffset) % 60;
+
+	const sign = utcOffset < 0 ? '-' : '+';
+	const hour = `${hourNum}`.padStart(2, '0');
+	const minute = `${minuteNum}`.padStart(2, '0');
+
+	return `UTC${sign}${hour}:${minute}`;
 }
 
 /**@example " (UTC+XX:XX)", " (UTC-XX:XX)", ""*/

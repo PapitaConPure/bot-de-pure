@@ -1,8 +1,9 @@
+import type { Image } from '@napi-rs/canvas';
 import { model, Schema } from 'mongoose';
 
 export const pureTableAssets = {
 	defaultEmote: '1267233873864032318',
-	image: null,
+	image: null as unknown as Image,
 };
 
 const PuretableSchema = new Schema({

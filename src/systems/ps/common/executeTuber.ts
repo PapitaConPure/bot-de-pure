@@ -1,14 +1,14 @@
-import { EmbedBuilder, Colors, ButtonBuilder, ActionRowBuilder, ButtonStyle } from 'discord.js';
-import { shortenText } from '@/func';
-import DiscordEnvironmentProvider from './discordEnvironmentProvider';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder } from 'discord.js';
 import sizeof from 'object-sizeof';
-import type { Input } from '../v1.1';
-import type { InputJSONData } from '../v1.1/interpreter/inputReader';
 import type { RequireAtLeastOne } from 'types';
-import type { RuntimeValue } from '../v1.1/interpreter/values';
 import type { ComplexCommandRequest } from 'types/commands';
-import type { EvaluationResult } from '../v1.1/interpreter';
+import { shortenText } from '@/func';
+import type { Input } from '../v1.1';
 import type { EmbedData } from '../v1.1/embedData';
+import type { EvaluationResult } from '../v1.1/interpreter';
+import type { InputJSONData } from '../v1.1/interpreter/inputReader';
+import type { RuntimeValue } from '../v1.1/interpreter/values';
+import DiscordEnvironmentProvider from './discordEnvironmentProvider';
 
 export const CURRENT_PS_VERSION = 1.11;
 
@@ -197,7 +197,7 @@ export async function executeTuber(
 			.setColor(errorColor)
 			.setAuthor({
 				name: 'Error de PuréScript',
-				iconURL: request.client.user.avatarURL({ size: 128 }),
+				iconURL: request.client.user.displayAvatarURL({ size: 128 }),
 			})
 			.addFields({
 				name: errorName,
@@ -236,8 +236,8 @@ export async function executeTuber(
 	}
 
 	const replyStacks = {
-		content: [],
-		embeds: [],
+		content: [] as (string | null)[],
+		embeds: [] as EmbedBuilder[],
 	};
 
 	for (const sendItem of sendStack) {
@@ -252,13 +252,14 @@ export async function executeTuber(
 	}
 
 	const replyObject = {
-		content: null as string,
+		content: null as string | null,
 		embeds: replyStacks.embeds,
 	};
 
 	if (replyStacks.content.length) replyObject.content = replyStacks.content.join('\n');
 
 	if (overwrite) {
+		//@ts-expect-error Hack para guardar
 		tuber.inputs = [newInputVariant];
 	} else {
 		tuber.inputs ??= [];
@@ -283,7 +284,7 @@ export async function executeTuber(
 					savedVariant.some((savedInput) => {
 						if (newInput.name !== savedInput.name) return false;
 
-						newInput.setDesc(savedInput.desc);
+						newInput.setDesc(savedInput.desc as string);
 						return true;
 					}),
 				),
@@ -291,7 +292,9 @@ export async function executeTuber(
 
 			savedVariants.push(newInputVariant);
 
+			//@ts-expect-error Hack para guardar
 			tuber.inputs = savedVariants;
+			//@ts-expect-error Hack para guardar
 			tuber.inputs.sort((a, b) => a.length - b.length);
 		}
 	}
@@ -382,7 +385,7 @@ function sendDatabaseError(
 		.setColor(0x9b59b6)
 		.setAuthor({
 			name: 'Error de PuréScript',
-			iconURL: request.client.user.avatarURL({ size: 128 }),
+			iconURL: request.client.user.displayAvatarURL({ size: 128 }),
 		})
 		.addFields({
 			name: 'Error de Guardado de Base de Datos',

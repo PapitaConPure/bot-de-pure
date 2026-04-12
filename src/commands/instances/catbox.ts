@@ -36,19 +36,27 @@ const command = new Command('catbox', tags)
 		);
 		const attachments = CommandOptionSolver.asAttachments(
 			args.parsePolyParamSync('imagens'),
-		).filter((a) => a);
-		const imageStreams: NodeJS.ReadableStream[] = await Promise.all(
+		).filter((a) => a != null);
+		const imageStreams: (NodeJS.ReadableStream | undefined)[] = await Promise.all(
 			attachments.slice(0, 5).map(async (attachment) => {
 				const fetchResult = await fetchExt(attachment.url, { type: 'nodeStream' });
 				return fetchResult.success ? fetchResult.data : undefined;
 			}),
 		);
 
-		const urlUploads: UrlPayload[] = imageUrls.map((url) => ({ type: 'url', image: url }));
-		const streamUploads: StreamPayload[] = imageStreams.map((stream) => ({
-			type: 'stream',
-			image: stream,
-		}));
+		const urlUploads: (UrlPayload | InvalidPayload)[] = imageUrls.map((url) =>
+			url != null ? { type: 'url', image: url } : { type: 'invalid' },
+		);
+		const streamUploads: (StreamPayload | InvalidPayload)[] = imageStreams.map((stream) =>
+			stream != null
+				? {
+						type: 'stream',
+						image: stream,
+					}
+				: {
+						type: 'invalid',
+					},
+		);
 		const uploads: Payload[] = [...urlUploads, ...streamUploads];
 
 		if (!uploads.length)
@@ -62,6 +70,8 @@ const command = new Command('catbox', tags)
 		for (const upload of streamUploads) {
 			const filePath = `./temp_${request.id}_${count++}.png`;
 
+			if (upload.type === 'invalid') continue;
+
 			const filePathResult: Promise<string | null> = pipeline(
 				upload.image,
 				fs.createWriteStream(filePath),
@@ -72,8 +82,8 @@ const command = new Command('catbox', tags)
 			filePaths.push(filePathResult);
 		}
 
-		const readyFilePaths: string[] = await Promise.all(filePaths);
-		const filePathsPendingForDeletion: string[] = readyFilePaths.filter((p) => p);
+		const readyFilePaths: (string | null)[] = await Promise.all(filePaths);
+		const filePathsPendingForDeletion: string[] = readyFilePaths.filter((p) => p != null);
 
 		const successes: EmbedBuilder[] = [];
 		const failures: EmbedBuilder[] = [];
@@ -123,14 +133,17 @@ const command = new Command('catbox', tags)
 
 export default command;
 
-interface BasePayload<TType extends 'url' | 'stream', TImage> {
+type BasePayloadType = 'invalid' | 'url' | 'stream';
+interface BasePayload<TType extends BasePayloadType, TImage> {
 	type: TType;
 	image: TImage;
 }
 
+type InvalidPayload = BasePayload<'invalid', undefined>;
 type UrlPayload = BasePayload<'url', string>;
 type StreamPayload = BasePayload<'stream', NodeJS.ReadableStream>;
-type Payload = UrlPayload | StreamPayload;
+
+type Payload = InvalidPayload | UrlPayload | StreamPayload;
 
 class FileStreamError extends Error {
 	constructor(message: string) {

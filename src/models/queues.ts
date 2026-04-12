@@ -3,7 +3,7 @@ import Mongoose from 'mongoose';
 /** Describe la configuración de un servidor. */
 const QueueSchema = new Mongoose.Schema({
 	queueId: { type: String },
-	content: { type: Array, default: [] },
+	content: { type: Array, of: Number, default: [] },
 });
 
 export const QueueModel = Mongoose.model('Queue', QueueSchema);
@@ -18,20 +18,21 @@ type QueueGenerationOptions = {
 
 type QueueItem = number;
 
-/**
- * Genera una nueva Queue sin guardarla en la base de datos.
- * Es probable que prefieras usar getQueueItem antes que solamente esta función
- */
 type SortFn = (a: number, b: number) => number;
 
 type Sort = 'NONE' | 'REVERSE' | 'ABC' | 'ABC_R' | 'VALUE' | 'VALUE_R' | 'RANDOM' | SortFn;
 
+/**
+ * Genera una nueva Queue sin guardarla en la base de datos.
+ * Es probable que prefieras usar getQueueItem antes que solamente esta función
+ */
 export const generateQueue = ({
-	length = 0,
+	length = 1,
 	mapFn = (_, k) => k,
 	sort = 'NONE',
 }: QueueGenerationOptions): QueueItem[] => {
-	if (length <= 0) return [];
+	length = Math.max(1, length);
+
 	if (typeof mapFn !== 'function') return Array(length).fill(null);
 
 	const queue = Array.from({ length }, mapFn);
@@ -73,10 +74,8 @@ export const getQueueItem = async (
 	const { queueId, ...queueGenOptions } = subtractOptions;
 	const queueQuery = { queueId };
 	const queue = (await QueueModel.findOne(queueQuery)) || new QueueModel(queueQuery);
-	if (!queue.content?.length) {
-		if (!queueGenOptions.length) return;
+	if (!queue.content?.length)
 		queue.content = generateQueue(queueGenOptions);
-	}
 
 	const item = queue.content.shift();
 	queue.markModified('content');

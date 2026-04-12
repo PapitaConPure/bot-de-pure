@@ -53,7 +53,7 @@ const command = new Command('exhibir', flags)
 		interaction.deferUpdate();
 		const { channel } = interaction;
 		const [pinnedMessages, backupChannel] = await Promise.all([
-			(await channel.messages.fetchPinned()).reverse(),
+			(await channel?.messages.fetchPinned())?.reverse(),
 			interaction.guild.id === serverIds.saki
 				? (interaction.guild.channels.fetch(
 						crazyBackupId,
@@ -70,7 +70,7 @@ const command = new Command('exhibir', flags)
 			return interaction.editReply({ content: '⚠️ Canal receptor no encontrado' });
 
 		const agent = await new DiscordAgent().setup(backupChannel);
-		const flushing = [];
+		const flushing: Promise<unknown>[] = [];
 
 		for (const message of pinnedMessages.values()) {
 			const formattedMessage = message;
@@ -93,7 +93,7 @@ const command = new Command('exhibir', flags)
 
 					return embed;
 				})
-				.filter((embed) => embed);
+				.filter((embed) => embed != null);
 
 			if (message.embeds.length < 10) {
 				let text = '\n-# ';
@@ -105,7 +105,7 @@ const command = new Command('exhibir', flags)
 						.map((reaction) => `${reaction.emoji} ${reaction.count}`)
 						.join(' ')} • `;
 
-				text += `[#${channel.name}](<${message.url}>) • <t:${getUnixTime(message.createdAt)}:F>`;
+				text += `[#${channel?.name}](<${message.url}>) • <t:${getUnixTime(message.createdAt)}:F>`;
 
 				(formattedMessage.embeds as unknown as EmbedBuilder[]).push(
 					new EmbedBuilder().setColor(Colors.Gold).setDescription(text),
@@ -117,13 +117,13 @@ const command = new Command('exhibir', flags)
 				formattedMessage as unknown as import('discord.js').WebhookMessageCreateOptions,
 			);
 			if (!sent)
-				interaction.channel.send({
+				interaction.channel?.send({
 					content: '⚠️ Se omitió un pin debido a un error al trasladarlo',
 				});
 			else
 				flushing.push(
 					message.unpin().catch(() =>
-						interaction.channel.send({
+						interaction.channel?.send({
 							content: `⚠️ No se pudo despinnear un mensaje\n${message.url}`,
 						}),
 					),

@@ -11,11 +11,12 @@ const command = new Command('decir', flags)
 	.setExecution(async (request, args) => {
 		const deleteFlag = args.hasFlag('borrar');
 
-		if (args.empty)
+		const sentence = args.getString('mensaje', true);
+
+		if(!sentence)
 			return request.reply({ content: '⚠️ tienes que especificar lo que quieres que diga.' });
 
-		const sentence = args.getString('mensaje', true);
-		if (deleteFlag && request.guild.members.me.permissions.has('ManageMessages'))
+		if (deleteFlag && request.guild.members.me?.permissions.has('ManageMessages'))
 			request.delete().catch((_) => _);
 
 		return request.reply({ content: sentence.split(/ +#[Nn] +/g).join('\n') });

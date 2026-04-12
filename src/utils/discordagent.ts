@@ -1,6 +1,5 @@
 import type {
 	AnyThreadChannel,
-	GuildBasedChannel,
 	GuildMember,
 	GuildTextBasedChannel,
 	Message,
@@ -19,15 +18,15 @@ const owners: Map<string, OwnerData> = new Map();
 
 /**@class Clase para interactuar con Webhooks de Discord de forma más sencilla.*/
 export class DiscordAgent {
-	webhook: Webhook;
-	threadId: string;
-	user: GuildMember | User;
+	webhook: Webhook | undefined;
+	threadId: string | undefined;
+	user: GuildMember | User | undefined;
 	userLock: Promise<boolean>;
 
 	constructor() {
-		this.webhook = null;
-		this.threadId = null;
-		this.user = null;
+		this.webhook = undefined;
+		this.threadId = undefined;
+		this.user = undefined;
 		this.userLock = Promise.resolve(false);
 	}
 
@@ -37,12 +36,14 @@ export class DiscordAgent {
 	 * @param name Nombre de muestra de Agente
 	 */
 	async setup(channel: GuildTextBasedChannel | AnyThreadChannel, name: string = 'Agente Puré') {
-		let hookable: GuildBasedChannel;
+		let hookable: Exclude<GuildTextBasedChannel, AnyThreadChannel>;
 
 		if (isThread(channel)) {
 			this.threadId = channel.id;
-			hookable = channel.parent;
-		} else hookable = channel;
+			hookable = channel.parent as Exclude<GuildTextBasedChannel, AnyThreadChannel>;
+		} else {
+			hookable = channel;
+		}
 
 		const webhooks = await hookable.fetchWebhooks();
 		this.webhook = webhooks.find((wh) => wh.token && wh.channelId === hookable.id);
@@ -88,6 +89,8 @@ export class DiscordAgent {
 
 		if (!this.user) throw new ReferenceError('No se ha definido un usuario');
 
+		if (!this.webhook) throw new ReferenceError('No se ha definido un webhook');
+
 		if (!messageOptions.content) messageOptions.content = undefined;
 
 		//@ts-expect-error Esto es un truco. Cambiar con cuidado.
@@ -100,7 +103,7 @@ export class DiscordAgent {
 			messageOptions.attachments = [];
 		}
 
-		let sent = null;
+		let sent: Message<true> | undefined;
 
 		try {
 			sent = await this.webhook.send({
@@ -138,7 +141,7 @@ export async function initializeWebhookMessageOwners() {
 				userId: owner.userId,
 				expirationDate: owner.expirationDate,
 			});
-		else await owner.delete();
+		else await owner.deleteOne();
 	}
 }
 
@@ -148,7 +151,7 @@ export function getAgentMessageOwnerId(messageId: string): string | null {
 	return owner.userId;
 }
 
-export async function addAgentMessageOwner(sent: Message, ownerId: string = undefined) {
+export async function addAgentMessageOwner(sent: Message, ownerId?: string) {
 	//Crear nuevo
 	const messageId = sent.id;
 	const userId = ownerId ?? sent.mentions?.repliedUser?.id ?? sent.author.id;
@@ -160,7 +163,7 @@ export async function addAgentMessageOwner(sent: Message, ownerId: string = unde
 
 export async function updateAgentMessageOwners() {
 	//Expirar viejos
-	const toDelete = [];
+	const toDelete: string[] = [];
 	for (const [messageId, owner] of owners.entries()) {
 		if (Date.now() > owner.expirationDate) {
 			toDelete.push(messageId);
@@ -177,5 +180,5 @@ export async function deleteAgentMessage(message: Message) {
 
 	owners.delete(message.id);
 
-	return Promise.all([message.delete().catch(() => undefined), webhookOwner?.delete()]);
+	return Promise.all([message.delete().catch(() => undefined), webhookOwner?.deleteOne()]);
 }

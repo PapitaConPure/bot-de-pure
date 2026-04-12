@@ -114,7 +114,7 @@ const command = new Command('presentar', tags)
 								.setDescription(
 									translator.getText('avatarGlobalAvatarAlt', papita.displayName),
 								)
-								.setURL(papita.avatarURL({ extension: 'png', size: 1024 })),
+								.setURL(papita.displayAvatarURL({ extension: 'png', size: 1024 })),
 						),
 				)
 				.addSeparatorComponents((separator) => separator.setDivider(true))

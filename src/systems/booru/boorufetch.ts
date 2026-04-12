@@ -1,6 +1,8 @@
+import type { AnyBulkWriteOperation } from 'mongoose';
 import type { ValuesOf } from 'types';
 import { decodeEntities, shuffleArray } from '@/func';
 import BooruTags from '@/models/boorutags';
+import type { GuildConfigDocument } from '@/models/guildconfigs';
 import type { FetchResult } from '@/utils/fetchext';
 import { fetchExt } from '@/utils/fetchext';
 
@@ -113,10 +115,10 @@ export class Booru {
 	static tagsSemaphoreCount: number = 0;
 	static tagsSemaphoreDone: number = 0;
 
-	credentials: Credentials;
+	#credentials: Credentials;
 
 	/**@param credentials Credenciales para autorizarse en la API*/
-	constructor(credentials: Credentials | null) {
+	constructor(credentials: Credentials) {
 		this.setCredentials(credentials);
 	}
 
@@ -373,13 +375,15 @@ export class Booru {
 
 				if (fetchedTags.length) {
 					savedTags.push(...fetchedTags);
-					const bulkOps = fetchedTags.map((t) => ({
-						updateOne: {
-							filter: { id: t.id },
-							update: { $set: t },
-							upsert: true,
-						},
-					}));
+					const bulkOps: AnyBulkWriteOperation<GuildConfigDocument>[] = fetchedTags.map(
+						(t) => ({
+							updateOne: {
+								filter: { id: t.id },
+								update: { $set: t },
+								upsert: true,
+							},
+						}),
+					);
 
 					await BooruTags.bulkWrite(bulkOps);
 				}
@@ -400,7 +404,7 @@ export class Booru {
 	 */
 	setCredentials(credentials: Credentials) {
 		this.#expectCredentials(credentials);
-		this.credentials = credentials;
+		this.#credentials = credentials;
 		return this;
 	}
 
@@ -410,8 +414,8 @@ export class Booru {
 	 * @throws {TypeError}
 	 */
 	#getCredentials() {
-		this.#expectCredentials(this.credentials);
-		return this.credentials;
+		this.#expectCredentials(this.#credentials);
+		return this.#credentials;
 	}
 
 	/**
@@ -442,10 +446,10 @@ export class Post {
 	creatorId: number;
 	fileUrl: string;
 	size: number[];
-	previewUrl: string | null;
-	previewSize: number[] | null;
-	sampleUrl: string | null;
-	sampleSize: number[] | null;
+	previewUrl: string | undefined;
+	previewSize: (number | undefined)[] | undefined;
+	sampleUrl: string | undefined;
+	sampleSize: (number | undefined)[] | undefined;
 
 	constructor(data: PostResolvable) {
 		this.id = data.id;
@@ -566,11 +570,13 @@ export class Tag {
 
 function getSourceUrl(source: string) {
 	if (!source) return null;
-	const smatch = source.match(
+
+	const sourceMatch = source.match(
 		/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_/.0-9#:?=&;,]*)?)?/,
 	);
-	if (!smatch) return null;
-	return source.slice(smatch.index, smatch.index + smatch[0].length);
+	if (!sourceMatch?.index) return null;
+
+	return source.slice(sourceMatch.index, sourceMatch.index + sourceMatch[0].length);
 }
 
 export class BooruError extends Error {

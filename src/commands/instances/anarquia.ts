@@ -1,5 +1,5 @@
 import { createCanvas, loadImage } from '@napi-rs/canvas';
-import type { AnySelectMenuInteraction } from 'discord.js';
+import type { AnySelectMenuInteraction, GuildEmoji } from 'discord.js';
 import {
 	ActionRowBuilder,
 	AttachmentBuilder,
@@ -260,11 +260,12 @@ const command = new Command('anarquia', tags)
 				iconURL: member.displayAvatarURL({ extension: 'png', size: 512 }),
 			});
 			if (auser) {
+				auser.skills ??= {} as Exclude<(typeof auser)['skills'], undefined>;
 				const skillContent = Object.entries(auser.skills)
 					.sort(([, amountA], [, amountB]) => amountB - amountA)
 					.map(([key, amount]) => {
 						const skill = skills[key as keyof typeof skills];
-						if (!skill) return undefined as string;
+						if (!skill) return undefined;
 
 						const decor = !amount ? '~~' : '';
 
@@ -321,11 +322,11 @@ const command = new Command('anarquia', tags)
 
 		const skill = args.hasFlag('skill');
 		const inverted = args.isMessageSolver(args.args) && Number.isNaN(+args.args[0]);
-		let emote: string;
+		let emote: string | undefined;
 		if (inverted) emote = args.getString('emote');
 		const pos = CommandOptionSolver.asNumbers(
 			args.parsePolyParamSync('posición', { regroupMethod: 'NONE' }),
-		).filter((x) => !Number.isNaN(+x));
+		).filter((x) => !Number.isNaN(+(x as number)));
 		if (!inverted) emote = args.getString('emote');
 
 		if (
@@ -340,12 +341,17 @@ const command = new Command('anarquia', tags)
 			});
 		}
 
-		// biome-ignore lint/suspicious/noImplicitAnyLet: En ese entonces programaba bastante mal así que esto toma varios tipos
-		let cells;
+		let cells: string[][] = [[]];
 		const embeds: EmbedBuilder[] = [];
 
 		//Ingresar emotes a tabla
 		if (pos.length) {
+			if (pos[0] == null || pos[1] == null)
+				return request.reply({
+					flags: MessageFlags.Ephemeral,
+					content: '⚠️️ Posición inválida.',
+				});
+
 			const { userId } = request;
 			const auser = (await AnarchyUser.findOne({ userId })) || new AnarchyUser({ userId });
 
@@ -355,7 +361,7 @@ const command = new Command('anarquia', tags)
 				return request.reply({ content: '⌛ ¡No tan rápido!', ephemeral: true });
 			} else auser.last = Date.now();
 
-			const emoteMatch = emote.match(emojiRegex);
+			const emoteMatch = emote?.match(emojiRegex);
 			if (!emoteMatch) {
 				reactIfMessage('⚠️');
 				return request.reply({
@@ -393,8 +399,9 @@ const command = new Command('anarquia', tags)
 				);
 			}
 
-			let couldLoadEmote: boolean;
-			let wasCorrected: boolean;
+			let couldLoadEmote = false;
+			let wasCorrected = false;
+
 			await ptTaskScheduler.scheduleTask(async () => {
 				cells = await fetchPureTableCells();
 				const correctedX = Ut.clamp(originalX, 0, cells[0].length - 1);
@@ -476,7 +483,7 @@ const command = new Command('anarquia', tags)
 
 			const skillKey = /**@type {keyof skills}*/ (interaction.values[0]);
 			const auser = await AnarchyUser.findOne({ userId });
-			if (!auser?.skills[skillKey]) {
+			if (!auser?.skills?.[skillKey]) {
 				react('❌');
 				return interaction.reply({
 					content: translator.getText('anarquiaSkillIssue'),
@@ -485,8 +492,8 @@ const command = new Command('anarquia', tags)
 			}
 
 			const skill = skills[skillKey];
-			let cells: string[][];
-			let couldLoadEmote: boolean;
+			let cells: string[][] = [[]];
+			let couldLoadEmote = false;
 
 			await ptTaskScheduler.scheduleTask(async () => {
 				couldLoadEmote = await loadEmoteIfNotLoaded(interaction, emoteId);
@@ -506,7 +513,7 @@ const command = new Command('anarquia', tags)
 				});
 			}
 
-			const embeds = [];
+			const embeds: EmbedBuilder[] = [];
 
 			react('⚡');
 			embeds.push(
@@ -566,7 +573,11 @@ const command = new Command('anarquia', tags)
 export default command;
 
 async function fetchPureTableCells() {
-	return (await PureTable.findOne({})).cells;
+	const pureTable = await PureTable.findOne({});
+
+	if (!pureTable) throw new ReferenceError('No se encontró la Tabla de Puré.');
+
+	return pureTable.cells;
 }
 
 /**@returns Whether the emote could be loaded (`true`) or not (`false`)*/
@@ -601,6 +612,7 @@ async function makeSkillSelectReply(
 	const userId = request.user.id;
 	const authorId = compressId(userId);
 	const [x, y] = position;
+	const emojisCache = request.client.emojis.cache;
 
 	return request.editReply({
 		embeds: [
@@ -613,9 +625,10 @@ async function makeSkillSelectReply(
 				.setTitle('¡A punto de usar una habilidad!')
 				.setDescription(`Centrada en la posición (${x + 1}, ${y + 1}) del tablero`)
 				.setThumbnail(
-					request.client.emojis.cache
-						.get(emoteId)
-						.imageURL({ extension: 'png', size: 512 }),
+					(emojisCache.get(emoteId) as GuildEmoji).imageURL({
+						extension: 'png',
+						size: 512,
+					}),
 				),
 		],
 		components: [
@@ -688,7 +701,9 @@ function levelUpAndGetSkills(auser: AnarchyUserDocument) {
 	const userLevel = calcUserLevel(auser);
 	const dropRate = calcDropRate(userLevel);
 
-	let droppedSkill: { key: string; skill: Skill };
+	auser.skills ??= {} as Exclude<(typeof auser)['skills'], undefined>;
+
+	let droppedSkill: { key: string; skill: Skill } | undefined;
 	if (Math.random() < dropRate) {
 		droppedSkill = makeWeightedDecision(skillOptions);
 		auser.skills[droppedSkill.key] ??= 0;

@@ -136,7 +136,7 @@ const command = new Command('tarjeta', tags)
 			});
 
 		const bg = backgrounds.find((b) =>
-			b.aliases.includes(args.getString('juego')?.toLowerCase()),
+			b.aliases.includes(args.getString('juego')?.toLowerCase() as string),
 		);
 		if (!bg)
 			return request.reply({
@@ -145,27 +145,27 @@ const command = new Command('tarjeta', tags)
 			});
 
 		const diff = highlights.difficulty.find((d) =>
-			d.aliases.includes(args.getString('dificultad')?.toLowerCase()),
+			d.aliases.includes(args.getString('dificultad')?.toLowerCase() as string),
 		);
 		if (!diff)
 			return request.reply({
 				content: `⚠️ Debes ingresar una calidad de survival válida.\n${helpstr}`,
 			});
 
-		const survivalname = args.getString('survival')?.toLowerCase();
+		const survivalname = args.getString('survival')?.toLowerCase() as string;
 		if (!highlights.survival[survivalname])
 			return request.reply({
 				content: `⚠️ Debes ingresar una calidad de survival válida.\n${helpstr}`,
 			});
 
-		const score = improveNumber(args.getNumber('puntaje'), { minDigits: 10 });
+		const score = improveNumber(args.getNumber('puntaje') as number, { minDigits: 10 });
 		if (!score || +score >= 10 ** 12)
 			return request.reply({
 				content: `⚠️ Debes ingresar un puntaje final válido.\n${helpstr}`,
 			});
 
 		let dateStr: string = request.isInteraction
-			? args.getString('fecha')
+			? args.getString('fecha') as string
 			: (args.args as string[]).slice(4).join('');
 		if (request.isMessage && !dateStr.length)
 			return request.reply({
@@ -202,7 +202,7 @@ const command = new Command('tarjeta', tags)
 				Canvas.loadImage(diff.url),
 				Canvas.loadImage(highlights.survival[survivalname]),
 				Canvas.loadImage(member.displayAvatarURL({ size: 512, extension: 'png' })),
-				...challenges.map((ch) => Canvas.loadImage(highlights.challenge[ch])),
+				...challenges.map((ch) => Canvas.loadImage(highlights.challenge[ch as string])),
 			]);
 
 			//Dibujar imágenes

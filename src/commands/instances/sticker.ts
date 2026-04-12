@@ -14,11 +14,10 @@ const command = new Command('sticker', tags)
 	.setDescription('Muestra el enlace del sticker especificado')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
+		const messageId = request.isMessage && request.inferAsMessage().reference?.messageId;
 		const message =
 			(await args.getMessage('mensaje', true))
-			?? (request.isMessage
-				? request.channel.messages.cache.get(request.inferAsMessage().reference?.messageId)
-				: null)
+			?? (messageId ? request.channel.messages.cache.get(messageId) : null)
 			?? (request.isMessage ? request.inferAsMessage() : null);
 
 		if (!message?.stickers.size)

@@ -47,7 +47,7 @@ const command = new Command('hora', tags)
 			?? (await UserConfigs.findOne({ userId: request.userId }))?.tzCode
 			?? 'UTC';
 		const sanitizedTzCode = sanitizeTzCode(tzCode);
-		const utcOffset = toUtcOffset(sanitizedTzCode);
+		const utcOffset = toUtcOffset(sanitizedTzCode) ?? 0;
 
 		const dateStr = args.parseFlagExpr('fecha');
 		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, sanitizedTzCode);

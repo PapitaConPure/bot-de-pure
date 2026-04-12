@@ -1,13 +1,21 @@
+'use strict';
+
 import type {
 	AnySelectMenuInteraction,
+	Attachment,
 	ButtonInteraction,
+	ChatInputCommandInteraction,
+	GuildBasedChannel,
+	GuildMember,
 	Interaction,
+	InteractionDeferReplyOptions,
 	MessageActionRowComponentBuilder,
 	MessageComponentInteraction,
 	MessageReplyOptions,
 	ModalMessageModalSubmitInteraction,
+	User,
 } from 'discord.js';
-import { Collection, InteractionType, Message } from 'discord.js';
+import { Collection, InteractionType, Message, PermissionsBitField } from 'discord.js';
 import type {
 	AnyCommandInteraction,
 	CommandEditReplyOptions,
@@ -22,29 +30,31 @@ import type { CommandPermissions } from './cmdPerms';
 import type { CommandTags } from './cmdTags';
 
 const extendedCommandRequestBlank: ExtendedCommandRequest = {
-	initialReply: undefined,
+	initialReply: undefined as unknown as Message<true>,
 	isInteraction: false,
 	isMessage: false,
-	inferAsMessage: undefined,
-	inferAsSlash: undefined,
+	inferAsMessage: undefined as unknown as () => Message<true>,
+	inferAsSlash: undefined as unknown as () => ChatInputCommandInteraction<'cached'>,
 
 	activity: undefined,
-	attachments: undefined,
-	appPermisions: undefined,
-	deferred: undefined,
-	replied: undefined,
-	memberPermissions: undefined,
-	user: undefined,
-	userId: undefined,
+	attachments: undefined as unknown as Collection<string, Attachment>,
+	appPermisions: undefined as unknown as Readonly<PermissionsBitField>,
+	deferred: undefined as unknown as boolean,
+	replied: undefined as unknown as boolean,
+	memberPermissions: undefined as unknown as PermissionsBitField,
+	user: undefined as unknown as User,
+	userId: undefined as unknown as string,
+	channel: undefined as unknown as GuildBasedChannel,
+	member: undefined as unknown as GuildMember,
 
-	reply: undefined,
-	replyFirst: undefined,
-	deferReply: undefined,
-	delete: undefined,
-	deleteReply: undefined,
-	editReply: undefined,
-	wasDeferred: undefined,
-	wasReplied: undefined,
+	reply: undefined as unknown as (options?: CommandReplyOptions | undefined) => Promise<Message<boolean>>,
+	replyFirst: undefined as unknown as (options?: CommandReplyOptions | undefined) => Promise<Message<boolean>>,
+	deferReply: undefined as unknown as (options?: (InteractionDeferReplyOptions & { fetchReply?: true;}) | undefined) => Promise<Message<boolean>>,
+	delete: undefined as unknown as () => Promise<Message<boolean>>,
+	deleteReply: undefined as unknown as () => Promise<Message<boolean>>,
+	editReply: undefined as unknown as (options: CommandEditReplyOptions) => Promise<Message<boolean>>,
+	wasDeferred: undefined as unknown as () => boolean,
+	wasReplied: undefined as unknown as () => boolean,
 };
 
 function extendRequest(request: CommandRequest | ComponentInteraction): ComplexCommandRequest {
@@ -57,10 +67,10 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 			throw 'Invalid inference of a Message Command into a Slash Command';
 		};
 
-		extension.appPermisions = request.guild.members.me.permissionsIn(request.channel);
+		extension.appPermisions = request.guild.members.me ? request.guild.members.me.permissionsIn(request.channel) : new PermissionsBitField(0n);
 		extension.deferred = false;
 		extension.replied = false;
-		extension.memberPermissions = request.member.permissionsIn(request.channel);
+		extension.memberPermissions = request.member ? request.member.permissionsIn(request.channel) : new PermissionsBitField(0n);
 		extension.user = request.author;
 		extension.userId = request.author.id;
 
@@ -99,27 +109,30 @@ function extendRequest(request: CommandRequest | ComponentInteraction): ComplexC
 			else throw 'Invalid inference of a non-Slash Command Interaction into a Slash Command';
 		};
 
-		extension.activity = null;
+		extension.activity = undefined;
 		extension.attachments = new Collection();
 		extension.userId = request.user.id;
 
-		extension.delete = async () => undefined;
+		extension.delete = async () => undefined as unknown as Message<true>;
 		extension.wasDeferred = () => request.isCommand() && request.deferred;
 		extension.wasReplied = () => request.isCommand() && request.replied;
 	}
 
-	for (const [k, v] of Object.entries(extension)) {
-		if (v !== undefined) request[k] = v;
-	}
+	for (const [k, v] of Object.entries(extension))
+		if (v !== undefined) Object.defineProperty(request, k, { value: v });
 
 	return request as ComplexCommandRequest;
 }
 
-type ExecutionFunction = (
+type ExecutionFunctionWithOptions = (
 	request: ComplexCommandRequest,
 	args: CommandOptionSolver,
 	rawArgs?: string,
 ) => Promise<unknown>;
+
+type ExecutionFunctionWithoutOptions = (request: ComplexCommandRequest) => Promise<unknown>
+
+type ExecutionFunction<TOptions extends CommandOptions | undefined> = TOptions extends CommandOptions ? ExecutionFunctionWithOptions : ExecutionFunctionWithoutOptions;
 
 type InteractionResponseFunction = (
 	interaction: Interaction,
@@ -164,19 +177,19 @@ interface CommandWikiData {
 }
 
 /**@class Representa un comando.*/
-export class Command {
+export class Command<TOptions extends CommandOptions | undefined = undefined> {
 	name: string;
 	aliases: string[] | null;
-	desc: string;
-	brief: string | null;
+	desc: string | undefined;
+	brief: string | undefined;
 	flags: CommandTags;
-	permissions: CommandPermissions;
-	options: CommandOptions | null;
-	callx: string | null;
+	permissions: CommandPermissions | undefined;
+	options: TOptions;
+	callx: string | undefined;
 	memory: Map<string, unknown>;
 	wiki: CommandWikiData;
-	reply: CommandReplyOptions;
-	execute: ExecutionFunction;
+	reply: CommandReplyOptions | undefined;
+	execute: ExecutionFunction<TOptions>;
 
 	/**
 	 * @description Crea un comando.
@@ -247,9 +260,9 @@ export class Command {
 
 	setOptions(options: CommandOptions) {
 		if (!options.options) throw new Error('Las opciones deben ser un CommandOptions');
-		this.options = options;
+		(this as Command<CommandOptions>).options = options;
 		this.callx = options.callSyntax;
-		return this;
+		return this as Command<CommandOptions>;
 	}
 
 	setReply(replyOptions: CommandReplyOptions) {
@@ -258,7 +271,7 @@ export class Command {
 	}
 
 	/**@description Establece la función de ejecución de este comando.*/
-	setExecution(exeFn: ExecutionFunction) {
+	setExecution(exeFn: ExecutionFunction<TOptions>) {
 		this.execute = exeFn;
 		return this;
 	}
@@ -296,7 +309,7 @@ export class Command {
 		responseFn: ButtonResponseFunction,
 		options: InteractionResponseOptions = {},
 	) {
-		return this.setFunction(responseFn, options);
+		return this.setFunction(responseFn as AnyCommandComponentResponseFunction, options);
 	}
 
 	/**
@@ -307,7 +320,7 @@ export class Command {
 		responseFn: SelectMenuResponseFunction,
 		options: InteractionResponseOptions = {},
 	) {
-		return this.setFunction(responseFn, options);
+		return this.setFunction(responseFn as AnyCommandComponentResponseFunction, options);
 	}
 
 	/**
@@ -315,7 +328,15 @@ export class Command {
 	 * @param options Opciones adicionales para controlar las respuestas de interacción
 	 */
 	setModalResponse(responseFn: ModalResponseFunction, options: InteractionResponseOptions = {}) {
-		return this.setFunction(responseFn, options);
+		return this.setFunction(responseFn as AnyCommandComponentResponseFunction, options);
+	}
+
+	hasOptions(): this is Command<CommandOptions> {
+		return this.options != null;
+	}
+
+	hasNoOptions(): this is Command<undefined> {
+		return this.options == null;
 	}
 
 	static requestIsMessage(request: CommandRequest | Interaction): request is Message<true> {

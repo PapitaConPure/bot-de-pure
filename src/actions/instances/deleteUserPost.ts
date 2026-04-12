@@ -19,6 +19,7 @@ const action = new ContextMenuAction('actionDeleteUserPost', 'Message').setMessa
 
 		if (
 			uid !== getAgentMessageOwnerId(message.id)
+			&& interaction.channel
 			&& !interaction.member.permissionsIn(interaction.channel).has('ManageMessages')
 		) {
 			return interaction.reply({

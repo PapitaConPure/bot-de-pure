@@ -21,7 +21,7 @@ export async function onUncaughtException(err: Error, origin: NodeJS.UncaughtExc
 	const lookups = [err.message, err.cause == null ? null : `${err.cause}`, err.stack].filter(
 		(l) => l,
 	);
-	if (lookups.some((l) => l.includes('ECONNRESET') || l.includes('terminated'))) {
+	if (lookups.some((l) => l?.includes('ECONNRESET') || l?.includes('terminated'))) {
 		warn('ECONNRESET RECIBIDO');
 		return;
 	}
@@ -79,13 +79,13 @@ export async function onUnhandledRejection(reason: unknown, promise: Promise<unk
 
 export async function onShutdown() {
 	process.on('SIGTERM', async () => {
-		await client.destroy();
+		await client?.destroy();
 		process.exit(0);
 	});
 }
 
 class UnhandledRejectionError extends Error {
-	constructor(parent: Error, message: string = null) {
+	constructor(parent: Error, message?: string) {
 		super(message, { cause: parent });
 		this.name = 'UnhandledRejectionError';
 	}

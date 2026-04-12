@@ -60,6 +60,10 @@ export interface ExtendedCommandRequest {
 	user: User;
 	/**The id of the user who started the command.*/
 	userId: string;
+	/**The channel the command was started on.*/
+	channel: GuildBasedChannel;
+	/**The guild the command was started on.*/
+	member: GuildMember;
 	/**If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply.*/
 	reply: (options?: CommandReplyOptions) => Promise<Message<boolean>>;
 	/**If a Slash command, defers the initial reply. Otherwise, sends a message and remembers it as the initial reply.*/
@@ -111,56 +115,35 @@ export type AnyCommandInteraction =
 
 export type ParamTypeStrict = { name: string; expression: string | number };
 
-export type BaseParamType =
-	| 'NUMBER'
-	| 'TEXT'
-	| 'USER'
-	| 'MEMBER'
-	| 'ROLE'
-	| 'GUILD'
-	| 'CHANNEL'
-	| 'MESSAGE'
-	| 'EMOTE'
-	| 'IMAGE'
-	| 'FILE'
-	| 'URL'
-	| 'ID'
-	| 'DATE'
-	| 'TIME';
+export type BaseParamTypeMap = {
+	NUMBER: number,
+	TEXT: string,
+	USER: User,
+	MEMBER: GuildMember,
+	GUILD: Guild,
+	CHANNEL: GuildBasedChannel,
+	MESSAGE: Message<boolean>,
+	ROLE: Role,
+	EMOTE: string,
+	IMAGE: string | Attachment,
+	FILE: string | Attachment,
+	URL: URL,
+	ID: string,
+	DATE: Date,
+	TIME: Date,
+};
+
+export type BaseParamType = keyof BaseParamTypeMap;
 
 export type ParamType = BaseParamType | ParamTypeStrict;
 
 export type ParamPoly = 'SINGLE' | 'MULTIPLE' | string[];
 
-export type GetMethodName = keyof CommandInteractionOptionResolver & `get${string}`;
-
-export interface ParamTypeSpecification {
-	getMethod: string;
-	help: string;
-}
-
-export type ParamResult =
-	| number
-	| string
-	| boolean
-	| User
-	| GuildMember
-	| Guild
-	| GuildBasedChannel
-	| Message<boolean>
-	| Role
-	| Attachment
-	| Date
-	| undefined;
+export type ParamResult = BaseParamTypeMap[BaseParamType] | boolean | undefined;
 
 export type FlagCallback<TResult extends ParamResult = ParamResult> = (
 	value: ParamResult,
 	isSlash: boolean,
-) => TResult;
-
-export type CommandArgumentGetFunction<TResult extends ParamResult = ParamResult> = (
-	identifier: string,
-	required?: boolean,
 ) => TResult;
 
 export interface FeedbackOptions<
@@ -171,6 +154,11 @@ export interface FeedbackOptions<
 	fallback?: TFallback;
 }
 
+export interface ParamTypeSpecification {
+	getMethod: string;
+	help: string;
+}
+
 export interface FetchMessageFlagOptions {
 	property: boolean;
 	short: string[];
@@ -178,3 +166,11 @@ export interface FetchMessageFlagOptions {
 	callback: FlagCallback;
 	fallback: unknown;
 }
+
+export type CommandArgumentGetFunction<TResult extends ParamResult = ParamResult> = (
+	identifier: string,
+	required?: boolean,
+) => TResult;
+
+export type GetMethodName = keyof CommandInteractionOptionResolver & `get${string}`;
+export type AnyCommandGetMethod = CommandInteractionOptionResolver[GetMethodName];

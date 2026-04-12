@@ -1,4 +1,4 @@
-import type { ButtonComponent, StringSelectMenuComponent } from 'discord.js';
+import type { ButtonComponent, Role, StringSelectMenuComponent } from 'discord.js';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -22,7 +22,7 @@ import { fetchExt } from '@/utils/fetchext';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandParam, CommandTags } from '../commons';
 
-type RoleData = {
+interface RoleData {
 	id: string;
 	label: string;
 	emote: string;
@@ -30,11 +30,11 @@ type RoleData = {
 
 type CategoryIndex = 'GAMES' | 'DRINKS' | 'FAITH';
 
-type CategoryContent = {
+interface CategoryContent {
 	functionName: string;
 	rolePool: RoleData[];
 	exclusive: boolean;
-};
+}
 
 type CategoryMap = Record<CategoryIndex, CategoryContent>;
 
@@ -50,7 +50,7 @@ function getAutoRoleRows(
 
 	const rolePool = subdivideArray(categories[category].rolePool, 5);
 	const pageRoles = rolePool[section];
-	const rows = [];
+	const rows: ActionRowBuilder<ButtonBuilder>[] = [];
 
 	if (pageRoles.length)
 		rows.push(
@@ -269,8 +269,8 @@ const command = new Command('roles', flags)
 				],
 			})
 			.catch(auditError);
-		if (!received) return command[operation](interaction);
-		return command[operation](interaction, ...received);
+		if (!received) return command[operation as string](interaction);
+		return command[operation as string](interaction, ...received);
 	})
 	.setInteractionResponse(async function selectCustomRole(interaction) {
 		if (!interaction.isRepliable()) return;
@@ -517,7 +517,7 @@ const command = new Command('roles', flags)
 		newComponents[0].components = newComponents[0].components.map(
 			(component: ButtonComponent) => {
 				const newComponent = ButtonBuilder.from(component);
-				const componentRid = component.customId.split('_')[2];
+				const componentRid = component.customId?.split('_')[2];
 
 				if (roleId === componentRid) {
 					if (!category) newComponent.setCustomId(`roles_removeRole_${componentRid}`);
@@ -565,7 +565,7 @@ const command = new Command('roles', flags)
 		newComponents[0].components = newComponents[0].components.map(
 			(component: ButtonComponent) => {
 				const newComponent = ButtonBuilder.from(component);
-				const componentRid = component.customId.split('_')[2];
+				const componentRid = component.customId?.split('_')[2];
 				if (roleId !== componentRid) return newComponent;
 
 				if (component.style === ButtonStyle.Primary)
@@ -601,7 +601,7 @@ const command = new Command('roles', flags)
 		newComponents[0].components = newComponents[0].components.map(
 			(component: ButtonComponent) => {
 				const newComponent = ButtonBuilder.from(component);
-				const [, functionName, componentRid] = component.customId.split('_');
+				const [, functionName, componentRid] = component.customId?.split('_') ?? [];
 				if (component.style === ButtonStyle.Secondary) return newComponent;
 				if (functionName === 'removeRole')
 					newComponent.setCustomId(`roles_addRole_${componentRid}`);
@@ -668,8 +668,7 @@ const command = new Command('roles', flags)
 		}
 	})
 	.setButtonResponse(async function customRoleWizard(interaction, roleId) {
-		/**@type {import('discord.js').Role}*/
-		const customRole: import('discord.js').Role = interaction.member.roles.cache.get(roleId);
+		const customRole: Role | undefined = interaction.member.roles.cache.get(roleId);
 		if (!customRole)
 			return interaction.update({
 				content: `⚠️ No se encontró tu Rol Personalizado. Prueba usando \`${p_pure(interaction.guildId).raw}roles\` una vez más para crear uno nuevo`,
@@ -714,8 +713,7 @@ const command = new Command('roles', flags)
 		return interaction.showModal(modal).catch(() => {});
 	})
 	.setModalResponse(async function applyCustomRoleChanges(interaction, roleId) {
-		/**@type {import('discord.js').Role}*/
-		const customRole: import('discord.js').Role = interaction.member.roles.cache.get(roleId);
+		const customRole: Role | undefined = interaction.member.roles.cache.get(roleId);
 		if (!customRole)
 			return interaction.reply({
 				content: '⚠️ No se encontró el rol personalizado. Intenta crearlo otra vez',
@@ -724,8 +722,8 @@ const command = new Command('roles', flags)
 		const roleName = interaction.fields.getTextInputValue('nameInput');
 		const roleColor = interaction.fields.getTextInputValue('colorInput');
 		let roleEmoteUrl = interaction.fields.getTextInputValue('emoteUrlInput');
-		const editStack = [];
-		const replyStack = [];
+		const editStack: Promise<unknown>[] = [];
+		const replyStack: string[] = [];
 
 		if (roleName.length)
 			editStack.push(

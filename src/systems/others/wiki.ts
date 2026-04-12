@@ -18,9 +18,9 @@ import {
 } from 'discord.js';
 import type { AnyRequest, ComplexCommandRequest, ComponentInteraction } from 'types/commands';
 import type { MessageComponentDataResolvable } from 'types/discord';
-import type { Command, CommandTagStringField } from '@/commands/commons';
+import type { Command, CommandOptions, CommandTagStringField } from '@/commands/commons';
 import { CommandTag, fetchCommandsFromFiles } from '@/commands/commons';
-import { client } from '@/core/client';
+import { ClientNotFoundError, client } from '@/core/client';
 import { tenshiColor } from '@/data/globalProps';
 import serverIds from '@/data/serverIds.json';
 import userIds from '@/data/userIds.json';
@@ -167,7 +167,8 @@ export const makeGuideRow = (
 export async function searchCommand(request: AnyRequest, nameOrAlias: string) {
 	const commands = await fetchCommandsFromFiles({
 		filter: (command) =>
-			command.name === nameOrAlias || command.aliases.some((alias) => alias === nameOrAlias),
+			command.name === nameOrAlias
+			|| !!command.aliases?.some((alias) => alias === nameOrAlias),
 	});
 
 	for (const command of commands) {
@@ -193,7 +194,7 @@ export async function searchCommand(request: AnyRequest, nameOrAlias: string) {
  * Si no se encuentran resultados, se devuelve `null`.
  */
 export async function searchCommands(request: AnyRequest, query: string) {
-	const commandsWithDistance = [];
+	const commandsWithDistance: { command: Command; distance: number }[] = [];
 
 	const commands = await fetchCommandsFromFiles({
 		excludeTags: CommandTag.GUIDE | CommandTag.MAINTENANCE | CommandTag.OUTDATED,
@@ -202,7 +203,10 @@ export async function searchCommands(request: AnyRequest, query: string) {
 
 	for (const command of commands) {
 		let distance = edlDistance(command.name, query);
+
 		if (distance > 3) {
+			if (!command.aliases) continue;
+
 			distance =
 				command.aliases
 					.map((alias) => edlDistance(alias, query))
@@ -251,9 +255,11 @@ const displayTagMappings = {
 	MUSIC: 'Música',
 } as const satisfies Record<CommandTagStringField, string>;
 
+const listExists = (l: string[] | null | undefined): l is string[] => !!l?.[0]?.length;
+
 /**@description Añade embeds y componentes de una wiki de comando a la carga indicada.*/
 export function injectWikiPage(
-	command: Command,
+	command: Command<CommandOptions | undefined>,
 	guildId: string,
 	payload: WikiPageInjectionPayload,
 ) {
@@ -272,7 +278,8 @@ export function injectWikiPage(
 		return `${commandName[0].toUpperCase()}${commandName.slice(1)}`;
 	};
 	const isNotGuidePage = !flags.has('GUIDE');
-	const listExists = (l: string[]) => l?.[0]?.length;
+
+	if (!client) throw new ClientNotFoundError();
 
 	//Embed de metadatos
 	embeds.push(
@@ -280,7 +287,8 @@ export function injectWikiPage(
 			.setColor(tenshiColor)
 			.setAuthor({
 				name: title(name),
-				iconURL: client.user.avatarURL({ extension: 'png', size: 512 }),
+				iconURL:
+					client.user?.displayAvatarURL({ extension: 'png', size: 512 }) ?? undefined,
 			})
 			.addFields(
 				{ name: 'Nombre', value: `\`${name}\``, inline: true },
@@ -332,7 +340,7 @@ export function injectWikiPage(
 
 /**@description Añade embeds y componentes de una wiki de comando a la carga indicada (utiliza Componentes V2).*/
 export function getWikiPageComponentsV2(
-	command: Command,
+	command: Command<CommandOptions | undefined>,
 	request: ComplexCommandRequest,
 ): WikiPageInjectionPayloadV2 {
 	const { name: commandName, aliases, flags: commandTags } = command;
@@ -342,7 +350,6 @@ export function getWikiPageComponentsV2(
 	const getDisplayFlags = () =>
 		`${commandTags.keys.map((t) => displayTagMappings[t]).join(', ')}`;
 	const isNotGuidePage = !commandTags.has('GUIDE');
-	const listExists = (l: string[]) => l?.[0]?.length;
 
 	//Contenedor de metadatos
 	const titleTextBuilder = new TextDisplayBuilder().setContent(

@@ -2,7 +2,7 @@ import { Client, IntentsBitField, Partials } from 'discord.js';
 
 const { Flags: intentBits } = IntentsBitField;
 
-export let client: Client<boolean> = null;
+export let client: Client<boolean> | undefined = undefined;
 
 export function initializeClient() {
 	const botIntents = new IntentsBitField().add(
@@ -29,4 +29,11 @@ export function initializeClient() {
 
 	client = initializedClient;
 	return initializedClient;
+}
+
+export class ClientNotFoundError extends Error {
+	constructor() {
+		super('Discord Client was expected but it was never initialized or registered in the system.');
+		this.name = 'ClientNotFoundError';
+	}
 }

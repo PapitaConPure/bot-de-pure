@@ -177,13 +177,13 @@ export class FetchError extends Error {
 }
 
 export class ResponseError extends Error {
-	#response: Response;
+	#response: Response | undefined;
 
 	constructor();
 	constructor(message?: string);
 	constructor(message?: string, response?: Response);
 	constructor(message?: string, response?: Response, options?: ErrorOptions);
-	constructor(message?: string, response: Response = undefined, options?: ErrorOptions) {
+	constructor(message?: string, response?: Response, options?: ErrorOptions) {
 		super(message, options);
 		this.name = 'ResponseError';
 		this.#response = response;

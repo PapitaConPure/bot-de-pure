@@ -109,7 +109,7 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 		}
 
 		let bestScore = 0;
-		let bestMatch = null;
+		let bestMatch: PSChannel | undefined;
 
 		for (const channel of this.guild.channels.values()) {
 			if (channel.name.includes(query) && channel.name.length > bestScore) {
@@ -118,7 +118,7 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 			}
 		}
 
-		return bestMatch;
+		return bestMatch ?? null;
 	}
 
 	fetchRole(query: string) {
@@ -128,7 +128,7 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 		}
 
 		let bestScore = 0;
-		let bestMatch = null;
+		let bestMatch: PSRole | undefined;
 
 		for (const roles of this.guild.roles.values()) {
 			if (roles.name.includes(query) && roles.name.length > bestScore) {
@@ -137,7 +137,7 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 			}
 		}
 
-		return bestMatch;
+		return bestMatch ?? null;
 	}
 
 	fetchMember(query: string) {
@@ -147,7 +147,7 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 		}
 
 		let bestScore = 0;
-		let bestMatch = null;
+		let bestMatch: PSMember | undefined;
 
 		for (const member of this.guild.members.values()) {
 			const tryName = (/**@type {string?}*/ name: string | null) => {
@@ -164,7 +164,7 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 			if (tryName(member.user.username)) continue;
 		}
 
-		return bestMatch;
+		return bestMatch ?? null;
 	}
 
 	private testUrlHandler() {

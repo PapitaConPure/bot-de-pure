@@ -16,7 +16,7 @@ const UserConfigSchema = new Mongoose.Schema({
 	},
 	tzCode: {
 		type: String,
-		default: null,
+		default: undefined,
 	},
 
 	prc: {
@@ -53,27 +53,31 @@ const UserConfigSchema = new Mongoose.Schema({
 		required: true,
 	},
 	voice: {
-		ping: {
-			type: String,
-			enum: ['always', 'onCreate', 'never'],
-			default: 'always',
-		},
-		autoname: {
-			type: String,
-			default: '',
-		},
-		autoemoji: {
-			type: String,
-			default: '',
-		},
-		killDelay: {
-			type: Number,
-			default: 0,
-		},
+		type: new Mongoose.Schema({
+			ping: {
+				type: String,
+				enum: ['always', 'onCreate', 'never'],
+				default: 'always',
+			},
+			autoname: {
+				type: String,
+				default: '',
+			},
+			autoemoji: {
+				type: String,
+				default: '',
+			},
+			killDelay: {
+				type: Number,
+				default: 0,
+			},
+		}, { _id: false }),
+		required: true,
 	},
 	flags: {
 		type: Array,
-		default: [],
+		of: String,
+		default: [] as string[],
 		required: true,
 	},
 	pixivConverter: {

@@ -35,7 +35,7 @@ export async function sendConvertedTwitterPosts(
 
 	if (
 		!message.guild.members.me
-			.permissionsIn(channel)
+			?.permissionsIn(channel)
 			.has(['SendMessages', 'ManageMessages', 'AttachFiles'])
 	)
 		return ConverterEmptyPayload;
@@ -44,8 +44,8 @@ export async function sendConvertedTwitterPosts(
 		try {
 			const { parent } = channel;
 			if (
-				parent.type === ChannelType.GuildForum
-				&& (await channel.fetchStarterMessage()).id === message.id
+				parent?.type === ChannelType.GuildForum
+				&& (await channel.fetchStarterMessage())?.id === message.id
 			)
 				return ConverterEmptyPayload;
 		} catch (err) {
@@ -71,7 +71,7 @@ export async function sendConvertedTwitterPosts(
 		let langSuffix = '';
 		if (ls && ls.length <= 2) {
 			langSuffix = `/${ls}`;
-			warnAboutUnsupportedTranslationUrls ||= ls && converterKey === 'vx';
+			warnAboutUnsupportedTranslationUrls ||= !!ls && converterKey === 'vx';
 		}
 		return `${spoiler}<:twitter2:1232243415165440040>[\`${artist}/${id}\`](${service}/${artist}/status/${id}${langSuffix})${spoiler}`;
 	});

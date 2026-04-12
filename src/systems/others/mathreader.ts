@@ -107,7 +107,7 @@ export class MathLexer {
 		this.#cursor = 0;
 		this.#tokens = [];
 
-		let match: string;
+		let match: string | null;
 		let normalizedRemainder: string;
 
 		while (this.#cursor < this.#stream.length) {
@@ -538,7 +538,7 @@ export class MathParser {
 
 		const token = this.#current;
 		const { start, end, type, value } = token ?? {};
-		fatal(
+		return fatal(
 			new MathParserError(
 				`Token inesperado en posición ${start}${start + 1 !== end ? ` a ${this.#current?.end}` : ''}: ${type}${value ? ` "${value}"` : ''}`,
 			),
@@ -610,7 +610,7 @@ export class MathEvaluator {
 				return this.#evaluateFunctionCall(node.identifier, node.argument);
 
 			default:
-				fatal(new MathEvaluatorError(`Nodo inesperado: ${(node as MathNode)?.type}`));
+				return fatal(new MathEvaluatorError(`Nodo inesperado: ${(node as MathNode)?.type}`));
 		}
 	}
 

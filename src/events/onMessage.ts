@@ -1,5 +1,6 @@
 import type { Guild, Message } from 'discord.js';
 import { ContainerBuilder, MessageFlags } from 'discord.js';
+import { Command, CommandOptionSolver, type CommandOptions } from '@/commands/commons';
 import { channelIsBlocked, edlDistance, rand } from '@/func';
 import {
 	findFirstException,
@@ -10,7 +11,6 @@ import { addAgentMessageOwner, updateAgentMessageOwners } from '@/utils/discorda
 import Logger from '@/utils/logs';
 import { p_pure } from '@/utils/prefixes';
 import { fetchUserCache, type UserCache } from '@/utils/usercache';
-import { Command, CommandOptionSolver } from '../commands/commons/index';
 import puré from '../core/puréRegistry';
 import type { PrefixPair } from '../data/globalProps';
 import { tenshiAltColor, tenshiColor } from '../data/globalProps';
@@ -88,7 +88,7 @@ async function handleInvalidCommand(
 	if (commandName.length < 2) return replyAndDelete();
 
 	const allowedGuesses = puré.commands.filter((cmd) => !cmd.flags.any('OUTDATED', 'MAINTENANCE'));
-	const foundList = [];
+	const foundList: { command: Command<CommandOptions | undefined>; distance: number }[] = [];
 	for (const [cmn, cmd] of allowedGuesses) {
 		const distances = [cmn, ...(cmd.aliases?.filter((a) => a.length > 1) ?? [])].map((c) => ({
 			n: c,
@@ -132,70 +132,62 @@ async function handleInvalidCommand(
 
 async function handleMessageCommand(
 	message: Message<true>,
-	command: Command,
+	command: Command<CommandOptions | undefined>,
 	args: string[],
 	rawArgs?: string,
 	exceptionString?: string,
 ): Promise<unknown> {
 	if (command.permissions) {
-		if (!command.permissions.isAllowedIn(message.member, message.channel)) {
-			const translator = await Translator.from(message.member);
-			return (
-				exceptionString
-				&& message.channel.send({
-					embeds: [
-						generateExceptionEmbed(
-							{
-								title: translator.getText('missingMemberChannelPermissionsTitle'),
-								desc: translator.getText(
-									'missingMemberChannelPermissionsDescription',
-								),
-							},
-							{ cmdString: exceptionString },
-						).addFields({
-							name: translator.getText(
-								'missingMemberChannelPermissionsFullRequisitesName',
-							),
-							value: command.permissions.matrix
-								.map(
-									(requisite, n) =>
-										`${n + 1}. ${requisite.map((p) => `\`${p}\``).join(' **o** ')}`,
-								)
-								.join('\n'),
-						}),
-					],
-				})
-			);
+		if (!message.member || !command.permissions.isAllowedIn(message.member, message.channel)) {
+			const translator = await Translator.from(message.author);
+			if (!exceptionString) return;
+			return message.channel.send({
+				embeds: [
+					generateExceptionEmbed(
+						{
+							title: translator.getText('missingMemberChannelPermissionsTitle'),
+							desc: translator.getText('missingMemberChannelPermissionsDescription'),
+						},
+						{ cmdString: exceptionString },
+					).addFields({
+						name: translator.getText(
+							'missingMemberChannelPermissionsFullRequisitesName',
+						),
+						value: command.permissions.matrix
+							.map(
+								(requisite, n) =>
+									`${n + 1}. ${requisite.map((p) => `\`${p}\``).join(' **o** ')}`,
+							)
+							.join('\n'),
+					}),
+				],
+			});
 		}
 
 		if (!command.permissions.amAllowedIn(message.channel)) {
 			const translator = await Translator.from(message.member);
-			return (
-				exceptionString
-				&& message.channel.send({
-					embeds: [
-						generateExceptionEmbed(
-							{
-								title: translator.getText('missingMemberChannelPermissionsTitle'),
-								desc: translator.getText(
-									'missingClientChannelPermissionsDescription',
-								),
-							},
-							{ cmdString: exceptionString },
-						).addFields({
-							name: translator.getText(
-								'missingMemberChannelPermissionsFullRequisitesName',
-							),
-							value: command.permissions.matrix
-								.map(
-									(requisite, n) =>
-										`${n + 1}. ${requisite.map((p) => `\`${p}\``).join(' **o** ')}`,
-								)
-								.join('\n'),
-						}),
-					],
-				})
-			);
+			if (!exceptionString) return;
+			return message.channel.send({
+				embeds: [
+					generateExceptionEmbed(
+						{
+							title: translator.getText('missingMemberChannelPermissionsTitle'),
+							desc: translator.getText('missingClientChannelPermissionsDescription'),
+						},
+						{ cmdString: exceptionString },
+					).addFields({
+						name: translator.getText(
+							'missingMemberChannelPermissionsFullRequisitesName',
+						),
+						value: command.permissions.matrix
+							.map(
+								(requisite, n) =>
+									`${n + 1}. ${requisite.map((p) => `\`${p}\``).join(' **o** ')}`,
+							)
+							.join('\n'),
+					}),
+				],
+			});
 		}
 	}
 
@@ -208,14 +200,14 @@ async function handleMessageCommand(
 			})
 		);
 
-	const completeExtendedRequest = Command.requestize(message);
-	const optionSolver = new CommandOptionSolver(
-		completeExtendedRequest,
-		args,
-		command.options,
-		rawArgs,
-	);
-	await command.execute(completeExtendedRequest, optionSolver, rawArgs);
+	const request = Command.requestize(message);
+
+	if (command.hasOptions()) {
+		const solver = new CommandOptionSolver(request, args, command.options, rawArgs);
+		await command.execute(request, solver, rawArgs);
+	} else if (command.hasNoOptions() /*Inferencia*/) {
+		await command.execute(request);
+	}
 }
 
 function handleMessageCommandError(
@@ -262,14 +254,20 @@ async function processCommand(message: Message<true>): Promise<CommandResult> {
 
 	auditRequest(message);
 
-	const args = content.replace(ppure.regex, '').split(/[\n ]+/); //Argumentos ingresados
-	const commandName = args.shift().toLowerCase(); //Comando ingresado
+	const args = content.replace(ppure.regex, '').split(/[\n ]+/);
+	const commandName = args.shift()?.toLowerCase();
+
+	if (!commandName) {
+		const translator = await Translator.from(message.author);
+		message.reply(translator.getText('invalidEmptyCommandName'));
+		return CommandResults.VOID;
+	}
+
 	const command =
 		puré.commands.get(commandName)
 		|| puré.commands.find((cmd) => cmd.aliases?.includes(commandName));
 
 	if (!command) return handleInvalidCommand(message, commandName, ppure);
-	//#endregion
 
 	const rawArgs = content.slice(content.indexOf(commandName) + commandName.length).trim();
 	try {
@@ -352,7 +350,7 @@ export async function onMessage(message: Message) {
 
 	const userCache = await fetchUserCache(author);
 
-	if (userCache.banned) return;
+	if (userCache?.banned) return;
 
 	await processGuildPlugins(message);
 
@@ -370,7 +368,7 @@ export async function onMessage(message: Message) {
 	Promise.allSettled([
 		gainPRC(guild, author.id),
 		updateAgentMessageOwners(),
-		processLinkConverters(message, userCache),
+		userCache && processLinkConverters(message, userCache),
 	]);
 	//#endregion
 

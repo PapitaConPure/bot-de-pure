@@ -76,7 +76,7 @@ export class CommandPermissions {
 
 	amAllowedIn(channel: GuildBasedChannel) {
 		const { guild } = channel;
-		return this.isAllowedIn(guild.members.me, channel);
+		return !!guild.members.me && this.isAllowedIn(guild.members.me, channel);
 	}
 
 	/**
@@ -100,7 +100,7 @@ export class CommandPermissions {
 
 		if (typeof permissions === 'bigint') return permissions;
 
-		if (typeof permissions === 'string') return BigInt(PermissionFlagsBits[permissions]);
+		if (typeof permissions === 'string') return BigInt((PermissionFlagsBits as { [ K: string ]: bigint })[permissions]);
 
 		if (permissions instanceof BitField) return BigInt(permissions.bitfield);
 

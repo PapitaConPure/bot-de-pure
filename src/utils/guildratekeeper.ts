@@ -1,3 +1,5 @@
+import { Guild, type GuildResolvable, Invite, InviteGuild } from 'discord.js';
+import { ClientNotFoundError, client } from '@/core/client';
 import Logger from '@/utils/logs';
 
 const { debug, info, error } = Logger('WARN', 'GRK');
@@ -7,22 +9,6 @@ const fetchRegistry: {
 } = {
 	members: new Map(),
 };
-
-const GuildRateKeeper: {
-	client?: import('discord.js').Client;
-} = {
-	client: null,
-};
-
-interface GuildRateKeeperSetupOptions {
-	client: import('discord.js').Client;
-}
-
-export function setupGuildRateKeeper({ client }: GuildRateKeeperSetupOptions) {
-	GuildRateKeeper.client = client;
-}
-
-type GuildResolvable = import('discord.js').Guild | string;
 
 /**@description Refresca la caché de miembros del servidor indicado, si es que no ha sido refrescada en un tiempo.*/
 export async function fetchGuildMembers(
@@ -52,15 +38,15 @@ export async function fetchGuildMembers(
 	}
 }
 
-export async function fetchAllGuildMembers(): Promise<void[]> {
+export async function fetchAllGuildMembers(): Promise<void> {
 	info('Attempting to fetch all guild members on all guilds...');
 
+	if (!client) throw new ClientNotFoundError();
+
 	try {
-		await GuildRateKeeper.client.guilds.fetch();
-		return Promise.all(
-			GuildRateKeeper.client.guilds.cache.map((guild) =>
-				fetchGuildMembers(guild, { withPresences: true }),
-			),
+		await client.guilds.fetch();
+		await Promise.all(
+			client.guilds.cache.map((guild) => fetchGuildMembers(guild, { withPresences: true })),
 		);
 	} catch (err) {
 		error(err);
@@ -68,8 +54,19 @@ export async function fetchAllGuildMembers(): Promise<void[]> {
 }
 
 /**@description Resuelve un {@link GuildResolvable}.*/
-async function resolveGuild(data: GuildResolvable) {
-	if (typeof data === 'string') return GuildRateKeeper.client.guilds.fetch(data);
+async function resolveGuild(data: GuildResolvable): Promise<Guild> {
+	if (!client) throw new ClientNotFoundError();
 
-	return data;
+	if (typeof data === 'string') return client.guilds.fetch(data);
+
+	if (data instanceof Guild) return data;
+
+	if (data instanceof Invite) {
+		if (data.guild == null || data.guild instanceof InviteGuild)
+			throw new TypeError(undefined, { cause: data });
+
+		return data.guild;
+	}
+
+	return data.guild;
 }

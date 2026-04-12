@@ -50,17 +50,14 @@ export async function modifyPresence(client: import('discord.js').Client, steps:
 		const monthKey = `${now.getUTCMonth() + 1}`.padStart(2, '0');
 		const specialDateKey = `${monthKey}-${dayKey}`;
 
-		const status =
-			specialDates[specialDateKey]?.(now)
-			?? presence.status[
-				await getQueueItem({
-					queueId: 'presenceStatus',
-					length: presence.status.length,
-					sort: 'RANDOM',
-				})
-			];
+		const queueIndex = await getQueueItem({
+			queueId: 'presenceStatus',
+			length: presence.status.length,
+			sort: 'RANDOM',
+		});
+		const status = specialDates[specialDateKey]?.(now) ?? presence.status[queueIndex];
 
-		client.user.setActivity({
+		client.user?.setActivity({
 			type: ActivityType.Custom,
 			name: 'customstatus',
 			state: `🥔 ${status}`,

@@ -15,7 +15,7 @@ async function safeDelete(message: ComplexCommandRequest) {
 	}
 }
 
-async function bulkDeleteMessages(channel: GuildTextBasedChannel, amount: number, user: User) {
+async function bulkDeleteMessages(channel: GuildTextBasedChannel, amount: number, user?: User) {
 	if (user == null) return channel.bulkDelete(amount);
 
 	const messages = await channel.messages.fetch({ limit: 100 });
@@ -64,7 +64,7 @@ const command = new Command('borrar', tags)
 			return request.isMessage && deleteOriginalAndReply(request, sent);
 		}
 
-		if (Number.isNaN(+amount)) {
+		if (!amount || Number.isNaN(+amount)) {
 			const sent = await request.reply({
 				content:
 					'⚠️ Debes especificar la cantidad de mensajes a borrar\n'

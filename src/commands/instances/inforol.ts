@@ -72,17 +72,17 @@ const command = new Command('inforol', flags)
 			args.parsePolyParamSync('términos', { regroupMethod: 'MENTIONABLES-WITH-SEP' }),
 		);
 
-		const roleIds = roles.map((role) => role.id);
-		if (!roleIds.length)
+		const roleIds = roles.map((role) => role?.id);
+		if (!roleIds.length || roles.some((role) => role == null))
 			return request.reply({ content: translator.getText('invalidRole'), ephemeral: true });
 
 		const members = request.guild.members.cache.filter((member) => {
 			const rolesCache = member.roles.cache;
 			return strict
-				? roleIds.every((arg) => rolesCache.has(arg))
-				: roleIds.some((arg) => rolesCache.has(arg));
+				? roleIds.every((arg) => arg && rolesCache.has(arg))
+				: roleIds.some((arg) => arg && rolesCache.has(arg));
 		});
-		const query = { strict, roles, members };
+		const query = { strict, roles: roles as Role[], members };
 		const requestId = compressId(request.id);
 		command.memory.set(requestId, query);
 
@@ -161,7 +161,7 @@ function showInforolPage(
 			.setThumbnail(guild.iconURL({ size: 256 }))
 			.setAuthor({
 				name: translator.getText('commandByName', user.username),
-				iconURL: user.avatarURL(),
+				iconURL: user.displayAvatarURL(),
 			})
 			.setFooter({ text: translator.getText('inforolDashboardFooter') })
 			.addFields(
@@ -196,7 +196,7 @@ function showInforolPage(
 			.setTitle(translator.getText('inforolDetailTitle'))
 			.setAuthor({
 				name: translator.getText('commandByName', user.username),
-				iconURL: user.avatarURL(),
+				iconURL: user.displayAvatarURL(),
 			})
 			.setFooter({ text: `${page}/${lastPage}` })
 			.addFields({

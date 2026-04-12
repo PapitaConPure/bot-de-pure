@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { GlobalFonts, loadImage } from '@napi-rs/canvas';
+import { GlobalFonts, type Image, loadImage } from '@napi-rs/canvas';
 import chalk from 'chalk';
 import { getUnixTime } from 'date-fns';
 import type {
@@ -14,7 +14,7 @@ import { Routes } from 'discord-api-types/v9';
 import { connect, set } from 'mongoose';
 import { databaseUri } from '@/core/db';
 import { initializeWebhookMessageOwners } from '@/utils/discordagent';
-import { fetchAllGuildMembers, setupGuildRateKeeper } from '@/utils/guildratekeeper';
+import { fetchAllGuildMembers } from '@/utils/guildratekeeper';
 import { fetchActionsFromFiles } from '../actions/commons/actionDiscovery';
 import { registerActions } from '../actions/commons/actionRegistry';
 import { fetchCommandsFromFiles } from '../commands/commons/commandDiscovery';
@@ -39,7 +39,7 @@ import { Booru, Tag } from '../systems/booru/boorufetch';
 import { auditSystem } from '../systems/others/auditor';
 import { initializeMessageCascades } from '../systems/others/messageCascades';
 import { prepareTracksPlayer } from '../systems/others/musicPlayer';
-import { initRemindersScheduler, processReminders } from '../systems/others/remindersScheduler';
+import { processReminders } from '../systems/others/remindersScheduler';
 import { modifyPresence } from '../systems/presence/presence';
 
 const logOptions = {
@@ -69,7 +69,7 @@ export async function onStartup(client: Client) {
 
 	console.log(chalk.cyan('Estableciendo actividad de "cargando"...'));
 	try {
-		client.user.setActivity({
+		client.user?.setActivity({
 			type: 4,
 			name: 'loading',
 			state: `⏳ Despertando...`,
@@ -99,7 +99,6 @@ export async function onStartup(client: Client) {
 	else console.log(chalk.cyanBright.bold('Se inicializará para un entorno de desarrollo.'));
 
 	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
-	setupGuildRateKeeper({ client });
 	await fetchAllGuildMembers();
 	confirm();
 
@@ -116,6 +115,9 @@ export async function onStartup(client: Client) {
 	};
 
 	try {
+		if (!client.application)
+			throw new ReferenceError("'client.application' was not properly defined");
+
 		await restGlobal.put(Routes.applicationCommands(client.application.id), {
 			body: commandData.global,
 		});
@@ -219,7 +221,6 @@ export async function onStartup(client: Client) {
 	logOptions.feedSuscriptions && console.log({ feedTagSuscriptionsCache });
 
 	console.log(chalk.gray('Preparando recordatorios...'));
-	initRemindersScheduler(client);
 	await processReminders();
 
 	console.log(chalk.gray('Preparando Dueños de Mensajes de Agentes Puré...'));
@@ -237,14 +238,14 @@ export async function onStartup(client: Client) {
 			),
 		);
 	const uniqueEmoteIds = new Set<string>();
-	const pendingEmoteCells = [];
+	const pendingEmoteCells: Promise<{ id: string; image: Image }>[] = [];
 	puretable.cells.flat().forEach((cell) => uniqueEmoteIds.add(cell));
 
-	/**@param {string} id*/
 	async function getEmoteCell(id: string) {
-		const image = await loadImage(
-			client.emojis.cache.get(id).imageURL({ extension: 'png', size: 64 }),
-		);
+		const emoji = client.emojis.cache.get(id);
+		if (!emoji)
+			throw new Error('Emoji unexpectedly not found even after emoji cleanup for PuréTable.');
+		const image = await loadImage(emoji.imageURL({ extension: 'png', size: 64 }));
 		return { id, image };
 	}
 
@@ -256,24 +257,8 @@ export async function onStartup(client: Client) {
 	]);
 	pureTableAssets.image = pureTableImage;
 	globalConfigs.loademotes = {};
-	for (const cell of emoteCells) globalConfigs.loademotes[cell.id] = cell.image;
-
-	console.log(chalk.gray('Preparando imágenes extra...'));
-	const slot3Emojis = /**@type {import('discord.js').Guild}*/ (globalConfigs.slots.slot3).emojis
-		.cache;
-	const [WHITE, BLACK, pawn] = await Promise.all([
-		loadImage(
-			slot3Emojis.find((e) => e.name === 'wCell').imageURL({ extension: 'png', size: 256 }),
-		),
-		loadImage(
-			slot3Emojis.find((e) => e.name === 'bCell').imageURL({ extension: 'png', size: 256 }),
-		),
-		loadImage(
-			slot3Emojis.find((e) => e.name === 'pawn').imageURL({ extension: 'png', size: 256 }),
-		),
-	]);
-	// biome-ignore lint/complexity/useLiteralKeys: 'chess' no está garantizado en loademotes
-	globalConfigs.loademotes['chess'] = { WHITE, BLACK, pawn };
+	for (const cell of emoteCells)
+		Object.defineProperty(globalConfigs.loademotes, cell.id, { value: cell.image });
 
 	console.log(chalk.gray('Iniciando cambios de presencia periódicos'));
 	modifyPresence(client);

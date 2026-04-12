@@ -16,7 +16,7 @@ import type { AnyRequest } from 'types/commands';
 import { tenshiColor } from '@/data/globalProps';
 import { compressId, decompressId, shortenText } from '@/func';
 import { Translator } from '@/i18n';
-import Reminder from '@/models/reminders';
+import Reminder, { type ReminderDocument } from '@/models/reminders';
 import UserConfigs from '@/models/userconfigs';
 import { clearScheduledReminder, scheduleReminder } from '@/systems/others/remindersScheduler';
 import {
@@ -122,7 +122,7 @@ async function makeRemindersListContainer(compressedUserId: string, translator: 
 function makeReminderContainer(
 	reminder: import('@/models/reminders').ReminderDocument,
 	translator: Translator,
-	title: string = undefined,
+	title?: string,
 ) {
 	const container = new ContainerBuilder()
 		.setAccentColor(tenshiColor)
@@ -167,7 +167,7 @@ function makeReminderModal(
 	request: AnyRequest,
 	translator: Translator,
 	utcOffset: number,
-	reminder: import('@/models/reminders').ReminderDocument = undefined,
+	reminder: ReminderDocument | undefined = undefined,
 ) {
 	const reminderId = reminder?._id;
 	const reminderLocalizedDate = new UTCDate(
@@ -262,10 +262,11 @@ function makeReminderModal(
 	return modal;
 }
 
-const validateDate = (date: Date, sanitizedTzCode: string) =>
-	isValid(date) && !isBefore(date, utcStartOfTzToday(sanitizedTzCode));
+const validateDate = (date: Date | null | undefined, sanitizedTzCode: string): date is Date =>
+	isValid(date) && !isBefore(date as Date, utcStartOfTzToday(sanitizedTzCode));
 
-const validateTime = (time: Date) => isValid(time) && Math.abs(+time) < +addDays(new Date(0), 2);
+const validateTime = (time: Date | null | undefined): time is Date =>
+	isValid(time) && Math.abs(+(time as Date)) < +addDays(new Date(0), 2);
 
 const isReminderLateEnough = (datetime: Date) => {
 	const inAMinute = addMinutes(new Date(Date.now()), 1);
@@ -335,7 +336,7 @@ const command = new Command('recordatorio', tags)
 
 		const tzCode = args.parseFlagExpr('huso') ?? userConfigs.tzCode ?? 'UTC';
 		const sanitizedTzCode = sanitizeTzCode(tzCode);
-		const utcOffset = toUtcOffset(sanitizedTzCode);
+		const utcOffset = toUtcOffset(sanitizedTzCode) ?? 0;
 
 		const dateStr = args.parseFlagExpr('fecha');
 		const timeStr = args.parseFlagExpr('hora');
@@ -354,7 +355,7 @@ const command = new Command('recordatorio', tags)
 			});
 		}
 
-		if (reminderContent?.length > 960)
+		if ((reminderContent?.length ?? 0) > 960)
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
 				content: translator.getText('recordarReminderContentTooLong'),
@@ -454,7 +455,7 @@ const command = new Command('recordatorio', tags)
 
 			const tzCode = userConfigs.tzCode ?? 'Etc/UTC';
 			const sanitizedTzCode = sanitizeTzCode(tzCode);
-			const utcOffset = toUtcOffset(sanitizedTzCode);
+			const utcOffset = toUtcOffset(sanitizedTzCode) ?? 0;
 
 			const modal = makeReminderModal(interaction, translator, utcOffset);
 
@@ -482,7 +483,7 @@ const command = new Command('recordatorio', tags)
 
 			const tzCode = userConfigs.tzCode ?? 'Etc/UTC';
 			const sanitizedTzCode = sanitizeTzCode(tzCode);
-			const utcOffset = toUtcOffset(sanitizedTzCode);
+			const utcOffset = toUtcOffset(sanitizedTzCode) ?? 0;
 
 			if (!reminder)
 				return interaction.reply({
@@ -512,7 +513,7 @@ const command = new Command('recordatorio', tags)
 
 		const tzCode = userConfigs.tzCode ?? 'UTC';
 		const sanitizedTzCode = sanitizeTzCode(tzCode);
-		const utcOffset = toUtcOffset(sanitizedTzCode);
+		const utcOffset = toUtcOffset(sanitizedTzCode) ?? 0;
 
 		const dateStr = interaction.fields.getTextInputValue('date');
 		const timeStr = interaction.fields.getTextInputValue('time');
@@ -588,7 +589,7 @@ const command = new Command('recordatorio', tags)
 
 		const tzCode = userConfigs.tzCode ?? 'Etc/UTC';
 		const sanitizedTzCode = sanitizeTzCode(tzCode);
-		const utcOffset = toUtcOffset(sanitizedTzCode);
+		const utcOffset = toUtcOffset(sanitizedTzCode) ?? 0;
 
 		if (!reminder)
 			return interaction.reply({

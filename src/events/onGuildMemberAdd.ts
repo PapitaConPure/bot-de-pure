@@ -12,10 +12,10 @@ export async function onGuildMemberAdd(member: GuildMember) {
 		setTimeout(equisde, 1000 * 2, member);
 		member.roles.add('1139992433501942001').catch(console.error);
 		return member.guild.systemChannel
-			.send('<:kokocrong:1107848001541644389>')
+			?.send('<:kokocrong:1107848001541644389>')
 			.catch(console.error);
 	}
-	announceMemberUpdate(member, sendWelcomeMessage);
+	announceMemberUpdate(member, 'welcome', sendWelcomeMessage);
 }
 
 async function equisde(member: GuildMember) {

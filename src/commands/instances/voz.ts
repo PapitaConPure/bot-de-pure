@@ -1,5 +1,5 @@
 import { addMinutes, getUnixTime, isBefore } from 'date-fns';
-import type { CategoryChannel, ColorResolvable, GuildChannel } from 'discord.js';
+import type { CategoryChannel, ColorResolvable, GuildChannel, GuildMember } from 'discord.js';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -99,8 +99,10 @@ const command = new Command('voz', tags)
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceState.channelId });
 		if (!session) return warnNotInSession();
 
-		const sessionMember = new PureVoiceSessionMember(session.members.get(request.member.id));
-		if (!sessionMember) return warnNotInSession();
+		const schemaMember = session.members.get(request.member.id);
+		if(!schemaMember) return warnNotInSession();
+
+		const sessionMember = new PureVoiceSessionMember(schemaMember);
 
 		if (sessionMember.isGuest())
 			return request.reply({
@@ -160,7 +162,7 @@ const command = new Command('voz', tags)
 
 			const wizard = wizEmbed(
 				translator,
-				interaction.client.user.avatarURL(),
+				interaction.client.user.displayAvatarURL(),
 				Colors.Navy,
 			).addFields({
 				name: translator.getText('voiceInstallationStartFieldName'),
@@ -210,7 +212,7 @@ const command = new Command('voz', tags)
 
 			const wizard = wizEmbed(
 				translator,
-				interaction.client.user.avatarURL(),
+				interaction.client.user.displayAvatarURL(),
 				Colors.Gold,
 			).addFields({
 				name: translator.getText('voiceInstallationSelectFieldName'),
@@ -310,7 +312,7 @@ const command = new Command('voz', tags)
 					.edit(interaction.guild.roles.everyone, { SendMessages: false })
 					.catch(console.error);
 				await voiceMaker.permissionOverwrites
-					.edit(interaction.guild.members.me, { SendMessages: true })
+					.edit(interaction.guild.members.me as GuildMember, { SendMessages: true })
 					.catch(console.error);
 
 				//Guardar nueva categoría PuréVoice
@@ -324,7 +326,7 @@ const command = new Command('voz', tags)
 
 				const wizard = wizEmbed(
 					translator,
-					interaction.client.user.avatarURL(),
+					interaction.client.user.displayAvatarURL(),
 					Colors.Green,
 				).addFields({
 					name: translator.getText('voiceCategoryInstalledFieldName'),
@@ -360,6 +362,9 @@ const command = new Command('voz', tags)
 
 			const guildQuery = { guildId: interaction.guildId };
 			const pv = await PureVoice.findOne(guildQuery);
+
+			if(!pv)
+				return interaction.deleteReply();
 
 			const modal = new ModalBuilder()
 				.setCustomId(`voz_relocateSystem_${authorId}`)
@@ -423,7 +428,7 @@ const command = new Command('voz', tags)
 			await Promise.all([
 				voiceMaker.permissionOverwrites
 					.edit(
-						interaction.guild.members.me,
+						interaction.guild.members.me as GuildMember,
 						{ SendMessages: true },
 						{ reason: relocateReason },
 					)
@@ -433,7 +438,7 @@ const command = new Command('voz', tags)
 
 			const wizard = wizEmbed(
 				translator,
-				interaction.client.user.avatarURL(),
+				interaction.client.user.displayAvatarURL(),
 				Colors.Yellow,
 			).addFields({
 				name: translator.getText('voiceRelocatedFieldName'),
@@ -453,7 +458,7 @@ const command = new Command('voz', tags)
 
 			const wizard = wizEmbed(
 				translator,
-				interaction.client.user.avatarURL(),
+				interaction.client.user.displayAvatarURL(),
 				Colors.Yellow,
 			).addFields({
 				name: translator.getText('voiceUninstallFieldName'),
@@ -521,7 +526,7 @@ const command = new Command('voz', tags)
 
 				const deleteEmbed = wizEmbed(
 					translator,
-					interaction.client.user.avatarURL(),
+					interaction.client.user.displayAvatarURL(),
 					Colors.Red,
 				).addFields({
 					name: translator.getText('voiceUninstalledFieldName'),
@@ -546,7 +551,7 @@ const command = new Command('voz', tags)
 
 			const cancelEmbed = wizEmbed(
 				translator,
-				interaction.client.user.avatarURL(),
+				interaction.client.user.displayAvatarURL(),
 				Colors.NotQuiteBlack,
 			).addFields({
 				name: translator.getText('cancelledStepName'),
@@ -620,6 +625,7 @@ const command = new Command('voz', tags)
 				.catch(console.error);
 
 		const voiceChannel = member.voice?.channel;
+		if (!voiceChannel?.id) return warnNotInSession();
 
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if (!session) return warnNotInSession();
@@ -665,7 +671,7 @@ const command = new Command('voz', tags)
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if (!session) return warnNotInSession();
 
-		const sessionMember = new PureVoiceSessionMember(session.members.get(member.id) ?? {});
+		const sessionMember = new PureVoiceSessionMember(session.members.get(member.id) ?? { id: '' });
 		if (sessionMember.isGuest())
 			return interaction.editReply({
 				content: translator.getText('voiceSessionAdminOrModExpected'),
@@ -780,7 +786,11 @@ function generateFirstWizard(request: ComplexCommandRequest, translator: Transla
 			content: translator.getText('insufficientPermissions'),
 		});
 
-	const wizard = wizEmbed(translator, request.client.user.avatarURL(), Colors.Aqua).addFields({
+	const wizard = wizEmbed(
+		translator,
+		request.client.user.displayAvatarURL(),
+		Colors.Aqua,
+	).addFields({
 		name: translator.getText('welcome'),
 		value: translator.getText('voiceWizardWelcome'),
 	});

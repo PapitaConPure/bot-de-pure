@@ -1,4 +1,4 @@
-import type { AutocompleteInteraction, Message } from 'discord.js';
+import type { AutocompleteInteraction, Guild, Message } from 'discord.js';
 import { EmbedBuilder, InteractionType, MessageFlags } from 'discord.js';
 import type { AnyRequest, ComplexCommandRequest } from 'types/commands';
 import serverIds from '@/data/serverIds.json';
@@ -70,8 +70,8 @@ function getEmotesList(interaction: AnyRequest) {
 
 	const guilds = interaction.client.guilds.cache;
 	const emotes = [
-		...guilds.get(serverIds.slot1).emojis.cache.values(),
-		...guilds.get(serverIds.slot2).emojis.cache.values(),
+		...(guilds.get(serverIds.slot1) as Guild).emojis.cache.values(),
+		...(guilds.get(serverIds.slot2) as Guild).emojis.cache.values(),
 	]
 		.filter((emote) => perritoNames.includes(emote.name))
 		.sort();
@@ -105,13 +105,10 @@ async function loadPageNumber(request: Exclude<AnyRequest, AutocompleteInteracti
 		components: navigationRows('perrito', page, lastPage),
 	};
 
-	if (
-		Object.hasOwn.call(request, 'author')
-		|| request.type === InteractionType.ApplicationCommand
-	)
+	if ('author' in request || request.type === InteractionType.ApplicationCommand)
 		return (request as Message).reply(content);
 
-	return 'update' in request ? request.update(content) : request.edit(content);
+	return request.update(content);
 }
 
 const options = new CommandOptions()

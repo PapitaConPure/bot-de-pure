@@ -1,4 +1,5 @@
 import type {
+	ApplicationCommandOptionChoiceData,
 	AutocompleteInteraction,
 	ChatInputCommandInteraction,
 	ContextMenuCommandInteraction,
@@ -11,7 +12,7 @@ import {
 	generateExceptionEmbed,
 	handleAndAuditError,
 } from '@/utils/cmdExceptions';
-import type { CommandFlagExpressive, CommandParam } from '../commands/commons/cmdOpts';
+import type { CommandOption, CommandOptions } from '../commands/commons/cmdOpts';
 import { CommandOptionSolver } from '../commands/commons/cmdOpts';
 import {
 	type AnyCommandComponentResponseFunction,
@@ -57,13 +58,24 @@ async function handleCommand(
 	if (!slash) return;
 
 	try {
-		//Detectar problemas con el comando basado en flags
-		const command: Command = puré.commands.get(commandName);
+		const command: Command<CommandOptions | undefined> | undefined =
+			puré.commands.get(commandName);
 
+		if (!command)
+			throw Error(`Command '${commandName}' was not registered before command handling.`);
+
+		if (!interaction.channel) {
+			const translator = await Translator.from(interaction.user);
+			return interaction.reply({
+				content: translator.getText('invalidChannel'),
+			});
+		}
+
+		//Detectar problemas con el comando basado en flags y permisos
 		if (command.permissions) {
 			if (!command.permissions.isAllowedIn(interaction.member, interaction.channel)) {
 				const translator = await Translator.from(interaction.member);
-				return interaction.channel.send({
+				return interaction.channel?.send({
 					embeds: [
 						generateExceptionEmbed(
 							{
@@ -123,9 +135,13 @@ async function handleCommand(
 				ephemeral: true,
 			});
 
-		const complex = Command.requestize(interaction);
-		const solver = new CommandOptionSolver(complex, interaction.options, command.options);
-		await command.execute(complex, solver);
+		const request = Command.requestize(interaction);
+		if (command.hasOptions()) {
+			const solver = new CommandOptionSolver(request, interaction.options, command.options);
+			await command.execute(request, solver);
+		} else if (command.hasNoOptions() /*Inferencia*/) {
+			await command.execute(request);
+		}
 		stats.commands.succeeded++;
 	} catch (error) {
 		const isPermissionsError = handleAndAuditError(error, interaction, {
@@ -149,6 +165,9 @@ async function handleAction(
 
 	try {
 		const action = puré.actions.get(commandName);
+
+		if (!action)
+			throw Error(`Action '${commandName}' was not registered before action handling.`);
 
 		await action.execute(interaction);
 		stats.commands.succeeded++;
@@ -176,10 +195,10 @@ async function handleComponent(interaction: AnyCommandInteraction) {
 
 		if (!commandName || !commandFnName) return handleUnknownInteraction(interaction);
 
-		const command: Command =
+		const command: Command | undefined =
 			puré.commands.get(commandName)
 			|| puré.commands.find((cmd) => cmd.aliases?.includes(commandName));
-		if (!command) throw new ReferenceError(`El comando ${commandName} no existe`);
+		if (command == null) throw new ReferenceError(`El comando ${commandName} no existe`);
 		if (typeof command[commandFnName] !== 'function') return handleHuskInteraction(interaction);
 
 		const commandFn: AnyCommandComponentResponseFunction = command[commandFnName];
@@ -228,22 +247,27 @@ async function handleAutocompleteInteraction(interaction: AutocompleteInteractio
 	console.log([commandName, optionName, '«?»', optionValue]);
 
 	try {
-		const command: Command =
+		const command: Command<CommandOptions | undefined> | undefined =
 			puré.commands.get(commandName)
 			|| puré.commands.find((cmd) => cmd.aliases?.includes(commandName));
-		const option = (command.options.options.get(optionName)
-			?? command.options.options.get(`${optionName.slice(0, optionName.lastIndexOf('_'))}s`)
-			?? command.options.options.get(
-				`${optionName.slice(0, optionName.lastIndexOf('_'))}`,
-			)) as CommandParam | CommandFlagExpressive;
+		if (command == null) throw new ReferenceError(`El comando ${commandName} no existe`);
+		const option: CommandOption | undefined =
+			command.options?.options.get(optionName)
+			?? command.options?.options.get(`${optionName.slice(0, optionName.lastIndexOf('_'))}s`)
+			?? command.options?.options.get(`${optionName.slice(0, optionName.lastIndexOf('_'))}`);
 
-		if (!option)
-			return interaction.respond([
-				{
-					name: 'Ocurrió un error. Disculpa las molestias',
-					value: 'BDP_ERR_NOOPTION',
-				},
-			]);
+		const errOption: ApplicationCommandOptionChoiceData = {
+			name: 'Ocurrió un error. Disculpa las molestias',
+			value: 'BDP_ERR_NOOPTION',
+		};
+
+		if (!option) return interaction.respond([errOption]);
+
+		if (!option.isCommandParam() && !option.isCommandFlag())
+			return interaction.respond([errOption]);
+
+		if (option.isCommandFlag() && !option.isExpressive())
+			return interaction.respond([errOption]);
 
 		return option.autocomplete(interaction, optionValue);
 	} catch (error) {

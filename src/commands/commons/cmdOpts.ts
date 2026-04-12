@@ -1,4 +1,6 @@
-import type { AutocompleteInteraction, GuildBasedChannel } from 'discord.js';
+'use strict';
+
+import type { AutocompleteInteraction, GuildBasedChannel, GuildTextBasedChannel } from 'discord.js';
 import {
 	Attachment,
 	CommandInteractionOptionResolver,
@@ -9,6 +11,8 @@ import {
 	Role,
 	User,
 } from 'discord.js';
+import type { SimpleTypeExpr } from 'types/typeExpr';
+import { UnexpectedValueError } from '@/errors/unexpectedValue';
 import {
 	fetchChannel,
 	fetchGuild,
@@ -22,6 +26,7 @@ import {
 import type { LocaleKey } from '@/i18n';
 import type {
 	BaseParamType,
+	BaseParamTypeMap,
 	CommandArgumentGetFunction,
 	CommandArguments,
 	CommandRequest,
@@ -41,7 +46,6 @@ import {
 	parseTimeFromNaturalLanguage,
 	relativeDates,
 } from '@/utils/datetime';
-
 import Logger from '@/utils/logs';
 
 const { warn } = Logger('WARN', 'CmdOpts');
@@ -64,7 +68,7 @@ const paramTypes = {
 	TIME: { getMethod: 'getString', help: 'hora' },
 } as const satisfies Record<BaseParamType, { getMethod: GetMethodName; help: string }>;
 
-function fetchMessageFlagText(args: string[], i: number): string {
+function fetchMessageFlagText(args: string[], i: number): string | undefined {
 	if (i >= args.length) return undefined;
 	if (!args[i].startsWith('"')) return args.splice(i, 1)[0];
 
@@ -83,10 +87,10 @@ function fetchMessageFlagText(args: string[], i: number): string {
 function fetchMessageFlag(
 	args: string[],
 	flag: FetchMessageFlagOptions = {
-		property: undefined,
+		property: undefined as unknown as boolean,
 		short: [],
 		long: [],
-		callback: undefined,
+		callback: undefined as unknown as FlagCallback<ParamResult>,
 		fallback: undefined,
 	},
 ) {
@@ -160,10 +164,10 @@ async function handleAutocomplete(
 }
 
 function groupQuoted(args: string[]): string[] {
-	const result = [];
+	const result: string[] = [];
 
 	let isInsideQuotes = false;
-	let groupedTemp = [];
+	let groupedTemp: string[] = [];
 
 	for (const arg of args) {
 		if (arg.startsWith('"') && !isInsideQuotes) {
@@ -184,8 +188,8 @@ function groupQuoted(args: string[]): string[] {
 }
 
 /**@description Representa una opción de comando.*/
-class CommandOption {
-	protected _desc: string;
+export abstract class CommandOption {
+	protected _desc: string | undefined;
 
 	/**@description La descripción de la opción.*/
 	get desc() {
@@ -219,7 +223,7 @@ export class CommandParam extends CommandOption {
 	#optional: boolean;
 	#poly: ParamPoly;
 	#polymax: number;
-	#autocompleteInner: AutocompleteFunction;
+	#autocompleteInner: AutocompleteFunction | undefined;
 
 	/**
 	 * @param name El nombre del parámetro.
@@ -243,6 +247,7 @@ export class CommandParam extends CommandOption {
 		this.#optional = false;
 		this.#poly = 'SINGLE';
 		this.#polymax = 8;
+		this.#autocompleteInner = undefined;
 	}
 
 	/**@description Define si el parámetro es opcional.*/
@@ -272,7 +277,10 @@ export class CommandParam extends CommandOption {
 		return true;
 	}
 
-	autocomplete: AutocompleteFunction = (interaction, query) => {
+	autocomplete: AutocompleteFunction = async (interaction, query) => {
+		if (!this.#autocompleteInner)
+			throw new Error('autocomplete() endpoint reached without proper initialization.');
+
 		return handleAutocomplete(this.#autocompleteInner, interaction, query);
 	};
 
@@ -333,8 +341,8 @@ export class CommandParam extends CommandOption {
 
 /**@class Representa una bandera de comando.*/
 export class CommandFlag extends CommandOption {
-	protected _short: string[];
-	protected _long: string[];
+	protected _short: string[] | undefined;
+	protected _long: string[] | undefined;
 	protected _expressive: boolean;
 	protected _type: ParamType | undefined;
 
@@ -375,6 +383,11 @@ export class CommandFlag extends CommandOption {
 	}
 
 	get actualType() {
+		if (!this._type)
+			throw new Error(
+				'Se esperaba que el tipo de esta opción estuviera inicializado para cuando se lo consultó',
+			);
+
 		return this._type;
 	}
 
@@ -388,31 +401,35 @@ export class CommandFlag extends CommandOption {
 	/**@description String de ayuda de la bandera.*/
 	get display(): string {
 		const { _short: short, _long: long, desc } = this;
-		const flagString = [];
+		const flagString: string[] = [];
+
 		if (Array.isArray(short) && short.length) flagString.push(`\`-${short[0]}\``);
 		if (Array.isArray(long) && long.length) flagString.push(`\`--${long[0]}\``);
+
 		return `${flagString.join(' o ')} ${desc}`;
 	}
 
 	/**@description Estructura de objeto de los identificadores de la bandera.*/
 	get structure(): { property: boolean; short: string[]; long: string[] } {
-		return { property: this.isExpressive(), short: this._short, long: this._long };
+		return { property: this.isExpressive(), short: this._short ?? [], long: this._long ?? [] };
 	}
 
 	/**@description Identificador de la bandera.*/
 	get identifier() {
-		return this._long.length
-			? Array.isArray(this._long)
-				? this._long[0]
-				: this._long
-			: this._short[0];
+		if (this._long?.length && Array.isArray(this._long)) return this._long[0];
+
+		if (this._short?.[0]) return this._short[0];
+
+		throw new Error(
+			'No se definieron banderas cortas ni largas antes de acceder identificador de bandera',
+		);
 	}
 }
 
 /**@class Representa una bandera expresiva de comando.*/
 export class CommandFlagExpressive extends CommandFlag {
 	#name: string;
-	#autocompleteInner: AutocompleteFunction;
+	#autocompleteInner: AutocompleteFunction | undefined;
 
 	/**
 	 * @constructor
@@ -435,6 +452,7 @@ export class CommandFlagExpressive extends CommandFlag {
 		this.#name = name;
 		this._type = type;
 		this._expressive = true;
+		this.#autocompleteInner = undefined;
 	}
 
 	/**
@@ -452,7 +470,10 @@ export class CommandFlagExpressive extends CommandFlag {
 		return this;
 	}
 
-	autocomplete: AutocompleteFunction = (interaction, query) => {
+	autocomplete: AutocompleteFunction = async (interaction, query) => {
+		if (!this.#autocompleteInner)
+			throw new Error('autocomplete() endpoint reached without proper initialization.');
+
 		return handleAutocomplete(this.#autocompleteInner, interaction, query);
 	};
 
@@ -463,15 +484,17 @@ export class CommandFlagExpressive extends CommandFlag {
 
 	/**@description El tipo del parámetro de la bandera.*/
 	get typeDisplay(): string {
-		return typeHelp(this._type);
+		return this._type ? typeHelp(this._type) : '';
 	}
 
 	/**@description Texto de ayuda de la bandera.*/
 	get display(): string {
 		const { short, long, name, typeDisplay, desc } = this;
-		const flagString = [];
+		const flagString: string[] = [];
+
 		if (Array.isArray(short) && short.length) flagString.push(`\`-${short[0]} <${name}>\``);
 		if (Array.isArray(long) && long.length) flagString.push(`\`--${long[0]} <${name}>\``);
+
 		return `${flagString.join(' o ')} _(${typeDisplay})_ ${desc}`;
 	}
 
@@ -500,10 +523,10 @@ export class CommandOptions {
 	/**@description Propiedades por defecto*/
 	#defaults: { polymax: number };
 	/**@description Contexto de Request.*/
-	#request: CommandRequest | null;
+	#request: CommandRequest | undefined;
 
 	/**@param request El contexto de Request actual. Esto solo se ingresa dentro de una ejecución.*/
-	constructor(request: CommandRequest | null = null) {
+	constructor(request: CommandRequest | undefined = undefined) {
 		this.options = new Map();
 		this.params = new Map();
 		this.flags = new Map();
@@ -557,7 +580,7 @@ export class CommandOptions {
 		short: string | string[],
 		long: string | string[],
 		desc: string,
-		expression?: { name?: string; type?: Exclude<ParamType, undefined | null> },
+		expression?: { name: string; type: Exclude<ParamType, undefined | null> },
 	) {
 		const commandFlag = expression
 			? new CommandFlagExpressive(expression.name, expression.type)
@@ -580,6 +603,8 @@ export class CommandOptions {
 			} else if (option.isCommandFlag()) {
 				identifier = option.identifier;
 				this.flags.set(identifier, option);
+			} else {
+				throw 'Comando inválido. Debes agregar una tag o una bandera.';
 			}
 
 			this.options.set(identifier, option);
@@ -680,7 +705,10 @@ export class CommandOptions {
 				);
 				return fetchMember(argsPrototype, this.#request);
 			case 'MESSAGE':
-				return fetchMessage(argsPrototype, this.#request);
+				return fetchMessage(
+					argsPrototype,
+					this.#request as unknown as { channel: GuildTextBasedChannel; guild: Guild },
+				);
 			case 'GUILD':
 				return fetchGuild(argsPrototype);
 		}
@@ -713,13 +741,13 @@ export class CommandOptions {
 			case 'MEMBER':
 				return fetchMember(argsPrototype, this.#request);
 			case 'ROLE':
-				return fetchRole(argsPrototype, this.#request.guild);
+				return fetchRole(argsPrototype, this.#request?.guild as Guild);
 			case 'MESSAGE':
 				throw 'Los parámetros de mensaje solo pueden ser manejados mediante promesas';
 			case 'GUILD':
 				throw 'Los parámetros de servidor solo pueden ser manejados mediante promesas';
 			case 'CHANNEL':
-				return fetchChannel(argsPrototype, this.#request.guild);
+				return fetchChannel(argsPrototype, this.#request?.guild as Guild);
 			case 'IMAGE':
 				return argsPrototype;
 			case 'NUMBER': {
@@ -759,7 +787,7 @@ export class CommandOptions {
 		slashIdentifier: string,
 		whole: boolean = false,
 	): Promise<ParamResult> {
-		const param: CommandParam = this.params.get(slashIdentifier);
+		const param: CommandParam | undefined = this.params.get(slashIdentifier);
 
 		if (!param)
 			throw ReferenceError(
@@ -783,7 +811,7 @@ export class CommandOptions {
 		let getMethodName: GetMethodName = 'getString';
 
 		if (Array.isArray(param.type)) {
-			let result: ParamResult;
+			let result: ParamResult | undefined;
 
 			for (const pt of param.type) {
 				if (!isParamTypeStrict(pt)) getMethodName = paramTypes[pt].getMethod;
@@ -801,7 +829,11 @@ export class CommandOptions {
 		} else {
 			if (!isParamTypeStrict(param.type)) getMethodName = paramTypes[param.type].getMethod;
 
-			return input[getMethodName](slashIdentifier, !param.optional);
+			try {
+				return input[getMethodName](slashIdentifier, !param.optional);
+			} catch {
+				return undefined;
+			}
 		}
 	}
 
@@ -823,14 +855,15 @@ export class CommandOptions {
 		callbackFn: CommandArgumentGetFunction<TResult>,
 		fallback: (() => TFallback) | TFallback | null | undefined = undefined,
 	): (TResult | TFallback)[] {
-		const option: CommandParam = this.params.get(identifier);
+		const option: CommandParam | undefined = this.params.get(identifier);
+
 		if (!option)
 			throw new ReferenceError(
 				`No se pudo encontrar un Poly-parámetro con el identificador: ${identifier}`,
 			);
 
 		const singlename = identifier.replace(/[Ss]$/, '');
-		let params: string[];
+		let params: string[] = [];
 		if (option?.poly)
 			switch (option.poly) {
 				case 'MULTIPLE':
@@ -853,7 +886,8 @@ export class CommandOptions {
 			.map((opt, i) => callbackFn.call(input, opt, !i && !option.optional))
 			.filter((param) => param);
 
-		if (!params.length) return [typeof fallback === 'function' ? fallback() : fallback];
+		if (!params.length)
+			return [typeof fallback === 'function' ? fallback() : (fallback as TFallback)];
 
 		return results;
 	}
@@ -875,7 +909,7 @@ export class CommandOptions {
 			| string[],
 		identifier: string,
 		output: FeedbackOptions<T, N> = { callback: undefined, fallback: undefined },
-	): T | N {
+	): T | N | undefined {
 		const flag = this.flags.get(identifier);
 
 		if (!flag)
@@ -884,12 +918,10 @@ export class CommandOptions {
 			);
 
 		if (Array.isArray(input))
-			// @ts-expect-error Te juro que se puede, solo no me acuerdo por qué
 			return fetchMessageFlag(input, {
-				property: flag.isExpressive(),
-				...this.flags.get(identifier).structure,
-				...output,
-			});
+				...flag.structure,
+				...(output as unknown as FetchMessageFlagOptions),
+			}) as T | N;
 
 		let getMethod: GetMethodName = 'getBoolean';
 
@@ -921,12 +953,32 @@ export class CommandOptions {
 	}
 }
 
+const typeValidators: {
+	[K in BaseParamType]: (v: unknown) => v is BaseParamTypeMap[K];
+} = {
+	NUMBER: (v): v is number => typeof v === 'number',
+	TEXT: (v): v is string => typeof v === 'string',
+	USER: (v): v is User => v instanceof User,
+	MEMBER: (v): v is GuildMember => v instanceof GuildMember,
+	GUILD: (v): v is Guild => v instanceof Guild,
+	CHANNEL: (v): v is GuildBasedChannel => v instanceof GuildChannel,
+	MESSAGE: (v): v is Message<boolean> => v instanceof Message,
+	ROLE: (v): v is Role => v instanceof Role,
+	EMOTE: (v): v is string => typeof v === 'string',
+	IMAGE: (v): v is string | Attachment => typeof v === 'string' || v instanceof Attachment,
+	FILE: (v): v is string | Attachment => typeof v === 'string' || v instanceof Attachment,
+	URL: (v): v is URL => v instanceof URL,
+	ID: (v): v is string => typeof v === 'string',
+	DATE: (v): v is Date => v instanceof Date,
+	TIME: (v): v is Date => v instanceof Date,
+};
+
 /**@class Representa un resolvedor de opciones de comando, sea este un comando de mensaje o un comandoSlash.*/
 export class CommandOptionSolver<TArgs extends CommandArguments = CommandArguments> {
 	#request: ComplexCommandRequest;
 	#requestified: boolean;
 	#args: TArgs;
-	#rawArgs: string | null;
+	#rawArgs: string;
 	#options: CommandOptions;
 	#isSlash: boolean = false;
 	#nextAttachmentIndex: number = 0;
@@ -940,12 +992,12 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		request: ComplexCommandRequest,
 		args: TArgs,
 		options: CommandOptions,
-		rawArgs: string = null,
+		rawArgs?: string,
 	) {
 		this.#request = request;
 		this.#requestified = false;
 		this.#args = args;
-		this.#rawArgs = rawArgs;
+		this.#rawArgs = rawArgs ?? '';
 		this.#options = options;
 		this.#isSlash = args instanceof CommandInteractionOptionResolver;
 	}
@@ -999,9 +1051,11 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 				return this;
 			},
 			next() {
-				return args.length
-					? { value: args.shift(), done: false }
-					: { value: undefined, done: true };
+				return (
+					args.length
+						? { value: args.shift(), done: false }
+						: { value: undefined, done: true }
+				) as IteratorResult<string, undefined>;
 			},
 		};
 	}
@@ -1010,7 +1064,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	 * @description Arranca y devuelve la siguiente entrada de este {@linkcode CommandOptionSolver<String[]>}.
 	 * @throws {Error} Al usarse con un {@linkcode CommandOptionSolver<CommandInteractionOptionResolver>}.
 	 */
-	next(): string {
+	next(): string | undefined {
 		if (!this.isMessageSolver(this.#args))
 			throw new Error('No se puede extraer un "siguiente parámetro" de un Comando Slash');
 
@@ -1061,20 +1115,21 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	 * @param identifier El identificador del {@linkcode CommandParam}.
 	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`.
 	 */
-	getString(identifier: string, getRestOfMessageWords: boolean = false): string | undefined {
-		if (this.isInteractionSolver(this.#args)) return this.#args.getString(identifier);
+	getString(identifier: string, getRestOfMessageWords: boolean = false) {
+		if (this.isInteractionSolver(this.#args))
+			return this.#args.getString(identifier) ?? undefined;
 
 		const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
-		return CommandOptionSolver.asString(result);
+		return CommandOptionSolver.asStringOrUndefined(result);
 	}
 
 	/**@param identifier El identificador del {@linkcode CommandParam}.*/
-	getNumber(identifier: string, defaultValue: number | null = null): number | undefined {
+	getNumber<TDefault extends number | undefined = undefined>(identifier: string, defaultValue?: TDefault): number | TDefault {
 		if (this.isInteractionSolver(this.#args))
-			return this.#args.getNumber(identifier) ?? defaultValue;
+			return this.#args.getNumber(identifier) ?? defaultValue as TDefault;
 
 		const result = this.#getResultFromParamSync(identifier, false) ?? defaultValue;
-		return CommandOptionSolver.asNumber(result);
+		return CommandOptionSolver.asNumberOrUndefined(result) as TDefault;
 	}
 
 	/**
@@ -1082,7 +1137,8 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`.
 	 */
 	getUser(identifier: string, getRestOfMessageWords: boolean = false): User | undefined {
-		if (this.isInteractionSolver(this.#args)) return this.#args.getUser(identifier);
+		if (this.isInteractionSolver(this.#args))
+			return this.#args.getUser(identifier) ?? undefined;
 
 		this.ensureRequistified();
 
@@ -1119,7 +1175,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		getRestOfMessageWords: boolean = false,
 	): Promise<Guild | undefined> {
 		if (this.isInteractionSolver(this.#args))
-			return fetchGuild(this.#args.getString(identifier));
+			return fetchGuild(this.#args.getString(identifier) as string);
 
 		const result = await this.#getResultFromParam(identifier, getRestOfMessageWords);
 		return CommandOptionSolver.asGuild(result);
@@ -1153,7 +1209,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		if (this.isInteractionSolver(this.#args)) {
 			const attachment = this.#args.getAttachment(identifier);
 
-			if (!CommandOptionSolver.isAttachment(attachment)) return;
+			if (!attachment || !CommandOptionSolver.isAttachment(attachment)) return;
 
 			return attachment;
 		}
@@ -1176,7 +1232,10 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		this.ensureRequistified();
 
 		if (this.isInteractionSolver(this.#args)) {
-			const message = await fetchMessage(this.#args.getString(identifier), this.#request);
+			const message = await fetchMessage(
+				this.#args.getString(identifier) ?? '',
+				this.#request as { channel: GuildTextBasedChannel; guild: Guild },
+			);
 
 			if (!message?.inGuild()) return undefined;
 
@@ -1216,6 +1275,8 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 
 		const firstArg = this.#args[0];
 		const rawDateStr = fetchSentence(this.#args, 0);
+		if (!rawDateStr) return;
+
 		const seps = ['/', '.', '-'];
 		const dateComponents = rawDateStr.split(/[/.-]/).map((d) => +d.trim());
 
@@ -1265,7 +1326,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			throw 'Se esperaban argumentos de comando Slash';
 
 		const dateStr = this.#args.getString(identifier);
-		return getDateComponentsFromString(dateStr);
+		return dateStr ? getDateComponentsFromString(dateStr) : undefined;
 	}
 
 	#getRelativeDateCompatibleMessageArgs() {
@@ -1291,7 +1352,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			: this.#getRelativeDateCompatibleMessageArgs();
 
 		for (const relativeDate of Object.values(relativeDates))
-			if (relativeDate.match.has(str)) return relativeDate.getValue(tzCode);
+			if (relativeDate.match.has(str ?? '')) return relativeDate.getValue(tzCode);
 
 		const dateComponents = this.isInteractionSolver(this.#args)
 			? this.#getDateComponentsFromInteraction(identifier)
@@ -1356,12 +1417,14 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			han: { pattern: /^半$/, limit: 1, handler: directAppendHandler },
 		};
 
-		let arg = '';
+		let arg: string | undefined = '';
 		while (this.hasNext()) {
 			arg = this.next();
 
 			let foundAvailableMatch = false;
 			for (const [id, availableMatch] of Object.entries(availableMatches)) {
+				if (!arg) continue;
+
 				const match = availableMatch.pattern.exec(arg);
 
 				if (!match) continue;
@@ -1453,27 +1516,17 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 				mentionableType,
 				messageSep,
 			});
-			if (!arrArgs.length) return this.#makePolyParamFallbackResult(fallback);
+			if (!arrArgs.length)
+				return this.#makePolyParamFallbackResult(fallback) as (ParamResult | TFallback)[];
 
 			const polymax = Array.isArray(option.poly) ? option.poly.length : option.polymax;
-			const results = [];
+			const results: ParamResult[] = [];
 			let i = 0;
 			let arrArg: string;
 			// biome-ignore lint/suspicious/noAssignInExpressions: Atajo
 			// biome-ignore lint/complexity/noCommaOperator: Atajo
 			while (arrArgs.length && ((arrArg = arrArgs[i]), i++) < polymax) {
-				let result:
-					| string
-					| number
-					| boolean
-					| User
-					| GuildMember
-					| Guild
-					| GuildBasedChannel
-					| Role
-					| Attachment
-					| Date
-					| Message<boolean>;
+				let result: ParamResult;
 
 				if (Array.isArray(option.type)) {
 					const results = await Promise.all(
@@ -1508,10 +1561,10 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	 * * Si no se obtiene ningún valor para el poli-parámetro y {@linkcode TFallback} es `null` o `undefined`, se devuelve un array vacía
 	 * @param identifier El identificador del poli-parámetro que representa a cada {@linkcode CommandParam} asociado
 	 */
-	parsePolyParamSync<TFallback extends ParamResult | null = undefined>(
+	parsePolyParamSync<TFallback extends ParamResult = undefined>(
 		identifier: string,
 		parseOptions: PolyParamParsingOptions<TFallback> = {},
-	): Array<ParamResult | TFallback> {
+	): (ParamResult | TFallback)[] {
 		const {
 			regroupMethod = 'SEPARATOR',
 			messageSep = ',',
@@ -1538,24 +1591,13 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 			if (!arrArgs.length) return this.#makePolyParamFallbackResult(fallback);
 
 			const polymax = Array.isArray(option.poly) ? option.poly.length : option.polymax;
-			const results = [];
+			const results: ParamResult[] = [];
 			let i = 0;
 			let arrArg: string;
 			// biome-ignore lint/suspicious/noAssignInExpressions: Atajo
 			// biome-ignore lint/complexity/noCommaOperator: Atajo
 			while (arrArgs.length && ((arrArg = arrArgs[i]), i++) < polymax) {
-				let result:
-					| string
-					| number
-					| boolean
-					| User
-					| GuildMember
-					| Guild
-					| GuildBasedChannel
-					| Role
-					| Attachment
-					| Date
-					| Message<boolean>;
+				let result: ParamResult;
 
 				if (Array.isArray(option.type)) {
 					const results = option.type.map((pt) =>
@@ -1636,7 +1678,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 
 	/**Devuelve el valor ingresado como un string si se ingresó la bandera especificada. De lo contrario, se devuelve `fallback` o `undefined`.*/
-	parseFlagExpr(identifier: string, fallback: string = undefined) {
+	parseFlagExpr(identifier: string, fallback?: string) {
 		return CommandOptionSolver.asString(
 			this.#options.fetchFlag(this.#args, identifier, {
 				callback: (x) => x,
@@ -1652,8 +1694,8 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	flagIf<TResult extends ParamResult, TFallback extends ParamResult = undefined>(
 		identifier: string,
 		positiveResult: TResult,
-		negativeResult: TFallback = undefined,
-	): TResult | TFallback {
+		negativeResult?: TFallback,
+	): TResult | TFallback | undefined {
 		return this.#options.fetchFlag(this.#args, identifier, {
 			callback: positiveResult,
 			fallback: negativeResult,
@@ -1672,10 +1714,10 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 
 	flagExprIf<TResult extends ParamResult, TFallback extends ParamResult = undefined>(
 		identifier: string,
-		callback: FlagCallback<TResult> = undefined,
-		fallback: TFallback = undefined,
-	): ReturnType<FlagCallback<TResult>> | TFallback {
-		callback ??= (x: TResult) => x;
+		callback?: FlagCallback<TResult>,
+		fallback?: TFallback,
+	): ReturnType<FlagCallback<TResult>> | TFallback | undefined {
+		callback ??= (<TResult>(x: TResult) => x as TResult) as FlagCallback<TResult>;
 
 		return this.#options.fetchFlag(this.#args, identifier, {
 			callback,
@@ -1684,34 +1726,79 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	}
 	//#endregion
 
+	as<TParam extends BaseParamType>(
+		type: TParam,
+		value: ParamResult,
+	): BaseParamTypeMap[TParam] | undefined {
+		if (value == null)
+			return undefined;
+
+		const validator = typeValidators[type];
+		if (!validator(value))
+			throw new MalformedParameterError();
+
+		return value;
+	}
+
+	asRequired<TParam extends BaseParamType>(
+		type: TParam,
+		value: ParamResult,
+	): BaseParamTypeMap[TParam] {
+		const finalValue = this.as(type, value);
+
+		if (finalValue == null) {
+			throw new UnexpectedValueError('Malformed parameter', {
+				expected: type,
+				received: 'undefined',
+			});
+		}
+
+		return finalValue;
+	}
+
 	//#region Casters
-	static asBoolean(paramResult: ParamResult): boolean | undefined {
-		if (paramResult == null) return;
-		if (typeof paramResult !== 'boolean')
-			throw `Se esperaba el tipo de parámetro: Boolean, pero se recibió: ${typeof paramResult}`;
-		return paramResult;
+	static asBooleanOrUndefined(paramResult: ParamResult) {
+		return assertResultAsTypeOrUndefined<boolean>(paramResult, 'boolean');
+	}
+
+	static asBoolean(paramResult: ParamResult) {
+		return assertResultAsType<boolean>(paramResult, 'boolean');
+	}
+
+	static asBooleansOrUndefined(paramResults: ParamResult[]) {
+		return paramResults.map((r) => CommandOptionSolver.asBooleanOrUndefined(r));
 	}
 
 	static asBooleans(paramResults: ParamResult[]) {
 		return paramResults.map((r) => CommandOptionSolver.asBoolean(r));
 	}
 
-	static asString(paramResult: ParamResult): string | undefined {
-		if (paramResult == null) return;
-		if (typeof paramResult !== 'string')
-			throw `Se esperaba el tipo de parámetro: String, pero se recibió: ${typeof paramResult}`;
-		return paramResult;
+	static asStringOrUndefined(paramResult: ParamResult) {
+		return assertResultAsTypeOrUndefined<string>(paramResult, 'string');
+	}
+
+	static asString(paramResult: ParamResult) {
+		return assertResultAsType<string>(paramResult, 'string');
+	}
+
+	static asStringsOrUndefined(paramResults: ParamResult[]) {
+		return paramResults.map((r) => CommandOptionSolver.asStringOrUndefined(r));
 	}
 
 	static asStrings(paramResults: ParamResult[]) {
 		return paramResults.map((r) => CommandOptionSolver.asString(r));
 	}
 
-	static asNumber(paramResult: ParamResult): number | undefined {
-		if (paramResult == null) return;
-		if (typeof paramResult !== 'number')
-			throw `Se esperaba el tipo de parámetro: Number, pero se recibió: ${typeof paramResult}`;
-		return paramResult;
+	static asNumberOrUndefined(paramResult: ParamResult) {
+		return assertResultAsTypeOrUndefined<number>(paramResult, 'number');
+	}
+
+	static asNumber(paramResult: ParamResult) {
+		return assertResultAsType<number>(paramResult, 'number');
+	}
+
+	static asNumbersOrUndefined(paramResults: ParamResult[]) {
+		return paramResults.map((r) => CommandOptionSolver.asNumberOrUndefined(r));
 	}
 
 	static asNumbers(paramResults: ParamResult[]) {
@@ -1879,7 +1966,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		const arrArgs = this.#args;
 
 		const option = this.#options.options.get(identifier);
-		if (!option.isCommandParam()) throw 'Se esperaba un identificador de parámetro de comando';
+		if (!option?.isCommandParam()) throw 'Se esperaba un identificador de parámetro de comando';
 
 		let finalResult: ParamResult;
 		if (Array.isArray(option.type)) {
@@ -1907,7 +1994,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		const arrArgs = this.#args;
 
 		const option = this.#options.options.get(identifier);
-		if (!option.isCommandParam()) throw 'Se esperaba un identificador de parámetro de comando';
+		if (!option?.isCommandParam()) throw 'Se esperaba un identificador de parámetro de comando';
 
 		if (Array.isArray(option.type)) {
 			const results = await Promise.all(
@@ -1934,8 +2021,59 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 }
 
 export class InvalidCommandOptionAttributeError extends Error {
-	constructor(message: string = null) {
+	constructor(message?: string) {
 		super(message);
-		this.name = 'InvalidOptionAttributeError';
+		this.name = InvalidCommandOptionAttributeError.name;
 	}
+}
+
+export class MalformedParameterError extends Error {
+	constructor(message?: string) {
+		super(message);
+		this.name = MalformedParameterError.name;
+	}
+}
+
+function assertResult(
+	value: ParamResult,
+	expectedType: SimpleTypeExpr,
+	predicate?: (value: ParamResult) => boolean,
+) {
+	if (predicate) return predicate(value);
+
+	return typeof value === expectedType;
+}
+
+function assertResultAsTypeOrUndefined<T>(
+	value: ParamResult,
+	expectedType: SimpleTypeExpr,
+	predicate?: (value: ParamResult) => boolean,
+): T | undefined {
+	if (value == null) return undefined;
+
+	if (!assertResult(value, expectedType, predicate)) {
+		throw new UnexpectedValueError('Malformed parameter', {
+			expected: expectedType,
+			received: typeof value,
+		});
+	}
+
+	return value as T;
+}
+
+function assertResultAsType<T>(
+	value: ParamResult,
+	expectedType: SimpleTypeExpr,
+	predicate?: (value: ParamResult) => boolean,
+): T {
+	const finalValue = assertResultAsTypeOrUndefined<T>(value, expectedType, predicate);
+
+	if (finalValue == null) {
+		throw new UnexpectedValueError('Malformed parameter', {
+			expected: expectedType,
+			received: typeof value,
+		});
+	}
+
+	return finalValue as T;
 }

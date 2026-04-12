@@ -5,13 +5,18 @@ let redacted = false;
 
 export const databaseUri = {
 	redact: () => {
-		process.env.MONGODB_URI = null;
-		process.env.MONGODB_PASSWORD = null;
+		process.env.MONGODB_URI = undefined;
+		process.env.MONGODB_PASSWORD = undefined;
 		redacted = true;
+		databaseUri.resolve = () => {
+			throw new Error('Database URI was redacted.');
+		};
+		databaseUri.redact = () => {
+			throw new Error('Database URI was already redacted.');
+		};
 	},
 	resolve() {
-		if(redacted)
-			throw new Error('Access to this method was blocked by the application.');
+		if (redacted) throw new Error('Access to this method was blocked by the application.');
 
 		if (process.env?.MONGODB_URI) return process.env?.MONGODB_URI;
 

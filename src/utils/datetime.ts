@@ -128,7 +128,7 @@ export function parseDateFromNaturalLanguage(
 	str: string,
 	locale: import('../i18n').LocaleKey,
 	sanitizedTzCode?: string,
-): UTCDate {
+): UTCDate | undefined {
 	if (!str) return;
 
 	sanitizedTzCode ??= 'Etc/UTC';
@@ -157,7 +157,7 @@ export function parseDateFromNaturalLanguage(
  * una fecha inválida si el string estaba malformado,
  * o `undefined` si el string estaba vacío
  */
-export function parseTimeFromNaturalLanguage(str: string, utcOffset: number = 0): Date {
+export function parseTimeFromNaturalLanguage(str: string, utcOffset: number = 0): Date | undefined {
 	if (!str) return;
 
 	str = str.toLowerCase();

@@ -36,9 +36,11 @@ const command = new Command('servidor', tags)
 	});
 
 function makeDashboardContainer(compressedUserId: string, guild: Guild, translator: Translator) {
-	const container = new ContainerBuilder()
-		.setAccentColor(tenshiColor)
-		.addSectionComponents((section) =>
+	const container = new ContainerBuilder().setAccentColor(tenshiColor);
+	const guildIcon = guild.iconURL({ size: 512 });
+
+	if (guildIcon)
+		container.addSectionComponents((section) =>
 			section
 				.addTextDisplayComponents(
 					(textDisplay) =>
@@ -48,9 +50,17 @@ function makeDashboardContainer(compressedUserId: string, guild: Guild, translat
 				.setThumbnailAccessory((thumbnail) =>
 					thumbnail
 						.setDescription(translator.getText('infoGuildIconAlt'))
-						.setURL(guild.iconURL({ size: 512 })),
+						.setURL(guildIcon),
 				),
-		)
+		);
+	else
+		container.addTextDisplayComponents(
+			(textDisplay) =>
+				textDisplay.setContent(translator.getText('serverDashboardServerEpigraph')),
+			(textDisplay) => textDisplay.setContent(`## ${guild.name}`),
+		);
+
+	container
 		.addSeparatorComponents((separator) => separator.setDivider(true))
 		.addTextDisplayComponents((textDisplay) =>
 			textDisplay.setContent(translator.getText('serverDashboardLanguageName')),

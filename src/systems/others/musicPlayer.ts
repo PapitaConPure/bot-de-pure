@@ -48,7 +48,7 @@ export function makePuréMusicEmbed(
 
 	if (iconUrl != null)
 		embed.setFooter({
-			text: `${shortenText(channel.name, 32)}${footerExtraContent}`,
+			text: `${shortenText(channel?.name ?? '???', 32)}${footerExtraContent}`,
 			iconURL: iconUrl,
 		});
 
@@ -178,8 +178,8 @@ export async function showQueuePage(
 		| ButtonInteraction<'cached'>
 		| AnySelectMenuInteraction<'cached'>
 		| ModalSubmitInteraction<'cached'>,
-	op: string = undefined,
-	authorId: string = undefined,
+	op?: string,
+	authorId?: string,
 	page: number = 0,
 ) {
 	const translator = await Translator.from(request.user.id);
@@ -223,7 +223,7 @@ export async function showQueuePage(
 
 	const player = useMainPlayer();
 	const queue = player.queues.get(request.guildId) ?? (await tryRecoverSavedTracksQueue(request));
-	const fullRows = ['EX', 'SF', 'AP', 'RP', 'LP'].includes(op);
+	const fullRows = !!op && ['EX', 'SF', 'AP', 'RP', 'LP'].includes(op);
 
 	if (!queue?.currentTrack && !queue?.size) {
 		const embed = makeReplyEmbed(Colors.Blurple)
@@ -234,9 +234,12 @@ export async function showQueuePage(
 					'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless',
 			});
 
+		const components: ActionRowBuilder<ButtonBuilder>[] = [];
+		if (queue) components.push(getTrackActionRow(queue, page, request.user.id, fullRows));
+
 		const replyObj = {
 			embeds: [embed],
-			components: [getTrackActionRow(queue, page, request.user.id, fullRows)],
+			components,
 		};
 		return request.editReply(replyObj);
 	}
@@ -254,7 +257,7 @@ export async function showQueuePage(
 	const previousPage = page === 0 ? lastPage : page - 1;
 	const nextPage = page === lastPage ? 0 : page + 1;
 	const footerText = `${shortChannelName} • ${queueInfo}`;
-	const labels = [];
+	const labels: string[] = [];
 
 	let queueEmbed: EmbedBuilder;
 
@@ -318,7 +321,7 @@ export async function showQueuePage(
 
 	const compressedUserId = compressId(request.user.id);
 
-	const components = [];
+	const components: ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder>[] = [];
 
 	if (queue.size) {
 		const menuRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(

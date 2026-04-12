@@ -57,7 +57,7 @@ const command = new Command('papa-eval', tags)
 				.setColor(0x0000ff)
 				.setAuthor({
 					name: `${message.guild.name} • ${message.channel.name}`,
-					iconURL: message.author.avatarURL(),
+					iconURL: message.author.displayAvatarURL(),
 					url: message.url,
 				})
 				.addFields({

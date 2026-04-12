@@ -138,7 +138,7 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
 	 * @param err El error que ocasionó este evento.
 	 * @param data Los datos de interés del evento.
 	 */
-	function fatal(err: Error, ...data: unknown[]) {
+	function fatal(err: Error, ...data: unknown[]): never {
 		LOG_LEVEL <= LogLevels.FATAL
 			&& console.error(
 				logLevelPrefix('FATAL'),

@@ -24,7 +24,7 @@ import {
 	MessageFlags,
 	StringSelectMenuBuilder,
 } from 'discord.js';
-import { client } from './core/client';
+import { ClientNotFoundError, client } from './core/client';
 import { globalConfigs, tenshiColor } from './data/globalProps';
 import images from './data/images.json';
 import { Translator } from './i18n';
@@ -37,8 +37,11 @@ const concol = {
 };
 
 //WARNING: Esta función permanece por compatibilidad. NO TOCAR
+/**@deprecated*/
 export function paginateRaw<T>(array: Collection<string, T>, pagemax?: number): [string, T][][];
+/**@deprecated*/
 export function paginateRaw<T>(array: T[], pagemax?: number): T[][];
+/**@deprecated*/
 export function paginateRaw<T>(
 	values: T[] | Collection<string, T>,
 	pagemax: number,
@@ -49,11 +52,13 @@ export function paginateRaw<T>(
 ): T[][] | [string, T][][] {
 	if (!Array.isArray(values)) {
 		const intermediate = [...values.entries()];
+		//@ts-expect-error
 		return intermediate
 			.map((_, i) => (i % pagemax === 0 ? intermediate.slice(i, i + pagemax) : null))
 			.filter((item) => item);
 	}
 
+	//@ts-expect-error
 	return values
 		.map((_, i) => (i % pagemax === 0 ? values.slice(i, i + pagemax) : null))
 		.filter((item) => item);
@@ -72,14 +77,16 @@ export const isNotModerator = (member: GuildMember) =>
 
 export async function isUsageBanned(user: User | GuildMember) {
 	const userCache = await fetchUserCache(user);
-	return userCache.banned;
+	return userCache?.banned ?? false;
 }
 
 export function isBoosting(member: GuildMember) {
 	return !!member.roles.premiumSubscriberRole;
 }
 
-export function isThread(channel: GuildBasedChannel): channel is AnyThreadChannel {
+export function isThread(
+	channel: GuildBasedChannel | AnyThreadChannel,
+): channel is AnyThreadChannel {
 	return [
 		ChannelType.PublicThread,
 		ChannelType.PrivateThread,
@@ -87,8 +94,10 @@ export function isThread(channel: GuildBasedChannel): channel is AnyThreadChanne
 	].includes(channel.type);
 }
 
-export function channelIsBlocked(channel: GuildTextBasedChannel) {
-	const member = channel?.guild?.members.me;
+export function channelIsBlocked(channel: GuildTextBasedChannel | null) {
+	if (!channel) return true;
+
+	const member = channel.guild?.members.me;
 	if (!member?.permissionsIn(channel)?.any?.(['SendMessages', 'SendMessagesInThreads'], true))
 		return true;
 	if (globalConfigs.maintenance.length === 0) return false;
@@ -252,8 +261,6 @@ export async function sendWelcomeMessage(member: GuildMember) {
 
 	const { guild, user, displayName } = member;
 
-	const channel = guild.systemChannel;
-
 	if (guild.systemChannel == null) {
 		guild.fetchOwner().then((ow) =>
 			ow.user.send({
@@ -267,7 +274,9 @@ export async function sendWelcomeMessage(member: GuildMember) {
 		return;
 	}
 
-	if (!guild.members.me.permissionsIn(channel).has(['SendMessages', 'ViewChannel'])) return;
+	const channel = guild.systemChannel;
+
+	if (!guild.members.me?.permissionsIn(channel).has(['SendMessages', 'ViewChannel'])) return;
 
 	console.log(concol.purple`Un usuario ha entrado a ${guild.name}...`);
 
@@ -374,7 +383,7 @@ export async function sendFarewellMessage(member: GuildMember) {
 	}
 
 	console.log(`Un usuario ha salido de ${guild.name}...`);
-	if (!guild.members.me.permissionsIn(channel).has(['SendMessages', 'ViewChannel'])) {
+	if (!guild.members.me?.permissionsIn(channel).has(['SendMessages', 'ViewChannel'])) {
 		console.log('No se puede enviar un mensaje de despedida en este canal.');
 		return;
 	}
@@ -481,7 +490,7 @@ function memberMatchComparer(a: MemberMatch, b: MemberMatch): number {
 export function findMemberByUsername(
 	members: Collection<string, GuildMember>,
 	query: string,
-): GuildMember {
+): GuildMember | undefined {
 	const processedMembers = members.map((m) => ({
 		member: m,
 		rawTarget: m.user.username,
@@ -501,14 +510,14 @@ export function findMemberByUsername(
 export function findMemberByNickname(
 	members: Collection<string, GuildMember>,
 	query: string,
-): GuildMember {
+): GuildMember | undefined {
 	const processedMembers = members
 		.filter((m) => m.nickname)
-		.map((m) => ({
+		.map((m: GuildMember) => ({
 			member: m,
-			rawTarget: m.nickname,
-			length: m.nickname.length,
-			matchIndex: m.nickname.toLowerCase().indexOf(query),
+			rawTarget: m.nickname as string,
+			length: m.nickname?.length as number,
+			matchIndex: m.nickname?.toLowerCase().indexOf(query) as number,
 		}));
 
 	const qualifiedMembers = processedMembers.filter((m) => m.matchIndex !== -1);
@@ -523,14 +532,14 @@ export function findMemberByNickname(
 export function findMemberByGlobalName(
 	members: Collection<string, GuildMember>,
 	query: string,
-): GuildMember {
+): GuildMember | undefined {
 	const processedMembers = members
 		.filter((m) => m.user.globalName)
 		.map((m) => ({
 			member: m,
-			rawTarget: m.user.globalName,
-			length: m.user.globalName.length,
-			matchIndex: m.user.globalName.toLowerCase().indexOf(query),
+			rawTarget: m.user.globalName as string,
+			length: m.user.globalName?.length as number,
+			matchIndex: m.user.globalName?.toLowerCase().indexOf(query) as number,
 		}));
 
 	const qualifiedMembers = processedMembers.filter((m) => m.matchIndex !== -1);
@@ -552,7 +561,10 @@ export function findMemberByGlobalName(
  * @param context El contexto del cuál obtener un miembro con la consulta.
  * @returns El miembro encontrado.
  */
-export function fetchMember(query: GuildMember | string, context: FetchUserContext): GuildMember {
+export function fetchMember(
+	query: GuildMember | string,
+	context?: FetchUserContext,
+): GuildMember | undefined {
 	if (!query) throw new Error('fetchMember: Se requiere un criterio de búsqueda');
 
 	if (typeof query !== 'string') return query.user?.username ? query : undefined;
@@ -613,7 +625,7 @@ interface FetchUserContext {
  * @param context El contexto del cuál obtener un usuario con la consulta.
  * @returns El usuario encontrado.
  */
-export function fetchUser(query: User | string, context: FetchUserContext): User {
+export function fetchUser(query: User | string, context?: FetchUserContext): User | undefined {
 	if (!query) throw new Error('fetchUser: Se requiere un criterio de búsqueda');
 
 	if (typeof query !== 'string') return query.username ? query : undefined;
@@ -665,7 +677,7 @@ export function fetchUser(query: User | string, context: FetchUserContext): User
 export async function fetchUserID(
 	query: User | string,
 	context: FetchUserContext,
-): Promise<string> {
+): Promise<string | undefined> {
 	const user = fetchUser(query, context);
 	return user != null ? user.id : undefined;
 }
@@ -679,14 +691,16 @@ export async function fetchUserID(
  * @param query La consulta a realizar para obtener un servidor.
  * @returns El servidor encontrado.
  */
-export async function fetchGuild(query: string): Promise<Guild> {
+export async function fetchGuild(query: string): Promise<Guild | undefined> {
 	if (typeof query !== 'string' || !query.length) return;
+
+	if (!client) throw new ClientNotFoundError();
 
 	if (!Number.isNaN(+query)) return client.guilds.cache.get(query) ?? client.guilds.fetch(query);
 
 	let bestDistance = -1;
 	return client.guilds.cache
-		.reduce((bestMatch, guild) => {
+		.reduce<Guild>((bestMatch, guild) => {
 			const distance = levenshteinDistance(guild.name, query);
 
 			if (bestMatch && distance < bestDistance) {
@@ -709,7 +723,10 @@ export async function fetchGuild(query: string): Promise<Guild> {
  * @param guild El servidor en el cual buscar el canal.
  * @returns El canal encontrado.
  */
-export function fetchChannel(query: string, guild: Guild): GuildBasedChannel {
+export function fetchChannel(
+	query: string | null | undefined,
+	guild: Guild,
+): GuildBasedChannel | undefined {
 	if (typeof query !== 'string' || !query.length) return;
 
 	const ccache = guild.channels.cache;
@@ -746,7 +763,7 @@ interface FetchMessageContext {
 export async function fetchMessage(
 	data: string,
 	context: FetchMessageContext = {},
-): Promise<Message> {
+): Promise<Message | undefined> {
 	if (typeof data !== 'string' || !data.length) return;
 
 	const acceptedChannelTypes = [
@@ -757,7 +774,7 @@ export async function fetchMessage(
 		ChannelType.AnnouncementThread,
 	];
 
-	if (!acceptedChannelTypes.includes(context.channel?.type)) return;
+	if (!context.channel || !acceptedChannelTypes.includes(context.channel?.type)) return;
 
 	const messages = context.channel?.messages;
 	const matchedUrl = data.match(/https:\/\/discord.com\/channels\/\d+\/\d+\/(\d+)/);
@@ -780,7 +797,7 @@ export async function fetchMessage(
  * @param guild El servidor en el cual buscar el rol.
  * @returns El rol encontrado.
  */
-export function fetchRole(data: string, guild: Guild): Role {
+export function fetchRole(data: string, guild: Guild): Role | undefined {
 	if (typeof data !== 'string' || !data.length) return;
 
 	const rcache = guild.roles.cache;
@@ -796,8 +813,8 @@ export function fetchRole(data: string, guild: Guild): Role {
 
 /**@deprecated Mantenido por compatibilidad. No debe reusarse nunca hoy en día, y en su lugar: deben usarse componentes de entrada de usuario de */
 export const fetchArrows = (emojiscache: Collection<Snowflake, Emoji>): [Emoji, Emoji] => [
-	emojiscache.get('681963688361590897'),
-	emojiscache.get('681963688411922460'),
+	emojiscache.get('681963688361590897') as Emoji,
+	emojiscache.get('681963688411922460') as Emoji,
 ];
 
 /**
@@ -863,7 +880,10 @@ const HTTP_ENTITIES_REGEX = (() => {
 export function decodeEntities(encodedstring: string) {
 	//Fuente: https://stackoverflow.com/questions/44195322/a-plain-javascript-way-to-decode-html-entities-works-on-both-browsers-and-node
 	return encodedstring
-		.replace(HTTP_ENTITIES_REGEX, (match, entity) => HTTP_ENTITIES[entity] ?? match)
+		.replace(
+			HTTP_ENTITIES_REGEX,
+			(match, entity: keyof typeof HTTP_ENTITIES) => HTTP_ENTITIES[entity] ?? match,
+		)
 		.replace(/&#(\d+);/gi, (_, numStr) => {
 			const num = parseInt(numStr, 10);
 			return String.fromCharCode(num);
@@ -897,7 +917,8 @@ export interface WeightedDecision<TValue> {
 export function makeWeightedDecision<TValue = unknown>(
 	options: WeightedDecision<TValue>[],
 ): TValue {
-	if (!options.length) return;
+	//@ts-expect-error Simplemente devuelve la misma array
+	if (!options.length) return options;
 
 	const optionCount = options.length;
 
@@ -930,7 +951,7 @@ export const emojiRegex = /<a?:\w+:([0-9]+)>/gi;
 /**@description Devuelve el primer emoji global encontrado en el string.*/
 export function defaultEmoji(emoji: string): string | null {
 	if (typeof emoji !== 'string') return null;
-	return emoji.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0]; //Expresión RegExp cursed
+	return emoji.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0] ?? null; //Expresión RegExp cursed
 }
 
 /**@description Devuelve el primer emoji de servidor encontrado con el string.*/
@@ -947,11 +968,11 @@ export const emoji = (emoji: string, guild: Guild): Emoji | string | null =>
 	defaultEmoji(emoji) ?? guildEmoji(emoji, guild);
 
 export function isNSFWChannel(channel: GuildBasedChannel) {
-	if (channel.isThread()) return channel.parent.nsfw;
+	if (!channel.isSendable()) return false;
 
-	if (channel.isSendable()) return channel.nsfw;
+	if (channel.isThread()) return channel.parent?.nsfw ?? false;
 
-	return false;
+	return channel.nsfw;
 }
 
 /**
@@ -1010,7 +1031,7 @@ export function randRange(minInclusive: number, maxExclusive: number, round: boo
 
 /**@description Devuelve un elemento aleatorio dentro de la Array especificada.*/
 export function randInArray<T>(array: T[]): T {
-	if (!array.length) return undefined;
+	if (!array.length) return undefined as T;
 	const randomIndex = rand(array.length);
 	return array[randomIndex];
 }
@@ -1030,7 +1051,7 @@ export function shuffleArray<T>(array: T[]): void {
 export function subdivideArray<T>(array: T[], divisionSize: number): T[][] {
 	if (!array.length) return [[]];
 
-	const subdivided = [];
+	const subdivided: T[][] = [];
 	for (let i = 0; i * divisionSize < array.length; i++) {
 		const j = i * divisionSize;
 		subdivided[i] = array.slice(j, j + divisionSize);
@@ -1369,7 +1390,8 @@ export function shortenTextSmart(text: string, options: Partial<SmartShortenOpti
 
 	const trueHardMax = Math.min(text.length, hardMax);
 
-	const whitespaceOffset = /\s/.exec(text.slice(max, trueHardMax - suspensor.length)).index;
+	const whitespaceOffset =
+		/\s/.exec(text.slice(max, trueHardMax - suspensor.length))?.index ?? -1;
 	const trueMax = max + (whitespaceOffset > 0 ? whitespaceOffset : 0);
 
 	//PENDIENTE
@@ -1387,9 +1409,8 @@ interface LowerCaseNormalizationOptions {
 /**@description Obtiene una representación en minúsculas, normalizada y sin diacríticos del string ingresado.*/
 export function toLowerCaseNormalized(
 	text: string,
-	options: LowerCaseNormalizationOptions = null,
+	options: LowerCaseNormalizationOptions = {},
 ): string {
-	options ??= {};
 	options.removeCarriageReturns ??= false;
 
 	text = text
@@ -1604,7 +1625,7 @@ export function dateToUTCFormat(date: Date, template: string, locale: string = '
 	const seconds = date.getUTCSeconds().toString();
 	const milliseconds = date.getUTCMilliseconds().toString();
 
-	const replacements = {
+	const replacements: Record<string, string> = {
 		yyyy: year,
 		yy: year.slice(-2),
 		MMMM: date.toLocaleDateString(locale, { month: 'long', timeZone: 'UTC' }),
@@ -1634,7 +1655,8 @@ export function dateToUTCFormat(date: Date, template: string, locale: string = '
 
 	for (const key in replacements) {
 		const regex = new RegExp(`\\b${key}\\b`, 'g');
-		formatted = formatted.replace(regex, replacements[key]);
+		const replacement: string = replacements[key];
+		formatted = formatted.replace(regex, replacement);
 	}
 
 	return formatted;

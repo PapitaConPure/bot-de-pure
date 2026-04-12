@@ -66,10 +66,10 @@ const command = new Command('papa-feedback', tags)
 		const guilds = client.guilds.cache;
 		guildConfigs.forEach((guildConfig) => {
 			const guild = guilds.get(guildConfig.guildId);
-			const channels = guild.channels.cache;
+			const channels = guild?.channels.cache;
 			Object.entries(guildConfig.feeds).forEach(([channelId]) => {
-				const channel = channels.get(channelId);
-				if (!channel.isSendable()) return;
+				const channel = channels?.get(channelId);
+				if (!channel?.isSendable()) return;
 				channel.send({
 					embeds: [feedbackEmbed],
 					components: feedbackRows,

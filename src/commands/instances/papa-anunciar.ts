@@ -21,14 +21,18 @@ const command = new Command('papa-anunciar', tags)
 	.setExecution(async (request, args) => {
 		const title = args.parseFlagExpr('título');
 		const announcement = args.getString('anuncio', true);
+
+		if(!announcement)
+			return request.deleteReply();
+
 		const guilds = request.client.guilds.cache;
 		guilds.forEach((guild) => {
 			const embed = new EmbedBuilder()
 				.setColor(tenshiColor)
 				.setTitle('📣 Anuncio de Actualización')
 				.setAuthor({
-					name: guild.members.me.displayName ?? request.client.user.username,
-					iconURL: request.client.user.avatarURL({ size: 256 }),
+					name: guild.members.me?.displayName ?? request.client.user.username,
+					iconURL: request.client.user.displayAvatarURL({ size: 256 }),
 				})
 				.setFooter({ text: 'Bot de Puré está en desarrollo por Papita con Puré#6932' })
 				.addFields({

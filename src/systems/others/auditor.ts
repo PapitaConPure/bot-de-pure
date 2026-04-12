@@ -8,8 +8,8 @@ function generateRequestRecord(request: CommandRequest | Interaction) {
 	// @ts-expect-error Alguno de los dos va a existir
 	const user: User = request.user ?? request.author;
 	const embed = new EmbedBuilder().setAuthor({
-		name: `${request.guild.name} • ${request.channel.name}`,
-		iconURL: user.avatarURL({ size: 128 }),
+		name: `${request.guild?.name}${request.channel ? ('name' in request.channel ? ` • ${request.channel?.name}` : '') : ''}`,
+		iconURL: user.displayAvatarURL({ size: 128 }),
 		// @ts-expect-error Alguno de los dos va a existir
 		url: request.url || request.channel?.url || 'https://discordapp.com',
 	});
@@ -113,7 +113,7 @@ export async function auditError(
 
 	return globalConfigs.logch
 		?.send({
-			content: ping ? `<@${userIds.papita}>` : null,
+			content: ping ? `<@${userIds.papita}>` : undefined,
 			embeds: [embed],
 		})
 		.catch(console.error);

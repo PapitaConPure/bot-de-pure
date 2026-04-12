@@ -4,7 +4,7 @@ import type { Tubercle } from '@/systems/ps/common/executeTuber';
 import { CURRENT_PS_VERSION, executeTuber } from '@/systems/ps/common/executeTuber';
 import { fetchExt } from '@/utils/fetchext';
 import { p_pure } from '@/utils/prefixes';
-import { CommandOptions } from '../commons/cmdOpts';
+import { type CommandOptionSolver, CommandOptions } from '../commons/cmdOpts';
 import { CommandTags } from '../commons/cmdTags';
 import { Command } from '../commons/commandBuilder';
 
@@ -20,10 +20,7 @@ export const psDocsButton = new ButtonBuilder()
 	.setEmoji('📖')
 	.setStyle(ButtonStyle.Link);
 
-async function getScriptString(
-	args: import('../commons/cmdOpts').CommandOptionSolver,
-	rawArgs?: string,
-) {
+async function getScriptString(args: CommandOptionSolver) {
 	const file = args.getAttachment('archivo');
 
 	if (file?.name.toLowerCase().endsWith('.tuber')) {
@@ -31,8 +28,8 @@ async function getScriptString(
 			const fetchResult = await fetchExt(file.url, { type: 'text' });
 
 			return {
-				status: fetchResult.response.status,
-				statusText: fetchResult.response.statusText,
+				status: fetchResult.response?.status,
+				statusText: fetchResult.response?.statusText,
 				result: fetchResult.success ? fetchResult.data : null,
 			};
 		};
@@ -40,17 +37,17 @@ async function getScriptString(
 		return importCode();
 	}
 
-	let script: string;
+	let script: string | undefined;
 	if (args.isInteractionSolver()) {
-		script = args.getString('script').trim();
+		script = args.getString('script')?.trim();
 	} else {
-		script = rawArgs
+		script = args.rawArgs
 			.replace(/^```[A-Za-z0-9]*/, '')
 			.replace(/```$/, '')
 			.trim();
 	}
 
-	if (!script.length)
+	if (!script?.length)
 		return {
 			status: 400,
 			statusText:
@@ -86,9 +83,9 @@ const command = new Command('purescript', flags)
 	)
 	.addWikiRow(psEditorButton, psDocsButton)
 	.setOptions(options)
-	.setExecution(async (request, args, rawArgs) => {
+	.setExecution(async (request, args) => {
 		const helpString = `-# Usa \`${p_pure(request.guildId).raw}ayuda puréscript\` para más información`;
-		const scriptResult = await getScriptString(args, rawArgs);
+		const scriptResult = await getScriptString(args);
 
 		if (scriptResult.status !== 200)
 			return request.reply({
@@ -107,10 +104,10 @@ const command = new Command('purescript', flags)
 				],
 			});
 
-		const script = scriptResult.result;
+		const script = scriptResult.result as string;
 
 		const tuber: Tubercle = {
-			id: null,
+			id: null as unknown as string,
 			author: request.userId,
 			advanced: true,
 			script,

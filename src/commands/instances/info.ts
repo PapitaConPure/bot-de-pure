@@ -64,7 +64,7 @@ const command = new Command('info', tags)
 		const targetMember = memberResult ? fetchMember(memberResult, request) : undefined;
 		const targetChannel = args.getChannel('canal') || request.channel;
 
-		const pages = /**@type {ContainerBuilder[]}*/ ([]);
+		const pages: ContainerBuilder[] = [];
 
 		//Página principal
 		const mainCointainer = new ContainerBuilder().setAccentColor(0xffd500);
@@ -125,9 +125,10 @@ const command = new Command('info', tags)
 		const owner = await guild.fetchOwner();
 		const guildIsDiscoverable = guild.features.includes('DISCOVERABLE');
 		const guildCreatedAtUnix = Math.floor(getUnixTime(guild.createdAt));
+		const guildIcon = guild.iconURL({ size: 256 });
 
-		mainCointainer
-			.addSectionComponents((section) =>
+		if (guildIcon)
+			mainCointainer.addSectionComponents((section) =>
 				section
 					.addTextDisplayComponents(
 						(textDisplay) =>
@@ -147,9 +148,25 @@ const command = new Command('info', tags)
 					.setThumbnailAccessory((accessory) =>
 						accessory
 							.setDescription(translator.getText('infoGuildIconAlt'))
-							.setURL(guild.iconURL({ size: 256 })),
+							.setURL(guildIcon),
 					),
-			)
+			);
+		else
+			mainCointainer.addTextDisplayComponents(
+				(textDisplay) =>
+					textDisplay.setContent(
+						translator.getText('infoGuildEpigraph', guildIsDiscoverable),
+					),
+				(textDisplay) => textDisplay.setContent(`# ${shortenText(guild.name, 100, '…')}`),
+				(textDisplay) =>
+					textDisplay.setContent(
+						[
+							translator.getText('infoGuildCreatedAt', guildCreatedAtUnix),
+							`🆔 \`${guild.id}\``,
+						].join('\n'),
+					),
+			);
+		mainCointainer
 			.addSeparatorComponents((separator) => separator.setDivider(true))
 			.addSectionComponents((section) =>
 				section
@@ -250,7 +267,7 @@ const command = new Command('info', tags)
 			)
 			.join('\n');
 
-		const statsSinceUnix = getUnixTime(new Date(stats.since));
+		const statsSinceUnix = getUnixTime(stats?.since ? new Date(stats.since) : 0);
 
 		activityStatsContainer.addTextDisplayComponents(
 			(textDisplay) => textDisplay.setContent(translator.getText('infoStatsTitle')),

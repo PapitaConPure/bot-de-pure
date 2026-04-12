@@ -661,7 +661,7 @@ const command = new Command('yo', tags)
 
 			userConfigs.tzCode = sanitizedTzCode || 'UTC';
 		} else {
-			userConfigs.tzCode = null;
+			userConfigs.tzCode = undefined;
 		}
 
 		return Promise.all([

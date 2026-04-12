@@ -108,7 +108,7 @@ const command = new Command('imgur', tags)
 		);
 		const attachments = CommandOptionSolver.asAttachments(
 			args.parsePolyParamSync('imagens'),
-		).filter((a) => a);
+		).filter((a) => a != null);
 		const attachmentUrls = attachments.map((attachment) => attachment.url);
 
 		const uploads: ImgurImagePayload[] = [
@@ -122,8 +122,8 @@ const command = new Command('imgur', tags)
 			});
 
 		let count = 1;
-		const successes = [];
-		const failures = [];
+		const successes: EmbedBuilder[] = [];
+		const failures: EmbedBuilder[] = [];
 		for (const upload of uploads) {
 			const result = await client.upload(upload);
 

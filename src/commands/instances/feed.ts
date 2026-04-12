@@ -2,6 +2,7 @@ import { getUnixTime } from 'date-fns';
 import type {
 	ButtonInteraction,
 	ContainerComponent,
+	GuildBasedChannel,
 	Message,
 	SelectMenuComponentOptionData,
 } from 'discord.js';
@@ -62,10 +63,13 @@ const safeTags = (_tags = '') => _tags.replace(/\\*\*/g, '\\*').replace(/\\*_/g,
 const generateFeedOptions = async (
 	interaction: ButtonInteraction,
 ): Promise<SelectMenuComponentOptionData[]> => {
-	const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+	const gcfg = await GuildConfig.findOne({ guildId: interaction.guild?.id });
+
+	if (!gcfg) return [];
+
 	const feedOptions = Object.entries(gcfg.feeds)
 		.map(([chid, feed]) => {
-			const channel = interaction.guild.channels.cache.get(chid);
+			const channel = interaction.guild?.channels.cache.get(chid);
 			if (!channel) {
 				delete gcfg.feeds[chid];
 				gcfg.markModified('feeds');
@@ -77,8 +81,10 @@ const generateFeedOptions = async (
 				value: chid,
 			};
 		})
-		.filter((feed) => feed);
+		.filter((feed) => feed != null);
+
 	gcfg.save();
+
 	return feedOptions;
 };
 
@@ -87,11 +93,14 @@ function tagsSetupPrompt(
 	channelId: string,
 	translator: Translator,
 ) {
-	const fetchedChannel = interaction.guild.channels.cache.get(channelId);
+	const fetchedChannel = interaction.guild?.channels.cache.get(channelId) as GuildBasedChannel;
 	const gelEmoji = guildEmoji('gelbooru', globalConfigs.slots.slot3);
 	const embed = new EmbedBuilder()
 		.setColor(Colors.Blurple)
-		.setAuthor({ name: wizTitle(translator), iconURL: interaction.client.user.avatarURL() })
+		.setAuthor({
+			name: wizTitle(translator),
+			iconURL: interaction.client.user.displayAvatarURL(),
+		})
 		.setFooter({ text: 'Asignar tags' })
 		.addFields(
 			{
@@ -153,7 +162,10 @@ const command = new Command('feed', tags)
 		const translator = await Translator.from(request.userId);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Aqua)
-			.setAuthor({ name: wizTitle(translator), iconURL: request.client.user.avatarURL() })
+			.setAuthor({
+				name: wizTitle(translator),
+				iconURL: request.client.user.displayAvatarURL(),
+			})
 			.setFooter({ text: 'Comenzar' })
 			.addFields({
 				name: 'Bienvenido',
@@ -187,7 +199,10 @@ const command = new Command('feed', tags)
 		const authorId = compressId(interaction.user.id);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Navy)
-			.setAuthor({ name: wizTitle(translator), iconURL: interaction.client.user.avatarURL() })
+			.setAuthor({
+				name: wizTitle(translator),
+				iconURL: interaction.client.user.displayAvatarURL(),
+			})
 			.setFooter({ text: 'Seleccionar operación' })
 			.addFields({
 				name: 'Selecciona una operación',
@@ -239,7 +254,9 @@ const command = new Command('feed', tags)
 			const channelInput = new TextInputBuilder()
 				.setCustomId('channelInput')
 				.setLabel('Canal')
-				.setPlaceholder(`Ej: #${interaction.channel.name} / ${interaction.channel.id}`)
+				.setPlaceholder(
+					`Ej: #${interaction.channel?.name ?? 'un-canal'} / ${interaction.channel?.id ?? '1234567890123456789'}`,
+				)
 				.setStyle(TextInputStyle.Short)
 				.setRequired(true);
 			const row = new ActionRowBuilder<TextInputBuilder>().addComponents(channelInput);
@@ -328,13 +345,18 @@ const command = new Command('feed', tags)
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 			const input = interaction.fields.getTextInputValue('tagsInput').toLowerCase().trim();
 
+			if (fetchedChannel == null)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('invalidChannel'),
+				});
+
 			const guildQuery = { guildId: interaction.guild.id };
 			const gcfg = /**@type {import('@/models/guildconfigs.js').GuildConfigDocument}*/ (
 				(await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery)
 			);
 			gcfg.feeds ??= {};
-			gcfg.feeds[fetchedChannel.id] ??= { tags: null };
-			gcfg.feeds[fetchedChannel.id].tags = input;
+			gcfg.feeds[fetchedChannel.id] ??= { tags: input };
 			gcfg.feeds[fetchedChannel.id].lastFetchedAt = new Date(Date.now());
 			const firstUpdateDelay = addGuildToFeedUpdateStack(interaction.guild);
 			gcfg.markModified('feeds');
@@ -344,7 +366,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.DarkVividPink)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields(
@@ -383,7 +405,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.Greyple)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Seleccionar Feed' })
 				.addFields({
@@ -424,7 +446,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.Greyple)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Seleccionar Feed' })
 				.addFields({
@@ -465,7 +487,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.Greyple)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Seleccionar Feed' })
 				.addFields({
@@ -506,7 +528,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.Greyple)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Seleccionar Feed' })
 				.addFields({
@@ -566,10 +588,18 @@ const command = new Command('feed', tags)
 	)
 	.setSelectMenuResponse(
 		async function selectedCustomize(interaction, authorId) {
+			if (!interaction.channel) return interaction.deleteReply();
+
 			const translator = await Translator.from(interaction.user.id);
+
 			const fetchedChannel = interaction.guild.channels.cache.get(
 				interaction.values[0] || interaction.channel.id,
 			);
+			if (fetchedChannel == null)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('invalidChannel'),
+				});
 
 			if (!fetchedChannel.isSendable()) return;
 
@@ -577,7 +607,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.Blurple)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Seleccionar elemento a personalizar' })
 				.addFields(
@@ -672,7 +702,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.Blurple)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Visualizando Feed' })
 				.addFields(
@@ -728,12 +758,12 @@ const command = new Command('feed', tags)
 			const translator = await Translator.from(interaction.user.id);
 			const chid = interaction.values[0];
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-			const tags = gcfg.feeds[chid].tags;
+			const tags = gcfg?.feeds[chid].tags;
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Red)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Confirmar' })
 				.addFields({
@@ -766,7 +796,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.DarkRed)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
@@ -782,6 +812,10 @@ const command = new Command('feed', tags)
 			);
 
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+
+			if (!gcfg)
+				throw new ReferenceError('GuildConfigs not found during deleteOne() user command.');
+
 			delete gcfg.feeds[channelId];
 			gcfg.markModified('feeds');
 			return Promise.all([
@@ -798,20 +832,20 @@ const command = new Command('feed', tags)
 		async function selectItemCustomize(interaction, channelId, authorId) {
 			const translator = await Translator.from(interaction.user.id);
 			const customizeTarget = interaction.values[0];
-			const fetchedChannel = /**@type {BaseGuildTextChannel}*/ (
-				interaction.guild.channels.cache.get(channelId)
-			);
+			const fetchedChannel = interaction.guild.channels.cache.get(
+				channelId,
+			) as GuildBasedChannel;
 
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Green)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Personalizar elemento' })
 				.addFields({
 					name: 'Destino',
-					value: `**${fetchedChannel.name}** (canal ${isNSFWChannel(fetchedChannel) ? 'NSFW' : 'SFW'})`,
+					value: `**${fetchedChannel?.name}** (canal ${isNSFWChannel(fetchedChannel) ? 'NSFW' : 'SFW'})`,
 				});
 
 			const row = new ActionRowBuilder<ButtonBuilder>();
@@ -1020,6 +1054,8 @@ const command = new Command('feed', tags)
 	.setModalResponse(
 		async function setCustomTitle(interaction, channelId) {
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+			if (!gcfg) return interaction.deleteReply();
+
 			const input = interaction.fields.getTextInputValue('titleInput');
 			gcfg.feeds[channelId].title = input;
 			gcfg.markModified('feeds');
@@ -1032,6 +1068,8 @@ const command = new Command('feed', tags)
 	.setModalResponse(
 		async function setCustomMaxTags(interaction, channelId) {
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+			if (!gcfg) return interaction.deleteReply();
+
 			const input = interaction.fields.getTextInputValue('tagsInput');
 			const maxTags = parseInt(input, 10);
 
@@ -1054,6 +1092,8 @@ const command = new Command('feed', tags)
 	.setModalResponse(
 		async function setCustomSubtitle(interaction, channelId) {
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+			if (!gcfg) return interaction.deleteReply();
+
 			const input = interaction.fields.getTextInputValue('subtitleInput');
 
 			gcfg.feeds[channelId].subtitle = input;
@@ -1067,6 +1107,8 @@ const command = new Command('feed', tags)
 	.setModalResponse(
 		async function setCustomFooter(interaction, channelId) {
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+			if (!gcfg) return interaction.deleteReply();
+
 			const input = interaction.fields.getTextInputValue('footerInput');
 
 			gcfg.feeds[channelId].footer = input;
@@ -1083,6 +1125,8 @@ const command = new Command('feed', tags)
 				GuildConfig.findOne({ guildId: interaction.guild.id }),
 				interaction.deferReply({ ephemeral: true }),
 			]);
+			if (!gcfg) return interaction.deleteReply();
+
 			const input = interaction.fields.getTextInputValue('iconInput');
 
 			//Crear embed de prueba para asegurarse de que el enlace sea una imagen válida
@@ -1091,9 +1135,9 @@ const command = new Command('feed', tags)
 				.setAuthor({ name: 'Verificando enlace...', iconURL: input });
 
 			try {
-				const sent = await interaction.channel.send({ embeds: [testEmbed] });
-				console.log(sent.embeds[0].author);
-				if (sent.embeds[0].author.iconURL) gcfg.feeds[channelId].cornerIcon = input;
+				const sent = await interaction.channel?.send({ embeds: [testEmbed] });
+				console.log(sent?.embeds[0].author);
+				if (sent?.embeds[0].author?.iconURL) gcfg.feeds[channelId].cornerIcon = input;
 				setTimeout(() => {
 					if (sent?.deletable) sent.delete().catch(console.error);
 				}, 1500);
@@ -1115,6 +1159,8 @@ const command = new Command('feed', tags)
 			const translator = await Translator.from(interaction.user.id);
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
+
 			delete gcfg.feeds[channelId].title;
 			gcfg.markModified('feeds');
 			await gcfg.save();
@@ -1123,7 +1169,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.DarkGreen)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
@@ -1149,6 +1195,8 @@ const command = new Command('feed', tags)
 			const translator = await Translator.from(interaction.user.id);
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
+
 			delete gcfg.feeds[channelId].maxTags;
 			gcfg.markModified('feeds');
 			await gcfg.save();
@@ -1157,7 +1205,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.DarkGreen)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
@@ -1183,6 +1231,8 @@ const command = new Command('feed', tags)
 			const translator = await Translator.from(interaction.user.id);
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
+
 			delete gcfg.feeds[fetchedChannel.id].subtitle;
 			gcfg.markModified('feeds');
 			await gcfg.save();
@@ -1191,7 +1241,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.DarkGreen)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
@@ -1217,6 +1267,8 @@ const command = new Command('feed', tags)
 			const translator = await Translator.from(interaction.user.id);
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
+
 			delete gcfg.feeds[fetchedChannel.id].footer;
 			gcfg.markModified('feeds');
 			await gcfg.save();
@@ -1225,7 +1277,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.DarkGreen)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
@@ -1251,6 +1303,8 @@ const command = new Command('feed', tags)
 			const translator = await Translator.from(interaction.user.id);
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
+
 			delete gcfg.feeds[fetchedChannel.id].cornerIcon;
 			gcfg.markModified('feeds');
 			await gcfg.save();
@@ -1259,7 +1313,7 @@ const command = new Command('feed', tags)
 				.setColor(Colors.DarkGreen)
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
@@ -1286,7 +1340,7 @@ const command = new Command('feed', tags)
 			const cancelEmbed = new EmbedBuilder()
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: translator.getText('cancelledStepFooterName') })
 				.addFields({
@@ -1306,7 +1360,7 @@ const command = new Command('feed', tags)
 			const cancelEmbed = new EmbedBuilder()
 				.setAuthor({
 					name: wizTitle(translator),
-					iconURL: interaction.client.user.avatarURL(),
+					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: translator.getText('finishedStepFooterName') })
 				.setDescription(translator.getText('feedFinishedStep'));
@@ -1326,9 +1380,13 @@ const command = new Command('feed', tags)
 
 		const container = interaction.message.components[0] as ContainerComponent;
 		const url = getPostUrlFromContainer(container);
+		if (!url) return interaction.deleteReply();
+
 		const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
 		try {
 			const post = await booru.fetchPostByUrl(url);
+			if (!post) return interaction.deleteReply();
+
 			const postTags = await booru.fetchPostTags(post);
 
 			const postArtistTags = postTags
@@ -1578,9 +1636,13 @@ const command = new Command('feed', tags)
 
 		const container = interaction.message.components[0] as ContainerComponent;
 		const url = getPostUrlFromContainer(container);
+		if (!url) return interaction.deleteReply();
+
 		const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
 		try {
 			const post = await booru.fetchPostByUrl(url);
+			if (!post) return interaction.deleteReply();
+
 			const requestTags = post.tags.filter(
 				(t) => t === 'tagme' || (t !== 'commentary_request' && t.endsWith('_request')),
 			);

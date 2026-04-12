@@ -1,4 +1,3 @@
-/**@param {number} first*/
 function* iotaGenerator(first: number) {
 	let value = first;
 	while (true) yield value++;
@@ -12,6 +11,7 @@ type IotaFunction = { (start?: number): number; gen?: Generator<number, void, un
  * Si se indica `start`, se comienza a contar otra vez desde ahí.
  */
 export let iota: IotaFunction;
+
 {
 	const fn = (start: number | null = null) => {
 		if (start != null || iota.gen == null) iota.gen = iotaGenerator(start || 0);
@@ -19,7 +19,7 @@ export let iota: IotaFunction;
 		const result = iota.gen.next().value;
 		return result as number;
 	};
-	fn.gen = null as Generator<number, void, unknown> | null;
+	fn.gen = undefined as Generator<number, void, unknown> | undefined;
 	iota = fn;
 }
 

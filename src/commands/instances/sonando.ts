@@ -40,7 +40,7 @@ const command = new Command('sonando', flags)
 					content: translator.getText('queueDescriptionEmptyQueue'),
 				});
 
-			const shortChannelName = shortenText(request.member.voice.channel.name, 20);
+			const shortChannelName = shortenText(request.member.voice.channel?.name ?? 'Canal', 20);
 			const queueInfo = queue.size
 				? translator.getText('playFooterTextQueueSize', queue.size, queue.durationFormatted)
 				: translator.getText('playFooterTextQueueEmpty');
@@ -58,6 +58,11 @@ const command = new Command('sonando', flags)
 						indicator: '',
 						rightChar: '▱',
 					})}`;
+
+			if (!currentTrack)
+				return request.editReply({
+					content: translator.getText('queueDescriptionEmptyQueue'),
+				});
 
 			const service = SERVICES[currentTrack.source];
 			return request.editReply({
@@ -86,7 +91,7 @@ const command = new Command('sonando', flags)
 		} catch (e) {
 			console.error(e);
 
-			const errorEmbed = makePuréMusicEmbed(request, 0x990000, null)
+			const errorEmbed = makePuréMusicEmbed(request, 0x990000)
 				.setTitle(translator.getText('somethingWentWrong'))
 				.addFields({
 					name: 'Error',

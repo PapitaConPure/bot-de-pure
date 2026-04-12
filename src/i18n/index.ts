@@ -1,7 +1,7 @@
 import type { UserCacheResolvable } from '@/utils/usercache';
 import { fetchUserCache } from '@/utils/usercache';
 import type { ValuesOf } from '../types/util';
-import Locales from './locales';
+import Locales, { defaultLocale } from './locales';
 
 export { Locales };
 
@@ -123,6 +123,11 @@ const localesObject = {
 		es: '❌ No tienes permiso para hacer esto',
 		en: "❌ You're not allowed to do that",
 		ja: '❌ あなたにはそれをする許可がありません',
+	},
+	invalidEmptyCommandName: {
+		es: '❌ Debes escribir un comando después del prefijo (por ejemplo: p!help)',
+		en: '❌ You need to type a command after the prefix (for example: p!help)',
+		ja: '❌ プレフィックスの後にコマンドを入力してください（例: p!help）',
 	},
 	unknownInteraction: {
 		es: '🍔 Recibí una acción, pero no sé cómo responderla. Esto es un problema... mientras arreglo algunas cosas, toma una hamburguesa',
@@ -762,6 +767,11 @@ const localesObject = {
 		ja: 'トラック再開ました',
 	},
 
+	queueExpected: {
+		es: '⚠️ No se encontró una cola de reproducción',
+		en: '⚠️ Couldn\'t find a player queue',
+		ja: '⚠️ 再生キューが見つかりません',
+	},
 	queueTitle: {
 		es: 'Cola de reproducción',
 		en: 'Music Queue',
@@ -2814,7 +2824,7 @@ export class Translator {
 	/**@description Instancia un {@link Translator} en base al idioma del usuario indicado*/
 	static async from(user: UserCacheResolvable) {
 		const userCache = await fetchUserCache(user);
-		return new Translator(userCache.language);
+		return new Translator(userCache?.language ?? defaultLocale);
 	}
 
 	/**
@@ -2842,12 +2852,12 @@ export class Translator {
 			subLocaleRegex,
 			(
 				_match,
-				/**@type {String}*/ i: string,
-				/**@type {String}*/ condition: string,
-				/**@type {String}*/ whenTrue: string,
-				/**@type {String}*/ defaultValue: string,
+				i: string,
+				condition: string,
+				whenTrue: string,
+				defaultValue: string,
 			) => {
-				const value = values[i];
+				const value = values[+i];
 
 				if (condition != null) {
 					const leftValue = typeof value === 'boolean' ? `__${value}__` : `${value}`;
@@ -2859,10 +2869,10 @@ export class Translator {
 					if (!conditionFns.has(operator)) throw 'Operador inválido';
 
 					const conditionFn = conditionFns.get(operator);
-					return conditionFn(leftValue, rightValue) ? whenTrue : (defaultValue ?? '');
+					return conditionFn?.(leftValue, rightValue) ? whenTrue : (defaultValue ?? '');
 				}
 
-				if (value != null) return value;
+				if (value != null) return `${value}`;
 
 				if (defaultValue != null) return defaultValue;
 
@@ -2884,9 +2894,9 @@ export class Translator {
 	 */
 	static mapReverseDateUTCComponents(
 		locale: LocaleKey,
-		component1: number | undefined = null,
-		component2: number | undefined = null,
-		component3: number | undefined = null,
+		component1?: number,
+		component2?: number,
+		component3?: number,
 	) {
 		const { day, month, year } = reverseDateMappers[locale](component1, component2, component3);
 		const tzNow = new Date(Date.now());
@@ -2918,9 +2928,9 @@ export class Translator {
 	 */
 	static reverseSearchUTCDate(
 		id: LocaleKey,
-		component1: number | undefined = null,
-		component2: number | undefined = null,
-		component3: number | undefined = null,
+		component1?: number,
+		component2?: number,
+		component3?: number,
 	) {
 		const { day, month, year } = Translator.mapReverseDateUTCComponents(
 			id,

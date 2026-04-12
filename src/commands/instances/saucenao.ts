@@ -1,5 +1,6 @@
 import {
 	ActionRowBuilder,
+	type Attachment,
 	ButtonBuilder,
 	ButtonStyle,
 	Colors,
@@ -62,28 +63,28 @@ const command = new Command('saucenao', flags)
 			});
 		}
 
+		const refMessageId = request.isMessage && request.inferAsMessage().reference?.messageId;
 		const message =
 			(request.isInteraction && (await args.getMessage('mensaje')))
-			|| (request.isMessage
-				&& request.channel.messages.cache.get(
-					request.inferAsMessage().reference?.messageId,
-				));
-		const messageAttachments = message?.attachments
+			|| (refMessageId ? request.channel.messages.cache.get(refMessageId) : undefined);
+		const refMessageAttachments = message?.attachments
 			? message.attachments.values()
-			: /**@type {Array<import('discord.js').Attachment>}*/ ([]);
+			: ([] as Attachment[]);
 
 		const imageUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(
 			(u) => u,
 		);
 		const commandAttachments = CommandOptionSolver.asAttachments(
 			args.parsePolyParamSync('imagens'),
-		).filter((a) => a);
+		).filter((a) => a != null);
 
-		const attachments = [...messageAttachments, ...commandAttachments];
+		const attachments = [...refMessageAttachments, ...commandAttachments];
 
 		const attachmentUrls = attachments.map((att) => att.url);
 		const otherMessageUrls = message?.embeds
-			? message.embeds?.flatMap((e) => [e.image?.url, e.thumbnail?.url]).filter((u) => u)
+			? message.embeds
+					?.flatMap((e) => [e.image?.url, e.thumbnail?.url])
+					.filter((u) => u != null)
 			: [];
 
 		const queries = [...imageUrls, ...attachmentUrls, ...otherMessageUrls].slice(0, 5);

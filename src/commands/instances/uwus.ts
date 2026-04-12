@@ -39,7 +39,7 @@ const command = new Command('uwus', tags)
 		});
 
 		coll.on('end', async (collected) => {
-			let bestId: Snowflake;
+			let bestId: Snowflake | undefined;
 			let max = 0;
 			for (const [uid, count] of uwuUsers.entries()) {
 				if (count >= max) {
@@ -96,7 +96,7 @@ const command = new Command('uwus', tags)
 			)
 			.setAuthor({
 				name: `Evento iniciado por ${user.username}`,
-				iconURL: user.avatarURL({ size: 256 }),
+				iconURL: user.displayAvatarURL({ size: 256 }),
 			});
 
 		return request.reply({ embeds: [embed] });

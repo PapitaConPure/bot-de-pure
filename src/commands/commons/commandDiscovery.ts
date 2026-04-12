@@ -53,7 +53,7 @@ export async function fetchCommandsFromFiles(
 export class FetchCommandError extends Error {
 	constructor();
 	constructor(message: string);
-	constructor(message: string = undefined) {
+	constructor(message?: string) {
 		super(message);
 		this.name = 'FetchCommandError';
 	}

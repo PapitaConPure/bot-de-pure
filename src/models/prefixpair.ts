@@ -1,10 +1,16 @@
 import Mongoose from 'mongoose';
 
 const PrefixPairSchema = new Mongoose.Schema({
-	guildId: { type: String },
+	guildId: { type: String, required: true },
 	pure: {
-		raw: { type: String, required: true },
-		regex: { type: Mongoose.SchemaTypes.Mixed, required: true },
+		type: new Mongoose.Schema(
+			{
+				raw: { type: String, required: true },
+				regex: { type: Mongoose.SchemaTypes.Mixed, required: true },
+			},
+			{ _id: false },
+		),
+		required: true,
 	},
 });
 

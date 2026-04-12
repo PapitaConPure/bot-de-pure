@@ -1,4 +1,4 @@
-import type { Interaction, TextChannel } from 'discord.js';
+import type { AnyThreadChannel, Interaction, TextChannel } from 'discord.js';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -22,7 +22,7 @@ import { DiscordAgent } from '@/utils/discordagent';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import { Command, CommandPermissions, CommandTags } from '../commons';
 
-const confessionTasks = [];
+const confessionTasks: unknown[] = [];
 
 const perms = new CommandPermissions()
 	.requireAnyOf('ManageMessages')
@@ -49,7 +49,7 @@ const command = new Command('confesión', tags)
 		const confChannel = fetchChannel(confSystem?.confessionsChannelId, request.guild);
 
 		const embed = new EmbedBuilder()
-			.setAuthor({ name: request.guild.name, iconURL: request.guild.iconURL() })
+			.setAuthor({ name: request.guild.name, iconURL: request.guild.iconURL() ?? undefined })
 			.setTitle('Configuración de Sistema de Confesiones')
 			.setColor(0x8334eb)
 			.addFields(
@@ -203,7 +203,7 @@ const command = new Command('confesión', tags)
 		});
 
 		const embed = new EmbedBuilder()
-			.setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL() })
+			.setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL() ?? undefined })
 			.setTitle('Confesionario')
 			.setColor(0x8334eb)
 			.addFields({ name: 'Canal de confesiones', value: `${confessionsChannel}` });
@@ -347,7 +347,7 @@ const command = new Command('confesión', tags)
 			const actualMessageId = decompressId(messageId);
 			const message = await confChannel.messages.fetch(actualMessageId);
 			const thread = message.hasThread
-				? message.thread
+				? message.thread as AnyThreadChannel
 				: await message.startThread({
 						name: 'Respuestas',
 						reason: 'Aprobación de respuesta anónima a confesión',
@@ -679,11 +679,11 @@ async function getConfessionSystemAndChannels(interaction: Interaction) {
 	if (!confSystem)
 		return makeErr('⚠️ No se ha configurado un sistema de confesiones en este server');
 
-	const logChannel = interaction.guild.channels.cache.get(confSystem.logChannelId);
+	const logChannel = interaction.guild?.channels.cache.get(confSystem.logChannelId);
 	if (!logChannel || logChannel.type !== ChannelType.GuildText)
 		return makeErr('⚠️ No se encontró un canal de auditoría de confesiones válido');
 
-	const confChannel = interaction.guild.channels.cache.get(confSystem.confessionsChannelId);
+	const confChannel = interaction.guild?.channels.cache.get(confSystem.confessionsChannelId);
 	if (!confChannel || confChannel.type !== ChannelType.GuildText)
 		return makeErr('⚠️ No se encontró un canal de confesiones válido');
 

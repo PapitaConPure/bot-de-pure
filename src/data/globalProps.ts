@@ -8,7 +8,18 @@ import type { GuildFeedChunk } from '@/systems/booru/boorufeed';
 /**@description Si se está en un entorno de producción (`true`) o de desarrollo (`false`, por defecto).*/
 export const remoteStartup: boolean = process.env.NODE_ENV === 'production';
 
+
 //Claves
+
+if (!process.env.DISCORD_TOKEN)
+	throw new Error("Couldn't find environment variable for: DISCORD_TOKEN");
+
+if (!process.env.GELBOORU_APIKEY)
+	throw new Error("Couldn't find environment variable for: GELBOORU_APIKEY");
+
+if (!process.env.GELBOORU_USERID)
+	throw new Error("Couldn't find environment variable for: GELBOORU_USERID");
+
 /**
  * @description
  * El token de bot de Discord a usar para el proceso actual.
@@ -92,10 +103,9 @@ export async function resolveHost(options: ResolveHostOptions = {}) {
 		hostname = `${h.service}://${h.hostname}/`;
 		onSuccess(hostname);
 	} catch (err) {
-		if (fallback == null && onFailure == null) throw err;
-
-		hostname = fallback;
-		onFailure(err);
+		if (fallback) hostname = fallback;
+		else if (onFailure) onFailure(err as Error);
+		else throw err;
 	}
 }
 
@@ -104,19 +114,19 @@ export async function resolveHost(options: ResolveHostOptions = {}) {
  * @description Color de Tenshi — Celestial.
  * @returns #608cf3
  */
-export const tenshiColor = color('#608cf3', 'number');
+export const tenshiColor = color('#608cf3', 'number') as number;
 
 /**
  * @description Color alternativo de Tenshi — Lavanda.
  * @returns #bf94e4
  */
-export const tenshiAltColor = color('#bf94e4', 'number');
+export const tenshiAltColor = color('#bf94e4', 'number') as number;
 
 /**
  * @description Color de resalte de Tenshi — Durazno.
  * @returns #ffe286
  */
-export const tenshiPeachColor = color('#ffe286', 'number');
+export const tenshiPeachColor = color('#ffe286', 'number') as number;
 
 /**
  * @description
@@ -150,12 +160,12 @@ export const globalConfigs = {
 	lechitauses: 0,
 	/**@description Servidores de Discords para utilidades varias de Bot de Puré.*/
 	slots: {
-		slot1: null as Guild,
-		slot2: null as Guild,
-		slot3: null as Guild,
+		slot1: null as unknown as Guild,
+		slot2: null as unknown as Guild,
+		slot3: null as unknown as Guild,
 	},
 	/**@description Canal de logs de Bot de Puré.*/
-	logch: null as GuildTextBasedChannel,
+	logch: null as unknown as GuildTextBasedChannel,
 	/**@description Imagen de fondo de la Tabla de Puré.*/
 	pureTableImage: null,
 	/**@description Emojis cargados en memoria.*/

@@ -97,7 +97,7 @@ const helpRows = () => [
 	new ActionRowBuilder<ButtonBuilder>().addComponents(psEditorButton, psDocsButton),
 ];
 
-async function getItemsList(guild: Guild, content: string = undefined) {
+async function getItemsList(guild: Guild, content?: string) {
 	const gcfg =
 		(await GuildConfig.findOne({ guildId: guild.id }))
 		|| new GuildConfig({ guildId: guild.id });
@@ -117,20 +117,20 @@ async function getItemsList(guild: Guild, content: string = undefined) {
 async function loadPageNumber(
 	interaction: AnyCommandInteraction,
 	page: number,
-	setFilter: string = undefined,
+	setFilter?: string,
 ) {
 	const { guild, message } = interaction;
-	const { items, lastPage } = await getItemsList(guild, setFilter ?? message.content);
+	const { items, lastPage } = await getItemsList(guild, setFilter ?? message?.content);
 	const members = guild.members.cache;
-	const oembed = message.embeds[0];
+	const oembed = message?.embeds[0];
 	const paginationEnabled = items.length >= pageMax;
 
 	const listUpdate: MessageEditOptions = {
 		embeds: [
 			new EmbedBuilder()
-				.setColor(oembed.color)
-				.setAuthor({ name: oembed.author.name, iconURL: oembed.author.url })
-				.setTitle(oembed.title)
+				.setColor(oembed?.color ?? 0)
+				.setAuthor({ name: oembed?.author?.name ?? '???', iconURL: oembed?.author?.url })
+				.setTitle(oembed?.title ?? '...')
 				.addFields({
 					name: `🥔)▬▬\\~•\\~▬▬▬\\~•\\~▬▬{ ${page + 1} / ${lastPage + 1} }▬▬\\~•\\~▬▬▬\\~•\\~▬▬(🥔`,
 					value: items.length
@@ -138,14 +138,14 @@ async function loadPageNumber(
 								.splice(page * pageMax, pageMax)
 								.map(
 									([tid, tuber]) =>
-										`${tuber.script ? '`📜`' : ''}**${tid}** • ${(members.get(tuber.author) ?? guild.members.me).user.username}`,
+										`${tuber.script ? '`📜`' : ''}**${tid}** • ${(members.get(tuber.author) ?? guild.members.me)?.user.username}`,
 								)
 								.join('\n')
 						: `Ningún Tubérculo coincide con la búsqueda actual`,
 					inline: true,
 				})
 				.setFooter({
-					iconURL: guild.iconURL({ size: 256 }),
+					iconURL: guild.iconURL({ size: 256 }) ?? undefined,
 					text: `Total • ${items.length}`,
 				}),
 		],
@@ -157,7 +157,7 @@ async function loadPageNumber(
 		else listUpdate.content = null;
 	}
 
-	if (interaction.isModalSubmit()) return interaction.message.edit(listUpdate);
+	if (interaction.isModalSubmit()) return interaction.message?.edit(listUpdate);
 	else return interaction.update(listUpdate);
 }
 
@@ -195,7 +195,7 @@ const options = new CommandOptions()
 				const existingTuber = tubersArr.find(([id]) => id === query);
 
 				const membersCache = interaction.guild.members.cache;
-				const clientDisplayName = interaction.guild.members.me.displayName;
+				const clientDisplayName = interaction.guild.members.me?.displayName;
 
 				const options: Array<ApplicationCommandOptionChoiceData> = tubersArr
 					.sort(([, , aDistance], [, , bDistance]) => aDistance - bDistance)
@@ -288,7 +288,7 @@ const command = new Command('tubérculo', flags)
 						.setColor(Colors.LuminousVividPink)
 						.setAuthor({
 							name: request.guild.name,
-							iconURL: request.guild.iconURL({ size: 256 }),
+							iconURL: request.guild.iconURL({ size: 256 }) ?? undefined,
 						})
 						.setTitle('Arsenal de Tubérculos del Servidor')
 						.addFields({
@@ -298,14 +298,14 @@ const command = new Command('tubérculo', flags)
 										.splice(0, pageMax)
 										.map(
 											([tid, tuber]) =>
-												`${tuber.script ? '`📜`' : ''}**${tid}** • ${(members.get(tuber.author) ?? request.guild.members.me).user.username}`,
+												`${tuber.script ? '`📜`' : ''}**${tid}** • ${(members.get(tuber.author) ?? request.guild.members.me)?.user.username}`,
 										)
 										.join('\n')
 								: `Este servidor no tiene ningún Tubérculo.\nComienza a desplegar TuberIDs con \`${p_pure(request.guildId).raw}tubérculo --crear\``,
 							inline: true,
 						})
 						.setFooter({
-							iconURL: request.guild.iconURL({ size: 256 }),
+							iconURL: request.guild.iconURL({ size: 256 }) ?? undefined,
 							text: `Total • ${items.length}`,
 						}),
 				],
@@ -431,7 +431,7 @@ const command = new Command('tubérculo', flags)
 		if (isNotModerator(interaction.member) && userId !== interaction.user.id) {
 			const members = interaction.guild.members;
 			return interaction.reply({
-				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(members.cache.get(userId) ?? members.me).user.username}*`,
+				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(members.cache.get(userId) ?? members.me)?.user.username}*`,
 				ephemeral: true,
 			});
 		}
@@ -455,7 +455,7 @@ const command = new Command('tubérculo', flags)
 		if (isNotModerator(interaction.member) && userId !== interaction.user.id) {
 			const gcfg = await GuildConfig.findOne({ guildId: interaction.guildId });
 			return interaction.reply({
-				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(interaction.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? interaction.guild.members.me).user.username}*`,
+				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(interaction.guild.members.cache.get(gcfg?.tubers[tuberId].author) ?? interaction.guild.members.me)?.user.username}*`,
 				ephemeral: true,
 			});
 		}
@@ -509,7 +509,7 @@ const command = new Command('tubérculo', flags)
 				interaction.guild.members.cache.get(gcfg.tubers[tuberId].author)
 				?? interaction.guild.members.me;
 			return interaction.reply({
-				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${member.user.username}*`,
+				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${member?.user.username}*`,
 			});
 		}
 
@@ -548,7 +548,7 @@ const command = new Command('tubérculo', flags)
 				interaction.guild.members.cache.get(gcfg.tubers[tuberId].author)
 				?? interaction.guild.members.me;
 			return interaction.reply({
-				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${member.user.username}*`,
+				content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${member?.user.username}*`,
 			});
 		}
 
@@ -606,7 +606,7 @@ async function createTuber(
 		&& gcfg.tubers[tuberId].author !== request.user.id
 	)
 		return request.reply({
-			content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*`,
+			content: `⛔ Acción denegada. Esta TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me)?.user.username}*`,
 		});
 
 	const tuberContent: Partial<Tubercle> = {
@@ -620,7 +620,7 @@ async function createTuber(
 	const contentResult = await (async () => {
 		const hasCodeImport = messageFiles[0]?.name.toLowerCase().endsWith('.tuber');
 		const importCode = async () => {
-			const fetchResult = await fetchExt(messageFiles[0].url, { type: 'text' });
+			const fetchResult = await fetchExt(messageFiles[0]?.url ?? '', { type: 'text' });
 
 			if (fetchResult.success === false)
 				return {
@@ -693,7 +693,9 @@ async function createTuber(
 			});
 		if (mcontent) tuberContent.content = mcontent;
 		if (messageFiles.length)
-			tuberContent.files = messageFiles.map((messageFile) => messageFile.url);
+			tuberContent.files = messageFiles
+				.map((messageFile) => messageFile?.url)
+				.filter((f) => f != null);
 	}
 
 	gcfg.tubers[tuberId] = tuberContent;
@@ -755,14 +757,13 @@ function viewTuber(
 			.setEmoji('ℹ')
 			.setStyle(ButtonStyle.Primary),
 	];
-	const variantButtons = [];
-	/**@type {Array<AttachmentBuilder>}*/
-	let files: Array<AttachmentBuilder> = [];
+	const variantButtons: ButtonBuilder[] = [];
+	let files: AttachmentBuilder[] = [];
 	const embed = new EmbedBuilder()
 		.setColor(Colors.DarkVividPink)
 		.setAuthor({
 			name: interaction.guild.name,
-			iconURL: interaction.guild.iconURL({ size: 256 }),
+			iconURL: interaction.guild.iconURL({ size: 256 }) ?? undefined,
 		})
 		.setTitle('Visor de Tubérculos')
 		.addFields(
@@ -773,7 +774,7 @@ function viewTuber(
 			},
 			{
 				name: 'Autor',
-				value: author.user.username,
+				value: author?.user.username ?? '???',
 				inline: true,
 			},
 		);
@@ -796,7 +797,7 @@ function viewTuber(
 
 		if (item.inputs?.length) {
 			let inputTitle: string;
-			let inputStrings: string;
+			let inputStrings: string | undefined;
 			let actuallyValid = true;
 
 			if (!item.psVersion) {
@@ -819,7 +820,7 @@ function viewTuber(
 			if (actuallyValid) {
 				embed.addFields({
 					name: inputTitle,
-					value: inputStrings,
+					value: inputStrings as string,
 				});
 				descriptionButtons.push(
 					new ButtonBuilder()
@@ -894,7 +895,7 @@ function deleteTuber(tuberId: string, gcfg: GuildConfigDocument, request: Comple
 
 	if (isNotModerator(request.member) && gcfg.tubers[tuberId].author !== request.userId)
 		return request.reply({
-			content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me).user.username}*`,
+			content: `⛔ Acción denegada. La TuberID **${tuberId}** le pertenece a *${(request.guild.members.cache.get(gcfg.tubers[tuberId].author) ?? request.guild.members.me)?.user.username}*`,
 		});
 
 	gcfg.tubers[tuberId] = null;
@@ -934,7 +935,7 @@ async function opExecuteTuber(
 		);
 
 		let similar: Array<{ name: string; distance: number }> = [];
-		let superSimilar: { name: string; distance: number };
+		let superSimilar: { name: string; distance: number } | undefined;
 		if (tuberId.length > 1)
 			similar = Object.keys(gcfg.tubers)
 				.filter((name) => name.length > 1)

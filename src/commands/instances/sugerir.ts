@@ -12,7 +12,7 @@ const command = new Command('sugerir', tags)
 			.setColor(tenshiColor)
 			.setAuthor({
 				name: 'Bot de Puré • Comentarios',
-				iconURL: request.client.user.avatarURL({ size: 256, extension: 'jpg' }),
+				iconURL: request.client.user.displayAvatarURL({ size: 256, extension: 'jpg' }),
 			})
 			.setThumbnail('https://i.imgur.com/Ah7G6iV.jpg')
 			.addFields(

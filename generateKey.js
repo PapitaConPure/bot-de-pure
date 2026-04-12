@@ -21,7 +21,7 @@ async function readln() {
 		});
 		rl.question('', () => {
 			rl.close();
-			resolve();
+			resolve(undefined);
 		});
 	});
 }

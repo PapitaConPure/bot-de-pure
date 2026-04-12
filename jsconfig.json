@@ -13,10 +13,16 @@
             "@/*": [
                 "./src/*"
             ]
-        }
+        },
+        "strict": false,
+        "strictBindCallApply": true,
+        "strictNullChecks": true,
+        "skipLibCheck": true
     },
     "exclude": [
         "node_modules",
-        "PS Docs"
+        "PS Docs",
+        "src/systems/ps/v1.0",
+        "src/systems/ps/v1.1"
     ],
 }

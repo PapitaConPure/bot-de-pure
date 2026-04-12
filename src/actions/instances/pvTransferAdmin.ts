@@ -1,14 +1,14 @@
-import { ContextMenuAction } from '../commons/actionBuilder';
-import {
-	PureVoiceSessionMember,
-	requestPVControlPanel,
-	PVCPSuccess,
-	PureVoiceActionHandler,
-	getOrchestrator,
-} from '@/systems/others/purevoice';
-import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice';
 import { MessageFlags } from 'discord.js';
 import { Translator } from '@/i18n';
+import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice';
+import {
+	getOrchestrator,
+	PureVoiceActionHandler,
+	PureVoiceSessionMember,
+	PVCPSuccess,
+	requestPVControlPanel,
+} from '@/systems/others/purevoice';
+import { ContextMenuAction } from '../commons/actionBuilder';
 
 const action = new ContextMenuAction('actionPVTransferAdmin', 'User').setUserResponse(
 	async (interaction) => {
@@ -22,12 +22,13 @@ const action = new ContextMenuAction('actionPVTransferAdmin', 'User').setUserRes
 
 		const voiceState = member.voice;
 		const voiceChannel = voiceState?.channel;
-		const { guild, guildId } = voiceChannel;
 
 		if (!voiceChannel)
 			return interaction.editReply({
 				content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
 			});
+
+		const { guild, guildId } = voiceChannel;
 
 		const pv = await PureVoiceModel.findOne({ guildId });
 		if (!pv)
@@ -48,7 +49,13 @@ const action = new ContextMenuAction('actionPVTransferAdmin', 'User').setUserRes
 					'❌ El miembro al que le transfieras el cargo de administrador debe estar en la misma sesión que tú',
 			});
 
-		const sessionSelf = new PureVoiceSessionMember(session.members.get(member.id));
+		const schemaMember = session.members.get(member.id);
+		if (!schemaMember)
+			return interaction.editReply({
+				content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+			});
+
+		const sessionSelf = new PureVoiceSessionMember(schemaMember);
 		const sessionOther = new PureVoiceSessionMember(dbOther);
 		if (!sessionSelf.exchangeAdmin(sessionOther))
 			return interaction.editReply({

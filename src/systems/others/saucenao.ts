@@ -1,4 +1,4 @@
-import { Colors, EmbedBuilder } from 'discord.js';
+import { Colors, EmbedBuilder, type GuildBasedChannel } from 'discord.js';
 import sagiri from 'sagiri';
 import type { AnyRequest } from 'types/commands';
 import { booruApiKey, booruUserId } from '@/data/globalProps';
@@ -24,7 +24,7 @@ export function testSauceNAOToken(token: string) {
 export async function pourSauce(
 	clientId: string,
 	queries: string[],
-	request: AnyRequest,
+	request: AnyRequest & { channel: GuildBasedChannel },
 	payload: { successes: EmbedBuilder[]; failures: EmbedBuilder[] },
 ) {
 	const translator = await Translator.from(request.user.id);
@@ -73,6 +73,8 @@ export async function pourSauce(
 				results.map(async (result) => {
 					try {
 						const post = await booru.fetchPostByUrl(result.url);
+						if (!post) throw new ReferenceError('Post no encontrado');
+
 						const isNSFW = post.rating === 'questionable' || post.rating === 'explicit';
 
 						const embed = new EmbedBuilder().setFooter({

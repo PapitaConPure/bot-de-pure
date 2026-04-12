@@ -46,7 +46,7 @@ export async function fetchActionsFromFiles(options: FetchActionOptions = {}): P
 export class FetchActionError extends Error {
 	constructor();
 	constructor(message: string);
-	constructor(message: string = undefined) {
+	constructor(message?: string) {
 		super(message);
 		this.name = 'FetchActionError';
 	}

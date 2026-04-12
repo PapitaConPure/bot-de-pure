@@ -52,7 +52,7 @@ export async function recacheUser(user: UserCacheResolvable) {
  * Devuelve los datos vinculados a la ID de usuario cacheada.
  * Si la ID no está cacheada, se realiza una llamada a la base de datos, se cachea el usuario y se devuelve lo obtenido
  */
-export async function fetchUserCache(user: UserCacheResolvable): Promise<UserCache> {
+export async function fetchUserCache(user: UserCacheResolvable): Promise<UserCache | undefined> {
 	const userId = resolveUserCacheId(user);
 	if (!userId) throw ReferenceError('Se esperaba una ID de usuario al recolectar caché');
 
@@ -61,10 +61,14 @@ export async function fetchUserCache(user: UserCacheResolvable): Promise<UserCac
 	return userCache.get(userId);
 }
 
-export function resolveUserCacheId(data: UserCacheResolvable) {
+export function resolveUserCacheId(data: UserCacheResolvable): string | undefined {
 	if (typeof data === 'string') return data;
 
-	if ('member' in data) return data.member.user.id;
+	if ('member' in data) {
+		if (!data.member) throw new Error('Malformed id');
+
+		return data.member.user.id;
+	}
 
 	return data.id;
 }

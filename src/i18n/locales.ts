@@ -11,3 +11,6 @@ const Locales = {
 } as const;
 
 export default Locales;
+
+/**@description El idioma por defecto a utilizar en las situaciones que se desconoce el idioma preferido del servidor o usuario.*/
+export const defaultLocale = Locales.Spanish;

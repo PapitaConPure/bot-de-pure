@@ -115,7 +115,7 @@ The User's Discord name is: "${request.member.displayName || request.user.userna
 
 		if (response.length <= chunkSize) return request.editReply({ content: response });
 
-		const responseParts = [];
+		const responseParts: string[] = [];
 		for (let i = 0; i < response.length; i += chunkSize)
 			responseParts.push(response.slice(i, i + chunkSize));
 

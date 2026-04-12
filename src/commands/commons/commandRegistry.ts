@@ -3,6 +3,7 @@ import { InteractionContextType, PermissionFlagsBits, SlashCommandBuilder } from
 import type { BaseParamType } from 'types/commands';
 import type { Command, CommandOptions } from '@/commands/commons';
 import puré from '@/core/puréRegistry';
+import { UnexpectedValueError } from '@/errors/unexpectedValue';
 import { shortenText } from '@/func';
 import type { AnySlashCommandOption, SlashCommandBuilderAddFunctionName } from '@/types/discord';
 
@@ -33,7 +34,7 @@ export function registerCommands(commands: Command[], log: boolean = false) {
 
 		const slash = new SlashCommandBuilder()
 			.setName(command.name)
-			.setDescription(command.brief || shortenText(command.desc, 100))
+			.setDescription(command.brief || shortenText(command.desc ?? 'Sin descripción.', 100))
 			.setContexts(InteractionContextType.Guild);
 
 		if (command.flags.has('MOD'))
@@ -41,7 +42,7 @@ export function registerCommands(commands: Command[], log: boolean = false) {
 				PermissionFlagsBits.ManageRoles | PermissionFlagsBits.ManageMessages,
 			);
 
-		const options: CommandOptions = command.options;
+		const options: CommandOptions | undefined = command.options;
 		if (options) setupOptionBuilders(slash, options, log);
 
 		const jsonData = slash.toJSON();
@@ -73,7 +74,7 @@ const addFunctionNames: Record<BaseParamType, SlashCommandBuilderAddFunctionName
 const defaultAddFunctionName: SlashCommandBuilderAddFunctionName = 'addStringOption';
 
 function setupOptionBuilders(slash: SlashCommandBuilder, options: CommandOptions, log = false) {
-	options.params.forEach((p) => {
+	options.params.forEach((param) => {
 		const optionBuilder = <T extends AnySlashCommandOption>(
 			option: T,
 			name: string,
@@ -81,42 +82,64 @@ function setupOptionBuilders(slash: SlashCommandBuilder, options: CommandOptions
 		): T => {
 			option
 				.setName(name)
-				.setDescription(p.desc)
-				.setRequired(!(fullyOptional || p.optional));
+				.setDescription(param.desc ?? 'Sin descripción.')
+				.setRequired(!(fullyOptional || param.optional));
 
-			if (p.hasAutocomplete) (option as SlashCommandStringOption).setAutocomplete(true);
+			if (param.hasAutocomplete) (option as SlashCommandStringOption).setAutocomplete(true);
 
 			return option;
 		};
 
 		const addFunctionName =
-			typeof p.type === 'string'
-				? (addFunctionNames[p.type] ?? defaultAddFunctionName)
+			typeof param.type === 'string'
+				? (addFunctionNames[param.type] ?? defaultAddFunctionName)
 				: defaultAddFunctionName;
 
-		if (p.poly === 'SINGLE') return slash[addFunctionName]((opt) => optionBuilder(opt, p.name));
-		if (p.poly === 'MULTIPLE') {
-			const singularName = p.name.replace(/[Ss]$/, '');
-			slash[addFunctionName]((opt) => optionBuilder(opt, `${singularName}_1`));
-			for (let i = 2; i <= p.polymax; i++)
-				slash[addFunctionName]((opt) => optionBuilder(opt, `${singularName}_${i}`, true));
+		if (param.poly === 'SINGLE')
+			// biome-ignore lint/suspicious/noExplicitAny: Hay que confiar en el proceso
+			return slash[addFunctionName]((opt: any) => optionBuilder(opt, param.name));
+		if (param.poly === 'MULTIPLE') {
+			const singularName = param.name.replace(/[Ss]$/, '');
+			// biome-ignore lint/suspicious/noExplicitAny: Hay que confiar en el proceso
+			slash[addFunctionName]((opt: any) => optionBuilder(opt, `${singularName}_1`));
+			for (let i = 2; i <= param.polymax; i++)
+				// biome-ignore lint/suspicious/noExplicitAny: Hay que confiar en el proceso
+				slash[addFunctionName]((opt: any) =>
+					optionBuilder(opt, `${singularName}_${i}`, true),
+				);
 			return;
 		}
-		return p.poly.forEach((entry) =>
-			slash[addFunctionName]((opt) => optionBuilder(opt, `${p.name}_${entry}`)),
+		return param.poly.forEach((entry) =>
+			// biome-ignore lint/suspicious/noExplicitAny: Hay que confiar en el proceso
+			slash[addFunctionName]((opt: any) => optionBuilder(opt, `${param.name}_${entry}`)),
 		);
 	});
 
 	options.flags.forEach((f) => {
 		const addFunctionName =
 			typeof f.type === 'string'
-				? (addFunctionNames[f.type] ?? defaultAddFunctionName)
+				? ((addFunctionNames as Record<string, SlashCommandBuilderAddFunctionName>)[f.type]
+					?? defaultAddFunctionName)
 				: defaultAddFunctionName;
 
 		const optionBuilder = <T extends AnySlashCommandOption>(option: T): T => {
+			if (f.long && !Array.isArray(f.long))
+				throw new UnexpectedValueError(`Malformed long command flags for option: ${option.name}`, {
+					expected: 'string[]',
+					received: f.long,
+				});
+
+			if (f.short && typeof f !== 'string' && !Array.isArray(f.short))
+				throw new UnexpectedValueError(`Malformed short command flags for option: ${option.name}`, {
+					expected: 'string[]',
+					received: f.long,
+				});
+
+			if (!f.long && !f.short) throw new Error('Malformed command flags.');
+
 			option
-				.setName(f.long[0] || f.short[0])
-				.setDescription(f.desc)
+				.setName(f.long?.[0] || (f.short?.[0] as string))
+				.setDescription(f.desc ?? 'Sin descripción.')
 				.setRequired(false);
 
 			if (f.isExpressive() && f.hasAutocomplete)
@@ -125,6 +148,7 @@ function setupOptionBuilders(slash: SlashCommandBuilder, options: CommandOptions
 			return option;
 		};
 
+		//@ts-expect-error Hay que confiar en el proceso.
 		if (f.isExpressive()) return slash[addFunctionName](optionBuilder);
 
 		return slash.addBooleanOption(optionBuilder);

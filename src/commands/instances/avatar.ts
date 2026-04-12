@@ -61,7 +61,7 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 	if (hasServerAvatarOverride || hasServerBannerOverride)
 		container.addSeparatorComponents((separator) => separator.setDivider(true));
 
-	if (hasServerBannerOverride)
+	if (hasServerBannerOverride && memberBannerURL != null)
 		container.addMediaGalleryComponents((mediaGallery) =>
 			mediaGallery.addItems((mediaGalleryItem) =>
 				mediaGalleryItem
@@ -100,7 +100,10 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 	return container;
 };
 
-function getMembers(request: ComplexCommandRequest, args: CommandOptionSolver) {
+function getMembers(
+	request: ComplexCommandRequest,
+	args: CommandOptionSolver,
+): { found: GuildMember[]; notFound: string[] } {
 	const notFound: string[] = [];
 	const members = CommandOptionSolver.asMembers(
 		args.parsePolyParamSync('miembros', {
@@ -111,7 +114,7 @@ function getMembers(request: ComplexCommandRequest, args: CommandOptionSolver) {
 	);
 
 	return {
-		found: members,
+		found: members as GuildMember[],
 		notFound,
 	};
 }
@@ -140,7 +143,7 @@ const command = new Command('avatar', tags)
 			fetchGuildMembers(request.guild),
 		]);
 
-		const components = /**@type {import('discord.js').ComponentBuilder[]}*/ ([]);
+		const components: (TextDisplayBuilder | ContainerBuilder)[] = [];
 		const { found: members, notFound } = getMembers(request, args);
 
 		if (notFound.length) {
@@ -157,7 +160,7 @@ const command = new Command('avatar', tags)
 		}
 
 		if (members?.length) {
-			const fetchedMembers = await Promise.all(members.map((m) => m.fetch(true)));
+			const fetchedMembers = await Promise.all(members.map((m) => m?.fetch(true)));
 			fetchedMembers?.forEach((member) => {
 				const avatarContainer = getAvatarContainer(member, translator);
 				avatarContainer && components.push(avatarContainer);

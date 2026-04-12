@@ -1,6 +1,6 @@
 import chalk from 'chalk';
-import { EmbedBuilder } from 'discord.js';
-import type { CommandTagResolvable } from '@/commands/commons';
+import { EmbedBuilder, type GuildMember, type Interaction, type User } from 'discord.js';
+import type { CommandOptions, CommandTagResolvable } from '@/commands/commons';
 import { isNotModerator } from '@/func';
 import { Command } from '../commands/commons/commandBuilder';
 import { reportFormUrl } from '../data/globalProps';
@@ -19,7 +19,8 @@ export interface ExceptionSummary {
 	isException: ExceptionTestFn;
 }
 
-const isNotByPapita: ExceptionTestFn = async (request) => request.member.user.id !== userIds.papita;
+const isNotByPapita: ExceptionTestFn = async (request) =>
+	request.member?.user.id !== userIds.papita;
 
 export const exceptions: ExceptionSummary[] = [
 	{
@@ -38,7 +39,7 @@ export const exceptions: ExceptionSummary[] = [
 		tag: 'MOD',
 		title: 'Comando exclusivo para moderación',
 		desc: 'El comando es de uso restringido para moderación.\n**Considero a alguien como moderador cuando** tiene permisos para administrar roles *(MANAGE_ROLES)* o mensajes *(MANAGE_MESSAGES)*\nNota: esto cambiará en una futura actualización, o puede ya haber cambiado pero no se ha actualizado este mensaje de error',
-		isException: async (request) => isNotModerator(request.member),
+		isException: async (request) => isNotModerator(request.member as GuildMember),
 	},
 	{
 		tag: 'CHAOS',
@@ -48,7 +49,7 @@ export const exceptions: ExceptionSummary[] = [
 			const gcfg =
 				(await GuildConfig.findOne({ guildId: request.guild.id }))
 				|| new GuildConfig({ guildId: request.guild.id });
-			return isNotByPapita(request) && !gcfg.chaos;
+			return (await isNotByPapita(request)) && !gcfg.chaos;
 		},
 	},
 	{
@@ -72,12 +73,12 @@ export const exceptions: ExceptionSummary[] = [
 			'Si te interesa, puedes [unirte al servidor](https://discord.gg/pPwP2UNvAC)',
 		].join('\n'),
 		isException: async (request) =>
-			isNotByPapita(request) && request.guild.id !== serverIds.saki,
+			(await isNotByPapita(request)) && request.guild.id !== serverIds.saki,
 	},
 ];
 
 export async function findFirstException(
-	command: Command,
+	command: Command<CommandOptions | undefined>,
 	request: CommandRequest,
 ): Promise<ExceptionSummary | null> {
 	const flags = command.flags;
@@ -114,19 +115,18 @@ interface ErrorLogOptions {
 }
 
 /**@returns Devuelve si el error se debe a una falta de permisos.*/
-export async function handleAndAuditError(
+export function handleAndAuditError(
 	error: Error,
-	request: CommandRequest | import('discord.js').Interaction<import('discord.js').CacheType>,
+	request: CommandRequest | Interaction<import('discord.js').CacheType>,
 	logOptions: ErrorLogOptions = {},
 ) {
 	if (error.message === 'Missing Permissions') {
-		/**@type {import('discord.js').User}*/
-		const user: import('discord.js').User = 'author' in request ? request.author : request.user;
+		const user: User = 'author' in request ? request.author : request.user;
 		const permsEmbed = new EmbedBuilder()
 			.setColor(0x0000ff)
 			.setAuthor({
-				name: `${request.guild.name} • ${request.channel.name} (Click para ver)`,
-				iconURL: user.avatarURL({ size: 128 }),
+				name: `${request.guild?.name} • ${request.channel ? ('name' in request.channel ? request.channel?.name : request.channelId) : '<Canal desconocido>'} (Click para ver)`,
+				iconURL: user.displayAvatarURL({ size: 128 }),
 				url: 'url' in request ? request.url : 'https://discordapp.com',
 			})
 			.setThumbnail('https://i.imgur.com/ftAxUen.jpg')

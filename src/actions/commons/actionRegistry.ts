@@ -6,7 +6,7 @@ import type { ContextMenuAction as Action } from './actionBuilder';
 interface ActionRegistryLogTableRow {
 	name: string;
 	type: string;
-	tid: string;
+	tid: string | null;
 }
 
 export function registerActions(actions: Action[], log: boolean = false) {

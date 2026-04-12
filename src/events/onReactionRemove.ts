@@ -30,7 +30,7 @@ export async function onReactionRemove(
 	const { guild } = message;
 	const userId = message.author.id;
 
-	if (guild.memberCount < 100) return;
+	if (!guild || guild.memberCount < 100) return;
 	if (user.id === userId) return;
 
 	const userConfigs = (await UserConfigs.findOne({ userId })) || new UserConfigs({ userId });

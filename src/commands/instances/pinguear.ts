@@ -66,17 +66,17 @@ const command = new Command('pinguear', flags)
 			});
 
 		let repeats = -1;
-		let user: User;
+		let user: User | undefined;
 
 		if (request.isInteraction) {
 			repeats = Math.floor(args.getNumber('cantidad', 3));
-			user = await args.getUser('usuario');
+			user = args.getUser('usuario');
 		} else {
 			if (!Number.isNaN(+args.args[0])) {
 				repeats = Math.floor(args.getNumber('cantidad', 3));
-				user = await args.getUser('usuario');
+				user = args.getUser('usuario');
 			} else if (!Number.isNaN(+args.args[1])) {
-				user = await args.getUser('usuario');
+				user = args.getUser('usuario');
 				repeats = Math.floor(args.getNumber('cantidad', 3));
 			} else {
 				return request.reply({

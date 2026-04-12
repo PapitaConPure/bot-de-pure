@@ -1,8 +1,11 @@
+'use strict';
+
 import chalk from 'chalk';
 import type {
 	GuildMember,
 	MessageCreateOptions,
 	MessagePayload,
+	Role,
 	TextChannel,
 	VoiceBasedChannel,
 	VoiceState,
@@ -27,7 +30,7 @@ import { p_pure } from '@/utils/prefixes';
 
 const { debug, info, warn, error } = Logger('WARN', 'PV');
 
-export function makePVSessionName(name: string, emoji: string = null) {
+export function makePVSessionName(name: string, emoji?: string) {
 	return `${emoji || '💠'}【${name}】`;
 }
 
@@ -42,32 +45,60 @@ export function makeSessionRoleAutoname(userConfig: UserConfigDocument) {
 }
 
 class PureVoiceDocumentHandler {
-	document: PureVoiceDocument;
+	#document: PureVoiceDocument | undefined;
 
 	/**
 	 * Intenta conseguir un documento de sistema PuréVoice del servidor relacionado al cambio detectado, en la base de datos
 	 * @param {Object} documentQuery
 	 * @returns {Promise<PureVoiceDocument>}
 	 */
-	async fetchSystemDocument(documentQuery: object): Promise<PureVoiceDocument> {
-		this.document = await PureVoiceModel.findOne(documentQuery).catch((err) => {
+	async fetchSystemDocument(documentQuery: object): Promise<PureVoiceDocument | undefined> {
+		this.#document = (await PureVoiceModel.findOne(documentQuery).catch((err) => {
 			error(err);
 			return undefined;
-		});
-		return this.document;
+		})) as PureVoiceDocument | undefined;
+
+		return this.#document;
 	}
 
 	async relinkDocument() {
-		const documentId = this.document._id;
-		this.document = await PureVoiceModel.findById(documentId).catch((err) => {
+		if (!this.#document)
+			throw new PureVoiceDocumentHandlerError(
+				'Expected PuréVoice document to be initialized before relinking it.',
+			);
+
+		const documentId = this.#document._id;
+		this.#document = (await PureVoiceModel.findById(documentId).catch((err) => {
 			error(err);
 			return undefined;
-		});
-		return this.document;
+		})) as PureVoiceDocument | undefined;
+
+		return this.#document;
 	}
 
 	async saveChanges() {
-		return this.document.save();
+		if (!this.#document)
+			throw new PureVoiceDocumentHandlerError(
+				'Expected PuréVoice document to be initialized before saving changes.',
+			);
+
+		return this.#document.save();
+	}
+
+	get document() {
+		if (!this.#document)
+			throw new PureVoiceDocumentHandlerError(
+				'Expected PuréVoice document to be initialized before accessing it externally.',
+			);
+
+		return this.#document;
+	}
+}
+
+export class PureVoiceDocumentHandlerError extends Error {
+	constructor(message?: string, options?: ErrorOptions) {
+		super(message, options);
+		this.name = PureVoiceDocumentHandlerError.name;
 	}
 }
 
@@ -105,7 +136,11 @@ export class PureVoiceUpdateHandler {
 	async handleDisconnection() {
 		if (this.isNotConnectionUpdate()) return;
 
-		const { guild, channel: oldChannel, member } = this.#oldState;
+		const {
+			guild,
+			channel: oldChannel,
+			member,
+		} = this.#oldState as VoiceState & { member: GuildMember };
 		const pvDocument = this.#documentHandler.document;
 
 		if (!oldChannel) {
@@ -132,7 +167,7 @@ export class PureVoiceUpdateHandler {
 				return;
 			}
 
-			const sessionRole = guild.roles.cache.get(session.roleId);
+			const sessionRole = guild.roles.cache.get(session.roleId) as Role;
 
 			//Si la desconexión no es "fatal", simplemente asegurarse que haya un panel de control y quitarle los permisos del mismo al miembro
 			if (oldChannel.members.filter((member) => !member.user.bot).size) {
@@ -222,7 +257,7 @@ export class PureVoiceUpdateHandler {
 			let reattempts = 3;
 			do {
 				removed = true;
-				await session.remove().catch((err) => {
+				await session.deleteOne().catch((err) => {
 					removed = false;
 
 					error(
@@ -263,7 +298,7 @@ export class PureVoiceUpdateHandler {
 				);
 
 			return guild.systemChannel
-				.send({
+				?.send({
 					content: [
 						'⚠️ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice del servidor.',
 						'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
@@ -283,7 +318,7 @@ export class PureVoiceUpdateHandler {
 		if (this.isNotConnectionUpdate()) return;
 
 		const { prematureError } = this;
-		const { guild, channel, member } = this.#state;
+		const { guild, channel, member } = this.#state as VoiceState & { member: GuildMember };
 		const pvDocument = this.#documentHandler.document;
 		if (!channel || channel?.parentId !== pvDocument.categoryId) return;
 
@@ -292,7 +327,7 @@ export class PureVoiceUpdateHandler {
 		//Embed de notificación
 		const embed = new EmbedBuilder().setAuthor({
 			name: 'PuréVoice',
-			iconURL: this.#state.client.user.avatarURL({ size: 128 }),
+			iconURL: this.#state.client.user.displayAvatarURL({ size: 128 }),
 		});
 
 		if (channel.id !== pvDocument.voiceMakerId) {
@@ -396,7 +431,7 @@ export class PureVoiceUpdateHandler {
 				?.send({
 					content:
 						userConfigs.voice.ping !== 'always' || member.user.bot
-							? null
+							? undefined
 							: translator.getText('voiceSessionNewMemberContentHint', `${member}`),
 					embeds: [embed],
 				})
@@ -409,7 +444,7 @@ export class PureVoiceUpdateHandler {
 
 		try {
 			const [userConfigs, translator] = await Promise.all([
-				UserConfigs.findOne({ userId: member.id })
+				(await UserConfigs.findOne({ userId: member.id }))
 					|| new UserConfigs({ userId: member.id }),
 				member.user.bot ? new Translator('es') : await Translator.from(member),
 			]);
@@ -417,7 +452,9 @@ export class PureVoiceUpdateHandler {
 			const prepareSessionRole = async () => {
 				const defaultName = member.user.username.slice(0, 24);
 				const sessionRole = await guild.roles.create({
-					name: makeSessionRoleAutoname(userConfigs) ?? `🔶 PV ${defaultName}`,
+					name:
+						makeSessionRoleAutoname(userConfigs as UserConfigDocument)
+						?? `🔶 PV ${defaultName}`,
 					color: tenshiColor,
 					mentionable: true,
 					reason: translator.getText('voiceSessionReasonRoleCreate'),
@@ -452,7 +489,7 @@ export class PureVoiceUpdateHandler {
 					.edit(guild.roles.everyone, { SendMessages: false })
 					.catch(prematureError);
 				await sessionMakerChannel.permissionOverwrites
-					.edit(guild.members.me, { SendMessages: true })
+					.edit(guild.members.me as GuildMember, { SendMessages: true })
 					.catch(prematureError);
 
 				return sessionMakerChannel;
@@ -623,7 +660,7 @@ export class PureVoiceUpdateHandler {
 						].join('\n'),
 					}),
 				);
-			return guild.systemChannel.send({
+			return guild.systemChannel?.send({
 				content: [
 					'⚠️ Ocurrió un problema al crear una nueva sesión para el Sistema PuréVoice del servidor. Esto puede deberse a una saturación de acciones o a falta de permisos.',
 					'Si el problema persiste, prueben desinstalar y volver a instalar el Sistema',
@@ -641,7 +678,7 @@ export class PureVoiceUpdateHandler {
 		const pvDocument = this.#documentHandler.document;
 		const guildChannels = this.#state.guild.channels.cache;
 		const members = new Map<string, GuildMember>();
-		const invalidSessionIds = [];
+		const invalidSessionIds: string[] = [];
 
 		pvDocument.sessions = pvDocument.sessions.filter((sid) => {
 			const channelExists = guildChannels.has(sid);
@@ -776,8 +813,8 @@ export class PureVoiceOrchestrator {
 	/**Quita de la cola un análisis de cambio de estado de una sesión de voz y lo ejecuta. Si alguna cola no está vacía, se ejecuta consumeAction (prioridad) o consumeUpdate*/
 	async consumeUpdate() {
 		const handler = this.#updates.shift();
-		await handler.fetchGuildDocument(this.#guildId).catch(error);
-		if (!handler.systemIsInstalled()) return;
+		await handler?.fetchGuildDocument(this.#guildId).catch(error);
+		if (!handler?.systemIsInstalled()) return;
 
 		try {
 			await Promise.all([
@@ -810,8 +847,8 @@ export class PureVoiceOrchestrator {
 	/**Quita de la cola una ejecución de acción en una sesión de voz y la ejecuta. Si alguna cola no está vacía, se ejecuta consumeAction (prioridad) o consumeUpdate*/
 	async consumeAction() {
 		const handler = this.#actions.shift();
-		await handler.fetchSystemDocument().catch(error);
-		if (!handler.systemIsInstalled()) return;
+		await handler?.fetchSystemDocument().catch(error);
+		if (!handler?.systemIsInstalled()) return;
 
 		try {
 			await handler.performAction().catch(error);
@@ -856,15 +893,16 @@ export class PureVoiceSessionMember {
 	#whitelisted: boolean;
 	#banned: boolean;
 
-	/**@param {Partial<PureVoiceSessionMemberJSONBody>} data*/
-	constructor(data: Partial<PureVoiceSessionMemberJSONBody>) {
-		this.id = data?.id ?? null;
+	constructor(
+		data: Pick<PureVoiceSessionMemberJSONBody, 'id'> &
+			Partial<Omit<PureVoiceSessionMemberJSONBody, 'id'>>,
+	) {
+		this.id = data.id;
 		this.role = data?.role ?? PureVoiceSessionMemberRoles.GUEST;
 		this.#whitelisted = !!(data?.whitelisted ?? false);
 		this.#banned = !!(data?.banned ?? false);
 	}
 
-	/**@param {PureVoiceSessionMember} other*/
 	exchangeAdmin(other: PureVoiceSessionMember) {
 		if (this.role === other.role || !this.isAdmin()) return false;
 
@@ -875,7 +913,6 @@ export class PureVoiceSessionMember {
 		return true;
 	}
 
-	/**@param {PureVoiceSessionMember} other*/
 	giveMod(other: PureVoiceSessionMember) {
 		if (!this.isAdmin() || !other.isGuest()) return false;
 
@@ -883,7 +920,6 @@ export class PureVoiceSessionMember {
 		return true;
 	}
 
-	/**@param {PureVoiceSessionMember} other*/
 	revokeMod(other: PureVoiceSessionMember) {
 		if (!this.isAdmin() || !other.isMod()) return false;
 
@@ -891,13 +927,11 @@ export class PureVoiceSessionMember {
 		return true;
 	}
 
-	/**@param {Boolean} whitelist*/
 	setWhitelisted(whitelist: boolean) {
 		this.#whitelisted = !!whitelist;
 		return this;
 	}
 
-	/**@param {Boolean} ban*/
 	setBanned(ban: boolean) {
 		this.#banned = !!ban;
 		return this;
@@ -929,7 +963,6 @@ export class PureVoiceSessionMember {
 		return this.isGuest() && this.#banned;
 	}
 
-	/**@returns {PureVoiceSessionMemberJSONBody} */
 	toJSON(): PureVoiceSessionMemberJSONBody {
 		return {
 			id: this.id,
@@ -997,7 +1030,7 @@ export async function createPVControlPanelChannel(
 		return { success: false, status: PVCPFailure.NoCategory };
 	}
 
-	if (!guild.members.me.permissions.has('ManageChannels', true)) {
+	if (!guild.members.me?.permissions.has('ManageChannels', true)) {
 		info('Unable to create channel because of missing permissions in guild:', guild.name);
 		return { success: false, status: PVCPFailure.NoPermissions };
 	}
@@ -1100,10 +1133,8 @@ export async function requestPVControlPanel(
 ): Promise<PVControlPanelResult> {
 	debug('Processing request for control panel:', controlPanelId, 'in category:', categoryId);
 
-	const existingControlPanel = /**@type {TextChannel}*/ (
-		guild.channels.cache.get(controlPanelId)
-			?? (await guild.channels.fetch(controlPanelId).catch(() => undefined))
-	);
+	const existingControlPanel = (guild.channels.cache.get(controlPanelId)
+		?? (await guild.channels.fetch(controlPanelId).catch(() => undefined))) as TextChannel;
 
 	if (existingControlPanel) {
 		debug('Fetched existing control panel.');
@@ -1119,11 +1150,15 @@ export async function requestPVControlPanel(
 
 export function getFrozenSessionAllowedMembers(
 	voiceChannel: VoiceBasedChannel,
-	dbMembers: Map<string, Partial<PureVoiceSessionMemberJSONBody>>,
+	dbMembers: Map<
+		string,
+		Pick<PureVoiceSessionMemberJSONBody, 'id'> &
+			Partial<Omit<PureVoiceSessionMemberJSONBody, 'id'>>
+	>,
 ) {
 	const voiceMembers = voiceChannel.members;
 
-	const allowedSessionMembers = /**@type {Map<String, PureVoiceSessionMember>}*/ (new Map());
+	const allowedSessionMembers: Map<string, PureVoiceSessionMember> = new Map();
 
 	for (const [id, dbMember] of dbMembers) {
 		const sessionMember = new PureVoiceSessionMember(dbMember);

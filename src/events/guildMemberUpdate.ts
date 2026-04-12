@@ -4,20 +4,13 @@ import { channelIsBlocked } from '@/func';
 import { globalConfigs } from '../data/globalProps';
 import userIds from '../data/userIds.json';
 
-const guildBotUpdateText: Map<
-	'dibujarBienvenida' | 'dibujarDespedida',
-	(member: GuildMember | PartialGuildMember) => string
-> = new Map();
-guildBotUpdateText
-	.set(
-		'dibujarBienvenida',
-		(member) => `Se acaba de unir un bot.\n***${member} Beep boop, boop beep?***`,
-	)
-	.set(
-		'dibujarDespedida',
-		(member) =>
-			`**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[`,
-	);
+type UpdateType = 'welcome' | 'farewell';
+
+const guildBotUpdateText = {
+	welcome: (member) => `Se acaba de unir un bot.\n***${member} Beep boop, boop beep?***`,
+	farewell: (member) =>
+		`**${member.displayName}** ya no es parte de la pandilla de bots de este servidor :[`,
+} as const satisfies Record<UpdateType, (member: GuildMember | PartialGuildMember) => string>;
 
 export function guildIsAvailable(guild: Guild) {
 	if (!guild.available || !guild.systemChannelId) return false;
@@ -44,6 +37,7 @@ function handleError(error: Error, guild: Guild, user: User, errorMessage?: stri
 
 export function announceMemberUpdate<TMember extends GuildMember | PartialGuildMember>(
 	member: TMember,
+	type: UpdateType,
 	fn: (member: TMember) => unknown,
 ) {
 	const { user, guild } = member;
@@ -51,10 +45,8 @@ export function announceMemberUpdate<TMember extends GuildMember | PartialGuildM
 		if (!user.bot) return fn(member);
 
 		return guild.systemChannel
-			.send({
-				content: guildBotUpdateText.get(
-					fn.name as 'dibujarBienvenida' | 'dibujarDespedida',
-				)(member),
+			?.send({
+				content: guildBotUpdateText[type](member),
 			})
 			.catch(console.error);
 	} catch (error) {

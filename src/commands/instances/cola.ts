@@ -1,4 +1,4 @@
-import { ButtonBuilder, ButtonStyle, Colors, ModalBuilder, TextInputStyle } from 'discord.js';
+import { ButtonBuilder, ButtonStyle, Colors, MessageFlags, ModalBuilder, TextInputStyle } from 'discord.js';
 import { QueueRepeatMode, useMainPlayer } from 'discord-player';
 import { decompressId, sleep } from '@/func';
 import { Translator } from '@/i18n';
@@ -142,7 +142,7 @@ const command = new Command('cola', tags)
 		} catch (e) {
 			console.error(e);
 
-			const errorEmbed = makePuréMusicEmbed(interaction, 0x990000, null)
+			const errorEmbed = makePuréMusicEmbed(interaction, 0x990000, undefined)
 				.setTitle(translator.getText('somethingWentWrong'))
 				.addFields({
 					name: 'Error',
@@ -434,8 +434,8 @@ const command = new Command('cola', tags)
 		const channel = interaction.member.voice?.channel;
 		if (!channel)
 			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
 				content: translator.getText('voiceExpected'),
-				ephemeral: true,
 			});
 
 		if (
@@ -443,12 +443,18 @@ const command = new Command('cola', tags)
 			&& interaction.guild.members.me.voice.channel.id !== channel.id
 		)
 			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
 				content: translator.getText('voiceSameChannelExpected'),
-				ephemeral: true,
 			});
 
 		const player = useMainPlayer();
 		const queue = player.queues.get(interaction.guildId);
+
+		if(!queue)
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('queueExpected'),
+			});
 
 		queue.toggleShuffle();
 
@@ -533,6 +539,12 @@ const command = new Command('cola', tags)
 
 		const player = useMainPlayer();
 		const queue = player.queues.get(interaction.guildId);
+
+		if(!queue)
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('queueExpected'),
+			});
 
 		const [delPage, delNum, delId] = interaction.values[0].split(':');
 		const delIndex = getPageAndNumberTrackIndex(+delPage, +delNum);

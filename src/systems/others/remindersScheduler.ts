@@ -1,5 +1,6 @@
-import type { Client, GuildTextBasedChannel, User } from 'discord.js';
+import type { GuildTextBasedChannel, User } from 'discord.js';
 import { ContainerBuilder, MessageFlags } from 'discord.js';
+import { ClientNotFoundError, client } from '@/core/client';
 import { tenshiColor } from '@/data/globalProps';
 import { decompressId } from '@/func';
 import { Translator } from '@/i18n';
@@ -10,7 +11,6 @@ import Logger from '@/utils/logs';
 
 const { debug, info, error } = Logger('WARN', 'Reminders');
 
-let schedulerClient: Client = null;
 const scheduledIds = new Map<string, NodeJS.Timeout>();
 
 /**
@@ -94,17 +94,17 @@ async function triggerReminder(reminder: ReminderDocument) {
 	const channelId = decompressId(reminder.channelId);
 	const userId = decompressId(reminder.userId);
 
+	if (!client) throw new ClientNotFoundError();
+
 	debug(`Fetching the specified channel for reminder #${reminder._id}.`);
 	const channel =
-		schedulerClient.channels.cache.get(channelId)
-		?? (await schedulerClient.channels.fetch(channelId));
+		client.channels.cache.get(channelId) ?? (await client.channels.fetch(channelId));
 
 	debug(`Fetching the specified user for reminder #${reminder._id}.`);
-	const user =
-		schedulerClient.users.cache.get(userId) ?? (await schedulerClient.users.fetch(userId));
+	const user = client.users.cache.get(userId) ?? (await client.users.fetch(userId));
 
 	try {
-		if (channel.isSendable() && channel.isTextBased() && !channel.isDMBased()) {
+		if (channel?.isSendable() && channel.isTextBased() && !channel.isDMBased()) {
 			await sendReminder(channel, user, reminder.content);
 			debug(`Reminder message for ${user.username} has been sent to ${channelId}.`);
 		}
@@ -144,10 +144,10 @@ async function sendReminder(channel: GuildTextBasedChannel, user: User, reminder
 }
 
 /**@description Limpia cualquier posible timeout previamente asociado a la ID del recordatorio especificado.*/
-export function clearScheduledReminder(reminder: ReminderDocument): NodeJS.Timeout;
+export function clearScheduledReminder(reminder: ReminderDocument): NodeJS.Timeout | undefined;
 /**@description Limpia cualquier posible timeout previamente asociado a la ID de recordatorio especificada.*/
-export function clearScheduledReminder(reminderId: string): NodeJS.Timeout;
-export function clearScheduledReminder(reminder: ReminderDocument | string): NodeJS.Timeout {
+export function clearScheduledReminder(reminderId: string): NodeJS.Timeout | undefined;
+export function clearScheduledReminder(reminder: ReminderDocument | string): NodeJS.Timeout | undefined {
 	const id: string = typeof reminder === 'string' ? reminder : reminder.id;
 
 	const samePreviousReminderTimeout = scheduledIds.get(id);
@@ -171,20 +171,9 @@ function timeUntil(date: Date) {
 	return then - now;
 }
 
-/**@description Inicializa el programador de recordatorios con el cliente indicado.*/
-export function initRemindersScheduler(client: Client) {
-	if (!client)
-		throw new TypeError(
-			`Expected a Discord client. Got: ${client == null ? client : typeof client}`,
-		);
-
-	debug('Initializing the scheduler.');
-	schedulerClient = client;
-}
-
 /**@class Representa un error en relación al programador de recordatorios.*/
 export class RemindersSchedulerError extends Error {
-	constructor(message: string = undefined) {
+	constructor(message?: string) {
 		super(message);
 		this.name = 'RemindersSchedulerError';
 	}

@@ -1,5 +1,6 @@
 import type {
 	ContextMenuCommandInteraction,
+	GuildMember,
 	MessageContextMenuCommandInteraction,
 	UserContextMenuCommandInteraction,
 } from 'discord.js';
@@ -30,6 +31,7 @@ export class ContextMenuAction {
 
 		this.name = translation.es;
 		this.type = ApplicationCommandType[type];
+		this.execute = async () => undefined;
 
 		this.localizations = new Map();
 		this.localizations.set(DiscordLocale.EnglishUS, translation.en);
@@ -47,15 +49,15 @@ export class ContextMenuAction {
 	setMessageResponse(
 		responseFn: ContextMenuActionHandler<MessageContextMenuCommandInteraction<'cached'>>,
 	) {
-		this.execute = responseFn;
+		this.execute = responseFn as ContextMenuActionHandler;
 		return this;
 	}
 
 	/** @param responseFn Acción a realizar al indicarse su ejecución*/
 	setUserResponse(
-		responseFn: ContextMenuActionHandler<UserContextMenuCommandInteraction<'cached'>>,
+		responseFn: ContextMenuActionHandler<UserContextMenuCommandInteraction<'cached'> & { targetMember: GuildMember }>,
 	) {
-		this.execute = responseFn;
+		this.execute = responseFn as ContextMenuActionHandler;
 		return this;
 	}
 }

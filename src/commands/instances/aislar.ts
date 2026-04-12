@@ -30,8 +30,8 @@ const command = new Command('aislar', tags)
 				content: translator.getText('aislarNoTimeProvided'),
 			});
 
-		let duration = args.getNumber('duración');
-		if (Number.isNaN(+duration) || duration < 0)
+		let duration: number | null | undefined = args.getNumber('duración');
+		if (duration === undefined || Number.isNaN(+duration) || duration < 0)
 			return request.reply({
 				content: translator.getText('aislarInvalidTime'),
 				ephemeral: true,
@@ -55,15 +55,15 @@ const command = new Command('aislar', tags)
 		const succeeded: GuildMember[] = [];
 		const failed: GuildMember[] = [];
 
+		const existingMembers = members.filter((member) => member) as GuildMember[];
+
 		await Promise.all(
-			members
-				.filter((member) => member)
-				.map((member) =>
-					member
-						.timeout(duration, `Aislado por ${request.member.user.tag}`)
-						.then(() => succeeded.push(member))
-						.catch(() => failed.push(member)),
-				),
+			existingMembers.map((member) =>
+				member
+					.timeout(duration, `Aislado por ${request.member.user.tag}`)
+					.then(() => succeeded.push(member))
+					.catch(() => failed.push(member)),
+			),
 		);
 
 		if (!succeeded.length)

@@ -1,8 +1,8 @@
-import { ContextMenuAction } from '../commons/actionBuilder';
-import { pourSauce } from '@/systems/others/saucenao';
-import SauceNAOUser from '@/models/saucenaoUsers';
+import type { Attachment, EmbedBuilder, GuildTextBasedChannel } from 'discord.js';
 import { Translator } from '@/i18n';
-import type { Attachment } from 'discord.js';
+import SauceNAOUser from '@/models/saucenaoUsers';
+import { pourSauce } from '@/systems/others/saucenao';
+import { ContextMenuAction } from '../commons/actionBuilder';
 
 const action = new ContextMenuAction('actionFindSource', 'Message').setMessageResponse(
 	async (interaction) => {
@@ -23,7 +23,7 @@ const action = new ContextMenuAction('actionFindSource', 'Message').setMessageRe
 
 		const attachmentUrls = messageAttachments.map((att) => att.url);
 		const otherMessageUrls =
-			message.embeds?.flatMap((e) => [e.image?.url, e.thumbnail?.url]).filter((u) => u) || [];
+			message.embeds?.flatMap((e) => [e.image?.url, e.thumbnail?.url] as string[]).filter((u) => u) || [];
 
 		const queries = [...attachmentUrls, ...otherMessageUrls].slice(0, 5);
 
@@ -35,10 +35,10 @@ const action = new ContextMenuAction('actionFindSource', 'Message').setMessageRe
 
 		await interaction.deferReply({ ephemeral: true });
 
-		const successes = [];
-		const failures = [];
+		const successes: EmbedBuilder[] = [];
+		const failures: EmbedBuilder[] = [];
 
-		await pourSauce(sauceNAOUser.clientId, queries, interaction, { successes, failures });
+		await pourSauce(sauceNAOUser.clientId, queries, interaction as typeof interaction & { channel: GuildTextBasedChannel }, { successes, failures });
 
 		if (!successes.length && !failures.length)
 			return interaction.editReply({ content: translator.getText('saucenaoInvalidImage') });

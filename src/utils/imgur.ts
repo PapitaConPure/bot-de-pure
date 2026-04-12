@@ -92,8 +92,8 @@ export class ImgurClient {
 		if (fetchResult.success === false) {
 			return {
 				success: false,
-				status: fetchResult.response.status,
-				statusText: fetchResult.response.statusText,
+				status: fetchResult.response?.status ?? 400,
+				statusText: fetchResult.response?.statusText ?? 'Error',
 				error: fetchResult.error,
 			};
 		}

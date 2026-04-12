@@ -73,7 +73,7 @@ const command = new Command('transferir', flags)
 				.setColor(tenshiColor)
 				.setAuthor({
 					name: translator.getText('transferAuthorName'),
-					iconURL: request.guild.iconURL({ size: 256 }),
+					iconURL: request.guild.iconURL({ size: 256 }) ?? undefined,
 				})
 				.setTitle(translator.getText('transferTitle'))
 				.addFields(

@@ -27,7 +27,7 @@ export async function saveTracksQueue(
 	request: ComplexCommandRequest | Interaction,
 	queue: GuildQueue,
 ) {
-	if (!queue) return;
+	if (!queue || !request.guild) return;
 
 	const pqQuery = { guildId: request.guild.id };
 	const playerQueue = (await PlayerQueue.findOne(pqQuery)) || new PlayerQueue(pqQuery);
@@ -48,6 +48,8 @@ export async function tryRecoverSavedTracksQueue(
 ) {
 	console.log('Attempting recovery of possible saved queue');
 	const { guild } = request;
+	if(!guild) return;
+	
 	const guildId = guild.id;
 
 	const player = useMainPlayer();
@@ -114,7 +116,7 @@ async function attemptDatabaseQueueRecovery(
 		if (restOfTracks.length) queue.tracks.add(restOfTracks);
 
 		console.log({
-			recoveredConnection: queue.connection.state,
+			recoveredConnection: queue.connection?.state,
 			recoveredTracks: queue.tracks.map((t) => t.toString()),
 		});
 

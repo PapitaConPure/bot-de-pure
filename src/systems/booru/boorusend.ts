@@ -45,7 +45,7 @@ export interface PostFormatData {
 	disableActions?: boolean;
 }
 
-export type SourceStyle = { emoji: string; color: number };
+export type SourceStyle = { emoji?: string; color: number };
 
 /**
  * Algunos enlaces pueden pertenecer a dominios asociados de un sitio para alojar recursos. Cosas como enlaces de CDNs.
@@ -135,7 +135,7 @@ export async function formatBooruPostMessage(
 	);
 
 	//Botón de Fuente (si está disponible)
-	let containerColor = null;
+	let containerColor: number | undefined;
 	const addSourceButtonAndApplyStyle = (source: string) => {
 		sourceMappings.forEach((mapping) => {
 			source = source.replace(mapping.pattern, mapping.replacement);
@@ -148,22 +148,23 @@ export async function formatBooruPostMessage(
 
 		if (source.length > 512) {
 			warn('El texto de una fuente del Post sobrepasa los 512 caracteres');
-			return buttonRow.addComponents(
-				new ButtonBuilder()
-					.setEmoji(emoji)
-					.setStyle(ButtonStyle.Danger)
-					.setCustomId('feed_invalidUrl')
-					.setDisabled(true),
-			);
+
+			const button = new ButtonBuilder()
+				.setStyle(ButtonStyle.Danger)
+				.setCustomId('feed_invalidUrl')
+				.setDisabled(true);
+			if (emoji) button.setEmoji(emoji);
+
+			return buttonRow.addComponents(button);
 		}
 
-		buttonRow.addComponents(
-			new ButtonBuilder()
-				.setEmoji(emoji)
-				.setStyle(ButtonStyle.Link)
-				.setURL(source)
-				.setDisabled(disableLinks),
-		);
+		const button = new ButtonBuilder()
+			.setStyle(ButtonStyle.Link)
+			.setURL(source)
+			.setDisabled(disableLinks);
+		if (emoji) button.setEmoji(emoji);
+
+		buttonRow.addComponents();
 	};
 
 	//Aplicar estilo y botones de source
@@ -289,7 +290,7 @@ export async function formatBooruPostMessage(
 		debug('El contenido no fue bloqueado. Se agregará al mensaje a continuación');
 		if (/\.(mp4|webm|webp|gif)/.test(post.fileUrl)) {
 			debug('El contenido es un video o GIF');
-			previewUrl = post.previewUrl || post.fileUrl || post.sampleUrl; //Revertir a `post.fileUrl || post.previewUrl || post.sampleUrl` cuando se solucione el problema
+			previewUrl = post.previewUrl || post.fileUrl; //Revertir a `post.fileUrl || post.previewUrl || post.sampleUrl` cuando se solucione el problema
 		} else {
 			debug('El contenido es probablemente una imagen estática');
 			previewUrl = post.previewUrl || post.sampleUrl || post.fileUrl; //Revertir a `post.sampleUrl || post.fileUrl || post.previewUrl` cuando se solucione el problema
@@ -305,7 +306,7 @@ export async function formatBooruPostMessage(
 	const actualMaxTags = Math.max(0, maxTags - specialTags.length);
 	const actualTotalTags = post.tags.length + specialTags.length;
 	try {
-		let thumbnailUrl = null;
+		let thumbnailUrl: string | undefined;
 		debug('Obteniendo información adicional de tags...');
 		const postTags = await booru.fetchPostTags(post);
 
@@ -506,7 +507,6 @@ export async function notifyUsers(
 				.setTitle(translator.getText('booruNotifTitle'))
 				.setDescription(translator.getText('booruNotifDescription'))
 				.setFooter({ text: translator.getText('dmDisclaimer') })
-				.setThumbnail(post.previewUrl)
 				.addFields(
 					{
 						name: 'Feed',
@@ -519,6 +519,7 @@ export async function notifyUsers(
 						inline: true,
 					},
 				);
+			if (post.previewUrl) userEmbed.setThumbnail(post.previewUrl);
 
 			const postRow = new ActionRowBuilder<ButtonBuilder>(containerButtonRow);
 			const spliceIndex = postRow.components.findLastIndex(
@@ -564,7 +565,7 @@ export interface CommandSearchOptions {
 /**@description Busca las tags de {@linkcode Booru} deseadas y envía {@linkcode Message}s acorde a la petición.*/
 export async function searchAndReplyWithPost(
 	request: ComplexCommandRequest,
-	args: import('@/commands/commons/cmdOpts').CommandOptionSolver,
+	args: CommandOptionSolver,
 	options: CommandSearchOptions = {},
 ) {
 	info('Se recibió una solicitud de respuesta con Posts resultados de búsqueda de Booru');
@@ -587,7 +588,7 @@ export async function searchAndReplyWithPost(
 	debug('poolSize =', poolSize);
 
 	debug('Verificando que la solicitud haya sido aprobada por el Vaticano');
-	if (isUnholy(isnsfw, request, [commandTag, ...words])) return rakki.execute(request, args);
+	if (isUnholy(isnsfw, request, [commandTag ?? '', ...words])) return rakki.execute(request);
 
 	debug('Comunicando retraso de respuesta a interacción...');
 	await request.deferReply();
@@ -642,7 +643,7 @@ export async function searchAndReplyWithPost(
 
 		//Enviar mensajes
 		info('Enviando mensaje(s) de respuesta de búsqueda...');
-		const firstContainer = containers.shift();
+		const firstContainer = containers.shift() as ContainerBuilder;
 		await request.editReply({
 			flags: MessageFlags.IsComponentsV2,
 			components: [firstContainer],

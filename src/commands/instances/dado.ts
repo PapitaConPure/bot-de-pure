@@ -70,14 +70,13 @@ const command = new Command('dados', flags)
 		'**Ejemplo de dados:** `1d6` = 1 dado de 6 caras; `5d4` = 5 dados de 4 caras; `15d20` = 15 dados de 20 caras',
 	)
 	.setOptions(options)
-	.setExecution(async (request, args, rawArgs) => {
-		const diceInputs = (
-			args.isInteractionSolver()
-				? CommandOptionSolver.asStrings(
-						args.parsePolyParamSync('dados', { messageSep: ' ' }),
-					).map((v) => v.match(diceRegex))
-				: [...rawArgs.matchAll(new RegExp(diceRegex, 'g'))]
-		).filter((v) => v);
+	.setExecution(async (request, args) => {
+		const diceInputs = CommandOptionSolver.asStrings(
+			args.parsePolyParamSync('dados', {
+				messageSep: ' ',
+				fallback: '1d6'
+			}),
+		).map((v) => v.match(diceRegex));
 
 		if (!diceInputs.length)
 			return request.reply({
@@ -95,14 +94,14 @@ const command = new Command('dados', flags)
 		const embed = new EmbedBuilder().setColor(0x3f4581).addFields({
 			name: 'Salió:',
 			value: dices
-				.map((dice) => `${dice.d} x 🎲(${dice.f}) → [${dice.r.join(',')}] = **${dice.t}**`)
+				.map((dice) => `${dice?.d} x 🎲(${dice?.f}) → [${dice?.r.join(',')}] = **${dice?.t}**`)
 				.join('\n**+** '),
 		});
 
 		if (dices.length > 1)
 			embed.addFields({
 				name: 'Total',
-				value: `${dices.map((dice) => dice.t).reduce((a, b) => a + b)}`,
+				value: `${dices.map((dice) => dice?.t as number).reduce((a, b) => a + b)}`,
 			});
 
 		return request.reply({ embeds: [embed] }).catch(() => {
@@ -110,12 +109,12 @@ const command = new Command('dados', flags)
 		});
 	});
 
-function parseDice(diceInput: RegExpMatchArray): {
+function parseDice(diceInput: RegExpMatchArray): ({
 	d: number;
 	f: number;
 	r: Array<number>;
 	t: number;
-} {
+}) | undefined {
 	if (!diceInput) return;
 
 	const [, dices, faces] = diceInput;

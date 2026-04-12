@@ -17,16 +17,7 @@ const command = new Command('emote', flags)
 	.setDescription('Muestra el enlace del emote especificado')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const message =
-			(await args.getMessage('mensaje', true))
-			?? request.channel.messages.cache.get(
-				request.isMessage ? (request as Message).reference?.messageId : '',
-			)
-			?? (request.isMessage ? request.inferAsMessage() : null);
-
-		let content = null;
-		if (message) content = message.content;
-		else if (request.isInteraction) content = args.getString('emote');
+		const content = args.getString('emote', true);
 
 		if (!content)
 			return request.reply({
@@ -36,11 +27,9 @@ const command = new Command('emote', flags)
 		const emojisMatches = content.matchAll(emojiRegex);
 		if (!emojisMatches) return request.reply({ content: 'No se encontraron emotes...' });
 
-		/**@type {Array<EmbedBuilder>}*/
-		const embeds = [];
+		const embeds: EmbedBuilder[] = [];
 
-		/**@type {Array<import('discord.js').ActionRowBuilder>}*/
-		const components = [];
+		const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
 		for (const emojiMatch of emojisMatches) {
 			if (embeds.length >= 25) continue;

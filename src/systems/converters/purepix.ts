@@ -32,7 +32,7 @@ export async function sendConvertedPixivPosts(
 
 	if (
 		!message.guild.members.me
-			.permissionsIn(channel)
+			?.permissionsIn(channel)
 			.has(['SendMessages', 'ManageMessages', 'AttachFiles'])
 	)
 		return ConverterEmptyPayload;
@@ -41,8 +41,8 @@ export async function sendConvertedPixivPosts(
 		try {
 			const { parent } = channel;
 			if (
-				parent.type === ChannelType.GuildForum
-				&& (await channel.fetchStarterMessage()).id === message.id
+				parent?.type === ChannelType.GuildForum
+				&& (await channel.fetchStarterMessage())?.id === message.id
 			)
 				return ConverterEmptyPayload;
 		} catch (err) {
@@ -52,7 +52,7 @@ export async function sendConvertedPixivPosts(
 	}
 
 	const pixivUrls = [...messageContent.matchAll(pixivRegex)]
-		.filter((u) => !(u.groups.st?.includes('<') && u.groups.ed?.includes('>')))
+		.filter((u) => !(u.groups?.st?.includes('<') && u.groups.ed?.includes('>')))
 		.slice(0, 16);
 
 	if (!pixivUrls.length) return ConverterEmptyPayload;
@@ -62,7 +62,7 @@ export async function sendConvertedPixivPosts(
 
 	const service = configProp.service;
 	const formattedPixivUrls = pixivUrls.map((u) => {
-		const { st = '', id, lang = '', page = null, ed = '' } = u.groups;
+		const { st = '', id, lang = '', page = null, ed = '' } = u.groups ?? {};
 		const spoiler = st.includes('||') && ed.includes('||') ? '||' : '';
 		const idAndPage = page ? `${id}/${page}` : id;
 		return `${spoiler}<:pixiv2:1334816111270563880>[\`${idAndPage}\`](${service}${lang}/artworks/${idAndPage})${spoiler}`;

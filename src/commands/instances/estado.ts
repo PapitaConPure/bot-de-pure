@@ -1,9 +1,11 @@
 import {
+	type APISelectMenuOption,
 	ButtonBuilder,
 	ButtonStyle,
 	ContainerBuilder,
 	EmbedBuilder,
 	MessageFlags,
+	type SelectMenuComponentOptionData,
 	StringSelectMenuBuilder,
 } from 'discord.js';
 import type { AnyRequest } from 'types/commands';
@@ -30,8 +32,7 @@ const command = new Command('estado', flags)
 	)
 	.setExecution(async (request) => {
 		const translator = await Translator.from(request.member);
-		const stats =
-			(await Stats.findOne({})) || new Stats({ since: Date.now() });
+		const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
 		const counts = {
 			commands: commandFilenames.length,
 			guilds: request.client.guilds.cache.size,
@@ -69,7 +70,7 @@ const command = new Command('estado', flags)
 					.setThumbnailAccessory((accessory) =>
 						accessory
 							.setDescription(translator.getText('estadoAvatarAlt', me.displayName))
-							.setURL(me.avatarURL({ extension: 'png', size: 1024 })),
+							.setURL(me.displayAvatarURL({ extension: 'png', size: 1024 })),
 					),
 			)
 			.addSeparatorComponents((separator) => separator.setDivider(true))
@@ -164,8 +165,7 @@ const command = new Command('estado', flags)
 
 		if (matchedCommands != null) {
 			const prefix = p_pure(interaction.guildId).raw;
-			const commandOptions =
-				/**@type {(import('discord.js').SelectMenuComponentOptionData|import('discord.js').APISelectMenuOption)[]}*/ ([]);
+			const commandOptions: (SelectMenuComponentOptionData | APISelectMenuOption)[] = [];
 			for (const matchedCommand of matchedCommands) {
 				const commandName = matchedCommand[2];
 				commandOptions.push({
