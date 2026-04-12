@@ -15,6 +15,7 @@ import { connect, set } from 'mongoose';
 import { databaseUri } from '@/core/db';
 import { initializeWebhookMessageOwners } from '@/utils/discordagent';
 import { fetchAllGuildMembers } from '@/utils/guildratekeeper';
+import { withTimeout } from '@/utils/promises';
 import { fetchActionsFromFiles } from '../actions/commons/actionDiscovery';
 import { registerActions } from '../actions/commons/actionRegistry';
 import { fetchCommandsFromFiles } from '../commands/commons/commandDiscovery';
@@ -227,16 +228,12 @@ export async function onStartup(client: Client) {
 	await initializeWebhookMessageOwners();
 
 	console.log(chalk.gray('Preparando Tabla de Puré...'));
-	const pureTableDocument = await PureTable.findOne({});
-	let puretable = pureTableDocument;
-	if (!puretable) puretable = new PureTable();
-	//Limpiar emotes eliminados / no accesibles
-	else
-		puretable.cells = puretable.cells.map((arr) =>
-			arr.map((cell) =>
-				client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote,
-			),
-		);
+	const puretable = await PureTable.findOne({}) ?? new PureTable();
+	puretable.cells = puretable.cells.map((arr) =>
+		arr.map((cell) =>
+			client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote,
+		),
+	);
 	const uniqueEmoteIds = new Set<string>();
 	const pendingEmoteCells: Promise<{ id: string; image: Image }>[] = [];
 	puretable.cells.flat().forEach((cell) => uniqueEmoteIds.add(cell));
@@ -245,7 +242,12 @@ export async function onStartup(client: Client) {
 		const emoji = client.emojis.cache.get(id);
 		if (!emoji)
 			throw new Error('Emoji unexpectedly not found even after emoji cleanup for PuréTable.');
-		const image = await loadImage(emoji.imageURL({ extension: 'png', size: 64 }));
+
+		const image = await withTimeout(
+			loadImage(emoji.imageURL({ extension: 'png', size: 64 })),
+			20_000,
+		);
+
 		return { id, image };
 	}
 
@@ -253,7 +255,12 @@ export async function onStartup(client: Client) {
 	const [, pureTableImage, emoteCells] = await Promise.all([
 		puretable.save(),
 		loadImage('https://i.imgur.com/TIL0jPV.png'),
-		Promise.all(pendingEmoteCells),
+		(async () => {
+			const results = await Promise.allSettled(pendingEmoteCells);
+			return results
+				.filter((result) => result.status === 'fulfilled')
+				.map((result) => result.value);
+		})(),
 	]);
 	pureTableAssets.image = pureTableImage;
 	globalConfigs.loademotes = {};
