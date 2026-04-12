@@ -22,21 +22,9 @@ import { fetchExt } from '@/utils/fetchext';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandParam, CommandTags } from '../commons';
 
-interface RoleData {
-	id: string;
-	label: string;
-	emote: string;
-}
-
 type CategoryIndex = 'GAMES' | 'DRINKS' | 'FAITH';
 
-interface CategoryContent {
-	functionName: string;
-	rolePool: RoleData[];
-	exclusive: boolean;
-}
-
-type CategoryMap = Record<CategoryIndex, CategoryContent>;
+type CategoryMap = SakiDocument['mentionRoles'];
 
 function getAutoRoleRows(
 	member: import('discord.js').GuildMember,
@@ -146,7 +134,7 @@ const command = new Command('roles', flags)
 
 		if (role) {
 			const sakiDB: SakiDocument = (await Saki.findOne({})) || new Saki({});
-			const mentionRoles = sakiDB.mentionRoles as CategoryMap;
+			const mentionRoles = sakiDB.mentionRoles;
 
 			const roleFound = Object.values(mentionRoles).some((category) =>
 				category.rolePool.some((roleItem) => {

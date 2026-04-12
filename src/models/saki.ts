@@ -1,5 +1,34 @@
 import Mongoose from 'mongoose';
 
+const SakiMentionRolePoolSchema = new Mongoose.Schema({
+	id: {
+		type: String,
+		required: true,
+	},
+	label: {
+		type: String,
+		required: true,
+	},
+	emote: {
+		type: String,
+		required: true,
+	},
+}, { _id: false });
+
+const SakiMentionRoleSchema = new Mongoose.Schema({
+	functionName: {
+		type: String,
+		required: true,
+	},
+	rolePool: {
+		type: [SakiMentionRolePoolSchema],
+		required: true,
+	},
+	exclusive: {
+		type: Boolean,
+	},
+}, { _id: false });
+
 /**@description Describe la configuración de Saki Scans*/
 const SakiSchema = new Mongoose.Schema({
 	configs: {
@@ -13,40 +42,16 @@ const SakiSchema = new Mongoose.Schema({
 	mentionRoles: {
 		type: new Mongoose.Schema({
 			GAMES: {
-				type: Object,
-				functionName: 'selectGame',
-				rolePool: [],
-				exclusive: false,
+				type: SakiMentionRoleSchema,
 				required: true,
 			},
 			DRINKS: {
-				functionName: 'selectDrink',
-				rolePool: [],
-				exclusive: false,
+				type: SakiMentionRoleSchema,
 				required: true,
 			},
 			FAITH: {
-				functionName: 'selectReligion',
-				rolePool: [],
-				exclusive: true,
+				type: SakiMentionRoleSchema,
 				required: true,
-			},
-			default: {
-				GAMES: {
-					functionName: 'selectGame',
-					rolePool: [],
-					exclusive: false,
-				},
-				DRINKS: {
-					functionName: 'selectDrink',
-					rolePool: [],
-					exclusive: false,
-				},
-				FAITH: {
-					functionName: 'selectReligion',
-					rolePool: [],
-					exclusive: true,
-				},
 			},
 		}, { _id: false }),
 		required: true,
