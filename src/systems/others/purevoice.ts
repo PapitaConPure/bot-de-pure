@@ -47,11 +47,7 @@ export function makeSessionRoleAutoname(userConfig: UserConfigDocument) {
 class PureVoiceDocumentHandler {
 	#document: PureVoiceDocument | undefined;
 
-	/**
-	 * Intenta conseguir un documento de sistema PuréVoice del servidor relacionado al cambio detectado, en la base de datos
-	 * @param {Object} documentQuery
-	 * @returns {Promise<PureVoiceDocument>}
-	 */
+	/**@description Intenta conseguir un documento de sistema PuréVoice del servidor relacionado al cambio detectado, en la base de datos*/
 	async fetchSystemDocument(documentQuery: object): Promise<PureVoiceDocument | undefined> {
 		this.#document = (await PureVoiceModel.findOne(documentQuery).catch((err) => {
 			error(err);
@@ -672,7 +668,7 @@ export class PureVoiceUpdateHandler {
 
 	/**
 	 * Comprobar si hay sesiones en la base de datos que no corresponden a ningún canal existente, y eliminarlas
-	 * @returns {Promise<Number>} la cantidad de sesiones defectuosas eliminadas
+	 * @returns la cantidad de sesiones defectuosas eliminadas
 	 */
 	async checkFaultySessions(): Promise<number> {
 		const pvDocument = this.#documentHandler.document;
@@ -709,7 +705,6 @@ export class PureVoiceUpdateHandler {
 		return invalidSessionIds.length;
 	}
 
-	/**@param {string} guildId*/
 	async fetchGuildDocument(guildId: string) {
 		await this.#documentHandler.fetchSystemDocument({ guildId });
 	}
@@ -726,11 +721,6 @@ export class PureVoiceActionHandler {
 	#actionFn: ActionFn;
 	#guild: Guild;
 
-	/**
-	 *
-	 * @param {Guild} guild
-	 * @param {ActionFn} actionHandler
-	 */
 	constructor(guild: Guild, actionHandler: ActionFn) {
 		this.#documentHandler = new PureVoiceDocumentHandler();
 		this.#actionFn = actionHandler;
@@ -770,8 +760,8 @@ export class PureVoiceOrchestrator {
 	#busy: boolean;
 
 	/**
+	 * @description
 	 * Instancia un orquestador de sistema PuréVoice para el servidor especificado
-	 * @param {string} guildId
 	 */
 	constructor(guildId: string) {
 		this.#guildId = guildId;
@@ -781,8 +771,8 @@ export class PureVoiceOrchestrator {
 	}
 
 	/**
+	 * @description
 	 * Pone en cola un análisis de cambio de estado de una sesión de voz
-	 * @param {PureVoiceUpdateHandler} handler
 	 */
 	async orchestrateUpdate(handler: PureVoiceUpdateHandler) {
 		this.#updates.push(handler);
@@ -796,8 +786,8 @@ export class PureVoiceOrchestrator {
 	}
 
 	/**
+	 * @description
 	 * Pone en cola prioritaria una ejecución de acción en una sesión de voz
-	 * @param {PureVoiceActionHandler} handler
 	 */
 	async orchestrateAction(handler: PureVoiceActionHandler) {
 		this.#actions.push(handler);
