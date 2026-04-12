@@ -78,7 +78,7 @@ async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) 
 			const members = guild.members.cache;
 
 			await Promise.all(
-				Object.entries(gcfg.feeds).map(async ([channelId, feedData]) => {
+				[...gcfg.feeds.entries()].map(async ([channelId, feedData]) => {
 					const feed = new BooruFeed(booru, guild.id, channelId, feedData.tags, feedData);
 					if (!feed.isRunning) return;
 					if (!feed.isProcessable)
@@ -196,8 +196,8 @@ export async function setupGuildFeedUpdateStack(client: Client) {
 	).map((g) => ({ guilds: g, tid: null, timestamp: null }) as GuildFeedChunk);
 
 	const feedCount = guildConfigs
-		.filter((gcfg) => gcfg.feeds?.size)
-		.map((gcfg) => Object.keys(gcfg.feeds).length)
+		.filter((gcfg) => gcfg.feeds.size)
+		.map((gcfg) => gcfg.feeds.size)
 		.reduce((previous, current) => previous + current, 0);
 	const chunkCount = feedChunks.length;
 

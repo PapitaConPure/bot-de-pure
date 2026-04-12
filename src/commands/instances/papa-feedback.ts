@@ -67,7 +67,7 @@ const command = new Command('papa-feedback', tags)
 		guildConfigs.forEach((guildConfig) => {
 			const guild = guilds.get(guildConfig.guildId);
 			const channels = guild?.channels.cache;
-			Object.entries(guildConfig.feeds).forEach(([channelId]) => {
+			[...guildConfig.feeds.entries()].forEach(([channelId]) => {
 				const channel = channels?.get(channelId);
 				if (!channel?.isSendable()) return;
 				channel.send({

@@ -51,7 +51,7 @@ const TuberValueSchema = new Mongoose.Schema(
 	{ _id: false },
 );
 
-const TuberSchema = new Mongoose.Schema({
+export const TuberSchema = new Mongoose.Schema({
 	id: {
 		type: String,
 		required: true,
@@ -70,7 +70,6 @@ const TuberSchema = new Mongoose.Schema({
 	},
 	advanced: {
 		type: Boolean,
-		required: true,
 	},
 	content: {
 		type: String,

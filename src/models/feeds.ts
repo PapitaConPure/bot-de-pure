@@ -1,49 +1,47 @@
 import Mongoose from 'mongoose';
 
-const FeedSchema = new Mongoose.Schema({
-	ids: {
-		type: [String],
-		default: [],
+export const FeedConfigSchema = new Mongoose.Schema(
+	{
+		ids: {
+			type: [String],
+			default: [],
+		},
+		tags: {
+			type: String,
+			required: true,
+		},
+		faults: {
+			type: Number,
+			default: 0,
+		},
+		lastFetchedAt: {
+			type: Date,
+			default: Date.UTC(1970, 0, 1, 0, 0, 0, 0),
+		},
+		title: {
+			type: String,
+		},
+		subtitle: {
+			type: String,
+		},
+		maxTags: {
+			type: Number,
+		},
+		cornerIcon: {
+			type: String,
+		},
+		footer: {
+			type: String,
+		},
 	},
-	tags: {
-		type: String,
-		required: true,
-	},
-	faults: {
-		type: Number,
-		default: 0,
-	},
-	lastFetchedAt: {
-		type: Date,
-		default: Date.UTC(1970, 0, 1, 0, 0, 0, 0),
-	},
-	title: {
-		type: String,
-		required: false,
-	},
-	subtitle: {
-		type: String,
-		required: false,
-	},
-	maxTags: {
-		type: Number,
-		required: false,
-	},
-	cornerIcon: {
-		type: String,
-		required: false,
-	},
-	footer: {
-		type: String,
-		required: false,
-	},
-});
+	{ _id: false },
+);
 
-const Feed = Mongoose.model('Feed', FeedSchema);
+const FeedConfig = Mongoose.model('FeedConfig', FeedConfigSchema);
 
 function m() {
-	return new Feed({});
+	return new FeedConfig({});
 }
 export type FeedDocument = ReturnType<typeof m>;
 
-export default Feed;
+export default FeedConfig;
