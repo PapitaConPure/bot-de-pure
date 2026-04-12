@@ -24,7 +24,10 @@ const command = new Command('pausar', tags)
 
 		const channel = request.member.voice?.channel;
 		if (!channel)
-			return request.reply({ content: translator.getText('voiceExpected'), flags: MessageFlags.Ephemeral });
+			return request.reply({
+				content: translator.getText('voiceExpected'),
+				flags: MessageFlags.Ephemeral,
+			});
 
 		if (isPlayerUnavailable(channel))
 			return request.reply({

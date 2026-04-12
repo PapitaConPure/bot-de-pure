@@ -228,11 +228,9 @@ export async function onStartup(client: Client) {
 	await initializeWebhookMessageOwners();
 
 	console.log(chalk.gray('Preparando Tabla de Puré...'));
-	const puretable = await PureTable.findOne({}) ?? new PureTable();
+	const puretable = (await PureTable.findOne({})) ?? new PureTable();
 	puretable.cells = puretable.cells.map((arr) =>
-		arr.map((cell) =>
-			client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote,
-		),
+		arr.map((cell) => (client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote)),
 	);
 	const uniqueEmoteIds = new Set<string>();
 	const pendingEmoteCells: Promise<{ id: string; image: Image }>[] = [];

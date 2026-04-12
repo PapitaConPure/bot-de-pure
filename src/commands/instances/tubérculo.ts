@@ -36,7 +36,10 @@ import {
 	executeTuber as executeTuberPS2,
 } from '@/systems/ps/common/executeTuber';
 import { RuntimeToLanguageType } from '@/systems/ps/v1.0/commons';
-import { executeTuber as executeTuberPS1, type TuberExecutionInputs } from '@/systems/ps/v1.0/purescript';
+import {
+	executeTuber as executeTuberPS1,
+	type TuberExecutionInputs,
+} from '@/systems/ps/v1.0/purescript';
 import { Input, type InputJSONData } from '@/systems/ps/v1.1/interpreter/inputReader';
 import {
 	type RuntimeValue,
@@ -568,7 +571,7 @@ const command = new Command('tubérculo', flags)
 				});
 
 			const input = gcfg.tubers.get(tuberId)?.inputs as unknown as TuberExecutionInputs;
-			if(input) {
+			if (input) {
 				input.desc = desc;
 				gcfg.markModified(`tubers.${tuberId}.inputs.${inputIndex}.desc`);
 			}

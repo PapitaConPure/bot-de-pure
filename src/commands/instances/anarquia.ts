@@ -358,7 +358,10 @@ const command = new Command('anarquia', tags)
 			//Tiempo de enfriamiento por usuario
 			if (Date.now() - auser.last < 5000) {
 				reactIfMessage('⌛');
-				return request.reply({ content: '⌛ ¡No tan rápido!', flags: MessageFlags.Ephemeral });
+				return request.reply({
+					content: '⌛ ¡No tan rápido!',
+					flags: MessageFlags.Ephemeral,
+				});
 			} else auser.last = Date.now();
 
 			const emoteMatch = emote?.match(emojiRegex);

@@ -35,7 +35,10 @@ const command = new Command('repetir', tags)
 
 		const channel = request.member.voice?.channel;
 		if (!channel)
-			return request.reply({ content: translator.getText('voiceExpected'), flags: MessageFlags.Ephemeral });
+			return request.reply({
+				content: translator.getText('voiceExpected'),
+				flags: MessageFlags.Ephemeral,
+			});
 
 		const embed = makePuréMusicEmbed(request).setTitle(translator.getText('queueLoopTitle'));
 

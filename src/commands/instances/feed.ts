@@ -289,7 +289,10 @@ const command = new Command('feed', tags)
 				: textChannels.get(input);
 
 			if (!fetchedChannel)
-				return interaction.reply({ content: '⚠️ Canal inválido', flags: MessageFlags.Ephemeral });
+				return interaction.reply({
+					content: '⚠️ Canal inválido',
+					flags: MessageFlags.Ephemeral,
+				});
 
 			const guildQuery = { guildId: interaction.guild.id };
 			const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
@@ -1083,7 +1086,10 @@ const command = new Command('feed', tags)
 			gcfg.setFeedField(channelId, 'title', input);
 			gcfg.save();
 
-			return interaction.reply({ content: '✅ Título actualizado', flags: MessageFlags.Ephemeral });
+			return interaction.reply({
+				content: '✅ Título actualizado',
+				flags: MessageFlags.Ephemeral,
+			});
 		},
 		{ userFilterIndex: 1 },
 	)
@@ -1124,7 +1130,10 @@ const command = new Command('feed', tags)
 			gcfg.setFeedField(channelId, 'subtitle', input);
 			gcfg.save();
 
-			return interaction.reply({ content: '✅ Antetítulo actualizado', flags: MessageFlags.Ephemeral });
+			return interaction.reply({
+				content: '✅ Antetítulo actualizado',
+				flags: MessageFlags.Ephemeral,
+			});
 		},
 		{ userFilterIndex: 1 },
 	)
@@ -1140,7 +1149,10 @@ const command = new Command('feed', tags)
 			gcfg.setFeedField(channelId, 'footer', input);
 			gcfg.save();
 
-			return interaction.reply({ content: '✅ Pie de imagen actualizado', flags: MessageFlags.Ephemeral });
+			return interaction.reply({
+				content: '✅ Pie de imagen actualizado',
+				flags: MessageFlags.Ephemeral,
+			});
 		},
 		{ userFilterIndex: 1 },
 	)

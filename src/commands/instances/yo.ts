@@ -561,7 +561,10 @@ const command = new Command('yo', tags)
 
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
 		if (!userConfigs)
-			return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
+			return interaction.reply({
+				content: userNotAvailableText,
+				flags: MessageFlags.Ephemeral,
+			});
 
 		const translator = new Translator(userConfigs.language);
 
@@ -581,7 +584,10 @@ const command = new Command('yo', tags)
 
 			const userConfigs = await UserConfigs.findOne({ userId: user.id });
 			if (!userConfigs)
-				return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
+				return interaction.reply({
+					content: userNotAvailableText,
+					flags: MessageFlags.Ephemeral,
+				});
 
 			let translator = new Translator(userConfigs.language);
 
@@ -605,7 +611,10 @@ const command = new Command('yo', tags)
 
 			const userConfigs = await UserConfigs.findOne({ userId: user.id });
 			if (!userConfigs)
-				return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
+				return interaction.reply({
+					content: userNotAvailableText,
+					flags: MessageFlags.Ephemeral,
+				});
 
 			const translator = new Translator(userConfigs.language);
 
@@ -680,7 +689,10 @@ const command = new Command('yo', tags)
 
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
 		if (!userConfigs)
-			return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
+			return interaction.reply({
+				content: userNotAvailableText,
+				flags: MessageFlags.Ephemeral,
+			});
 
 		const translator = new Translator(userConfigs.language);
 
@@ -727,7 +739,10 @@ const command = new Command('yo', tags)
 
 			const userConfigs = await UserConfigs.findOne({ userId: user.id });
 			if (!userConfigs)
-				return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
+				return interaction.reply({
+					content: userNotAvailableText,
+					flags: MessageFlags.Ephemeral,
+				});
 
 			const translator = new Translator(userConfigs.language as LocaleKey);
 
@@ -750,7 +765,10 @@ const command = new Command('yo', tags)
 
 			const userConfigs = await UserConfigs.findOne({ userId: user.id });
 			if (!userConfigs)
-				return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
+				return interaction.reply({
+					content: userNotAvailableText,
+					flags: MessageFlags.Ephemeral,
+				});
 
 			const translator = new Translator(userConfigs.language);
 
@@ -825,7 +843,10 @@ const command = new Command('yo', tags)
 
 			const userConfigs = await UserConfigs.findOne({ userId: user.id });
 			if (!userConfigs)
-				return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
+				return interaction.reply({
+					content: userNotAvailableText,
+					flags: MessageFlags.Ephemeral,
+				});
 
 			const translator = new Translator(userConfigs.language as LocaleKey);
 
@@ -979,7 +1000,10 @@ const command = new Command('yo', tags)
 
 			const userConfigs = await UserConfigs.findOne({ userId: user.id });
 			if (!userConfigs)
-				return interaction.reply({ content: userNotAvailableText, flags: MessageFlags.Ephemeral });
+				return interaction.reply({
+					content: userNotAvailableText,
+					flags: MessageFlags.Ephemeral,
+				});
 
 			const translator = new Translator(userConfigs.language);
 
