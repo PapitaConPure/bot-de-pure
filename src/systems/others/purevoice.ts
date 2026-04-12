@@ -81,6 +81,10 @@ class PureVoiceDocumentHandler {
 		return this.#document.save();
 	}
 
+	isInitialized() {
+		return !!this.#document;
+	}
+
 	get document() {
 		if (!this.#document)
 			throw new PureVoiceDocumentHandlerError(
@@ -113,7 +117,7 @@ export class PureVoiceUpdateHandler {
 	/**@description Comprueba si hay un sistema PuréVoice instalado en el servidor actual o no.*/
 	systemIsInstalled() {
 		return !!(
-			this.#documentHandler.document
+			this.#documentHandler.isInitialized()
 			&& this.#state.guild.channels.cache.get(this.#documentHandler.document.categoryId)
 		);
 	}
@@ -131,6 +135,7 @@ export class PureVoiceUpdateHandler {
 	 */
 	async handleDisconnection() {
 		if (this.isNotConnectionUpdate()) return;
+		if (!this.#documentHandler.isInitialized()) return;
 
 		const {
 			guild,
@@ -312,6 +317,7 @@ export class PureVoiceUpdateHandler {
 	 */
 	async handleConnection() {
 		if (this.isNotConnectionUpdate()) return;
+		if (!this.#documentHandler.isInitialized()) return;
 
 		const { prematureError } = this;
 		const { guild, channel, member } = this.#state as VoiceState & { member: GuildMember };
@@ -451,7 +457,9 @@ export class PureVoiceUpdateHandler {
 					name:
 						makeSessionRoleAutoname(userConfigs as UserConfigDocument)
 						?? `🔶 PV ${defaultName}`,
-					color: tenshiColor,
+					colors: {
+						primaryColor: tenshiColor,
+					},
 					mentionable: true,
 					reason: translator.getText('voiceSessionReasonRoleCreate'),
 				});
@@ -671,6 +679,8 @@ export class PureVoiceUpdateHandler {
 	 * @returns la cantidad de sesiones defectuosas eliminadas
 	 */
 	async checkFaultySessions(): Promise<number> {
+		if (!this.#documentHandler.isInitialized()) return 0;
+
 		const pvDocument = this.#documentHandler.document;
 		const guildChannels = this.#state.guild.channels.cache;
 		const members = new Map<string, GuildMember>();
@@ -750,13 +760,9 @@ export class PureVoiceActionHandler {
 
 /**@class Representa un orquestador de sistema PuréVoice*/
 export class PureVoiceOrchestrator {
-	/**@type {string}*/
 	#guildId: string;
-	/**@type {Array<PureVoiceUpdateHandler>}*/
-	#updates: Array<PureVoiceUpdateHandler>;
-	/**@type {Array<PureVoiceActionHandler>}*/
-	#actions: Array<PureVoiceActionHandler>;
-	/**@type {boolean}*/
+	#updates: PureVoiceUpdateHandler[];
+	#actions: PureVoiceActionHandler[];
 	#busy: boolean;
 
 	/**
@@ -780,7 +786,7 @@ export class PureVoiceOrchestrator {
 		if (this.#busy) return true;
 		this.#busy = true;
 
-		await this.consumeUpdate();
+		await this.#consumeUpdate();
 
 		return false;
 	}
@@ -795,13 +801,16 @@ export class PureVoiceOrchestrator {
 		if (this.#busy) return true;
 		this.#busy = true;
 
-		await this.consumeAction();
+		await this.#consumeAction();
 
 		return false;
 	}
 
-	/**Quita de la cola un análisis de cambio de estado de una sesión de voz y lo ejecuta. Si alguna cola no está vacía, se ejecuta consumeAction (prioridad) o consumeUpdate*/
-	async consumeUpdate() {
+	/**
+	 * @description
+	 * Quita de la cola un análisis de cambio de estado de una sesión de voz y lo ejecuta. Si alguna cola no está vacía, se ejecuta consumeAction (prioridad) o consumeUpdate.
+	 */
+	async #consumeUpdate() {
 		const handler = this.#updates.shift();
 		await handler?.fetchGuildDocument(this.#guildId).catch(error);
 		if (!handler?.systemIsInstalled()) return;
@@ -821,12 +830,12 @@ export class PureVoiceOrchestrator {
 		}
 
 		if (this.#actions.length) {
-			await this.consumeAction();
+			await this.#consumeAction();
 			return;
 		}
 
 		if (this.#updates.length) {
-			await this.consumeUpdate();
+			await this.#consumeUpdate();
 			return;
 		}
 
@@ -834,8 +843,11 @@ export class PureVoiceOrchestrator {
 		return;
 	}
 
-	/**Quita de la cola una ejecución de acción en una sesión de voz y la ejecuta. Si alguna cola no está vacía, se ejecuta consumeAction (prioridad) o consumeUpdate*/
-	async consumeAction() {
+	/**
+	 * @description
+	 * Quita de la cola una ejecución de acción en una sesión de voz y la ejecuta. Si alguna cola no está vacía, se ejecuta consumeAction (prioridad) o consumeUpdate.
+	 */
+	async #consumeAction() {
 		const handler = this.#actions.shift();
 		await handler?.fetchSystemDocument().catch(error);
 		if (!handler?.systemIsInstalled()) return;
@@ -848,12 +860,12 @@ export class PureVoiceOrchestrator {
 		}
 
 		if (this.#actions.length) {
-			await this.consumeAction();
+			await this.#consumeAction();
 			return;
 		}
 
 		if (this.#updates.length) {
-			await this.consumeUpdate();
+			await this.#consumeUpdate();
 			return;
 		}
 

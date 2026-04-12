@@ -724,7 +724,7 @@ const command = new Command('roles', flags)
 			const roleColorNumber = stringHexToNumber(roleColor);
 			editStack.push(
 				customRole
-					.edit({ color: roleColorNumber })
+					.edit({ colors: { primaryColor: roleColorNumber } })
 					.catch(() => replyStack.push('⚠️ No se pudo actualizar el color del rol')),
 			);
 		}
