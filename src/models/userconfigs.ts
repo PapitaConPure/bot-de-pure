@@ -80,7 +80,7 @@ const UserConfigSchema = new Mongoose.Schema({
 				trim: true,
 			},
 		],
-		default: () => new Map(),
+		default: () => new Map() as Map<string, string[]>,
 		required: true,
 	},
 	voice: {
