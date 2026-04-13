@@ -986,9 +986,9 @@ export const getEmojiString = (emoji: string, guild: Guild): string | null => {
 };
 
 export function isNSFWChannel(channel: GuildBasedChannel) {
-	if (!channel.isSendable()) return false;
-
 	if (channel.isThread()) return channel.parent?.nsfw ?? false;
+
+	if (!channel.isSendable()) return false;
 
 	return channel.nsfw;
 }
