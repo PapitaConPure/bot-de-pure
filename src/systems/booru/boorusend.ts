@@ -140,9 +140,11 @@ export async function formatBooruPostMessage(
 	//Botón de Fuente (si está disponible)
 	let containerColor: number | undefined;
 	const addSourceButtonAndApplyStyle = (source: string) => {
+		debug('Antes de mapeos de fuente:', source);
 		sourceMappings.forEach((mapping) => {
 			source = source.replace(mapping.pattern, mapping.replacement);
 		});
+		debug('Después de mapeos de fuente:', source);
 
 		//Dar estilo a Embed según fuente de la imagen
 		const sourceStyle = SOURCE_STYLES.find((s) => s.pattern.test(source)) ?? unknownSource;
@@ -167,14 +169,17 @@ export async function formatBooruPostMessage(
 			.setDisabled(disableLinks);
 		if (emoji) button.setEmoji(emoji);
 
-		buttonRow.addComponents();
+		buttonRow.addComponents(button);
 	};
 
 	//Aplicar estilo y botones de source
 	debug('Se está por decidir el estilo del Embed del mensaje');
 	if (post.source) {
 		debug('El Post tiene fuentes. Se buscarán enlaces');
+		debug('sources =', post.sources);
+
 		const sourceUrl = post.findFirstUrlSource();
+		debug('sourceUrl =', sourceUrl);
 
 		if (sourceUrl) {
 			debug(
@@ -628,7 +633,8 @@ export async function searchAndReplyWithPost(
 		//Seleccionar imágenes
 		const posts = response.sort(() => 0.5 - Math.random()).slice(0, poolSize);
 
-		debug('posts =', posts);
+		debug('posts =');
+		debug.dir(posts);
 
 		//Crear presentaciones
 		info('Preparando mensaje(s) de respuesta de búsqueda...');

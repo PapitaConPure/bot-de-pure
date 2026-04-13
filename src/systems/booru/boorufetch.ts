@@ -497,29 +497,29 @@ export class Post {
 		}
 	}
 
-	/**@description Tries to find sources that match an URL pattern, and returns all matches (if any)*/
+	/**@description Tries to find sources that match a URL pattern, and returns all matches (if any)*/
 	findUrlSources() {
-		return this.sources.map(getSourceUrl).filter((s) => s);
+		return this.sources.map(getSourceUrl).filter((s) => s != null);
 	}
 
 	/**
 	 * @description
-	 * Finds and returns the first source that matches an URL pattern.
+	 * Finds and returns the first source that matches a URL pattern.
 	 *
 	 * If no URL source is found, `undefined` is returned
 	 */
 	findFirstUrlSource() {
-		return this.sources.map(getSourceUrl).find((s) => s);
+		return this.sources.map(getSourceUrl).find((s) => s != null);
 	}
 
 	/**
 	 * @description
-	 * Finds and returns the last source that matches an URL pattern.
+	 * Finds and returns the last source that matches a URL pattern.
 	 *
 	 * If no URL source is found, `undefined` is returned.
 	 */
 	findLastUrlSource() {
-		return this.sources.map(getSourceUrl).findLast((s) => s);
+		return this.sources.map(getSourceUrl).findLast((s) => s != null);
 	}
 }
 
@@ -574,7 +574,7 @@ function getSourceUrl(source: string) {
 	const sourceMatch = source.match(
 		/(http:\/\/|https:\/\/)(www\.)?(([a-zA-Z0-9-])+\.){1,4}([a-zA-Z]){2,6}(\/([a-zA-Z-_/.0-9#:?=&;,]*)?)?/,
 	);
-	if (!sourceMatch?.index) return null;
+	if (sourceMatch?.index == null) return null;
 
 	return source.slice(sourceMatch.index, sourceMatch.index + sourceMatch[0].length);
 }
