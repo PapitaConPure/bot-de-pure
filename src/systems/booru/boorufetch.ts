@@ -529,7 +529,7 @@ export class Tag {
 	name: string;
 	count: number;
 	type: TagType;
-	ambiguous: boolean | null;
+	ambiguous: boolean;
 	fetchTimestamp: Date;
 
 	constructor(data: TagResolvable) {
