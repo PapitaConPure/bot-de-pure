@@ -35,7 +35,7 @@ export async function cacheUser(user: UserCacheResolvable) {
 		language: userConfigs.language,
 		pixivConverter: userConfigs.pixivConverter || '',
 		twitterPrefix: userConfigs.twitterPrefix || '',
-		banned: userConfigs.banned,
+		banned: userConfigs.banned ?? false,
 	});
 }
 
