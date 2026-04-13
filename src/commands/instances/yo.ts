@@ -820,16 +820,22 @@ const command = new Command('yo', tags)
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
 		if (!userConfigs) return interaction.editReply({ content: userNotAvailableText });
 
+		const translator = new Translator(userConfigs.language);
+
 		const name = interaction.fields.getTextInputValue('inputName');
 		const emoji = interaction.fields.getTextInputValue('inputEmoji');
-		const uEmoji = parseUnicodeEmoji(emoji);
+		const unicodeEmoji = parseUnicodeEmoji(emoji);
+
+		if (emoji.length && !unicodeEmoji)
+			return interaction.editReply({
+				content: translator.getText('invalidEmoji'),
+			});
 
 		userConfigs.voice.autoname = name;
-		if (uEmoji) userConfigs.voice.autoemoji = uEmoji;
+		if (unicodeEmoji) userConfigs.voice.autoemoji = unicodeEmoji;
 
+		userConfigs.markModified('voice');
 		await userConfigs.save();
-
-		const translator = new Translator(userConfigs.language as LocaleKey);
 
 		await interaction.message
 			.edit({
