@@ -19,7 +19,7 @@ const UserConfigVoiceSchema = new Mongoose.Schema(
 			type: String,
 			trim: true,
 			validate: {
-				validator: (v: string) => v === '' || unicodeEmojiRegex.test(v),
+				validator: (v: string) => !v || unicodeEmojiRegex.test(v),
 				message: 'Invalid emoji',
 			},
 		},
