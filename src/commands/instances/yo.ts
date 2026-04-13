@@ -15,7 +15,7 @@ import {
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
 import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
-import { compressId, decompressId, improveNumber, shortenText } from '@/func';
+import { compressId, decompressId, improveNumber, parseUnicodeEmoji, shortenText } from '@/func';
 import type { LocaleIds, LocaleKey } from '@/i18n';
 import { isValidLocaleKey, Locales, Translator } from '@/i18n';
 import type { UserConfigDocument } from '@/models/userconfigs';
@@ -820,8 +820,12 @@ const command = new Command('yo', tags)
 		const userConfigs = await UserConfigs.findOne({ userId: user.id });
 		if (!userConfigs) return interaction.editReply({ content: userNotAvailableText });
 
-		userConfigs.voice.autoname = interaction.fields.getTextInputValue('inputName');
-		userConfigs.voice.autoemoji = interaction.fields.getTextInputValue('inputEmoji');
+		const name = interaction.fields.getTextInputValue('inputName');
+		const emoji = interaction.fields.getTextInputValue('inputEmoji');
+		const uEmoji = parseUnicodeEmoji(emoji);
+
+		userConfigs.voice.autoname = name;
+		if (uEmoji) userConfigs.voice.autoemoji = uEmoji;
 
 		await userConfigs.save();
 
