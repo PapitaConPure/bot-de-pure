@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
-import { emojiRegex } from '@/func';
+import { discordEmojiRegex } from '@/func';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
 const options = new CommandOptions()
@@ -23,7 +23,7 @@ const command = new Command('emote', flags)
 				content: '⚠️️ Debes especificar un emote o un mensaje con un emote',
 			});
 
-		const emojisMatches = content.matchAll(emojiRegex);
+		const emojisMatches = content.matchAll(discordEmojiRegex);
 		if (!emojisMatches) return request.reply({ content: 'No se encontraron emotes...' });
 
 		const embeds: EmbedBuilder[] = [];
@@ -33,7 +33,10 @@ const command = new Command('emote', flags)
 		for (const emojiMatch of emojisMatches) {
 			if (embeds.length >= 25) continue;
 
-			const emoji = request.client.emojis.resolve(emojiMatch[1]);
+			const emojiId = emojiMatch.groups?.id;
+			if(!emojiId) continue;
+
+			const emoji = request.client.emojis.resolve(emojiId);
 			if (!emoji) continue;
 
 			const embed = new EmbedBuilder()

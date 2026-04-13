@@ -13,7 +13,7 @@ import {
 import type { ComplexCommandRequest } from 'types/commands';
 import { globalConfigs } from '@/data/globalProps';
 import type { WeightedDecision } from '@/func';
-import { compressId, decompressId, emojiRegex, improveNumber, makeWeightedDecision } from '@/func';
+import { compressId, decompressId, discordEmojiRegex, improveNumber, makeWeightedDecision } from '@/func';
 import { Translator } from '@/i18n';
 import type { AnarchyUserDocument } from '@/models/puretable';
 import { AnarchyUser, PureTable, pureTableAssets } from '@/models/puretable';
@@ -364,7 +364,7 @@ const command = new Command('anarquia', tags)
 				});
 			} else auser.last = Date.now();
 
-			const emoteMatch = emote?.match(emojiRegex);
+			const emoteMatch = emote?.match(discordEmojiRegex);
 			if (!emoteMatch) {
 				reactIfMessage('⚠️');
 				return request.reply({
@@ -372,9 +372,9 @@ const command = new Command('anarquia', tags)
 					flags: MessageFlags.Ephemeral,
 				});
 			}
-			const emoteId = emoteMatch[1];
+			const emoteId = emoteMatch.groups?.id;
 
-			if (!request.client.emojis.cache.has(emoteId)) {
+			if (!emoteId || !request.client.emojis.cache.has(emoteId)) {
 				reactIfMessage('⚠️');
 				return request.reply({
 					content:

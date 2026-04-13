@@ -941,31 +941,49 @@ export function makeWeightedDecision<TValue = unknown>(
 //#endregion
 
 //#region Otros
+/**@description RegEx para reconocer emojis Unicode.*/
 export const unicodeEmojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
-/**
- * @description Resultado de un elemento del retorno de `string.prototype.matchAll`:
- * * `[1]`: La ID del emoji
- */
-export const emojiRegex = /<a?:\w+:([0-9]+)>/gi;
 
 /**@description Devuelve el primer emoji global encontrado en el string.*/
-export function defaultEmoji(emoji: string): string | null {
+export function parseUnicodeEmoji(emoji: string): string | null {
 	if (typeof emoji !== 'string') return null;
-	return emoji.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)?.[0] ?? null; //Expresión RegExp cursed
+	return emoji.match(unicodeEmojiRegex)?.[0] ?? null; //Expresión RegExp cursed
 }
 
+/**
+ * @description RegEx para reconocer expresiones de emojis de Discord.
+ *
+ * @groups
+ * * `name`: Nombre del emoji
+ * * `id`: ID del emoji
+ *
+ * @example
+ * ```
+ * const sample = '<:emoji:123456789012345678>';
+ * for(const emojiMatch of sample.matchAll(discordEmojiRegex) {
+ *     console.log(emojiMatch.groups?.id); //123456789012345678
+ * }
+ * ```
+ */
+export const discordEmojiRegex = /<a?:(?<name>\w+):(?<id>[0-9]+)>/gi;
+
 /**@description Devuelve el primer emoji de servidor encontrado con el string.*/
-export function guildEmoji(emoji: string, guild: Guild): Emoji | null {
-	if (typeof emoji !== 'string') return null;
-	if (!guild.emojis) throw TypeError('Debes ingresar una Guild');
-	const parsedEmoji = emoji.match(/^<a*:\w+:[0-9]+>\B/gu)?.[0];
+export function getGuildEmoji(emoji: string, guild: Guild): Emoji | null {
+	const parsedEmoji = emoji.match(discordEmojiRegex)?.[0];
 	if (!parsedEmoji) return guild.emojis.cache.find((e) => e.name === emoji) || null;
 	return guild.emojis.resolve(parsedEmoji);
 }
 
 /**@description Devuelve el primer emoji global o de servidor encontrado en el string.*/
-export const emoji = (emoji: string, guild: Guild): Emoji | string | null =>
-	defaultEmoji(emoji) ?? guildEmoji(emoji, guild);
+export const getEmojiString = (emoji: string, guild: Guild): string | null => {
+	const unicodeEmoji = parseUnicodeEmoji(emoji);
+	if (unicodeEmoji) return unicodeEmoji;
+
+	const guildEmoji = getGuildEmoji(emoji, guild);
+	if (guildEmoji) return `${guildEmoji}`;
+
+	return null;
+};
 
 export function isNSFWChannel(channel: GuildBasedChannel) {
 	if (!channel.isSendable()) return false;

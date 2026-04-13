@@ -5,7 +5,7 @@ import {
 	EmbedBuilder,
 	MessageFlags,
 } from 'discord.js';
-import { emojiRegex } from '@/func';
+import { discordEmojiRegex } from '@/func';
 import { Translator } from '@/i18n';
 import { ContextMenuAction } from '../commons/actionBuilder';
 
@@ -16,7 +16,7 @@ const action = new ContextMenuAction('actionGetEmojis', 'Message').setMessageRes
 		// biome-ignore lint/correctness/noUnusedVariables: TODO: Traducir
 		const translator = await Translator.from(uid);
 
-		const emojisMatches = message.content.matchAll(emojiRegex);
+		const emojisMatches = message.content.matchAll(discordEmojiRegex);
 		if (!emojisMatches)
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
@@ -29,7 +29,10 @@ const action = new ContextMenuAction('actionGetEmojis', 'Message').setMessageRes
 		for (const emojiMatch of emojisMatches) {
 			if (embeds.length >= 25) continue;
 
-			const emoji = interaction.client.emojis.resolve(emojiMatch[1]);
+			const emojiId = emojiMatch.groups?.id;
+			if(!emojiId) continue;
+
+			const emoji = interaction.client.emojis.resolve(emojiId);
 			if (!emoji) continue;
 
 			const embed = new EmbedBuilder()

@@ -14,7 +14,7 @@ import {
 	TextInputStyle,
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
-import { compressId, defaultEmoji, isNotModerator } from '@/func';
+import { compressId, isNotModerator, parseUnicodeEmoji } from '@/func';
 import { Translator } from '@/i18n';
 import { PureVoiceModel as PureVoice, PureVoiceSessionModel } from '@/models/purevoice.js';
 import {
@@ -73,7 +73,7 @@ const command = new Command('voz', tags)
 				.catch(console.error);
 
 		const emoteString = args.flagExprIf('emote', (x) => `${x}`, '💠');
-		const sessionEmote = defaultEmoji(emoteString);
+		const sessionEmote = parseUnicodeEmoji(emoteString);
 		const sessionName = args.getString('nombre', true);
 
 		if (!sessionName)
@@ -639,7 +639,7 @@ const command = new Command('voz', tags)
 			});
 		}
 
-		const defEmoji = defaultEmoji(emoji);
+		const defEmoji = parseUnicodeEmoji(emoji);
 		if (!defEmoji)
 			return interaction.editReply({
 				content: translator.getText('voiceSessionRenameInvalidEmoji'),

@@ -23,7 +23,7 @@ import {
 import { booruApiKey, booruUserId, globalConfigs, tenshiAltColor } from '@/data/globalProps';
 import {
 	compressId,
-	guildEmoji,
+	getGuildEmoji,
 	isNotModerator,
 	isNSFWChannel,
 	randInArray,
@@ -94,7 +94,7 @@ function tagsSetupPrompt(
 	translator: Translator,
 ) {
 	const fetchedChannel = interaction.guild?.channels.cache.get(channelId) as GuildBasedChannel;
-	const gelEmoji = guildEmoji('gelbooru', globalConfigs.slots.slot3);
+	const gelEmoji = getGuildEmoji('gelbooru', globalConfigs.slots.slot3);
 	const embed = new EmbedBuilder()
 		.setColor(Colors.Blurple)
 		.setAuthor({
@@ -1467,7 +1467,7 @@ const command = new Command('feed', tags)
 				.filter((t) => !otherTagTypes.includes(t.type))
 				.map((t) => t.name);
 
-			const tagEmoji = guildEmoji('tagswhite', globalConfigs.slots.slot3);
+			const tagEmoji = getGuildEmoji('tagswhite', globalConfigs.slots.slot3);
 			const tagsContent = formatTagNameListNew(postOtherTags, ' ');
 
 			const source = post.source;

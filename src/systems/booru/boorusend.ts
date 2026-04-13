@@ -22,7 +22,7 @@ import { CommandOptionSolver } from '@/commands/commons/cmdOpts';
 import rakki from '@/commands/instances/rakkidei';
 import { booruApiKey, booruUserId, globalConfigs } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
-import { guildEmoji as gEmo, isNSFWChannel, shortenText } from '@/func';
+import { getGuildEmoji as gEmo, isNSFWChannel, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import Logger from '@/utils/logs';
 import type { Post } from './boorufetch';
