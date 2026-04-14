@@ -50,8 +50,5 @@
     "@types/bun": "latest",
     "globals": "^17.4.0"
   },
-  "private": true,
-  "peerDependencies": {
-    "typescript": "^6.0.2"
-  }
+  "private": true
 }
