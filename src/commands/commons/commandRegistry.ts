@@ -46,8 +46,7 @@ export function registerCommands(commands: Command[], log: boolean = false) {
 		if (options) setupOptionBuilders(slash, options, log);
 
 		const jsonData = slash.toJSON();
-		if (!command.flags.has('SAKI')) puré.slash.set(command.name, jsonData);
-		else puré.slashSaki.set(command.name, jsonData);
+		puré.slash.set(command.name, jsonData);
 	}
 
 	log && console.table(commandTableStack);

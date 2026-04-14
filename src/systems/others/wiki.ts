@@ -22,7 +22,6 @@ import type { Command, CommandOptions, CommandTagStringField } from '@/commands/
 import { CommandTag, fetchCommandsFromFiles } from '@/commands/commons';
 import { ClientNotFoundError, client } from '@/core/client';
 import { tenshiColor } from '@/data/globalProps';
-import serverIds from '@/data/serverIds.json';
 import userIds from '@/data/userIds.json';
 import { compressId, edlDistance, isNotModerator, toCapitalized } from '@/func';
 import { p_pure } from '@/utils/prefixes';
@@ -77,16 +76,6 @@ export const makeCategoriesRow = (
 				.setLabel('En mantenimiento')
 				.setDescription('Comandos en desarrollo o mantenimiento.')
 				.setDefault(getDefault('MAINTENANCE')),
-		);
-
-	request.guildId === serverIds.saki
-		&& categoriesMenu.addOptions(
-			new StringSelectMenuOptionBuilder()
-				.setValue('SAKI')
-				.setEmoji('1108197083334316183')
-				.setLabel('Saki Scans')
-				.setDescription('Comandos exclusivos para Saki Scans.')
-				.setDefault(getDefault('SAKI')),
 		);
 
 	categoriesMenu.addOptions(
@@ -175,7 +164,6 @@ export async function searchCommand(request: AnyRequest, nameOrAlias: string) {
 		if (
 			(command.tags.has('PAPA') && request.user.id !== userIds.papita)
 			|| (command.tags.has('MOD') && isNotModerator(request.member))
-			|| (command.tags.has('SAKI') && request.guild.id !== serverIds.saki)
 		)
 			continue;
 
@@ -218,7 +206,6 @@ export async function searchCommands(request: AnyRequest, query: string) {
 		if (
 			(command.tags.has('PAPA') && request.user.id !== userIds.papita)
 			|| (command.tags.has('MOD') && isNotModerator(request.member))
-			|| (command.tags.has('SAKI') && request.guild.id !== serverIds.saki)
 		)
 			continue;
 

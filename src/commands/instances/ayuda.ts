@@ -2,7 +2,6 @@ import type { AnySelectMenuInteraction, GuildChannelResolvable, GuildMember } fr
 import { EmbedBuilder, MessageFlags } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
 import { tenshiColor } from '@/data/globalProps';
-import serverIds from '@/data/serverIds.json';
 import userIds from '@/data/userIds.json';
 import { isNotModerator, shortenText } from '@/func';
 import {
@@ -26,7 +25,6 @@ const makeExcludedTags = (request: ComplexCommandRequest | AnySelectMenuInteract
 	const excludedTags: Array<import('../commons/cmdTags').CommandTagResolvable> = ['GUIDE'];
 
 	isNotModerator(request.member) && excludedTags.push('MOD');
-	request.guildId !== serverIds.saki && excludedTags.push('SAKI');
 	request.user.id !== userIds.papita && excludedTags.push('PAPA', 'MAINTENANCE', 'OUTDATED');
 
 	return excludedTags;

@@ -158,8 +158,6 @@ export const globalConfigs = {
 	seed: 0,
 	/**@description Fecha a la que se inició este proceso del bot.*/
 	startupTime: 0,
-	/**@description (Compatibilidad). Controla los usos globales del comando p!leche.*/
-	lechitauses: 0,
 	/**@description Servidores de Discords para utilidades varias de Bot de Puré.*/
 	slots: {
 		slot1: null as unknown as Guild,

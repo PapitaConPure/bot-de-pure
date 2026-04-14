@@ -7,7 +7,6 @@ import type {
 	Collection,
 	GuildTextBasedChannel,
 	RESTPostAPIApplicationCommandsJSONBody,
-	RESTPostAPIChatInputApplicationCommandsJSONBody,
 } from 'discord.js';
 import { REST } from 'discord.js';
 import { Routes } from 'discord-api-types/v9';
@@ -103,36 +102,19 @@ export async function onStartup(client: Client) {
 
 	console.log(chalk.bold.magentaBright('Cargando comandos Slash y Contextuales...'));
 	const restGlobal = new REST({ version: '9' }).setToken(discordToken);
-	const commandData: {
-		global: Collection<string, RESTPostAPIApplicationCommandsJSONBody>;
-		saki: Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>;
-	} = {
-		global: (puré.slash as Collection<string, RESTPostAPIApplicationCommandsJSONBody>).concat(
-			puré.contextMenu,
-		),
-		saki: puré.slashSaki,
-	};
+	const commandData = (
+		puré.slash as Collection<string, RESTPostAPIApplicationCommandsJSONBody>
+	).concat(puré.contextMenu);
 
 	try {
 		if (!client.application)
 			throw new ReferenceError("'client.application' was not properly defined");
 
 		await restGlobal.put(Routes.applicationCommands(client.application.id), {
-			body: commandData.global,
+			body: commandData,
 		});
 
-		const dedicatedServerId = serverIds.saki;
-		if (client.guilds.cache.get(dedicatedServerId))
-			await restGlobal.put(
-				Routes.applicationGuildCommands(client.application.id, dedicatedServerId),
-				{ body: commandData.saki },
-			);
-
-		logOptions.slash
-			&& console.log(
-				`Comandos registrados :: ${client.guilds.cache.get(dedicatedServerId)?.name}):`,
-				restGlobal,
-			);
+		logOptions.slash && console.log(`Comandos registrados:`, restGlobal);
 		confirm();
 	} catch (error) {
 		console.log(
@@ -146,7 +128,6 @@ export async function onStartup(client: Client) {
 	console.log(chalk.cyan('Calculando semilla y horario (compatibilidad)...'));
 	const currentTime = Date.now();
 	globalConfigs.startupTime = currentTime;
-	globalConfigs.lechitauses = currentTime;
 	globalConfigs.seed = currentTime / 60000;
 
 	console.log(chalk.magenta('Obteniendo información del host...'));

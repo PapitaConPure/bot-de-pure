@@ -31,8 +31,6 @@ La columna "Meta" indica los modificadores de interés de un comando:
 | caos            | ✅ | ✅ | 🛡️ |
 | catbox          | ✅ | ✅ |  |
 | cola            | ✅ | ✅ |  |
-| colgar          | ✅ | ✅ | 🛡️🎎 |
-| colores         | ✅ | ✅ | 🎎💔 |
 | confesión       | ✅ | ✅ | 🛡️ |
 | cultivar        | ✅ | ✅ |  |
 | dado            | ✅ | ✅ |  |
@@ -52,14 +50,12 @@ La columna "Meta" indica los modificadores de interés de un comando:
 | info            | ✅ | ✅ |  |
 | inforol         | ✅ | ✅ | 🛡️ |
 | karl            | ✅ | ✅ |  |
-| leche           | ✅ | ✅ |  |
 | megumin         | ✅ | ✅ |  |
 | mimar           | ✅ | ✅ |  |
 | número          | ✅ | ✅ |  |
 | papa-anunciar   | ✅ | ✅ | 🥔 |
 | papa-ban        | ✅ | ✅ | 🥔 |
 | papa-bienvenida | ✅ | ✅ | 🥔 |
-| papa-decir      | ✅ | ✅ | 🥔 |
 | papa-escapar    | ✅ | ✅ | 🥔 |
 | papa-eval       | ✅ | ✅ | 🥔 |
 | papa-feedback   | ✅ | ✅ | 🥔 |
@@ -70,7 +66,6 @@ La columna "Meta" indica los modificadores de interés de un comando:
 | papa-test       | ✅ | ✅ | 🥔 |
 | papita          | ✅ | ✅ |  |
 | pausar          | ✅ | ✅ |  |
-| perrito         | ✅ | ✅ |  |
 | ping            | ✅ | ✅ |  |
 | pinguear        | ✅ | ✅ |  |
 | prefijo         | ✅ | ✅ | 🛡️ |
@@ -79,20 +74,15 @@ La columna "Meta" indica los modificadores de interés de un comando:
 | rakkidei        | ✅ | ✅ |  |
 | reproducir      | ✅ | ✅ |  |
 | resumir         | ✅ | ✅ |  |
-| roles           | ✅ | ✅ | 🎎 |
-| saki            | ✅ | ✅ | 🛡️🎎 |
 | saltar          | ✅ | ✅ |  |
-| sassafras       | ✅ | ✅ | 💔 |
 | saucenao        | ✅ | ✅ |  |
 | sonando         | ✅ | ✅ |  |
 | sticker         | ✅ | ✅ |  |
 | sugerir         | ✅ | ✅ |  |
-| suicidio        | ✅ | ✅ | 🎎 |
 | tarjeta         | ✅ | ✅ |  |
 | touhou          | ✅ | ✅ |  |
 | transferir      | ✅ | ✅ |  |
 | tubérculo       | ✅ | ✅ |  |
-| twitters        | ✅ | ✅ | 🛡️🎎🚧 |
 | uwu             | ✅ | ✅ |  |
 | uwus            | ✅ | ✅ |  |
 | voz             | ✅ | ✅ |  |
