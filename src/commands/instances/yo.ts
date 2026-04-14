@@ -134,7 +134,7 @@ function makeDashboardContainer(
 						.setPlaceholder(translator.getText('yoDashboardMenuConfig'))
 						.setOptions([
 							{
-								label: 'PuréFeed',
+								label: 'Boorutato',
 								description: translator.getText('yoDashboardMenuConfigFeedDesc'),
 								emoji: '1460145550119669912',
 								value: 'feed',

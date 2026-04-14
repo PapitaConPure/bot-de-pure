@@ -1767,7 +1767,7 @@ const command = new Command('feed', tags)
 
 		//type = 'Y' | 'N' | 'F'
 		if (type === 'Y' || type === 'N') {
-			auditAction(`PuréFeed • Feedback • ${interaction.user.username}`, {
+			auditAction(`Boorutato • Feedback • ${interaction.user.username}`, {
 				name: 'Calificación',
 				value: type === 'Y' ? '✅ Satisfecho' : '❌ Insatisfecho',
 			});
@@ -1805,7 +1805,7 @@ const command = new Command('feed', tags)
 		const translator = await Translator.from(interaction.user);
 		const feedback = interaction.fields.getTextInputValue('feedback');
 
-		auditAction(`PuréFeed • Feedback • ${interaction.user.username}`, {
+		auditAction(`Boorutato • Feedback • ${interaction.user.username}`, {
 			name: 'Mensaje',
 			value: feedback,
 		});

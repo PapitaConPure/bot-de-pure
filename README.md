@@ -184,8 +184,8 @@ Luego, reemplaza los markdowns y las IDs de emojis personalizados en el código.
 
 
 * Fácil y rápida automatización en servidores gracias al uso de Asistentes de Configuración:
-  - Usa el Asistente PuréFeed para **programar el envío de imágenes de Gelbooru** en un canal, con las tags que quieras<br>
-    ![purefeed](https://github.com/user-attachments/assets/680fb037-a08e-44cb-a992-1fcb2f4e2d46)
+  - Usa el Asistente Boorutato para **programar el envío de imágenes de Gelbooru** en un canal, con las tags que quieras<br>
+    ![boorutato](https://github.com/user-attachments/assets/680fb037-a08e-44cb-a992-1fcb2f4e2d46)
   - Usa el Asistente PuréVoice para configurar una categoría de **canales de voz dinámicos avanzados** (sesiones PuréVoice)<br>
     ![purevoice](https://github.com/user-attachments/assets/cdeb7d40-29f8-47bf-99ca-c469c6b65752)
   - Usa el Asistente de Confesiones para facilitar la distribución de confesiones anónimas, seguras y con protección contra abusos<br>
@@ -194,7 +194,7 @@ Luego, reemplaza los markdowns y las IDs de emojis personalizados en el código.
   ![userconfigs](https://github.com/user-attachments/assets/72bad62e-27e1-4b44-aa85-3dfea173d0c6)
   - Configura nombres automáticos de sesión y otras preferencias de usuario para sesiones de voz (PuréVoice)
   - Corrección automática de previsualizaciones de enlaces de **Twitter/X** (Puréet) y pixiv (Purépix)
-  - Edita tus suscripciones a tags de Feeds de imágenes (PuréFeed)
+  - Edita tus suscripciones a tags de Feeds de imágenes (Boorutato)
   - Soporte de español, inglés y (parcialmente) japonés
 * Fácil reproducción de música con sencilla gestión de colas de reproducción<br>
   ![puremusic](https://github.com/user-attachments/assets/9168f6fd-2c8c-409b-8745-b8f64cab3258)

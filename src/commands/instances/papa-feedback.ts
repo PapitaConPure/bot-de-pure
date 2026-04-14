@@ -12,7 +12,7 @@ const command = new Command('papa-feedback', tags)
 
 		const feedbackEmbed = new EmbedBuilder()
 			.setAuthor({
-				name: 'Bot de Puré • PuréFeed',
+				name: 'Bot de Puré • Boorutato',
 				iconURL: client.user.displayAvatarURL({ size: 256 }),
 			})
 			.setColor(tenshiColor)

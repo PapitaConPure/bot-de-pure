@@ -2541,15 +2541,15 @@ const localesObject = {
 	yoFeedEmptyError: {
 		es: paragraph(
 			'¡No tienes ninguna suscripción a Feeds de imágenes!',
-			'Puedes comenzar a seguir tags en cualquier canal con un Sistema PuréFeed instalado',
+			'Puedes comenzar a seguir tags en cualquier canal con un Sistema Boorutato instalado',
 		),
 		en: paragraph(
 			"You're not subscribed to any image Feeds!",
-			'You can start following tags in any channel that has a PuréFeed system installed',
+			'You can start following tags in any channel that has a Boorutato system installed',
 		),
 		ja: paragraph(
 			'画像掲示板のフィードを購読していません！',
-			'PuréFeed システムがインストールされているチャンネルであれば、タグのフォローを開始できます',
+			'Boorutato システムがインストールされているチャンネルであれば、タグのフォローを開始できます',
 		),
 	},
 	yoVoiceTitle: {

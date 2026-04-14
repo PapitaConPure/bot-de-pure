@@ -92,7 +92,7 @@ function makeDashboardContainer(compressedUserId: string, guild: Guild, translat
 					.setPlaceholder(translator.getText('serverDashboardMenuConfig'))
 					.setOptions([
 						{
-							label: 'PuréFeed',
+							label: 'Boorutato',
 							description: translator.getText('yoDashboardMenuConfigFeedDesc'),
 							emoji: '1460145550119669912',
 							value: 'feed',
