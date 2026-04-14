@@ -10,6 +10,7 @@
         "@discord-player/extractor": "^7.2.0",
         "@distube/ytdl-core": "^4.16.12",
         "@napi-rs/canvas": "^0.1.97",
+        "@papitaconpure/booru-client": "^0.3.1",
         "chalk": "^5.6.2",
         "date-fns": "^4.1.0",
         "discord-player": "^7.2.0",
@@ -189,6 +190,8 @@
     "@napi-rs/canvas-win32-arm64-msvc": ["@napi-rs/canvas-win32-arm64-msvc@0.1.97", "", { "os": "win32", "cpu": "arm64" }, "sha512-u883Yr6A6fO7Vpsy9YE4FVCIxzzo5sO+7pIUjjoDLjS3vQaNMkVzx5bdIpEL+ob+gU88WDK4VcxYMZ6nmnoX9A=="],
 
     "@napi-rs/canvas-win32-x64-msvc": ["@napi-rs/canvas-win32-x64-msvc@0.1.97", "", { "os": "win32", "cpu": "x64" }, "sha512-sWtD2EE3fV0IzN+iiQUqr/Q1SwqWhs2O1FKItFlxtdDkikpEj5g7DKQpY3x55H/MAOnL8iomnlk3mcEeGiUMoQ=="],
+
+    "@papitaconpure/booru-client": ["@papitaconpure/booru-client@0.3.1", "", {}, "sha512-ZllzQygMclTOlAcEalNn+faXElxw8vyzNdNVHM83Q9MABSUA/NgJHmIOWYJaaI1yG8JtTlfLS11oDlwkBJAglg=="],
 
     "@rollup/rollup-android-arm-eabi": ["@rollup/rollup-android-arm-eabi@4.54.0", "", { "os": "android", "cpu": "arm" }, "sha512-OywsdRHrFvCdvsewAInDKCNyR3laPA2mc9bRYJ6LBp5IyvF3fvXbbNR0bSzHlZVFtn6E0xw2oZlyjg4rKCVcng=="],
 
