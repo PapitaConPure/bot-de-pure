@@ -16,7 +16,6 @@ const txtToArray = (path: string) =>
 		.filter((t) => t.length);
 const presence = {
 	status: txtToArray('./status.txt'),
-	stream: txtToArray('./stream.txt'),
 };
 
 const PRESENCE_TICK_INTERVAL_RANGE = [20, 35] as const;
