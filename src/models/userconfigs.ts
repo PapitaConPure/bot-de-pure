@@ -1,5 +1,4 @@
 import Mongoose from 'mongoose';
-import { unicodeEmojiRegex } from '@/func';
 import { acceptedPixivConverters } from '@/systems/converters/purepix';
 import Locales from '../i18n/locales';
 import { acceptedTwitterConverters } from '../systems/converters/pureet';
@@ -18,10 +17,6 @@ const UserConfigVoiceSchema = new Mongoose.Schema(
 		autoemoji: {
 			type: String,
 			trim: true,
-			validate: {
-				validator: (v: string) => !v || unicodeEmojiRegex.test(v),
-				message: 'Invalid emoji',
-			},
 		},
 		killDelay: {
 			type: Number,
