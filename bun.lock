@@ -29,9 +29,6 @@
         "@types/bun": "latest",
         "globals": "^17.4.0",
       },
-      "peerDependencies": {
-        "typescript": "^6.0.2",
-      },
     },
   },
   "packages": {
