@@ -37,7 +37,7 @@
     "discord-player": "^7.2.0",
     "discord-player-googlevideo": "^0.2.5",
     "discord-player-soundcloud": "^1.0.7",
-    "discord.js": "^14.26.2",
+    "discord.js": "^14.26.3",
     "groq-sdk": "^1.1.2",
     "mongoose": "^7.8.9",
     "mongoose-int32": "^0.6.0",
@@ -48,7 +48,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.4.11",
     "@types/bun": "latest",
-    "globals": "^17.4.0"
+    "globals": "^17.5.0"
   },
   "private": true
 }
