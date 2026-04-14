@@ -40,7 +40,7 @@
     "discord-player-soundcloud": "^1.0.7",
     "discord.js": "^14.26.3",
     "groq-sdk": "^1.1.2",
-    "mongoose": "^7.8.9",
+    "mongoose": "^8.23.0",
     "mongoose-int32": "^0.6.0",
     "node-catbox": "^4.2.0",
     "object-sizeof": "^2.6.5",
