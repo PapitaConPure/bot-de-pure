@@ -33,7 +33,7 @@ import {
 import serverIds from '../data/serverIds.json';
 import PrefixPairs from '../models/prefixpair';
 import { PureTable, pureTableAssets } from '../models/puretable';
-import UserConfigs from '../models/userconfigs';
+import UserConfigModel from '../models/userconfigs';
 import { feedTagSuscriptionsCache, setupGuildFeedUpdateStack } from '../systems/booru/boorufeed';
 import { auditSystem } from '../systems/others/auditor';
 import { initializeMessageCascades } from '../systems/others/messageCascades';
@@ -185,7 +185,7 @@ export async function onStartup(client: Client) {
 	console.log(chalk.gray('Obteniendo documentos...'));
 	const [prefixPairs, userConfigs] = await Promise.all([
 		PrefixPairs.find({}),
-		UserConfigs.find({}),
+		UserConfigModel.find({}),
 	]);
 
 	console.log(chalk.gray('Facilitando prefijos...'));

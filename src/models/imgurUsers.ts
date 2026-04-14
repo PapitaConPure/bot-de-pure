@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 
 /**Describe la configuración de un sistema PureVoice de servidor.*/
 const ImgurUserSchema = new Mongoose.Schema({
@@ -7,11 +7,10 @@ const ImgurUserSchema = new Mongoose.Schema({
 	clientId: { type: String, required: true },
 });
 
-const ImgurUser = Mongoose.model('ImgurUser', ImgurUserSchema);
+export type ImgurUserSchemaType = InferSchemaType<typeof ImgurUserSchema>;
 
-function m() {
-	return new ImgurUser({});
-}
-export type ImgurUserDocument = ReturnType<typeof m>;
+const ImgurUserModel = Mongoose.model('ImgurUser', ImgurUserSchema);
 
-export default ImgurUser;
+export type ImgurUserDocument = InstanceType<typeof ImgurUserModel>;
+
+export default ImgurUserModel;

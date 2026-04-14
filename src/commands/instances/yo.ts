@@ -18,8 +18,8 @@ import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
 import { compressId, decompressId, improveNumber, parseUnicodeEmoji, shortenText } from '@/func';
 import type { LocaleIds, LocaleKey } from '@/i18n';
 import { isValidLocaleKey, Locales, Translator } from '@/i18n';
-import type { UserConfigDocument } from '@/models/userconfigs';
-import UserConfigs from '@/models/userconfigs';
+import type { UserConfigSchemaType } from '@/models/userconfigs';
+import UserConfigModel from '@/models/userconfigs';
 import { updateFollowedFeedTagsCache } from '@/systems/booru/boorufeed';
 import type { AcceptedTwitterConverterKey } from '@/systems/converters/pureet';
 import { acceptedTwitterConverters } from '@/systems/converters/pureet';
@@ -46,7 +46,7 @@ const cancelButton = (compressedAuthorId: string) =>
 
 function makeDashboardContainer(
 	request: Interaction | ComplexCommandRequest,
-	userConfigs: UserConfigDocument,
+	userConfigs: UserConfigSchemaType,
 	translator: Translator,
 ) {
 	//const suscriptions = [...userConfigs.feedTagSuscriptions.values()];
@@ -173,7 +173,7 @@ function makeDashboardContainer(
 
 const makeVoiceContainer = (
 	compressedAuthorId: string,
-	userConfigs: UserConfigDocument,
+	userConfigs: UserConfigSchemaType,
 	translator: Translator,
 ) => {
 	const container = new ContainerBuilder()
@@ -384,7 +384,7 @@ const makePixivServicePickerContainer = (
 function makeSelectTagsChannelContainer(
 	compressedAuthorId: string,
 	request: MessageComponentInteraction,
-	userConfigs: UserConfigDocument,
+	userConfigs: UserConfigSchemaType,
 	translator: Translator,
 ) {
 	const container = new ContainerBuilder()
@@ -430,7 +430,7 @@ function makeSelectTagsChannelContainer(
 function makeFollowedTagsContainer(
 	compressedAuthorId: string,
 	channelId: string,
-	userConfigs: UserConfigDocument,
+	userConfigs: UserConfigSchemaType,
 	translator: Translator,
 	isAlt: boolean,
 ) {
@@ -480,7 +480,7 @@ async function makeSelectFeedTCResponse(
 	const { user } = interaction;
 
 	const [userConfigs] = await Promise.all([
-		UserConfigs.findOne({ userId: user.id }),
+		UserConfigModel.findOne({ userId: user.id }),
 		interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 	]);
 
@@ -541,12 +541,12 @@ const command = new Command('yo', tags)
 		const userQuery = { userId: request.userId };
 
 		let [userConfigs] = await Promise.all([
-			UserConfigs.findOne(userQuery),
+			UserConfigModel.findOne(userQuery),
 			request.deferReply(args.hasFlag('efímero') ? { flags: MessageFlags.Ephemeral } : {}),
 		]);
 
 		if (!userConfigs) {
-			userConfigs = new UserConfigs(userQuery);
+			userConfigs = new UserConfigModel(userQuery);
 			await userConfigs.save();
 		}
 
@@ -559,7 +559,7 @@ const command = new Command('yo', tags)
 	.setButtonResponse(async function goToDashboard(interaction, authorId) {
 		const { user } = interaction;
 
-		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+		const userConfigs = await UserConfigModel.findOne({ userId: user.id });
 		if (!userConfigs)
 			return interaction.reply({
 				content: userNotAvailableText,
@@ -582,7 +582,7 @@ const command = new Command('yo', tags)
 		async function selectLanguage(interaction) {
 			const { user } = interaction;
 
-			const userConfigs = await UserConfigs.findOne({ userId: user.id });
+			const userConfigs = await UserConfigModel.findOne({ userId: user.id });
 			if (!userConfigs)
 				return interaction.reply({
 					content: userNotAvailableText,
@@ -609,7 +609,7 @@ const command = new Command('yo', tags)
 		async function promptSetTimezone(interaction) {
 			const { user } = interaction;
 
-			const userConfigs = await UserConfigs.findOne({ userId: user.id });
+			const userConfigs = await UserConfigModel.findOne({ userId: user.id });
 			if (!userConfigs)
 				return interaction.reply({
 					content: userNotAvailableText,
@@ -648,7 +648,7 @@ const command = new Command('yo', tags)
 	.setModalResponse(async function setTimezone(interaction) {
 		const { user } = interaction;
 
-		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+		const userConfigs = await UserConfigModel.findOne({ userId: user.id });
 		if (!userConfigs)
 			return interaction.reply({
 				content: userNotAvailableText,
@@ -687,7 +687,7 @@ const command = new Command('yo', tags)
 
 		if (selected === 'feed') return makeSelectFeedTCResponse(interaction, compressedAuthorId);
 
-		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+		const userConfigs = await UserConfigModel.findOne({ userId: user.id });
 		if (!userConfigs)
 			return interaction.reply({
 				content: userNotAvailableText,
@@ -737,7 +737,7 @@ const command = new Command('yo', tags)
 		async function setVoicePing(interaction, compressedAuthorId) {
 			const { user } = interaction;
 
-			const userConfigs = await UserConfigs.findOne({ userId: user.id });
+			const userConfigs = await UserConfigModel.findOne({ userId: user.id });
 			if (!userConfigs)
 				return interaction.reply({
 					content: userNotAvailableText,
@@ -763,7 +763,7 @@ const command = new Command('yo', tags)
 		async function setVoiceAutoname(interaction) {
 			const { user } = interaction;
 
-			const userConfigs = await UserConfigs.findOne({ userId: user.id });
+			const userConfigs = await UserConfigModel.findOne({ userId: user.id });
 			if (!userConfigs)
 				return interaction.reply({
 					content: userNotAvailableText,
@@ -817,7 +817,7 @@ const command = new Command('yo', tags)
 
 		const { user } = interaction;
 
-		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+		const userConfigs = await UserConfigModel.findOne({ userId: user.id });
 		if (!userConfigs) return interaction.editReply({ content: userNotAvailableText });
 
 		const translator = new Translator(userConfigs.language);
@@ -851,7 +851,7 @@ const command = new Command('yo', tags)
 		async function setVoiceKillDelay(interaction) {
 			const { user } = interaction;
 
-			const userConfigs = await UserConfigs.findOne({ userId: user.id });
+			const userConfigs = await UserConfigModel.findOne({ userId: user.id });
 			if (!userConfigs)
 				return interaction.reply({
 					content: userNotAvailableText,
@@ -893,7 +893,7 @@ const command = new Command('yo', tags)
 
 		const { user } = interaction;
 
-		const userConfigs = await UserConfigs.findOne({ userId: user.id });
+		const userConfigs = await UserConfigModel.findOne({ userId: user.id });
 		if (!userConfigs) return interaction.editReply({ content: userNotAvailableText });
 
 		//FIXME: esto está completamente mal. Parsear formato XXm XXs luego
@@ -919,7 +919,7 @@ const command = new Command('yo', tags)
 			const { user } = interaction;
 
 			const [userConfigs] = await Promise.all([
-				UserConfigs.findOne({ userId: user.id }),
+				UserConfigModel.findOne({ userId: user.id }),
 				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 			]);
 			if (!userConfigs) return interaction.editReply({ content: userNotAvailableText });
@@ -962,7 +962,7 @@ const command = new Command('yo', tags)
 			const { user } = interaction;
 
 			const [userConfigs] = await Promise.all([
-				UserConfigs.findOne({ userId: user.id }),
+				UserConfigModel.findOne({ userId: user.id }),
 				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 			]);
 			if (!userConfigs) return interaction.editReply({ content: userNotAvailableText });
@@ -1008,7 +1008,7 @@ const command = new Command('yo', tags)
 			const { user } = interaction;
 			const channelId = isAlt ? interaction.channelId : interaction.values[0];
 
-			const userConfigs = await UserConfigs.findOne({ userId: user.id });
+			const userConfigs = await UserConfigModel.findOne({ userId: user.id });
 			if (!userConfigs)
 				return interaction.reply({
 					content: userNotAvailableText,
@@ -1099,7 +1099,7 @@ const command = new Command('yo', tags)
 
 			const userQuery = { userId };
 			const userConfigs =
-				(await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery);
+				(await UserConfigModel.findOne(userQuery)) || new UserConfigModel(userQuery);
 			const translator = new Translator(userConfigs.language);
 			let newTags = userConfigs.feedTagSuscriptions.get(channelId)?.slice(0) ?? [];
 			let setTagsResponse: LocaleIds;

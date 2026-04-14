@@ -1,7 +1,7 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 import { makeStringIdValidator } from './modelUtils';
 
-const reminderSchema = new Mongoose.Schema({
+const ReminderSchema = new Mongoose.Schema({
 	_id: String,
 	userId: {
 		type: String,
@@ -24,11 +24,10 @@ const reminderSchema = new Mongoose.Schema({
 	},
 });
 
-const Reminder = Mongoose.model('reminder', reminderSchema);
+export type ReminderSchemaType = InferSchemaType<typeof ReminderSchema>;
 
-function m() {
-	return new Reminder({});
-}
-export type ReminderDocument = ReturnType<typeof m>;
+const ReminderModel = Mongoose.model('reminder', ReminderSchema);
 
-export default Reminder;
+export type ReminderDocument = InstanceType<typeof ReminderModel>;
+
+export default ReminderModel;

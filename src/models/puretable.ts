@@ -1,12 +1,12 @@
 import type { Image } from '@napi-rs/canvas';
-import { model, Schema } from 'mongoose';
+import { type InferSchemaType, model, Schema } from 'mongoose';
 
 export const pureTableAssets = {
 	defaultEmote: '1267233873864032318',
 	image: null as unknown as Image,
 };
 
-const PuretableSchema = new Schema({
+const PureTableSchema = new Schema({
 	cells: {
 		type: [[String]],
 		default: Array(16)
@@ -40,15 +40,11 @@ const AnarchyUserSchema = new Schema({
 	skills: AnarchyUserSkillSchema,
 });
 
-export const PureTable = model('PureTable', PuretableSchema);
+export type PureTableSchemaType = InferSchemaType<typeof PureTableSchema>;
+export type AnarchyUserSchemaType = InferSchemaType<typeof AnarchyUserSchema>;
+
+export const PureTable = model('PureTable', PureTableSchema);
 export const AnarchyUser = model('AnarchyUser', AnarchyUserSchema);
 
-function ptm() {
-	return new PureTable({});
-}
-export type PureTableDocument = ReturnType<typeof ptm>;
-
-function aum() {
-	return new AnarchyUser({});
-}
-export type AnarchyUserDocument = ReturnType<typeof aum>;
+export type PureTableDocument = InstanceType<typeof PureTable>;
+export type AnarchyUserDocument = InstanceType<typeof AnarchyUser>;

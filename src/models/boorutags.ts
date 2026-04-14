@@ -4,7 +4,7 @@ import _Int32 from 'mongoose-int32';
 const Int32 = _Int32.loadType(Mongoose);
 const TypeSafeInt32 = Int32 as unknown as typeof Number;
 
-const tagSchema = new Mongoose.Schema({
+const TagSchema = new Mongoose.Schema({
 	_id: TypeSafeInt32,
 	id: {
 		type: TypeSafeInt32,
@@ -37,8 +37,10 @@ const tagSchema = new Mongoose.Schema({
 	},
 });
 
-export type TagDocument = InferSchemaType<typeof tagSchema>;
+export type TagSchemaType = InferSchemaType<typeof TagSchema>;
 
-const model = Mongoose.model('boorutags', tagSchema);
+const TagModel = Mongoose.model('boorutags', TagSchema);
 
-export default model;
+export type TagDocument = InstanceType<typeof TagModel>;
+
+export default TagModel;

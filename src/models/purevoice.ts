@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 
 /**Describe la configuración de un sistema PureVoice de servidor.*/
 const PureVoiceSchema = new Mongoose.Schema({
@@ -28,12 +28,11 @@ const PureVoiceSchema = new Mongoose.Schema({
 	},
 });
 
+export type PureVoiceSchemaType = InferSchemaType<typeof PureVoiceSchema>;
+
 export const PureVoiceModel = Mongoose.model('PureVoice', PureVoiceSchema);
 
-function m() {
-	return new PureVoiceModel({});
-}
-export type PureVoiceDocument = ReturnType<typeof m>;
+export type PureVoiceDocument = InstanceType<typeof PureVoiceModel>;
 
 const PureVoiceSessionMemberSchema = new Mongoose.Schema(
 	{
@@ -96,9 +95,8 @@ const PureVoiceSessionSchema = new Mongoose.Schema({
 	},
 });
 
+export type PureVoiceSessionDocumPureVoiceSessionSchemaType = InferSchemaType<typeof PureVoiceSessionSchema>;
+
 export const PureVoiceSessionModel = Mongoose.model('PureVoiceSession', PureVoiceSessionSchema);
 
-function n() {
-	return new PureVoiceSessionModel({});
-}
-export type PureVoiceSessionDocument = ReturnType<typeof n>;
+export type PureVoiceSessionDocumPureVoiceSessionDocument = InstanceType<typeof PureVoiceModel>;

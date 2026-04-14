@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 
 export const FeedConfigSchema = new Mongoose.Schema(
 	{
@@ -37,11 +37,10 @@ export const FeedConfigSchema = new Mongoose.Schema(
 	{ _id: false },
 );
 
-const FeedConfig = Mongoose.model('FeedConfig', FeedConfigSchema);
+export type FeedSchemaType = InferSchemaType<typeof FeedConfigSchema>;
 
-function m() {
-	return new FeedConfig({});
-}
-export type FeedDocument = ReturnType<typeof m>;
+const FeedConfigModel = Mongoose.model('FeedConfig', FeedConfigSchema);
 
-export default FeedConfig;
+export type FeedDocument = InferSchemaType<typeof FeedConfigModel>;
+
+export default FeedConfigModel;

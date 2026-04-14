@@ -23,8 +23,8 @@ import { tenshiColor } from '@/data/globalProps.js';
 import { Translator } from '@/i18n/index.js';
 import type { PureVoiceDocument } from '@/models/purevoice.js';
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice.js';
-import type { UserConfigDocument } from '@/models/userconfigs.js';
-import UserConfigs from '@/models/userconfigs.js';
+import type { UserConfigSchemaType } from '@/models/userconfigs.js';
+import UserConfigModel from '@/models/userconfigs.js';
 import Logger from '@/utils/logs.js';
 import { p_pure } from '@/utils/prefixes';
 
@@ -34,12 +34,12 @@ export function makePVSessionName(name: string, emoji?: string) {
 	return `${emoji || '💠'}【${name}】`;
 }
 
-export function makeSessionAutoname(userConfig: UserConfigDocument) {
+export function makeSessionAutoname(userConfig: UserConfigSchemaType) {
 	if (!userConfig?.voice?.autoname) return null;
 	return makePVSessionName(userConfig.voice.autoname, userConfig.voice.autoemoji);
 }
 
-export function makeSessionRoleAutoname(userConfig: UserConfigDocument) {
+export function makeSessionRoleAutoname(userConfig: UserConfigSchemaType) {
 	if (!userConfig?.voice?.autoname) return null;
 	return `${userConfig.voice.autoemoji || '💠'} ${userConfig.voice.autoname}`;
 }
@@ -413,8 +413,8 @@ export class PureVoiceUpdateHandler {
 			);
 
 			const userConfigs =
-				(await UserConfigs.findOne({ userId: member.id }))
-				|| new UserConfigs({ userId: member.id });
+				(await UserConfigModel.findOne({ userId: member.id }))
+				|| new UserConfigModel({ userId: member.id });
 
 			embed
 				.setColor(0x00ff7f)
@@ -446,8 +446,8 @@ export class PureVoiceUpdateHandler {
 
 		try {
 			const [userConfigs, translator] = await Promise.all([
-				(await UserConfigs.findOne({ userId: member.id }))
-					|| new UserConfigs({ userId: member.id }),
+				(await UserConfigModel.findOne({ userId: member.id }))
+					|| new UserConfigModel({ userId: member.id }),
 				member.user.bot ? new Translator('es') : await Translator.from(member),
 			]);
 
@@ -455,7 +455,7 @@ export class PureVoiceUpdateHandler {
 				const defaultName = member.user.username.slice(0, 24);
 				const sessionRole = await guild.roles.create({
 					name:
-						makeSessionRoleAutoname(userConfigs as UserConfigDocument)
+						makeSessionRoleAutoname(userConfigs as UserConfigSchemaType)
 						?? `🔶 PV ${defaultName}`,
 					colors: {
 						primaryColor: tenshiColor,

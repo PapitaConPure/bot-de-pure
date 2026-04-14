@@ -7,7 +7,7 @@ import type { AnyBulkWriteOperation } from 'mongoose';
 import { ClientNotFoundError, client } from '@/core/client';
 import { globalConfigs } from '@/data/globalProps';
 import { isNSFWChannel, paginateRaw } from '@/func';
-import GuildConfigs, { type GuildConfigDocument } from '@/models/guildconfigs';
+import GuildConfigs, { type GuildConfigSchemaType } from '@/models/guildconfigs';
 import type { PostFormatData, Suscription } from '@/systems/booru/boorusend';
 import { formatBooruPostMessage, notifyUsers } from '@/systems/booru/boorusend';
 import { auditAction, auditError } from '@/systems/others/auditor';
@@ -66,7 +66,7 @@ async function processFeeds(booru: BooruClient, guilds: Collection<Snowflake, Gu
 		feeds: { $exists: true, $ne: {} },
 	});
 
-	const bulkOps: (AnyBulkWriteOperation<GuildConfigDocument> | undefined)[] = [];
+	const bulkOps: (AnyBulkWriteOperation<GuildConfigSchemaType> | undefined)[] = [];
 
 	await Promise.all(
 		guildConfigs.map(async (gcfg) => {
@@ -451,7 +451,7 @@ export class BooruFeed {
 	 * @description Aumenta el número de fallas del Feed en pasos de 1.
 	 * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}, o `undefined` si ya se registraron 10 fallas.
 	 */
-	addFault(): AnyBulkWriteOperation<GuildConfigDocument> | undefined {
+	addFault(): AnyBulkWriteOperation<GuildConfigSchemaType> | undefined {
 		const channel = this.channel;
 		const guild = channel?.guild;
 
@@ -477,7 +477,7 @@ export class BooruFeed {
 	 * @description Reduce progresivamente las fallas detectadas del Feed en pasos de 2.
 	 * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}.
 	 */
-	reduceFaults(): AnyBulkWriteOperation<GuildConfigDocument> | undefined {
+	reduceFaults(): AnyBulkWriteOperation<GuildConfigSchemaType> | undefined {
 		this.faults = Math.max(0, this.faults - 2);
 		this.lastFetchedAt = new Date(Date.now());
 		return {

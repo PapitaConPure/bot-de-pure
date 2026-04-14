@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 import { acceptedPixivConverters } from '@/systems/converters/purepix';
 import Locales from '../i18n/locales';
 import { acceptedTwitterConverters } from '../systems/converters/pureet';
@@ -111,11 +111,10 @@ const UserConfigSchema = new Mongoose.Schema({
 	},
 });
 
-export const UserConfigs = Mongoose.model('UserConfig', UserConfigSchema);
+export type UserConfigSchemaType = InferSchemaType<typeof UserConfigSchema>;
 
-function m() {
-	return new UserConfigs({});
-}
-export type UserConfigDocument = ReturnType<typeof m>;
+export const UserConfigModel = Mongoose.model('UserConfig', UserConfigSchema);
 
-export default UserConfigs;
+export type UserConfigDocument = InstanceType<typeof UserConfigModel>;
+
+export default UserConfigModel;

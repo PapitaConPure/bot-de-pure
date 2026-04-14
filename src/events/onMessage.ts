@@ -16,8 +16,8 @@ import type { PrefixPair } from '../data/globalProps';
 import { tenshiAltColor, tenshiColor } from '../data/globalProps';
 import unknownCommandReplies from '../data/unknownCommandReplies.json';
 import { Translator } from '../i18n/index';
-import { ChannelStats, Stats } from '../models/stats';
-import UserConfigs from '../models/userconfigs';
+import { ChannelStatsModel, StatsModel } from '../models/stats';
+import UserConfigModel from '../models/userconfigs';
 import { sendConvertedTwitterPosts } from '../systems/converters/pureet';
 import { sendConvertedPixivPosts } from '../systems/converters/purepix';
 import { auditRequest } from '../systems/others/auditor';
@@ -56,7 +56,7 @@ async function processGuildPlugins(message: Message<true>) {
 async function updateChannelMessageCounter(guildId: string, channelId: string, userId: string) {
 	const channelQuery = { guildId, channelId };
 	const channelStats =
-		(await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery);
+		(await ChannelStatsModel.findOne(channelQuery)) || new ChannelStatsModel(channelQuery);
 	channelStats.cnt++;
 	channelStats.sub[userId] ??= 0;
 	channelStats.sub[userId] += 1;
@@ -282,7 +282,7 @@ async function processCommand(message: Message<true>): Promise<CommandResult> {
 async function gainPRC(guild: Guild, userId: string) {
 	if (guild.memberCount < 100) return;
 
-	const userConfigs = (await UserConfigs.findOne({ userId })) || new UserConfigs({ userId });
+	const userConfigs = (await UserConfigModel.findOne({ userId })) || new UserConfigModel({ userId });
 
 	const then = userConfigs.lastDateReceived;
 	const today = new Date(Date.now());
@@ -356,7 +356,7 @@ export async function onMessage(message: Message) {
 
 	if (author.bot) return;
 
-	const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
+	const stats = (await StatsModel.findOne({})) || new StatsModel({ since: Date.now() });
 	stats.read++;
 	updateChannelMessageCounter(guild.id, channel.id, author.id);
 

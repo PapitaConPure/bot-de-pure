@@ -22,7 +22,7 @@ import {
 import puré from '../core/puréRegistry';
 import userIds from '../data/userIds.json';
 import { Translator } from '../i18n';
-import { Stats, type StatsDocument } from '../models/stats';
+import { type StatsDocument, StatsModel } from '../models/stats';
 import { auditRequest } from '../systems/others/auditor';
 
 export async function onInteraction(interaction: Interaction) {
@@ -34,7 +34,7 @@ export async function onInteraction(interaction: Interaction) {
 	if (channelIsBlocked(channel) || (await isUsageBanned(user)))
 		return handleBlockedInteraction(interaction).catch(console.error);
 
-	const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
+	const stats = (await StatsModel.findOne({})) || new StatsModel({ since: Date.now() });
 
 	if (interaction.isAutocomplete()) return handleAutocompleteInteraction(interaction);
 

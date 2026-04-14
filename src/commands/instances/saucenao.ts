@@ -12,7 +12,7 @@ import {
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
 import { Translator } from '@/i18n';
-import SauceNAOUser from '@/models/saucenaoUsers';
+import SauceNAOUserModel from '@/models/saucenaoUsers';
 import { pourSauce, testSauceNAOToken } from '@/systems/others/saucenao';
 import Logger from '@/utils/logs';
 import { encryptString } from '@/utils/security';
@@ -51,7 +51,7 @@ const command = new Command('saucenao', flags)
 		debug('Verificando flag --registrar');
 		if (args.hasFlag('registrar')) return makeRegisterRequestResponse(request, translator);
 
-		const sauceNAOUser = await SauceNAOUser.findOne({ userId: request.userId });
+		const sauceNAOUser = await SauceNAOUserModel.findOne({ userId: request.userId });
 		if (!sauceNAOUser) {
 			debug('Usuario no tiene una cuenta de sauceNAO válida. Abortando...');
 			const embed = new EmbedBuilder()
@@ -136,8 +136,8 @@ const command = new Command('saucenao', flags)
 		}
 
 		const sauceNAOUser =
-			(await SauceNAOUser.findOne({ userId: interaction.user.id }))
-			|| new SauceNAOUser({ userId: interaction.user.id });
+			(await SauceNAOUserModel.findOne({ userId: interaction.user.id }))
+			|| new SauceNAOUserModel({ userId: interaction.user.id });
 		sauceNAOUser.clientId = encryptString(clientId);
 		await sauceNAOUser.save();
 		return interaction.reply({

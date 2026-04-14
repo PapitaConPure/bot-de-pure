@@ -3,7 +3,7 @@ import type { ComplexCommandRequest } from 'types/commands';
 import { globalConfigs, tenshiColor } from '@/data/globalProps';
 import { compressId, improveNumber, sleep } from '@/func';
 import { Translator } from '@/i18n';
-import UserConfigs from '@/models/userconfigs';
+import UserConfigModel from '@/models/userconfigs';
 import { auditError } from '@/systems/others/auditor';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
@@ -57,9 +57,9 @@ const command = new Command('transferir', flags)
 			const targetQuery = { userId: targetId };
 			const [userConfigs, targetConfigs] = await Promise.all([
 				(async () =>
-					(await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery))(),
+					(await UserConfigModel.findOne(userQuery)) || new UserConfigModel(userQuery))(),
 				(async () =>
-					(await UserConfigs.findOne(targetQuery)) || new UserConfigs(targetQuery))(),
+					(await UserConfigModel.findOne(targetQuery)) || new UserConfigModel(targetQuery))(),
 			]);
 
 			if (amount > userConfigs.prc)

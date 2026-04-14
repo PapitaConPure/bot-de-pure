@@ -1,19 +1,19 @@
 import type { Tag, TagStore } from '@papitaconpure/booru-client';
 import type { AnyBulkWriteOperation, AnyKeys } from 'mongoose';
 import type BooruTags from '@/models/boorutags';
-import type { TagDocument } from '@/models/boorutags';
+import type { TagSchemaType } from '@/models/boorutags';
 import type { TagPersistenceMapper } from './mapper/tagPersistenceMapper';
 import { TagPersistenceMapperImpl } from './mapper/tagPersistenceMapperImpl';
 
 export class MongooseTagStore implements TagStore {
 	readonly #model: typeof BooruTags;
-	readonly #mapper: TagPersistenceMapper<TagDocument, AnyKeys<TagDocument>>;
+	readonly #mapper: TagPersistenceMapper<TagSchemaType, AnyKeys<TagSchemaType>>;
 	readonly #ttl: number;
 
 	constructor(
 		model: typeof BooruTags,
 		options: {
-			mapper?: TagPersistenceMapper<TagDocument, AnyKeys<TagDocument>>;
+			mapper?: TagPersistenceMapper<TagSchemaType, AnyKeys<TagSchemaType>>;
 			ttl?: number;
 		} = {},
 	) {
@@ -36,7 +36,7 @@ export class MongooseTagStore implements TagStore {
 	}
 
 	async setMany(tags: Iterable<Tag>): Promise<void> {
-		const bulkOps: AnyBulkWriteOperation<TagDocument>[] = [...tags].map((t) => ({
+		const bulkOps: AnyBulkWriteOperation<TagSchemaType>[] = [...tags].map((t) => ({
 			updateOne: {
 				filter: { id: t.id },
 				update: { $set: this.#mapper.toDocument(t) },

@@ -1,7 +1,7 @@
-import Mongoose from 'mongoose';
-import { FeedConfigSchema, type FeedDocument } from './feeds';
+import Mongoose, { type InferSchemaType } from 'mongoose';
+import { FeedConfigSchema, type FeedSchemaType } from './feeds';
 import { makeStringIdValidator } from './modelUtils';
-import { type TuberDocument, TuberSchema } from './tubers';
+import { TuberSchema, type TuberSchemaType } from './tubers';
 
 const GuildConfigSchema = new Mongoose.Schema(
 	{
@@ -34,10 +34,10 @@ const GuildConfigSchema = new Mongoose.Schema(
 	},
 	{
 		methods: {
-			setTuberField<TKey extends keyof TuberDocument>(
+			setTuberField<TKey extends keyof TuberSchemaType>(
 				tuberId: string,
 				field: TKey,
-				value: TuberDocument[TKey],
+				value: TuberSchemaType[TKey],
 			) {
 				const tuber = this.tubers.get(tuberId);
 				if (!tuber) return false;
@@ -48,10 +48,10 @@ const GuildConfigSchema = new Mongoose.Schema(
 
 				return true;
 			},
-			setFeedField<TKey extends keyof FeedDocument>(
+			setFeedField<TKey extends keyof FeedSchemaType>(
 				feedId: string,
 				field: TKey,
-				value: FeedDocument[TKey],
+				value: FeedSchemaType[TKey],
 			) {
 				const feed = this.feeds.get(feedId);
 				if (!feed) return false;
@@ -66,12 +66,11 @@ const GuildConfigSchema = new Mongoose.Schema(
 	},
 );
 
+export type GuildConfigSchemaType = InferSchemaType<typeof GuildConfigSchema>;
+
 /**@description Describe la configuración de un servidor.*/
 const GuildConfig = Mongoose.model('GuildConfig', GuildConfigSchema);
 
-function m() {
-	return new GuildConfig({});
-}
-export type GuildConfigDocument = ReturnType<typeof m>;
+export type GuildConfigDocument = InstanceType<typeof GuildConfig>;
 
 export default GuildConfig;

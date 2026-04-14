@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 
 const StatsSchema = new Mongoose.Schema({
 	since: {
@@ -21,14 +21,6 @@ const StatsSchema = new Mongoose.Schema({
 	},
 });
 
-export const Stats = Mongoose.model('Stats', StatsSchema);
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function m() {
-	return new Stats({});
-}
-export type StatsDocument = ReturnType<typeof m>;
-
 const ChannelStatsSchema = new Mongoose.Schema({
 	guildId: {
 		type: String,
@@ -48,9 +40,12 @@ const ChannelStatsSchema = new Mongoose.Schema({
 	},
 });
 
-export const ChannelStats = Mongoose.model('ChannelStats', ChannelStatsSchema);
 
-function cm() {
-	return new ChannelStats({});
-}
-export type ChannelStatsDocument = ReturnType<typeof cm>;
+export type StatsSchemaType = InferSchemaType<typeof StatsSchema>;
+export type ChannelStatsSchemaType = InferSchemaType<typeof ChannelStatsSchema>;
+
+export const StatsModel = Mongoose.model('Stats', StatsSchema);
+export const ChannelStatsModel = Mongoose.model('ChannelStats', ChannelStatsSchema);
+
+export type StatsDocument = InstanceType<typeof StatsModel>;
+export type ChannelStatsDocument = InstanceType<typeof ChannelStatsModel>;

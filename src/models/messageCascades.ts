@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 
 const MessageCascadeSchema = new Mongoose.Schema({
 	messageId: {
@@ -16,11 +16,10 @@ const MessageCascadeSchema = new Mongoose.Schema({
 	},
 });
 
-const MessageCascade = Mongoose.model('MessageCascade', MessageCascadeSchema);
+export type MessageCascadeSchemaType = InferSchemaType<typeof MessageCascadeSchema>;
 
-function m() {
-	return new MessageCascade({});
-}
-export type MessageCascadeDocument = ReturnType<typeof m>;
+const MessageCascadeModel = Mongoose.model('MessageCascade', MessageCascadeSchema);
 
-export default MessageCascade;
+export type MessageCascadeDocument = InstanceType<typeof MessageCascadeModel>;
+
+export default MessageCascadeModel;

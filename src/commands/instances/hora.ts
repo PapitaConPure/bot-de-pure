@@ -2,7 +2,7 @@ import { addMinutes, getUnixTime, isValid } from 'date-fns';
 import { ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 import { dateToUTCFormat } from '@/func';
 import { Translator } from '@/i18n';
-import UserConfigs from '@/models/userconfigs';
+import UserConfigModel from '@/models/userconfigs';
 import { addTime, parseDateFromNaturalLanguage, utcStartOfTzToday } from '@/utils/datetime';
 import { sanitizeTzCode, toUtcOffset, utcOffsetDisplay } from '@/utils/timezones';
 import { Command, CommandOptions, CommandTags } from '../commons';
@@ -44,7 +44,7 @@ const command = new Command('hora', tags)
 
 		const tzCode =
 			args.parseFlagExpr('huso')
-			?? (await UserConfigs.findOne({ userId: request.userId }))?.tzCode
+			?? (await UserConfigModel.findOne({ userId: request.userId }))?.tzCode
 			?? 'UTC';
 		const sanitizedTzCode = sanitizeTzCode(tzCode);
 		const utcOffset = toUtcOffset(sanitizedTzCode) ?? 0;

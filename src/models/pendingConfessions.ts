@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 
 const PendingConfessionSchema = new Mongoose.Schema({
 	id: {
@@ -19,11 +19,10 @@ const PendingConfessionSchema = new Mongoose.Schema({
 	},
 });
 
-const PendingConfession = Mongoose.model('PendingConfession', PendingConfessionSchema);
+export type PendingConfessionSchemaType = InferSchemaType<typeof PendingConfessionSchema>;
 
-function m() {
-	return new PendingConfession({});
-}
-export type PendingConfessionDocument = ReturnType<typeof m>;
+const PendingConfessionModel = Mongoose.model('PendingConfession', PendingConfessionSchema);
 
-export default PendingConfession;
+export type PendingConfessionDocument = InstanceType<typeof PendingConfessionModel>;
+
+export default PendingConfessionModel;

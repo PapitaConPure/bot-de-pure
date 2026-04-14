@@ -13,7 +13,7 @@ import { changelog, note, todo as toDo, version } from '@/data/botStatus.json';
 import { remoteStartup, tenshiColor } from '@/data/globalProps';
 import { quantityDisplay } from '@/func';
 import { Translator } from '@/i18n';
-import { Stats } from '@/models/stats';
+import { StatsModel } from '@/models/stats';
 import { getWikiPageComponentsV2, makeGuideRow, searchCommand } from '@/systems/others/wiki';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandTags, commandFilenames } from '../commons';
@@ -32,7 +32,7 @@ const command = new Command('estado', flags)
 	)
 	.setExecution(async (request) => {
 		const translator = await Translator.from(request.member);
-		const stats = (await Stats.findOne({})) || new Stats({ since: Date.now() });
+		const stats = (await StatsModel.findOne({})) || new StatsModel({ since: Date.now() });
 		const counts = {
 			commands: commandFilenames.length,
 			guilds: request.client.guilds.cache.size,

@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 import { makeStringIdValidator } from './modelUtils';
 
 const ConfessionSystemSchema = new Mongoose.Schema({
@@ -27,11 +27,10 @@ const ConfessionSystemSchema = new Mongoose.Schema({
 	},
 });
 
-const ConfessionSystem = Mongoose.model('ConfessionSystem', ConfessionSystemSchema);
+export type ConfessionSystemSchemaType = InferSchemaType<typeof ConfessionSystemSchema>;
 
-function m() {
-	return new ConfessionSystem({});
-}
-export type ConfessionSystemDocument = ReturnType<typeof m>;
+const ConfessionSystemModel = Mongoose.model('ConfessionSystem', ConfessionSystemSchema);
 
-export default ConfessionSystem;
+export type ConfessionSystemDocument = InstanceType<typeof ConfessionSystemModel>;
+
+export default ConfessionSystemModel;

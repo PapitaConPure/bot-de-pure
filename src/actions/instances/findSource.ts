@@ -5,7 +5,7 @@ import {
 	MessageFlags,
 } from 'discord.js';
 import { Translator } from '@/i18n';
-import SauceNAOUser from '@/models/saucenaoUsers';
+import SauceNAOUserModel from '@/models/saucenaoUsers';
 import { pourSauce } from '@/systems/others/saucenao';
 import { ContextMenuAction } from '../commons/actionBuilder';
 
@@ -15,7 +15,7 @@ const action = new ContextMenuAction('actionFindSource', 'Message').setMessageRe
 		const uid = interaction.user.id;
 		const translator = await Translator.from(uid);
 
-		const sauceNAOUser = await SauceNAOUser.findOne({ userId: interaction.user.id });
+		const sauceNAOUser = await SauceNAOUserModel.findOne({ userId: interaction.user.id });
 		if (!sauceNAOUser)
 			return interaction.reply({
 				content: translator.getText('saucenaoUnregisteredNotice'),

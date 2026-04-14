@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 import { CURRENT_PS_VERSION } from '../systems/ps/common/executeTuber';
 
 const TuberInputSchema = new Mongoose.Schema({
@@ -91,11 +91,10 @@ export const TuberSchema = new Mongoose.Schema({
 	},
 });
 
-const Tuber = Mongoose.model('Tuber', TuberSchema);
+export type TuberSchemaType = InferSchemaType<typeof TuberSchema>;
 
-function m() {
-	return new Tuber({});
-}
-export type TuberDocument = ReturnType<typeof m>;
+const TuberModel = Mongoose.model('Tuber', TuberSchema);
 
-export default Tuber;
+export type TuberDocument = InstanceType<typeof TuberModel>;
+
+export default TuberModel;

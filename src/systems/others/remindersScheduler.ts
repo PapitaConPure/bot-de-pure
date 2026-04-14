@@ -5,7 +5,7 @@ import { tenshiColor } from '@/data/globalProps';
 import { decompressId } from '@/func';
 import { Translator } from '@/i18n';
 import type { ReminderDocument } from '@/models/reminders';
-import Reminder from '@/models/reminders';
+import ReminderModel from '@/models/reminders';
 import { INT32_MAX } from '@/utils/general';
 import Logger from '@/utils/logs';
 
@@ -18,9 +18,9 @@ const scheduledIds = new Map<string, NodeJS.Timeout>();
  * @param reminder El recordatorio a programar.
  */
 export async function scheduleReminder(reminder: ReminderDocument) {
-	if (!reminder)
+	if (reminder?._id == null)
 		throw new TypeError(
-			`Expected a ReminderDocument. Got: ${reminder == null ? reminder : typeof reminder}`,
+			`Expected a valid ReminderDocument. Got: ${reminder == null ? reminder : typeof reminder}`,
 		);
 
 	const debugId = decompressId(reminder._id);
@@ -63,7 +63,7 @@ export async function scheduleReminder(reminder: ReminderDocument) {
 export async function processReminders() {
 	try {
 		debug('Attempting to process all registered reminders');
-		const dueReminders = await Reminder.find();
+		const dueReminders = await ReminderModel.find();
 		const reminders = await Promise.allSettled(
 			dueReminders.map((reminder) => scheduleReminder(reminder)),
 		);
@@ -109,7 +109,7 @@ async function triggerReminder(reminder: ReminderDocument) {
 			debug(`Reminder message for ${user.username} has been sent to ${channelId}.`);
 		}
 
-		await Reminder.findByIdAndDelete(reminder._id);
+		await ReminderModel.findByIdAndDelete(reminder._id);
 
 		info(
 			`The reminder #${reminder._id} for ${user.username} has been triggered, sent to ${channelId}, and deleted appropiately.`,
@@ -150,7 +150,7 @@ export function clearScheduledReminder(reminderId: string): NodeJS.Timeout | und
 export function clearScheduledReminder(
 	reminder: ReminderDocument | string,
 ): NodeJS.Timeout | undefined {
-	const id: string = typeof reminder === 'string' ? reminder : reminder.id;
+	const id: string = typeof reminder === 'string' ? reminder : reminder._id as string;
 
 	const samePreviousReminderTimeout = scheduledIds.get(id);
 	if (samePreviousReminderTimeout) {

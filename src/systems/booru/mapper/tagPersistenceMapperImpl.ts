@@ -1,12 +1,12 @@
 import { Tag, type TagType } from '@papitaconpure/booru-client';
 import type { AnyKeys } from 'mongoose';
-import type { TagDocument } from '@/models/boorutags';
+import type { TagSchemaType } from '@/models/boorutags';
 import type { TagPersistenceMapper } from './tagPersistenceMapper';
 
 export class TagPersistenceMapperImpl
-	implements TagPersistenceMapper<TagDocument, AnyKeys<TagDocument>>
+	implements TagPersistenceMapper<TagSchemaType, AnyKeys<TagSchemaType>>
 {
-	fromDocument(doc: TagDocument): Tag {
+	fromDocument(doc: TagSchemaType): Tag {
 		return new Tag({
 			id: doc.id,
 			name: doc.name,
@@ -16,7 +16,7 @@ export class TagPersistenceMapperImpl
 		});
 	}
 
-	toDocument(tag: Tag): AnyKeys<TagDocument> {
+	toDocument(tag: Tag): AnyKeys<TagSchemaType> {
 		return {
 			id: tag.id,
 			name: tag.name,

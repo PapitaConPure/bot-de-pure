@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 
 /**Describe la configuración de un sistema PureVoice de servidor.*/
 const SauceNAOUserSchema = new Mongoose.Schema({
@@ -7,11 +7,10 @@ const SauceNAOUserSchema = new Mongoose.Schema({
 	clientId: { type: String, required: true },
 });
 
-const SauceNAOUser = Mongoose.model('SauceNAOUser', SauceNAOUserSchema);
+export type SauceNAOUserSchemaType = InferSchemaType<typeof SauceNAOUserSchema>;
 
-function m() {
-	return new SauceNAOUser({});
-}
-export type SauceNAOUserDocument = ReturnType<typeof m>;
+const SauceNAOUserModel = Mongoose.model('SauceNAOUser', SauceNAOUserSchema);
 
-export default SauceNAOUser;
+export type SauceNAOUserDocument = InferSchemaType<typeof SauceNAOUserModel>;
+
+export default SauceNAOUserModel;

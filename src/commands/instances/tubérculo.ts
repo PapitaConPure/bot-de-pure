@@ -26,9 +26,9 @@ import {
 	shortenText,
 } from '@/func';
 import { Translator } from '@/i18n';
-import type { GuildConfigDocument } from '@/models/guildconfigs';
+import type { GuildConfigDocument, GuildConfigSchemaType } from '@/models/guildconfigs';
 import GuildConfig from '@/models/guildconfigs';
-import type { TuberDocument } from '@/models/tubers';
+import type { TuberSchemaType } from '@/models/tubers';
 import { getWikiPageComponentsV2 } from '@/systems/others/wiki';
 import type { Tubercle, TuberExecutionOptions } from '@/systems/ps/common/executeTuber';
 import {
@@ -610,7 +610,7 @@ const command = new Command('tubérculo', flags)
 
 async function createTuber(
 	tuberId: string,
-	gcfg: GuildConfigDocument,
+	gcfg: GuildConfigSchemaType,
 	isPureScript: boolean,
 	request: ComplexCommandRequest,
 	args: CommandOptionSolver,
@@ -732,7 +732,7 @@ async function createTuber(
 		}
 
 		console.log('PuréScript ejecutado:', tuberContent);
-		gcfg.tubers.set(tuberId, tuberContent as TuberDocument);
+		gcfg.tubers.set(tuberId, tuberContent as TuberSchemaType);
 	} catch (error) {
 		console.log('Ocurrió un error al añadir un nuevo Tubérculo');
 		console.error(error);
@@ -895,10 +895,10 @@ function viewTuber(
 /**
  *
  * @param {String} tuberId
- * @param {GuildConfigDocument} gcfg
+ * @param {GuildConfigSchemaType} gcfg
  * @param {ComplexCommandRequest} request
  */
-function deleteTuber(tuberId: string, gcfg: GuildConfigDocument, request: ComplexCommandRequest) {
+function deleteTuber(tuberId: string, gcfg: GuildConfigSchemaType, request: ComplexCommandRequest) {
 	if (!gcfg.tubers.has(tuberId))
 		return request.reply({ content: `⚠️️ El Tubérculo **${tuberId}** no existe` });
 
@@ -1010,7 +1010,7 @@ async function opExecuteTuber(
 					'inputs',
 					(gcfg.tubers.get(tid)?.inputs as unknown as Input[][]).map((variant) =>
 						variant.map((input) => input.json ?? input),
-					) as TuberDocument['inputs'],
+					) as TuberSchemaType['inputs'],
 				);
 			gcfg.markModified(`tubers.${tid}.saved`);
 		})

@@ -1,7 +1,7 @@
 import type { GuildMember, Interaction } from 'discord.js';
 import type { GuildQueue, Player, Track } from 'discord-player';
 import { decode, deserialize, encode, serialize, useMainPlayer } from 'discord-player';
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 import type { ComplexCommandRequest } from '../types/commands';
 
 const PlayerQueueSchema = new Mongoose.Schema({
@@ -16,12 +16,11 @@ const PlayerQueueSchema = new Mongoose.Schema({
 	},
 });
 
-const PlayerQueue = Mongoose.model('PlayerQueue', PlayerQueueSchema);
+export type PlayerTrackSchemaType = InferSchemaType<typeof PlayerQueueSchema>;
 
-function m() {
-	return new PlayerQueue({});
-}
-export type PlayerTrackDocument = ReturnType<typeof m>;
+const PlayerQueueModel = Mongoose.model('PlayerQueue', PlayerQueueSchema);
+
+export type PlayerTrackDocument = InstanceType<typeof PlayerQueueModel>;
 
 export async function saveTracksQueue(
 	request: ComplexCommandRequest | Interaction,
@@ -30,7 +29,7 @@ export async function saveTracksQueue(
 	if (!queue || !request.guild) return;
 
 	const pqQuery = { guildId: request.guild.id };
-	const playerQueue = (await PlayerQueue.findOne(pqQuery)) || new PlayerQueue(pqQuery);
+	const playerQueue = (await PlayerQueueModel.findOne(pqQuery)) || new PlayerQueueModel(pqQuery);
 	const serializedTracks = queue.tracks.map(serializeTrack);
 	if (queue.currentTrack) serializedTracks.unshift(serializeTrack(queue.currentTrack));
 	playerQueue.serializedTracks = serializedTracks;
@@ -60,7 +59,7 @@ export async function tryRecoverSavedTracksQueue(
 	console.log("Queue wasn't cached. Searching in DB...");
 	const pqQuery = { guildId };
 	console.log(pqQuery);
-	const savedQueue = await PlayerQueue.findOne(pqQuery);
+	const savedQueue = await PlayerQueueModel.findOne(pqQuery);
 
 	if (!savedQueue?.serializedTracks.length) return null;
 

@@ -11,7 +11,7 @@ import {
 import { globalConfigs } from '@/data/globalProps';
 import { compressId, fetchMember, quantityDisplay, shortenText } from '@/func';
 import { Translator } from '@/i18n';
-import { ChannelStats, Stats } from '@/models/stats';
+import { ChannelStatsModel, StatsModel } from '@/models/stats';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
@@ -55,7 +55,7 @@ const command = new Command('info', tags)
 
 		const guild = request.guild;
 		const [stats, translator] = await Promise.all([
-			Stats.findOne({}),
+			StatsModel.findOne({}),
 			Translator.from(request),
 			request.deferReply(),
 			fetchGuildMembers(guild),
@@ -231,10 +231,10 @@ const command = new Command('info', tags)
 			channelId: targetChannel.id,
 		};
 		const targetChannelStats = /**@type {import('@/models/stats.js').ChannelStatsDocument}*/ (
-			(await ChannelStats.findOne(channelQuery)) || new ChannelStats(channelQuery)
+			(await ChannelStatsModel.findOne(channelQuery)) || new ChannelStatsModel(channelQuery)
 		);
 		const guildChannelStats = /**@type {import('@/models/stats.js').ChannelStatsDocument[]}*/ (
-			await ChannelStats.find({ guildId: guild.id })
+			await ChannelStatsModel.find({ guildId: guild.id })
 		);
 		const targetChannelHasMessages = Object.keys(targetChannelStats.sub).length;
 

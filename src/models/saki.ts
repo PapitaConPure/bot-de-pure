@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 
 const SakiMentionRolePoolSchema = new Mongoose.Schema(
 	{
@@ -67,11 +67,10 @@ const SakiSchema = new Mongoose.Schema({
 	},
 });
 
-const Saki = Mongoose.model('Hourai', SakiSchema);
+export type SakiSchemaType = InferSchemaType<typeof SakiSchema>;
 
-function m() {
-	return new Saki({});
-}
-export type SakiDocument = ReturnType<typeof m>;
+const SakiModel = Mongoose.model('Hourai', SakiSchema);
 
-export default Saki;
+export type SakiDocument = InstanceType<typeof SakiModel>;
+
+export default SakiModel;

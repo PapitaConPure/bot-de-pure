@@ -3,7 +3,7 @@ import { EmbedBuilder } from 'discord.js';
 import { tenshiColor } from '@/data/globalProps';
 import { improveNumber, randRange } from '@/func';
 import { Translator } from '@/i18n';
-import UserConfigs from '@/models/userconfigs';
+import UserConfigModel from '@/models/userconfigs';
 import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
@@ -17,7 +17,7 @@ const command = new Command('cultivar', tags)
 	)
 	.setExecution(async (request) => {
 		const userQuery = { userId: request.userId };
-		const userConfigs = (await UserConfigs.findOne(userQuery)) || new UserConfigs(userQuery);
+		const userConfigs = (await UserConfigModel.findOne(userQuery)) || new UserConfigModel(userQuery);
 		const translator = await Translator.from(request.userId);
 
 		const now = new Date(Date.now());

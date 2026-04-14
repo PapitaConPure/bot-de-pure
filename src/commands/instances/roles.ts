@@ -16,8 +16,8 @@ import { saki } from '@/data/sakiProps';
 import { colorsRow } from '@/data/sakiProps.js';
 import userIds from '@/data/userIds.json';
 import { isBoosting, stringHexToNumber, subdivideArray } from '@/func';
-import type { SakiDocument } from '@/models/saki';
-import Saki from '@/models/saki.js';
+import type { SakiSchemaType } from '@/models/saki';
+import SakiModel from '@/models/saki.js';
 import { auditError } from '@/systems/others/auditor.js';
 import { fetchExt } from '@/utils/fetchext';
 import { p_pure } from '@/utils/prefixes';
@@ -25,7 +25,7 @@ import { Command, CommandOptions, CommandParam, CommandTags } from '../commons';
 
 type CategoryIndex = 'GAMES' | 'DRINKS' | 'FAITH';
 
-type CategoryMap = SakiDocument['mentionRoles'];
+type CategoryMap = SakiSchemaType['mentionRoles'];
 
 function getAutoRoleRows(
 	member: import('discord.js').GuildMember,
@@ -134,7 +134,7 @@ const command = new Command('roles', flags)
 		const role = args.getRole('búsqueda', true);
 
 		if (role) {
-			const sakiDB: SakiDocument = (await Saki.findOne({})) || new Saki({});
+			const sakiDB: SakiSchemaType = (await SakiModel.findOne({})) || new SakiModel({});
 			const mentionRoles = sakiDB.mentionRoles;
 
 			const roleFound = Object.values(mentionRoles).some((category) =>
@@ -266,7 +266,7 @@ const command = new Command('roles', flags)
 
 		if (!interaction.inCachedGuild()) return interaction.reply({ content: '❌' });
 
-		const sakiDB = (await Saki.findOne({})) || new Saki({});
+		const sakiDB = (await SakiModel.findOne({})) || new SakiModel({});
 		const boostedRecently =
 			isBoosting(interaction.member) || interaction.user.id === userIds.papita;
 		const customRoleId = sakiDB.customRoles?.[interaction.user.id];
@@ -361,7 +361,7 @@ const command = new Command('roles', flags)
 			return interaction.isRepliable() && interaction.reply({ content: '❌' });
 
 		const section = parseInt(sectionNumber, 10);
-		const sakiDB = (await Saki.findOne({})) || new Saki({});
+		const sakiDB = (await SakiModel.findOne({})) || new SakiModel({});
 		const mentionRoles = sakiDB.mentionRoles as CategoryMap;
 		const messageActions = {
 			embeds: [
@@ -390,7 +390,7 @@ const command = new Command('roles', flags)
 		if (!interaction.inCachedGuild()) return interaction.reply({ content: '❌' });
 
 		const section = parseInt(sectionNumber, 10);
-		const sakiDB = (await Saki.findOne({})) || new Saki({});
+		const sakiDB = (await SakiModel.findOne({})) || new SakiModel({});
 		const mentionRoles = sakiDB.mentionRoles as CategoryMap;
 		const messageActions = {
 			embeds: [
@@ -411,7 +411,7 @@ const command = new Command('roles', flags)
 	})
 	.setSelectMenuResponse(async function selectReligion(interaction, sectionNumber) {
 		const section = parseInt(sectionNumber, 10);
-		const sakiDB = (await Saki.findOne({})) || new Saki({});
+		const sakiDB = (await SakiModel.findOne({})) || new SakiModel({});
 		const mentionRoles = sakiDB.mentionRoles as CategoryMap;
 
 		return interaction.reply({
@@ -523,7 +523,7 @@ const command = new Command('roles', flags)
 			},
 		);
 
-		const sakiDB = (await Saki.findOne({})) || new Saki({});
+		const sakiDB = (await SakiModel.findOne({})) || new SakiModel({});
 		let rolesToRemove = [];
 		if (category)
 			rolesToRemove = sakiDB.mentionRoles[category].rolePool
@@ -582,7 +582,7 @@ const command = new Command('roles', flags)
 	})
 	.setButtonResponse(async function removeAll(interaction, category) {
 		const { member } = interaction;
-		const sakiDB = (await Saki.findOne({})) || new Saki({});
+		const sakiDB = (await SakiModel.findOne({})) || new SakiModel({});
 		const rolePool = sakiDB.mentionRoles[category].rolePool.filter((roleData) =>
 			member.roles.cache.has(roleData.id),
 		);
@@ -613,7 +613,7 @@ const command = new Command('roles', flags)
 		interaction.editReply({ components: newComponents });
 	})
 	.setButtonResponse(async function customRole(interaction, operation) {
-		const sakiDB = (await Saki.findOne({})) || new Saki({ customRoles: {} });
+		const sakiDB = (await SakiModel.findOne({})) || new SakiModel({ customRoles: {} });
 		const userId = interaction.user.id;
 
 		switch (operation) {

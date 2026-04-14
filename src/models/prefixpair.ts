@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 
 const PrefixPairSchema = new Mongoose.Schema({
 	guildId: { type: String, required: true },
@@ -14,11 +14,10 @@ const PrefixPairSchema = new Mongoose.Schema({
 	},
 });
 
-const PrefixPair = Mongoose.model('PrefixPair', PrefixPairSchema);
+export type PrefixPairSchemaType = InferSchemaType<typeof PrefixPairSchema>;
 
-function m() {
-	return new PrefixPair({});
-}
-export type PrefixPairDocument = ReturnType<typeof m>;
+const PrefixPairModel = Mongoose.model('PrefixPair', PrefixPairSchema);
 
-export default PrefixPair;
+export type PrefixPairDocument = InstanceType<typeof PrefixPairModel>;
+
+export default PrefixPairModel;

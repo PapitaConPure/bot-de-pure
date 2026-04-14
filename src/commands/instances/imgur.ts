@@ -11,7 +11,7 @@ import {
 	TextInputStyle,
 } from 'discord.js';
 import { Translator } from '@/i18n';
-import ImgurUser from '@/models/imgurUsers';
+import ImgurUserModel from '@/models/imgurUsers';
 import type { ImgurImagePayload } from '@/utils/imgur';
 import { ImgurClient } from '@/utils/imgur';
 import Logger from '@/utils/logs';
@@ -99,8 +99,8 @@ const command = new Command('imgur', tags)
 		await request.deferReply();
 
 		const imgurUser =
-			(await ImgurUser.findOne({ userId: request.userId }))
-			|| new ImgurUser({ userId: request.userId });
+			(await ImgurUserModel.findOne({ userId: request.userId }))
+			|| new ImgurUserModel({ userId: request.userId });
 		const clientId = imgurUser.clientId ?? process.env.IMGUR_CLIENT_ID;
 		const client = new ImgurClient(clientId);
 
@@ -166,8 +166,8 @@ const command = new Command('imgur', tags)
 		const translator = await Translator.from(interaction.user.id);
 
 		const imgurUser =
-			(await ImgurUser.findOne({ userId: interaction.user.id }))
-			|| new ImgurUser({ userId: interaction.user.id });
+			(await ImgurUserModel.findOne({ userId: interaction.user.id }))
+			|| new ImgurUserModel({ userId: interaction.user.id });
 		const clientId = interaction.fields.getTextInputValue('clientId');
 		imgurUser.clientId = clientId;
 		await imgurUser.save();

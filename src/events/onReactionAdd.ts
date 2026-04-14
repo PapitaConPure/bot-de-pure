@@ -6,7 +6,7 @@ import type {
 	User,
 } from 'discord.js';
 import Logger from '@/utils/logs.js';
-import UserConfigs from '../models/userconfigs';
+import UserConfigModel from '../models/userconfigs';
 
 const { warn } = Logger('WARN', 'onReactionAdd');
 
@@ -34,7 +34,7 @@ export async function onReactionAdd(
 	if (!guild || guild.memberCount < 100) return;
 	if (user.id === userId) return;
 
-	const userConfigs = (await UserConfigs.findOne({ userId })) || new UserConfigs({ userId });
+	const userConfigs = (await UserConfigModel.findOne({ userId })) || new UserConfigModel({ userId });
 
 	const then = userConfigs.lastDateReceived;
 	const now = new Date(Date.now());

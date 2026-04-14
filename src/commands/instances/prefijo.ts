@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { prefixes, tenshiColor } from '@/data/globalProps';
 import { shortenText } from '@/func';
-import PrefixPair from '@/models/prefixpair';
+import PrefixPairModel from '@/models/prefixpair';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandTags } from '../commons';
 import { CommandPermissions } from '../commons/cmdPerms';
@@ -23,7 +23,7 @@ const command = new Command('prefijo', flags)
 		const { raw: preraw, regex: preregex } = p_pure(request.guildId);
 
 		if (reset) {
-			await PrefixPair.findOneAndDelete(guildsearch);
+			await PrefixPairModel.findOneAndDelete(guildsearch);
 			delete prefixes[request.guildId];
 			return request.reply({
 				content:
@@ -53,8 +53,8 @@ const command = new Command('prefijo', flags)
 			return request.reply({ embeds: [embed] });
 		}
 
-		await PrefixPair.findOneAndDelete(guildsearch);
-		const pfpair = (await PrefixPair.findOne(guildsearch)) || new PrefixPair(guildsearch);
+		await PrefixPairModel.findOneAndDelete(guildsearch);
+		const pfpair = (await PrefixPairModel.findOne(guildsearch)) || new PrefixPairModel(guildsearch);
 		const regex = new RegExp(
 			`^${prefix.replace(/[a-z]/g, (l) => `[${l.toUpperCase()}${l}]`).replace('\\', '\\\\')}[\n ]*`,
 		);

@@ -16,8 +16,8 @@ import type { AnyRequest } from 'types/commands';
 import { tenshiColor } from '@/data/globalProps';
 import { compressId, decompressId, shortenText } from '@/func';
 import { Translator } from '@/i18n';
-import Reminder, { type ReminderDocument } from '@/models/reminders';
-import UserConfigs from '@/models/userconfigs';
+import ReminderModel, { type ReminderDocument } from '@/models/reminders';
+import UserConfigModel from '@/models/userconfigs';
 import { clearScheduledReminder, scheduleReminder } from '@/systems/others/remindersScheduler';
 import {
 	addTime,
@@ -40,7 +40,7 @@ const maxReminderContentLength = 960;
 
 /**@description Crea un contenedor con un listado CRUD de recordatorios.*/
 async function makeRemindersListContainer(compressedUserId: string, translator: Translator) {
-	const reminders = await Reminder.find({ userId: compressedUserId });
+	const reminders = await ReminderModel.find({ userId: compressedUserId });
 
 	const container = new ContainerBuilder()
 		.setAccentColor(tenshiColor)
@@ -325,7 +325,7 @@ const command = new Command('recordatorio', tags)
 		const compressedUserId = compressId(userId);
 		const [translator, userConfigs] = await Promise.all([
 			Translator.from(request),
-			UserConfigs.findOne({ userId }),
+			UserConfigModel.findOne({ userId }),
 		]);
 
 		if (!userConfigs)
@@ -388,7 +388,7 @@ const command = new Command('recordatorio', tags)
 				content: translator.getText('recordarReminderTooSoon', getUnixTime(datetime)),
 			});
 
-		const reminderCount = (await Reminder.find({ userId: compressedUserId })).length;
+		const reminderCount = (await ReminderModel.find({ userId: compressedUserId })).length;
 		if (reminderCount > maxReminderCountPerUser)
 			return request.reply({
 				flags: MessageFlags.Ephemeral,
@@ -398,7 +398,7 @@ const command = new Command('recordatorio', tags)
 		await request.deferReply();
 
 		const reminderId = compressId(request.id);
-		const reminder = new Reminder({
+		const reminder = new ReminderModel({
 			_id: reminderId,
 			userId: compressedUserId,
 			channelId: compressId(request.channelId),
@@ -417,7 +417,7 @@ const command = new Command('recordatorio', tags)
 	.setButtonResponse(
 		async function viewReminder(interaction, reminderId) {
 			const [reminder, translator] = await Promise.all([
-				Reminder.findById(reminderId),
+				ReminderModel.findById(reminderId),
 				Translator.from(interaction),
 				interaction.deferReply({
 					flags: MessageFlags.Ephemeral,
@@ -441,7 +441,7 @@ const command = new Command('recordatorio', tags)
 			const userId = interaction.user.id;
 			const [translator, userConfigs] = await Promise.all([
 				Translator.from(interaction),
-				UserConfigs.findOne({ userId }),
+				UserConfigModel.findOne({ userId }),
 			]);
 
 			if (!userConfigs)
@@ -467,9 +467,9 @@ const command = new Command('recordatorio', tags)
 		async function promptEditReminder(interaction, reminderId) {
 			const userId = interaction.user.id;
 			const [reminder, translator, userConfigs] = await Promise.all([
-				Reminder.findById(reminderId),
+				ReminderModel.findById(reminderId),
 				Translator.from(interaction),
-				UserConfigs.findOne({ userId }),
+				UserConfigModel.findOne({ userId }),
 			]);
 
 			if (!userConfigs)
@@ -502,7 +502,7 @@ const command = new Command('recordatorio', tags)
 		const compressedUserId = compressId(userId);
 		const [translator, userConfigs] = await Promise.all([
 			Translator.from(interaction),
-			UserConfigs.findOne({ userId }),
+			UserConfigModel.findOne({ userId }),
 			interaction.deferUpdate(),
 		]);
 
@@ -549,12 +549,12 @@ const command = new Command('recordatorio', tags)
 				translator.getText('recordarReminderTooSoon', getUnixTime(datetime)),
 			);
 
-		const reminderCount = (await Reminder.find({ userId: compressedUserId })).length;
+		const reminderCount = (await ReminderModel.find({ userId: compressedUserId })).length;
 		if (reminderCount > maxReminderCountPerUser)
 			return informIssue(translator.getText('recordarTooManyReminders'));
 
 		const reminderId = compressId(interaction.id);
-		const reminder = new Reminder({
+		const reminder = new ReminderModel({
 			_id: reminderId,
 			userId: compressedUserId,
 			channelId: compressId(channel.id),
@@ -576,9 +576,9 @@ const command = new Command('recordatorio', tags)
 	})
 	.setModalResponse(async function editReminder(interaction, reminderId) {
 		const [reminder, translator, userConfigs] = await Promise.all([
-			Reminder.findById(reminderId),
+			ReminderModel.findById(reminderId),
 			Translator.from(interaction),
-			UserConfigs.findOne({ userId: interaction.user.id }),
+			UserConfigModel.findOne({ userId: interaction.user.id }),
 		]);
 
 		if (!userConfigs)
@@ -659,7 +659,7 @@ const command = new Command('recordatorio', tags)
 	.setButtonResponse(
 		async function deleteReminder(interaction, reminderId) {
 			const [reminder, translator] = await Promise.all([
-				Reminder.findById(reminderId),
+				ReminderModel.findById(reminderId),
 				Translator.from(interaction),
 			]);
 

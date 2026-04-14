@@ -8,7 +8,7 @@ import type {
 	WebhookMessageCreateOptions,
 } from 'discord.js';
 import { isThread } from '@/func';
-import WebhookOwner from '@/models/webhookOwners';
+import WebhookOwnerModel from '@/models/webhookOwners';
 
 interface OwnerData {
 	userId: string;
@@ -133,7 +133,7 @@ export class DiscordAgent {
 }
 
 export async function initializeWebhookMessageOwners() {
-	const webhookOwners = await WebhookOwner.find({});
+	const webhookOwners = await WebhookOwnerModel.find({});
 	const now = Date.now();
 	for (const owner of webhookOwners) {
 		if (now < owner.expirationDate)
@@ -156,7 +156,7 @@ export async function addAgentMessageOwner(sent: Message, ownerId?: string) {
 	const messageId = sent.id;
 	const userId = ownerId ?? sent.mentions?.repliedUser?.id ?? sent.author.id;
 	const expirationDate = Date.now() + 3600e3;
-	const webhookOwner = new WebhookOwner({ messageId, userId, expirationDate });
+	const webhookOwner = new WebhookOwnerModel({ messageId, userId, expirationDate });
 	owners.set(messageId, { userId, expirationDate });
 	webhookOwner.save();
 }
@@ -167,7 +167,7 @@ export async function updateAgentMessageOwners() {
 	for (const [messageId, owner] of owners.entries()) {
 		if (Date.now() > owner.expirationDate) {
 			toDelete.push(messageId);
-			await WebhookOwner.deleteOne({ messageId });
+			await WebhookOwnerModel.deleteOne({ messageId });
 		}
 	}
 
@@ -176,7 +176,7 @@ export async function updateAgentMessageOwners() {
 }
 
 export async function deleteAgentMessage(message: Message) {
-	const webhookOwner = await WebhookOwner.findOne({ messageId: message.id });
+	const webhookOwner = await WebhookOwnerModel.findOne({ messageId: message.id });
 
 	owners.delete(message.id);
 

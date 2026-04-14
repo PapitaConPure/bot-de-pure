@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 
 const WebhookOwnerSchema = new Mongoose.Schema({
 	messageId: {
@@ -15,11 +15,10 @@ const WebhookOwnerSchema = new Mongoose.Schema({
 	},
 });
 
-const WebhookOwner = Mongoose.model('WebhookOwner', WebhookOwnerSchema);
+export type WebhookOwnerSchemaType = InferSchemaType<typeof WebhookOwnerSchema>;
 
-function m() {
-	return new WebhookOwner({});
-}
-export type WebhookOwnerDocument = ReturnType<typeof m>;
+const WebhookOwnerModel = Mongoose.model('WebhookOwner', WebhookOwnerSchema);
 
-export default WebhookOwner;
+export type WebhookOwnerDocument = InstanceType<typeof WebhookOwnerModel>;
+
+export default WebhookOwnerModel;
