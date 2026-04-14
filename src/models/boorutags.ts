@@ -1,4 +1,4 @@
-import Mongoose from 'mongoose';
+import Mongoose, { type InferSchemaType } from 'mongoose';
 import _Int32 from 'mongoose-int32';
 
 const Int32 = _Int32.loadType(Mongoose);
@@ -37,11 +37,8 @@ const tagSchema = new Mongoose.Schema({
 	},
 });
 
-const model = Mongoose.model('boorutags', tagSchema);
+export type TagDocument = InferSchemaType<typeof tagSchema>;
 
-function m() {
-	return new model({});
-}
-export type TagDocument = ReturnType<typeof m>;
+const model = Mongoose.model('boorutags', tagSchema);
 
 export default model;
