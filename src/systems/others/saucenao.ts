@@ -1,11 +1,10 @@
 import { Colors, EmbedBuilder, type GuildBasedChannel } from 'discord.js';
 import sagiri from 'sagiri';
 import type { AnyRequest } from 'types/commands';
-import { booruApiKey, booruUserId } from '@/data/globalProps';
 import { isNSFWChannel } from '@/func';
 import { Translator } from '@/i18n';
-import { Booru } from '@/systems/booru/boorufetch';
 import { decryptString } from '@/utils/security';
+import { getMainBooruClient } from '../booru/booruclient';
 import { auditError } from './auditor';
 
 const MATCH_COUNT_MAX = 3;
@@ -48,7 +47,7 @@ export async function pourSauce(
 		return;
 	}
 
-	const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
+	const booru = getMainBooruClient();
 	for (let q = 0; q < queries.length; q++) {
 		const query = queries[q];
 		const count = q + 1;
@@ -89,7 +88,7 @@ export async function pourSauce(
 								.setThumbnail('https://i.imgur.com/P7UWZDo.png');
 						} else {
 							const sources = post.findUrlSources();
-							const sourcesText = `${result.url}\n${sources.join('\n')}`;
+							const sourcesText = `${result.url}\n${sources?.join('\n')}`;
 
 							embed
 								.setColor(Colors.Green)

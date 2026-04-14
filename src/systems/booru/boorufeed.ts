@@ -1,18 +1,19 @@
+import type { BooruClient, Post } from '@papitaconpure/booru-client';
 import chalk from 'chalk';
 import { getUnixTime, minutesToMilliseconds } from 'date-fns';
 import type { Client, Guild, GuildTextBasedChannel, Message, Snowflake } from 'discord.js';
 import { Collection, MessageFlags } from 'discord.js';
 import type { AnyBulkWriteOperation } from 'mongoose';
 import { ClientNotFoundError, client } from '@/core/client';
-import { booruApiKey, booruUserId, globalConfigs } from '@/data/globalProps';
+import { globalConfigs } from '@/data/globalProps';
 import { isNSFWChannel, paginateRaw } from '@/func';
 import GuildConfigs, { type GuildConfigDocument } from '@/models/guildconfigs';
-import { Booru, type Post } from '@/systems/booru/boorufetch';
 import type { PostFormatData, Suscription } from '@/systems/booru/boorusend';
 import { formatBooruPostMessage, notifyUsers } from '@/systems/booru/boorusend';
 import { auditAction, auditError } from '@/systems/others/auditor';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import Logger from '@/utils/logs';
+import { getMainBooruClient } from './booruclient';
 
 const { debug, warn, error } = Logger('WARN', 'BooruSend');
 
@@ -33,14 +34,12 @@ export const FEED_UPDATE_MAX_POST_COUNT = 32;
 export const FEED_BATCH_MAX_COUNT = 5;
 
 async function updateBooruFeeds(guilds: Collection<Snowflake, Guild>): Promise<void> {
-	const booru = new Booru({ apiKey: booruApiKey, userId: booruUserId });
+	const booru = getMainBooruClient();
 	const startMs = Date.now();
 
 	try {
 		await processFeeds(booru, guilds).catch(console.error);
-		Booru.cleanupTagsCache();
 	} catch (err) {
-		//Solución temporal para atrapar el bug malvado de una vez
 		const now = new Date(Date.now());
 		const unixNow = getUnixTime(now);
 		auditError(err, {
@@ -60,7 +59,7 @@ async function updateBooruFeeds(guilds: Collection<Snowflake, Guild>): Promise<v
  * @param booru El Booru a comprobar
  * @param guilds Colección de Guilds a procesar
  */
-async function processFeeds(booru: Booru, guilds: Collection<Snowflake, Guild>) {
+async function processFeeds(booru: BooruClient, guilds: Collection<Snowflake, Guild>) {
 	const guildIds = guilds.map((g) => g.id);
 	const guildConfigs = await GuildConfigs.find({
 		guildId: { $in: guildIds },
@@ -352,7 +351,7 @@ export interface FeedOptions {
 
 /**@class Representa un Feed programado de imágenes de {@linkcode Booru}.*/
 export class BooruFeed {
-	booru: Booru;
+	booru: BooruClient;
 	channel: GuildTextBasedChannel | null;
 	tags: string;
 
@@ -372,7 +371,7 @@ export class BooruFeed {
 	 * @throws {TypeError}
 	 */
 	constructor(
-		booru: Booru,
+		booru: BooruClient,
 		guildId: string,
 		channelId: string,
 		tags: string,

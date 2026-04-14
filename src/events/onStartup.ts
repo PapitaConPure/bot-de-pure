@@ -31,12 +31,10 @@ import {
 	resolveHost,
 } from '../data/globalProps';
 import serverIds from '../data/serverIds.json';
-import BooruTags from '../models/boorutags';
 import PrefixPairs from '../models/prefixpair';
 import { PureTable, pureTableAssets } from '../models/puretable';
 import UserConfigs from '../models/userconfigs';
 import { feedTagSuscriptionsCache, setupGuildFeedUpdateStack } from '../systems/booru/boorufeed';
-import { Booru, Tag } from '../systems/booru/boorufetch';
 import { auditSystem } from '../systems/others/auditor';
 import { initializeMessageCascades } from '../systems/others/messageCascades';
 import { prepareTracksPlayer } from '../systems/others/musicPlayer';
@@ -185,10 +183,9 @@ export async function onStartup(client: Client) {
 	});
 
 	console.log(chalk.gray('Obteniendo documentos...'));
-	const [prefixPairs, userConfigs, booruTags] = await Promise.all([
+	const [prefixPairs, userConfigs] = await Promise.all([
 		PrefixPairs.find({}),
 		UserConfigs.find({}),
-		BooruTags.find({}),
 	]);
 
 	console.log(chalk.gray('Facilitando prefijos...'));
@@ -199,16 +196,6 @@ export async function onStartup(client: Client) {
 		};
 	});
 	logOptions.prefixes && console.table(prefixes);
-
-	console.log(chalk.gray('Preparando Tags de Booru...'));
-	await BooruTags.deleteMany({
-		fetchTimestamp: { $lt: new Date(Date.now() - Booru.TAGS_DB_LIFETIME) },
-	}).catch(console.error);
-	await BooruTags.syncIndexes();
-	await BooruTags.createIndexes();
-	booruTags.forEach((tag) => Booru.tagsCache.set(tag.name, new Tag(tag)));
-	logOptions.booruTags
-		&& console.table([...Booru.tagsCache.values()].sort((a, b) => a.id - b.id));
 
 	console.log(chalk.gray('Preparando Cascadas de Mensajes...'));
 	await initializeMessageCascades();

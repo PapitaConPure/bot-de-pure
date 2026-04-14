@@ -1,3 +1,8 @@
+import {
+	BooruUnknownPostError,
+	type TagType,
+	TagTypes,
+} from '@papitaconpure/booru-client';
 import { getUnixTime } from 'date-fns';
 import type {
 	ButtonInteraction,
@@ -20,7 +25,7 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
-import { booruApiKey, booruUserId, globalConfigs, tenshiAltColor } from '@/data/globalProps';
+import { globalConfigs, tenshiAltColor } from '@/data/globalProps';
 import {
 	compressId,
 	getGuildEmoji,
@@ -32,9 +37,8 @@ import {
 } from '@/func';
 import { Translator } from '@/i18n';
 import GuildConfig from '@/models/guildconfigs.js';
+import { getMainBooruClient } from '@/systems/booru/booruclient';
 import { addGuildToFeedUpdateStack } from '@/systems/booru/boorufeed';
-import type { TagType } from '@/systems/booru/boorufetch';
-import { Booru, BooruUnknownPostError, TagTypes } from '@/systems/booru/boorufetch';
 import {
 	formatBooruPostMessage,
 	formatTagNameListNew,
@@ -736,7 +740,7 @@ const command = new Command('feed', tags)
 				})
 				.catch(console.error);
 
-			const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
+			const booru = getMainBooruClient();
 			const post = randInArray(await booru.search(feed.tags, { limit: 42 }));
 			if (!post)
 				return interaction.editReply({
@@ -1441,7 +1445,7 @@ const command = new Command('feed', tags)
 		const url = getPostUrlFromContainer(container);
 		if (!url) return interaction.deleteReply();
 
-		const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
+		const booru = getMainBooruClient();
 		try {
 			const post = await booru.fetchPostByUrl(url);
 			if (!post) return interaction.deleteReply();
@@ -1628,7 +1632,7 @@ const command = new Command('feed', tags)
 				message.delete().catch(console.error),
 			]);
 
-		const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
+		const booru = getMainBooruClient();
 
 		try {
 			const post = await booru.fetchPostByUrl(url);
@@ -1697,7 +1701,7 @@ const command = new Command('feed', tags)
 		const url = getPostUrlFromContainer(container);
 		if (!url) return interaction.deleteReply();
 
-		const booru = new Booru({ userId: booruUserId, apiKey: booruApiKey });
+		const booru = getMainBooruClient();
 		try {
 			const post = await booru.fetchPostByUrl(url);
 			if (!post) return interaction.deleteReply();

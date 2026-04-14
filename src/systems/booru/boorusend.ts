@@ -1,3 +1,4 @@
+import { type BooruClient, type Post, TagTypes } from '@papitaconpure/booru-client';
 import type {
 	ActionRow,
 	ButtonComponent,
@@ -20,13 +21,12 @@ import {
 import type { ComplexCommandRequest } from 'types/commands';
 import { CommandOptionSolver } from '@/commands/commons/cmdOpts';
 import rakki from '@/commands/instances/rakkidei';
-import { booruApiKey, booruUserId, globalConfigs } from '@/data/globalProps';
+import { globalConfigs } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { getGuildEmoji as gEmo, isNSFWChannel, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import Logger from '@/utils/logs';
-import type { Post } from './boorufetch';
-import { Booru, TagTypes } from './boorufetch';
+import { getMainBooruClient } from './booruclient';
 import type { tagMaps } from './booruprops';
 import { getBaseTags, getSearchTags } from './booruprops';
 
@@ -120,7 +120,7 @@ const ignoredTagsIfSexCount = new Set<string>(['multiple_girls', 'multiple_boys'
  * @param data Información adicional a mostrar en el Embed. Se puede pasar un Feed directamente
  */
 export async function formatBooruPostMessage(
-	booru: Booru,
+	booru: BooruClient,
 	post: Post,
 	data: PostFormatData = {},
 ): Promise<ContainerBuilder> {
@@ -201,13 +201,12 @@ export async function formatBooruPostMessage(
 
 	//Filtrar tags con estilos especiales
 	debug('A punto de procesar tags especiales');
-	const originalPostTags = [...post.tags];
 	let maxResOrder = -1;
 	let resTag = '';
 	const sexTags: string[] = [];
 	let hasTagMe = false;
 	let hasRequestTags = false;
-	post.tags = post.tags.filter((t) => {
+	let processedPostTags = post.tags.filter((t) => {
 		if (t === 'tagme') {
 			hasTagMe = true;
 			return false;
@@ -241,12 +240,12 @@ export async function formatBooruPostMessage(
 	debug('resTag =', resTag);
 	debug('sexTags =', sexTags);
 
-	if (sexTags.length) post.tags = post.tags.filter((t) => !ignoredTagsIfSexCount.has(t));
+	if (sexTags.length) processedPostTags = processedPostTags.filter((t) => !ignoredTagsIfSexCount.has(t));
 
 	const specialTags = [...sexTags, ...(resTag ? [resTag] : [])];
 
 	debug('specialTags =', specialTags);
-	debug('postTags =', post.tags);
+	debug('postTags =', processedPostTags);
 
 	debug('Aplicando botones adicionales...');
 
@@ -312,7 +311,7 @@ export async function formatBooruPostMessage(
 	debug('A punto de intentar procesar las tags del Post');
 	const maxTags = data.maxTags ?? 20;
 	const actualMaxTags = Math.max(0, maxTags - specialTags.length);
-	const actualTotalTags = post.tags.length + specialTags.length;
+	const actualTotalTags = processedPostTags.length + specialTags.length;
 	try {
 		let thumbnailUrl: string | undefined;
 		debug('Obteniendo información adicional de tags...');
@@ -424,7 +423,7 @@ export async function formatBooruPostMessage(
 		);
 		info('Intentando formatear tags con método alternativo sin categorías');
 
-		const postTags = post.tags;
+		const postTags = processedPostTags;
 		const filteredTags = postTags.slice(0, actualMaxTags);
 		const displayedTagsCount = Math.min(filteredTags.length + specialTags.length, maxTags);
 
@@ -444,8 +443,6 @@ export async function formatBooruPostMessage(
 			);
 		}
 	}
-
-	post.tags = originalPostTags;
 
 	info('Agregando botones');
 	container
@@ -616,7 +613,7 @@ export async function searchAndReplyWithPost(
 	//Petición
 	try {
 		info('Buscando Posts...');
-		const booru = new Booru({ apiKey: booruApiKey, userId: booruUserId });
+		const booru = getMainBooruClient();
 		const response = await booru.search(finalTags, { limit: 100, random: true });
 
 		//Manejo de respuesta
