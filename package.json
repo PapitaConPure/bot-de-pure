@@ -12,7 +12,10 @@
     "dev": "bun --env-file=.env.dev ./src/main.ts",
     "prod": "bun --env-file=.env.production ./src/main.ts",
     "lint": "bunx biome lint",
-    "lint:fix": "bunx biome lint --write && bunx biome format --write"
+    "lint:fix": "bunx biome lint --write",
+    "format": "bunx biome format",
+    "format:fix": "bunx biome format --write",
+    "prepare": "bun run lint:fix && bun run format:fix"
   },
   "repository": {
     "type": "git",
