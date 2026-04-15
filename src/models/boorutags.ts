@@ -27,10 +27,6 @@ const TagSchema = new Mongoose.Schema({
 		required: true,
 		enum: [0, 1, 2, 3, 4, 5, 6],
 	},
-	ambiguous: {
-		type: Boolean,
-		default: false,
-	},
 	fetchTimestamp: {
 		type: Date,
 		default: () => new Date(Date.now()),
