@@ -1,4 +1,5 @@
 import type { GuildMember, Interaction, User } from 'discord.js';
+import type { AcceptedBoorutatoConverterKey } from '@/systems/converters/boorutato';
 import type { LocaleKey } from '../i18n';
 import UserConfigModel from '../models/userconfigs';
 import type { AcceptedTwitterConverterKey } from '../systems/converters/pureet';
@@ -8,6 +9,7 @@ export interface UserCache {
 	language: LocaleKey;
 	pixivConverter: 'phixiv' | '';
 	twitterPrefix: AcceptedTwitterConverterKey | '';
+	booruConverters: Set<AcceptedBoorutatoConverterKey>;
 	banned: boolean;
 }
 
@@ -35,6 +37,7 @@ export async function cacheUser(user: UserCacheResolvable) {
 		language: userConfigs.language,
 		pixivConverter: userConfigs.pixivConverter || '',
 		twitterPrefix: userConfigs.twitterPrefix || '',
+		booruConverters: new Set(userConfigs.booruConverters || []),
 		banned: userConfigs.banned ?? false,
 	});
 }

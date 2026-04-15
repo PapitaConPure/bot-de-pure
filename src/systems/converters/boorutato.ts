@@ -9,19 +9,23 @@ import { ConverterEmptyPayload } from './converters';
 
 const { error } = Logger('WARN', 'BoorutatoConvert');
 
+export const acceptedBoorutatoConverters =  ['gelbooru'] as const;
+
+export type AcceptedBoorutatoConverterKey = (typeof acceptedBoorutatoConverters)[number];
+
 const gelbooruPostRegex =
 	/(?<st>(?:<|\|\|){0,2}) ?(?<original>(?:(?:http:\/\/|https:\/\/))?(?:www\.)?gelbooru.com\/index\.php\?page=post(?:&\S*)*&id=(?<id>[0-9]+)(?:&\S*)?) ?(?<ed>(?:>|\|\|){0,2})/gi;
 
 /**
- * @description Detecta enlaces de Twitter en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
+ * @description Detecta enlaces de Gelbooru en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
  * @param message El mensaje a analizar
- * @param converterKey El identificador de servicio de conversión a utilizar
+ * @param converterKeys Los identificadores de servicios de conversión a procesar
  */
 export async function sendConvertedBooruPosts(
 	message: Message<true>,
-	converterKey: 'boorutato' | '',
+	converterKeys: Set<'gelbooru'>,
 ): Promise<ConverterPayload> {
-	if (converterKey === '') return ConverterEmptyPayload;
+	if (converterKeys.size === 0) return ConverterEmptyPayload;
 
 	const { content: messageContent, channel } = message;
 

@@ -309,7 +309,7 @@ async function processLinkConverters(message: Message<true>, userCache: UserCach
 	const converterPayloads = await Promise.all([
 		sendConvertedPixivPosts(message, userCache.pixivConverter),
 		sendConvertedTwitterPosts(message, userCache.twitterPrefix),
-		sendConvertedBooruPosts(message, 'boorutato'),
+		sendConvertedBooruPosts(message, userCache.booruConverters),
 	]);
 
 	const contentfulPayloads = converterPayloads.filter((r) => r.contentful === true);
