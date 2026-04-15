@@ -12,10 +12,10 @@ export const pixivRegex =
 	/(?<st>(?:<|\|\|){0,2}) ?(?:(?:http:\/\/|https:\/\/)(?:www\.))?(?:pixiv.net(?<lang>\/en)?)\/artworks\/(?<id>[0-9]{6,9})(?:\/(?<page>[0-9]{1,4}))? ?(?<ed>(?:>|\|\|){0,2})/g;
 
 export type AcceptedPixivConverterKey = (typeof acceptedPixivConvertersWithoutNone)[number];
-/**@satisfies {Record<AcceptedPixivConverterKey, { name: string, service: string }>}*/
+
 const pixivConversionServices = {
 	phixiv: { name: 'phixiv', service: 'https://www.phixiv.net' },
-} as const;
+} as const satisfies Record<AcceptedPixivConverterKey, { name: string, service: string }>;
 
 /**
  * @description Detecta enlaces de pixiv en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
