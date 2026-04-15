@@ -271,7 +271,9 @@ export async function formatBooruPostMessage(
 			previewUrl = post.previewUrl || post.sampleUrl || post.fileUrl || 'https://google.com'; //Revertir a `post.sampleUrl || post.fileUrl || post.previewUrl` cuando se solucione el problema
 		}
 		container.addMediaGalleryComponents((mediaGallery) =>
-			mediaGallery.addItems((mediaGalleryItem) => mediaGalleryItem.setURL(previewUrl.toString())),
+			mediaGallery.addItems((mediaGalleryItem) =>
+				mediaGalleryItem.setURL(previewUrl.toString()),
+			),
 		);
 	}
 
