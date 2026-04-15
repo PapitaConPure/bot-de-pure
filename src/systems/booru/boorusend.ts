@@ -261,9 +261,9 @@ export async function formatBooruPostMessage(
 		(post.rating === 'explicit' || post.rating === 'questionable') && !allowNSFW;
 
 	if (!shouldBlock) {
-		let previewUrl: string;
+		let previewUrl: URL;
 		debug('El contenido no fue bloqueado. Se agregará al mensaje a continuación');
-		if (/\.(mp4|webm|webp|gif)/.test(post.fileUrl)) {
+		if (/\.(mp4|webm|webp|gif)/.test(post.fileUrl.toString())) {
 			debug('El contenido es un video o GIF');
 			previewUrl = post.previewUrl || post.fileUrl || post.sampleUrl || 'https://google.com'; //Revertir a `post.fileUrl || post.previewUrl || post.sampleUrl` cuando se solucione el problema
 		} else {
@@ -271,7 +271,7 @@ export async function formatBooruPostMessage(
 			previewUrl = post.previewUrl || post.sampleUrl || post.fileUrl || 'https://google.com'; //Revertir a `post.sampleUrl || post.fileUrl || post.previewUrl` cuando se solucione el problema
 		}
 		container.addMediaGalleryComponents((mediaGallery) =>
-			mediaGallery.addItems((mediaGalleryItem) => mediaGalleryItem.setURL(previewUrl)),
+			mediaGallery.addItems((mediaGalleryItem) => mediaGalleryItem.setURL(previewUrl.toString())),
 		);
 	}
 
@@ -522,7 +522,7 @@ export async function notifyUsers(
 						inline: true,
 					},
 				);
-			if (post.previewUrl) userEmbed.setThumbnail(post.previewUrl);
+			if (post.previewUrl) userEmbed.setThumbnail(post.previewUrl.toString());
 
 			const postRow = new ActionRowBuilder<ButtonBuilder>(containerButtonRow);
 			const spliceIndex = postRow.components.findLastIndex(

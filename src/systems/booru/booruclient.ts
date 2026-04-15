@@ -7,13 +7,12 @@ let mainBooru: BooruClient | null = null;
 
 export function getMainBooruClient(): BooruClient {
 	if (!mainBooru)
-		mainBooru = new BooruClient(
-			new Gelbooru(),
-			{ apiKey: booruApiKey, userId: booruUserId },
-			{
-				tagStoreChain: [new MemoryTagStore(), new MongooseTagStore(BooruTags)],
+		mainBooru = new BooruClient(new Gelbooru(), {
+			credentials: { apiKey: booruApiKey, userId: booruUserId },
+			tags: {
+				storeChain: [new MemoryTagStore(), new MongooseTagStore(BooruTags)],
 			},
-		);
+		});
 
 	return mainBooru;
 }

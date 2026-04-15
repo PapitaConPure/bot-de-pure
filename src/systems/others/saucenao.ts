@@ -100,7 +100,9 @@ export async function pourSauce(
 								.setDescription(sourcesText)
 								.setURL(result.url)
 								.setThumbnail(
-									post.previewUrl || post.sampleUrl || result.thumbnail,
+									post.previewUrl?.toString()
+										|| post.sampleUrl?.toString()
+										|| result.thumbnail,
 								);
 						}
 
