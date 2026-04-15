@@ -38,7 +38,7 @@ export class MongooseTagStore implements TagStore {
 	async setMany(tags: Iterable<Tag>): Promise<void> {
 		const bulkOps: AnyBulkWriteOperation<TagSchemaType>[] = [...tags].map((t) => ({
 			updateOne: {
-				filter: { id: t.id },
+				filter: { name: t.name },
 				update: { $set: this.#mapper.toDocument(t) },
 				upsert: true,
 			},
@@ -49,7 +49,7 @@ export class MongooseTagStore implements TagStore {
 
 	async setOne(tag: Tag): Promise<void> {
 		await this.#model.updateOne(
-			{ id: tag.id },
+			{ name: tag.name },
 			{ $set: this.#mapper.toDocument(tag) },
 			{ upsert: true },
 		);
