@@ -32,7 +32,7 @@
     "@date-fns/tz": "^1.4.1",
     "@date-fns/utc": "^2.1.1",
     "@napi-rs/canvas": "^0.1.98",
-    "@papitaconpure/booru-client": "^1.1.0",
+    "@papitaconpure/booru-client": "^1.1.1",
     "biome": "^0.3.3",
     "chalk": "^5.6.2",
     "date-fns": "^4.1.0",

@@ -8,7 +8,7 @@
         "@date-fns/tz": "^1.4.1",
         "@date-fns/utc": "^2.1.1",
         "@napi-rs/canvas": "^0.1.98",
-        "@papitaconpure/booru-client": "^1.1.0",
+        "@papitaconpure/booru-client": "^1.1.1",
         "biome": "^0.3.3",
         "chalk": "^5.6.2",
         "date-fns": "^4.1.0",
@@ -159,7 +159,7 @@
 
     "@napi-rs/canvas-win32-x64-msvc": ["@napi-rs/canvas-win32-x64-msvc@0.1.98", "", { "os": "win32", "cpu": "x64" }, "sha512-ZqstKAJBSyZetU8udUvBQWPlGN9buawFvjuo9mgCAxzbOoJAgXX39ihec/nn42T5Vb6/qyn45eTimx5ND9kMEw=="],
 
-    "@papitaconpure/booru-client": ["@papitaconpure/booru-client@1.1.0", "", {}, "sha512-lRyBli098nssgj1liPbHONQ9vBj3Wr0oxCx0hULMgcYYz+z/MHeALy7V5iq1L1gDpEZHVMvvhLpJWB7XgSKB0g=="],
+    "@papitaconpure/booru-client": ["@papitaconpure/booru-client@1.1.1", "", {}, "sha512-Y9a93v8qxEuPE+xChHVa8wh54rDp2escoO1LRN364k7HXD3aRiS6VluyBLdwkHvZE9POBNOQcJMo2ISzxS/WlQ=="],
 
     "@rollup/rollup-android-arm-eabi": ["@rollup/rollup-android-arm-eabi@4.60.1", "", { "os": "android", "cpu": "arm" }, "sha512-d6FinEBLdIiK+1uACUttJKfgZREXrF0Qc2SmLII7W2AD8FfiZ9Wjd+rD/iRuf5s5dWrr1GgwXCvPqOuDquOowA=="],
 
