@@ -96,25 +96,23 @@ export const SOURCE_STYLES: ReadonlyArray<SourceStyle & { pattern: RegExp }> = [
 const noSource: SourceStyle = { color: Colors.Aqua, emoji: undefined };
 const unknownSource: SourceStyle = { color: 0x1bb76e, emoji: '969664712604262400' };
 
-/**@satisfies {Record<string, { order: number; emote: string; }>}*/
 const resMappings = {
 	lowres: { order: 0, emote: '<:lowRes:1355765055945310238>' },
 	highres: { order: 1, emote: '<:highRes:1355765065772699719>' },
 	absurdres: { order: 2, emote: '<:absurdRes:1355765080800890891>' },
 	incredibly_absurdres: { order: 3, emote: '<:incrediblyAbsurdRes:1355765110387507374>' },
-} as const;
+} as const satisfies Record<string, { order: number; emote: string }>;
 
-/**@satisfies {Record<string, string>}*/
 const sexEmotes = {
 	girl: '<:girl:1355803255481045053>',
 	boy: '<:boy:1355803803248623646>',
 	futa: '<:futa:1355803817089831055>',
-} as const;
+} as const satisfies Record<string, string>;
 
 const ignoredTagsIfSexCount = new Set<string>(['multiple_girls', 'multiple_boys', 'multiple_futa']);
 
 /**
- * Genera un {@linkcode EmbedBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
+ * Genera un {@linkcode ContainerBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
  * @param booru Instancia de Booru
  * @param post Post de Booru
  * @param data Información adicional a mostrar en el Embed. Se puede pasar un Feed directamente
@@ -128,49 +126,17 @@ export async function formatBooruPostMessage(
 
 	const { allowNSFW = false, disableLinks = false, disableActions = false } = data;
 
-	//Botón de Post de Gelbooru
-	const buttonRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
+	let containerColor = noSource.color;
+	const buttonRow = new ActionRowBuilder<ButtonBuilder>();
+
+	//Botón de Post de Booru
+	buttonRow.addComponents(
 		new ButtonBuilder()
 			.setEmoji('919398540172750878')
 			.setStyle(ButtonStyle.Link)
 			.setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${post.id}`)
 			.setDisabled(disableLinks ?? false),
 	);
-
-	//Botón de Fuente (si está disponible)
-	let containerColor: number | undefined;
-	const addSourceButtonAndApplyStyle = (source: string) => {
-		debug('Antes de mapeos de fuente:', source);
-		sourceMappings.forEach((mapping) => {
-			source = source.replace(mapping.pattern, mapping.replacement);
-		});
-		debug('Después de mapeos de fuente:', source);
-
-		//Dar estilo a Embed según fuente de la imagen
-		const sourceStyle = SOURCE_STYLES.find((s) => s.pattern.test(source)) ?? unknownSource;
-		const emoji = sourceStyle.emoji;
-		containerColor ??= sourceStyle.color;
-
-		if (source.length > 512) {
-			warn('El texto de una fuente del Post sobrepasa los 512 caracteres');
-
-			const button = new ButtonBuilder()
-				.setStyle(ButtonStyle.Danger)
-				.setCustomId('feed_invalidUrl')
-				.setDisabled(true);
-			if (emoji) button.setEmoji(emoji);
-
-			return buttonRow.addComponents(button);
-		}
-
-		const button = new ButtonBuilder()
-			.setStyle(ButtonStyle.Link)
-			.setURL(source)
-			.setDisabled(!!disableLinks);
-		if (emoji) button.setEmoji(emoji);
-
-		buttonRow.addComponents(button);
-	};
 
 	//Aplicar estilo y botones de source
 	debug('Se está por decidir el estilo del Embed del mensaje');
@@ -185,7 +151,9 @@ export async function formatBooruPostMessage(
 			debug(
 				'El Post tiene enlaces como fuentes. Se aplicará un botón de enlace a fuente y el estilo de la fuente primaria',
 			);
-			addSourceButtonAndApplyStyle(sourceUrl);
+			const result = getSourceButtonAndColor(sourceUrl);
+			buttonRow.addComponents(result.sourceButton);
+			containerColor = result.containerColor;
 		} else {
 			debug('El Post no tiene enlaces como fuentes. Se aplicará un botón de texto plano');
 			buttonRow.addComponents(
@@ -197,7 +165,6 @@ export async function formatBooruPostMessage(
 			);
 		}
 	}
-	containerColor ??= noSource.color;
 
 	//Filtrar tags con estilos especiales
 	debug('A punto de procesar tags especiales');
@@ -298,10 +265,10 @@ export async function formatBooruPostMessage(
 		debug('El contenido no fue bloqueado. Se agregará al mensaje a continuación');
 		if (/\.(mp4|webm|webp|gif)/.test(post.fileUrl)) {
 			debug('El contenido es un video o GIF');
-			previewUrl = post.previewUrl || post.fileUrl; //Revertir a `post.fileUrl || post.previewUrl || post.sampleUrl` cuando se solucione el problema
+			previewUrl = post.previewUrl || post.fileUrl || post.sampleUrl || 'https://google.com'; //Revertir a `post.fileUrl || post.previewUrl || post.sampleUrl` cuando se solucione el problema
 		} else {
 			debug('El contenido es probablemente una imagen estática');
-			previewUrl = post.previewUrl || post.sampleUrl || post.fileUrl; //Revertir a `post.sampleUrl || post.fileUrl || post.previewUrl` cuando se solucione el problema
+			previewUrl = post.previewUrl || post.sampleUrl || post.fileUrl || 'https://google.com'; //Revertir a `post.sampleUrl || post.fileUrl || post.previewUrl` cuando se solucione el problema
 		}
 		container.addMediaGalleryComponents((mediaGallery) =>
 			mediaGallery.addItems((mediaGalleryItem) => mediaGalleryItem.setURL(previewUrl)),
@@ -457,6 +424,36 @@ export async function formatBooruPostMessage(
 	info('Se terminó de formatear un contenedor a de acuerdo a un Post de Booru');
 
 	return container;
+}
+
+/**@description Devuelve un botón y color de contenedor para la fuente especificada (si está disponible).*/
+function getSourceButtonAndColor(source: string, options: { disableLinks?: boolean } = {}) {
+	const { disableLinks = false } = options;
+
+	debug('Antes de mapeos de fuente:', source);
+	sourceMappings.forEach((mapping) => {
+		source = source.replace(mapping.pattern, mapping.replacement);
+	});
+	debug('Después de mapeos de fuente:', source);
+
+	//Dar estilo a Embed según fuente de la imagen
+	const sourceStyle = SOURCE_STYLES.find((s) => s.pattern.test(source)) ?? unknownSource;
+	const buttonEmoji = sourceStyle.emoji;
+	const containerColor = sourceStyle.color;
+	const sourceTooLong = source.length > 512;
+
+	if (sourceTooLong) warn('El texto de una fuente del Post sobrepasa los 512 caracteres');
+
+	const sourceButton = sourceTooLong
+		? new ButtonBuilder()
+				.setStyle(ButtonStyle.Danger)
+				.setCustomId('feed_invalidUrl')
+				.setDisabled(true)
+		: new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(source).setDisabled(!!disableLinks);
+
+	if (buttonEmoji) sourceButton.setEmoji(buttonEmoji);
+
+	return { sourceButton, containerColor };
 }
 
 export interface Suscription {
