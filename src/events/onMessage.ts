@@ -282,7 +282,8 @@ async function processCommand(message: Message<true>): Promise<CommandResult> {
 async function gainPRC(guild: Guild, userId: string) {
 	if (guild.memberCount < 100) return;
 
-	const userConfigs = (await UserConfigModel.findOne({ userId })) || new UserConfigModel({ userId });
+	const userConfigs =
+		(await UserConfigModel.findOne({ userId })) || new UserConfigModel({ userId });
 
 	const then = userConfigs.lastDateReceived;
 	const today = new Date(Date.now());

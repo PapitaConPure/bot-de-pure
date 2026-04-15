@@ -59,7 +59,8 @@ const command = new Command('transferir', flags)
 				(async () =>
 					(await UserConfigModel.findOne(userQuery)) || new UserConfigModel(userQuery))(),
 				(async () =>
-					(await UserConfigModel.findOne(targetQuery)) || new UserConfigModel(targetQuery))(),
+					(await UserConfigModel.findOne(targetQuery))
+					|| new UserConfigModel(targetQuery))(),
 			]);
 
 			if (amount > userConfigs.prc)

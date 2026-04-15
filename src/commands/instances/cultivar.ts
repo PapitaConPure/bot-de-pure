@@ -17,7 +17,8 @@ const command = new Command('cultivar', tags)
 	)
 	.setExecution(async (request) => {
 		const userQuery = { userId: request.userId };
-		const userConfigs = (await UserConfigModel.findOne(userQuery)) || new UserConfigModel(userQuery);
+		const userConfigs =
+			(await UserConfigModel.findOne(userQuery)) || new UserConfigModel(userQuery);
 		const translator = await Translator.from(request.userId);
 
 		const now = new Date(Date.now());

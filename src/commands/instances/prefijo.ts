@@ -54,7 +54,8 @@ const command = new Command('prefijo', flags)
 		}
 
 		await PrefixPairModel.findOneAndDelete(guildsearch);
-		const pfpair = (await PrefixPairModel.findOne(guildsearch)) || new PrefixPairModel(guildsearch);
+		const pfpair =
+			(await PrefixPairModel.findOne(guildsearch)) || new PrefixPairModel(guildsearch);
 		const regex = new RegExp(
 			`^${prefix.replace(/[a-z]/g, (l) => `[${l.toUpperCase()}${l}]`).replace('\\', '\\\\')}[\n ]*`,
 		);

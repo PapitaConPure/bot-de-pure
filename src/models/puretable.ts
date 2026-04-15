@@ -8,11 +8,15 @@ export const pureTableAssets = {
 
 const PureTableSchema = new Schema({
 	cells: {
-		type: [[{
-			type: String,
-			default: '',
-			required: true,
-		}]],
+		type: [
+			[
+				{
+					type: String,
+					default: '',
+					required: true,
+				},
+			],
+		],
 		default: Array(16)
 			.fill(null)
 			.map(() => Array(16).fill(pureTableAssets.defaultEmote)),

@@ -194,7 +194,9 @@ export async function onStartup(client: Client) {
 	console.log(chalk.gray('Preparando Tabla de Puré...'));
 	const puretable = (await PureTable.findOne({})) ?? new PureTable();
 	puretable.cells = [...puretable.cells].map((arr) =>
-		[...(arr as unknown as string[])].map((cell: string) => (client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote)),
+		[...(arr as unknown as string[])].map((cell: string) =>
+			client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote,
+		),
 	) as unknown as PureTableSchemaType['cells'];
 	const uniqueEmoteIds = new Set<string>();
 	const pendingEmoteCells: Promise<{ id: string; image: Image }>[] = [];

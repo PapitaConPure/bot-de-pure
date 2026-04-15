@@ -95,7 +95,9 @@ const PureVoiceSessionSchema = new Mongoose.Schema({
 	},
 });
 
-export type PureVoiceSessionDocumPureVoiceSessionSchemaType = InferSchemaType<typeof PureVoiceSessionSchema>;
+export type PureVoiceSessionDocumPureVoiceSessionSchemaType = InferSchemaType<
+	typeof PureVoiceSessionSchema
+>;
 
 export const PureVoiceSessionModel = Mongoose.model('PureVoiceSession', PureVoiceSessionSchema);
 

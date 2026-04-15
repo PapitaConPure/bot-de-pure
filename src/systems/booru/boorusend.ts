@@ -240,7 +240,8 @@ export async function formatBooruPostMessage(
 	debug('resTag =', resTag);
 	debug('sexTags =', sexTags);
 
-	if (sexTags.length) processedPostTags = processedPostTags.filter((t) => !ignoredTagsIfSexCount.has(t));
+	if (sexTags.length)
+		processedPostTags = processedPostTags.filter((t) => !ignoredTagsIfSexCount.has(t));
 
 	const specialTags = [...sexTags, ...(resTag ? [resTag] : [])];
 

@@ -1,8 +1,4 @@
-import {
-	BooruUnknownPostError,
-	type TagType,
-	TagTypes,
-} from '@papitaconpure/booru-client';
+import { BooruUnknownPostError, type TagType, TagTypes } from '@papitaconpure/booru-client';
 import { getUnixTime } from 'date-fns';
 import type {
 	ButtonInteraction,

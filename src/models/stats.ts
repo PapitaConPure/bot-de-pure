@@ -40,7 +40,6 @@ const ChannelStatsSchema = new Mongoose.Schema({
 	},
 });
 
-
 export type StatsSchemaType = InferSchemaType<typeof StatsSchema>;
 export type ChannelStatsSchemaType = InferSchemaType<typeof ChannelStatsSchema>;
 

@@ -150,7 +150,7 @@ export function clearScheduledReminder(reminderId: string): NodeJS.Timeout | und
 export function clearScheduledReminder(
 	reminder: ReminderDocument | string,
 ): NodeJS.Timeout | undefined {
-	const id: string = typeof reminder === 'string' ? reminder : reminder._id as string;
+	const id: string = typeof reminder === 'string' ? reminder : (reminder._id as string);
 
 	const samePreviousReminderTimeout = scheduledIds.get(id);
 	if (samePreviousReminderTimeout) {

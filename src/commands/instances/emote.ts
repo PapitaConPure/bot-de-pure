@@ -34,7 +34,7 @@ const command = new Command('emote', flags)
 			if (embeds.length >= 25) continue;
 
 			const emojiId = emojiMatch.groups?.id;
-			if(!emojiId) continue;
+			if (!emojiId) continue;
 
 			const emoji = request.client.emojis.resolve(emojiId);
 			if (!emoji) continue;

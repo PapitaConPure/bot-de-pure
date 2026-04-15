@@ -34,7 +34,8 @@ export async function onReactionAdd(
 	if (!guild || guild.memberCount < 100) return;
 	if (user.id === userId) return;
 
-	const userConfigs = (await UserConfigModel.findOne({ userId })) || new UserConfigModel({ userId });
+	const userConfigs =
+		(await UserConfigModel.findOne({ userId })) || new UserConfigModel({ userId });
 
 	const then = userConfigs.lastDateReceived;
 	const now = new Date(Date.now());

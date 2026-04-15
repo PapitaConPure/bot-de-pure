@@ -30,7 +30,7 @@ const action = new ContextMenuAction('actionGetEmojis', 'Message').setMessageRes
 			if (embeds.length >= 25) continue;
 
 			const emojiId = emojiMatch.groups?.id;
-			if(!emojiId) continue;
+			if (!emojiId) continue;
 
 			const emoji = interaction.client.emojis.resolve(emojiId);
 			if (!emoji) continue;
