@@ -7,12 +7,14 @@ import type {
 	GuildMember,
 	Message,
 	Snowflake,
+	TopLevelComponent,
 } from 'discord.js';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	Colors,
+	ComponentType,
 	ContainerBuilder,
 	EmbedBuilder,
 	MessageFlags,
@@ -713,10 +715,12 @@ export function formatTagNameListNew(tagNames: Array<string>, sep: string) {
 		.join(sep);
 }
 
-export function getPostUrlFromContainer(container: ContainerComponent) {
-	const containerSize = container.components.length;
-	const containerButtonRow = container.components[
-		containerSize - 1
-	] as ActionRow<ButtonComponent>;
+export function getPostUrlFromComponents(containers: TopLevelComponent[]) {
+	const container = containers.find((c) => c.type === ComponentType.Container);
+
+	if (!container) return undefined;
+
+	const containerButtonRow = container.components.find(c => c.type === ComponentType.ActionRow && c.components[0].type === ComponentType.Button) as ActionRow<ButtonComponent>;
+
 	return containerButtonRow.components[0].url;
 }

@@ -38,7 +38,7 @@ import { addGuildToFeedUpdateStack } from '@/systems/booru/boorufeed';
 import {
 	formatBooruPostMessage,
 	formatTagNameListNew,
-	getPostUrlFromContainer,
+	getPostUrlFromComponents,
 } from '@/systems/booru/boorusend.js';
 import { auditAction, auditError } from '@/systems/others/auditor';
 import type { AnyCommandInteraction } from '@/types/commands';
@@ -1437,8 +1437,7 @@ const command = new Command('feed', tags)
 	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
 		const translator = await Translator.from(interaction.user.id);
 
-		const container = interaction.message.components[0] as ContainerComponent;
-		const url = getPostUrlFromContainer(container);
+		const url = getPostUrlFromComponents(interaction.message.components);
 		if (!url) return interaction.deleteReply();
 
 		const booru = getMainBooruClient();
@@ -1617,8 +1616,7 @@ const command = new Command('feed', tags)
 			});
 
 		const { message } = interaction;
-		const container = message.components[0] as ContainerComponent;
-		const url = getPostUrlFromContainer(container);
+		const url = getPostUrlFromComponents(message.components);
 		if (isNotFeed || !url)
 			return Promise.all([
 				interaction.reply({
@@ -1693,8 +1691,7 @@ const command = new Command('feed', tags)
 	.setButtonResponse(async function contribute(interaction) {
 		const translator = await Translator.from(interaction.user.id);
 
-		const container = interaction.message.components[0] as ContainerComponent;
-		const url = getPostUrlFromContainer(container);
+		const url = getPostUrlFromComponents(interaction.message.components);
 		if (!url) return interaction.deleteReply();
 
 		const booru = getMainBooruClient();
