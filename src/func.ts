@@ -965,7 +965,7 @@ export function parseUnicodeEmoji(emoji: string): string | null {
  * }
  * ```
  */
-export const discordEmojiRegex = /<a?:(?<name>\w+):(?<id>[0-9]+)>/gi;
+export const discordEmojiRegex = /<a?:(?<name>\w+):(?<id>[0-9]+)>/g;
 
 /**@description Devuelve el primer emoji de servidor encontrado con el string.*/
 export function getGuildEmoji(emoji: string, guild: Guild): Emoji | null {

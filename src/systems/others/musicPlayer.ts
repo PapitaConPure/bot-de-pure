@@ -18,8 +18,6 @@ import {
 } from 'discord.js';
 import type { GuildQueue, Track } from 'discord-player';
 import { Player, QueueRepeatMode, useMainPlayer } from 'discord-player';
-import { YoutubeSabrExtractor } from 'discord-player-googlevideo';
-import { SoundcloudExtractor } from 'discord-player-soundcloud';
 import type { ComplexCommandRequest, ComponentInteraction } from 'types/commands';
 import { compressId, decompressId, shortenText } from '@/func';
 import { Translator } from '@/i18n';
@@ -128,14 +126,6 @@ export async function prepareTracksPlayer(client: Client) {
 	});
 	info('Music Player created.');
 
-	debug('Loading YouTube extractor...');
-	await player.extractors.register(YoutubeSabrExtractor, {
-		streamOptions: {
-			highWaterMark: 1 << 25,
-		},
-	});
-	debug('Loading Soundcloud extractor...');
-	await player.extractors.register(SoundcloudExtractor, {});
 	debug('Loading default extractors...');
 	await player.extractors.loadMulti(
 		DefaultExtractors.filter(

@@ -33,16 +33,16 @@ import { getBaseTags, getSearchTags } from './booruprops';
 const { debug, info, warn, error } = Logger('WARN', 'BooruSend');
 
 export interface PostFormatData {
-	maxTags?: number;
-	title?: string;
-	subtitle?: string;
-	footer?: string;
-	cornerIcon?: string;
-	manageableBy?: string;
-	allowNSFW?: boolean;
-	isNotFeed?: boolean;
-	disableLinks?: boolean;
-	disableActions?: boolean;
+	maxTags?: number | null;
+	title?: string | null;
+	subtitle?: string | null;
+	footer?: string | null;
+	cornerIcon?: string | null;
+	manageableBy?: string | null;
+	allowNSFW?: boolean | null;
+	isNotFeed?: boolean | null;
+	disableLinks?: boolean | null;
+	disableActions?: boolean | null;
 }
 
 export interface SourceStyle {
@@ -134,7 +134,7 @@ export async function formatBooruPostMessage(
 			.setEmoji('919398540172750878')
 			.setStyle(ButtonStyle.Link)
 			.setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${post.id}`)
-			.setDisabled(disableLinks),
+			.setDisabled(disableLinks ?? false),
 	);
 
 	//Botón de Fuente (si está disponible)
@@ -166,7 +166,7 @@ export async function formatBooruPostMessage(
 		const button = new ButtonBuilder()
 			.setStyle(ButtonStyle.Link)
 			.setURL(source)
-			.setDisabled(disableLinks);
+			.setDisabled(!!disableLinks);
 		if (emoji) button.setEmoji(emoji);
 
 		buttonRow.addComponents(button);
@@ -255,7 +255,7 @@ export async function formatBooruPostMessage(
 			.setEmoji('921788204540100608')
 			.setStyle(ButtonStyle.Primary)
 			.setCustomId(`feed_showFeedImageTags_${data.isNotFeed ? 'NaF' : ''}`)
-			.setDisabled(disableActions),
+			.setDisabled(!!disableActions),
 	);
 
 	//Botón de contribución
@@ -265,7 +265,7 @@ export async function formatBooruPostMessage(
 				.setEmoji('1355496081550606486')
 				.setStyle(ButtonStyle.Success)
 				.setCustomId(`feed_contribute`)
-				.setDisabled(disableActions),
+				.setDisabled(!!disableActions),
 		);
 
 	//Botón de eliminación
@@ -274,7 +274,7 @@ export async function formatBooruPostMessage(
 			.setEmoji('1355143793577426962')
 			.setStyle(ButtonStyle.Danger)
 			.setCustomId(`feed_deletePost_${data.manageableBy ?? ''}_${data.isNotFeed ?? ''}`)
-			.setDisabled(disableActions),
+			.setDisabled(!!disableActions),
 	);
 
 	//Preparar contenedor final

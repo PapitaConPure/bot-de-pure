@@ -31,7 +31,7 @@ import {
 } from '../data/globalProps';
 import serverIds from '../data/serverIds.json';
 import PrefixPairs from '../models/prefixpair';
-import { PureTable, pureTableAssets } from '../models/puretable';
+import { PureTable, type PureTableSchemaType, pureTableAssets } from '../models/puretable';
 import UserConfigModel from '../models/userconfigs';
 import { feedTagSuscriptionsCache, setupGuildFeedUpdateStack } from '../systems/booru/boorufeed';
 import { auditSystem } from '../systems/others/auditor';
@@ -157,11 +157,7 @@ export async function onStartup(client: Client) {
 	const mongoUri: string = databaseUri.resolve();
 	databaseUri.redact();
 	set('strictQuery', false);
-	connect(mongoUri, {
-		//@ts-expect-error Quizá sí existen estas 2
-		useUnifiedTopology: true,
-		useNewUrlParser: true,
-	});
+	connect(mongoUri);
 
 	console.log(chalk.gray('Obteniendo documentos...'));
 	const [prefixPairs, userConfigs] = await Promise.all([
@@ -197,12 +193,12 @@ export async function onStartup(client: Client) {
 
 	console.log(chalk.gray('Preparando Tabla de Puré...'));
 	const puretable = (await PureTable.findOne({})) ?? new PureTable();
-	puretable.cells = puretable.cells.map((arr) =>
-		arr.map((cell) => (client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote)),
-	);
+	puretable.cells = [...puretable.cells].map((arr) =>
+		[...(arr as unknown as string[])].map((cell: string) => (client.emojis.cache.get(cell) ? cell : pureTableAssets.defaultEmote)),
+	) as unknown as PureTableSchemaType['cells'];
 	const uniqueEmoteIds = new Set<string>();
 	const pendingEmoteCells: Promise<{ id: string; image: Image }>[] = [];
-	puretable.cells.flat().forEach((cell) => uniqueEmoteIds.add(cell));
+	puretable.cells.flat().forEach((cell) => uniqueEmoteIds.add(`${cell}`));
 
 	async function getEmoteCell(id: string) {
 		const emoji = client.emojis.cache.get(id);

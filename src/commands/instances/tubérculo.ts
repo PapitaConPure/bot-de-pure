@@ -28,7 +28,7 @@ import {
 import { Translator } from '@/i18n';
 import type { GuildConfigDocument, GuildConfigSchemaType } from '@/models/guildconfigs';
 import GuildConfig from '@/models/guildconfigs';
-import type { TuberSchemaType } from '@/models/tubers';
+import type { TuberDocument, TuberSchemaType } from '@/models/tubers';
 import { getWikiPageComponentsV2 } from '@/systems/others/wiki';
 import type { Tubercle, TuberExecutionOptions } from '@/systems/ps/common/executeTuber';
 import {
@@ -576,7 +576,7 @@ const command = new Command('tubérculo', flags)
 				gcfg.markModified(`tubers.${tuberId}.inputs.${inputIndex}.desc`);
 			}
 		} else {
-			const variants = gcfg.tubers.get(tuberId)?.inputs;
+			const variants = gcfg.tubers.get(tuberId)?.inputs as unknown as InputJSONData[][];
 			let found = false;
 			variants?.forEach((variant, variantIndex) =>
 				variant.forEach((input, inputIndex) => {
@@ -732,7 +732,7 @@ async function createTuber(
 		}
 
 		console.log('PuréScript ejecutado:', tuberContent);
-		gcfg.tubers.set(tuberId, tuberContent as TuberSchemaType);
+		gcfg.tubers.set(tuberId, tuberContent as unknown as TuberDocument);
 	} catch (error) {
 		console.log('Ocurrió un error al añadir un nuevo Tubérculo');
 		console.error(error);
@@ -1010,7 +1010,7 @@ async function opExecuteTuber(
 					'inputs',
 					(gcfg.tubers.get(tid)?.inputs as unknown as Input[][]).map((variant) =>
 						variant.map((input) => input.json ?? input),
-					) as TuberSchemaType['inputs'],
+					) as unknown as TuberSchemaType['inputs'],
 				);
 			gcfg.markModified(`tubers.${tid}.saved`);
 		})

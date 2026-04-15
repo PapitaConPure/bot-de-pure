@@ -4,7 +4,7 @@ import { CURRENT_PS_VERSION } from '../systems/ps/common/executeTuber';
 const TuberInputSchema = new Mongoose.Schema({
 	name: {
 		type: String,
-		required: true,
+		default: 'input',
 	},
 	desc: {
 		type: String,
@@ -13,7 +13,6 @@ const TuberInputSchema = new Mongoose.Schema({
 	kind: {
 		type: String,
 		enum: ['Number', 'Text', 'Boolean'],
-		required: true,
 	},
 	optional: {
 		type: Boolean,
@@ -25,36 +24,10 @@ const TuberInputSchema = new Mongoose.Schema({
 	},
 });
 
-const TuberValueSchema = new Mongoose.Schema(
-	{
-		name: {
-			type: String,
-			required: true,
-		},
-		desc: {
-			type: String,
-			default: null,
-		},
-		kind: {
-			type: String,
-			required: true,
-		},
-		optional: {
-			type: Boolean,
-			required: true,
-		},
-		spread: {
-			type: Boolean,
-			required: true,
-		},
-	},
-	{ _id: false },
-);
-
 export const TuberSchema = new Mongoose.Schema({
 	id: {
 		type: String,
-		required: true,
+		default: 'tid',
 	},
 	author: {
 		type: String,
@@ -75,11 +48,10 @@ export const TuberSchema = new Mongoose.Schema({
 		type: String,
 	},
 	files: {
-		type: [String],
+		type: Array,
 	},
 	script: {
-		type: String,
-		default: null,
+		type: Mongoose.SchemaTypes.Mixed,
 	},
 	psVersion: {
 		type: Number,
@@ -87,7 +59,7 @@ export const TuberSchema = new Mongoose.Schema({
 	},
 	saved: {
 		type: Map,
-		of: TuberValueSchema,
+		of: Mongoose.SchemaTypes.Mixed,
 	},
 });
 

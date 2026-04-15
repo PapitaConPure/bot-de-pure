@@ -340,13 +340,13 @@ export function updateFollowedFeedTagsCache(
 }
 
 export interface FeedOptions {
-	lastFetchedAt?: Date;
-	faults?: number;
-	maxTags?: number;
-	cornerIcon?: string;
-	title?: string;
-	subtitle?: string;
-	footer?: string;
+	lastFetchedAt?: Date | null;
+	faults?: number | null;
+	maxTags?: number | null;
+	cornerIcon?: string | null;
+	title?: string | null;
+	subtitle?: string | null;
+	footer?: string | null;
 }
 
 /**@class Representa un Feed programado de imágenes de {@linkcode Booru}.*/

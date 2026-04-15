@@ -13,7 +13,13 @@ import {
 import type { ComplexCommandRequest } from 'types/commands';
 import { globalConfigs } from '@/data/globalProps';
 import type { WeightedDecision } from '@/func';
-import { compressId, decompressId, discordEmojiRegex, improveNumber, makeWeightedDecision } from '@/func';
+import {
+	compressId,
+	decompressId,
+	discordEmojiRegex,
+	improveNumber,
+	makeWeightedDecision,
+} from '@/func';
 import { Translator } from '@/i18n';
 import type { AnarchyUserDocument } from '@/models/puretable';
 import { AnarchyUser, PureTable, pureTableAssets } from '@/models/puretable';
@@ -261,18 +267,23 @@ const command = new Command('anarquia', tags)
 			});
 			if (auser) {
 				auser.skills ??= {} as Exclude<(typeof auser)['skills'], undefined>;
-				const skillContent = Object.entries(auser.skills)
-					.sort(([, amountA], [, amountB]) => amountB - amountA)
-					.map(([key, amount]) => {
-						const skill = skills[key as keyof typeof skills];
-						if (!skill) return undefined;
+				const skillContent = auser?.skills
+					? Object.entries(auser.skills)
+							.sort(
+								([, amountA], [, amountB]) =>
+									(amountB as number) - (amountA as number),
+							)
+							.map(([key, amount]) => {
+								const skill = skills[key as keyof typeof skills];
+								if (!skill) return undefined;
 
-						const decor = !amount ? '~~' : '';
+								const decor = !amount ? '~~' : '';
 
-						return `${decor}${skill.emoji} x **${amount}**${decor}`;
-					})
-					.filter((s) => s)
-					.join('\n');
+								return `${decor}${skill.emoji} x **${amount}**${decor}`;
+							})
+							.filter((s) => s)
+							.join('\n')
+					: '';
 
 				const exp = auser.exp % maxExp;
 				const userLevel = calcUserLevel(auser);
@@ -364,7 +375,7 @@ const command = new Command('anarquia', tags)
 				});
 			} else auser.last = Date.now();
 
-			const emoteMatch = emote?.match(discordEmojiRegex);
+			const emoteMatch = [...(emote?.matchAll(discordEmojiRegex) ?? [])];
 			if (!emoteMatch) {
 				reactIfMessage('⚠️');
 				return request.reply({
@@ -372,7 +383,7 @@ const command = new Command('anarquia', tags)
 					flags: MessageFlags.Ephemeral,
 				});
 			}
-			const emoteId = emoteMatch.groups?.id;
+			const emoteId = emoteMatch[0]?.groups?.id;
 
 			if (!emoteId || !request.client.emojis.cache.has(emoteId)) {
 				reactIfMessage('⚠️');
@@ -580,7 +591,7 @@ async function fetchPureTableCells() {
 
 	if (!pureTable) throw new ReferenceError('No se encontró la Tabla de Puré.');
 
-	return pureTable.cells;
+	return pureTable.cells as unknown as string[][];
 }
 
 /**@returns Whether the emote could be loaded (`true`) or not (`false`)*/
@@ -709,8 +720,8 @@ function levelUpAndGetSkills(auser: AnarchyUserDocument) {
 	let droppedSkill: { key: string; skill: Skill } | undefined;
 	if (Math.random() < dropRate) {
 		droppedSkill = makeWeightedDecision(skillOptions);
-		auser.skills[droppedSkill.key] ??= 0;
-		auser.skills[droppedSkill.key]++;
+		(auser.skills as object)[droppedSkill.key] ??= 0;
+		(auser.skills as object)[droppedSkill.key]++;
 	}
 
 	auser.exp++;

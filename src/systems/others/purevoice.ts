@@ -30,7 +30,7 @@ import { p_pure } from '@/utils/prefixes';
 
 const { debug, info, warn, error } = Logger('WARN', 'PV');
 
-export function makePVSessionName(name: string, emoji?: string) {
+export function makePVSessionName(name: string, emoji?: string | null) {
 	return `${emoji || '💠'}【${name}】`;
 }
 
