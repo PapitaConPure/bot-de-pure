@@ -1,7 +1,8 @@
-import type { Guild, Message } from 'discord.js';
-import { ContainerBuilder, MessageFlags } from 'discord.js';
+import type { BitFieldResolvable, Guild, Message, MessageFlagsString } from 'discord.js';
+import { ContainerBuilder, MessageFlags, MessageFlagsBitField } from 'discord.js';
 import { Command, CommandOptionSolver, type CommandOptions } from '@/commands/commons';
 import { channelIsBlocked, edlDistance, rand } from '@/func';
+import { sendConvertedBooruPosts } from '@/systems/converters/boorutato';
 import {
 	findFirstException,
 	generateExceptionEmbed,
@@ -309,25 +310,53 @@ async function processLinkConverters(message: Message<true>, userCache: UserCach
 		sendConvertedPixivPosts(message, userCache.pixivConverter),
 		sendConvertedTwitterPosts(message, userCache.twitterPrefix),
 	]);
+
 	const contentfulPayloads = converterPayloads.filter((r) => r.contentful === true);
-	if (contentfulPayloads.length) {
-		const messageResult = `-# ${contentfulPayloads.map((r) => r.content).join(' ')}`;
 
-		const [sent] = await Promise.all([
-			message.reply(messageResult),
-			message.suppressEmbeds(true),
-		]);
+	if (!contentfulPayloads.length) return;
 
-		setTimeout(() => {
-			if (!message?.embeds) return;
-			message.suppressEmbeds(true).catch(() => undefined);
-		}, 3000);
+	const mergedFlags = contentfulPayloads
+		.map((r) => r.flags)
+		.filter((f) => f != null)
+		.map((f) => new MessageFlagsBitField(+f))
+		.reduce((pf, f) => (pf == null ? f : pf.add(f)));
 
-		await Promise.all([
-			addAgentMessageOwner(sent, message.author.id),
-			addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
-		]);
-	}
+	const messageResult = mergedFlags.has(MessageFlags.IsComponentsV2)
+		? {
+				flags:
+					(mergedFlags as BitFieldResolvable<
+						Extract<
+							MessageFlagsString,
+							'SuppressEmbeds' | 'SuppressNotifications' | 'IsComponentsV2'
+						>,
+						| MessageFlags.SuppressEmbeds
+						| MessageFlags.SuppressNotifications
+						| MessageFlags.IsComponentsV2
+					>) || undefined,
+				components:
+					contentfulPayloads
+						.map((r) => r.components)
+						.filter((c) => c != null)
+						.flat(1) || undefined,
+			}
+		: {
+				content: `-# ${contentfulPayloads
+					.map((r) => r.content)
+					.filter((c) => c != null)
+					.join(' ')}`,
+			};
+
+	const [sent] = await Promise.all([message.reply(messageResult), message.suppressEmbeds(true)]);
+
+	setTimeout(() => {
+		if (!message?.embeds) return;
+		message.suppressEmbeds(true).catch(() => undefined);
+	}, 3000);
+
+	await Promise.all([
+		addAgentMessageOwner(sent, message.author.id),
+		addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
+	]);
 }
 
 async function processBeginnerHelp(message: Message<true>) {
