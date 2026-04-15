@@ -2,7 +2,6 @@ import { BooruUnknownPostError, type TagType, TagTypes } from '@papitaconpure/bo
 import { getUnixTime } from 'date-fns';
 import type {
 	ButtonInteraction,
-	ContainerComponent,
 	GuildBasedChannel,
 	Message,
 	SelectMenuComponentOptionData,
