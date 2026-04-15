@@ -11,6 +11,7 @@ export function getMainBooruClient(): BooruClient {
 			credentials: { apiKey: booruApiKey, userId: booruUserId },
 			tags: {
 				storeChain: [new MemoryTagStore(), new MongooseTagStore(BooruTags)],
+				cleanOnStartup: true,
 			},
 		});
 
