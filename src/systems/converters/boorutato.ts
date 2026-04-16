@@ -14,7 +14,7 @@ export const acceptedBoorutatoConverters =  ['gelbooru'] as const;
 export type AcceptedBoorutatoConverterKey = (typeof acceptedBoorutatoConverters)[number];
 
 const gelbooruPostRegex =
-	/(?<st>(?:<|\|\|){0,2}) ?(?<original>(?:(?:http:\/\/|https:\/\/))?(?:www\.)?gelbooru.com\/index\.php\?page=post(?:&\S*)*&id=(?<id>[0-9]+)(?:&\S*)?) ?(?<ed>(?:>|\|\|){0,2})/gi;
+	/(?<st>(?:<|\|\|){0,2}) ?(?<original>(?:(?:http:\/\/|https:\/\/))?(?:www\.)?gelbooru.com\/index\.php\?page=post(?:&[^\s&]*)*&id=(?<id>[0-9]+)(?:&[^\s&]*)?) ?(?<ed>(?:>|\|\|){0,2})/gi;
 
 /**
  * @description Detecta enlaces de Gelbooru en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
