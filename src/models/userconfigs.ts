@@ -104,6 +104,7 @@ const UserConfigSchema = new Mongoose.Schema({
 			type: String,
 			enum: acceptedBoorutatoConverters,
 		}],
+		default: ['gelbooru'],
 	},
 	showLevelUp: {
 		type: Boolean,
