@@ -37,7 +37,7 @@ export async function cacheUser(user: UserCacheResolvable) {
 		language: userConfigs.language,
 		pixivConverter: userConfigs.pixivConverter || '',
 		twitterPrefix: userConfigs.twitterPrefix || '',
-		booruConverters: new Set(userConfigs.booruConverters || []),
+		booruConverters: new Set(userConfigs.booruConverters || ['gelbooru']),
 		banned: userConfigs.banned ?? false,
 	});
 }
