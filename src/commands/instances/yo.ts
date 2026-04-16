@@ -14,13 +14,17 @@ import {
 	TextInputStyle,
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
-import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
+import { tenshiAltColor, tenshiColor, tenshiPeachColor } from '@/data/globalProps';
 import { compressId, decompressId, improveNumber, parseUnicodeEmoji, shortenText } from '@/func';
 import type { LocaleIds, LocaleKey } from '@/i18n';
 import { isValidLocaleKey, Locales, Translator } from '@/i18n';
 import type { UserConfigSchemaType } from '@/models/userconfigs';
 import UserConfigModel from '@/models/userconfigs';
 import { updateFollowedFeedTagsCache } from '@/systems/booru/boorufeed';
+import {
+	type AcceptedBoorutatoConverterKey,
+	acceptedBoorutatoConverters,
+} from '@/systems/converters/boorutato';
 import type { AcceptedTwitterConverterKey } from '@/systems/converters/pureet';
 import { acceptedTwitterConverters } from '@/systems/converters/pureet';
 import { auditError } from '@/systems/others/auditor';
@@ -156,6 +160,14 @@ function makeDashboardContainer(
 								description: translator.getText('yoDashboardMenuConfigTwitterDesc'),
 								emoji: '1460135894404305019',
 								value: 'twitter',
+							},
+							{
+								label: 'BoorutatoConvert',
+								description: translator.getText(
+									'yoDashboardMenuConfigBoorutatoDesc',
+								),
+								emoji: '1460145550119669912',
+								value: 'booru',
 							},
 						]),
 				),
@@ -364,6 +376,61 @@ const makePixivServicePickerContainer = (
 							label: 'phixiv',
 							description: translator.getText('yoPixivMenuServicePhixivDesc'),
 							default: service === 'phixiv',
+						},
+					),
+			),
+		)
+		.addSeparatorComponents((separator) =>
+			separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
+		)
+		.addActionRowComponents((actionRow) =>
+			actionRow.addComponents(
+				backToDashboardButton(compressedAuthorId),
+				cancelButton(compressedAuthorId),
+			),
+		);
+
+	return container;
+};
+
+const makeBoorutatoServicePickerContainer = (
+	compressedAuthorId: string,
+	services: Set<AcceptedBoorutatoConverterKey>,
+	translator: Translator,
+) => {
+	const hasGelbooru = services.has('gelbooru');
+
+	const container = new ContainerBuilder()
+		.setAccentColor(tenshiPeachColor)
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(
+				[
+					translator.getText('yoBoorutatoTitle'),
+					translator.getText('yoBoorutatoDesc'),
+				].join('\n'),
+			),
+		)
+		.addSeparatorComponents((separator) => separator.setDivider(true))
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent('### -# <:gelbooru:919398540172750878> Gelbooru'),
+		)
+		.addActionRowComponents((actionRow) =>
+			actionRow.addComponents(
+				new StringSelectMenuBuilder()
+					.setCustomId(`yo_setBooruConvert_${compressedAuthorId}_${'gelbooru' as AcceptedBoorutatoConverterKey}`)
+					.setPlaceholder(translator.getText('yoConversionServiceMenuService'))
+					.setOptions(
+						{
+							value: 'off',
+							label: translator.getText('disabled'),
+							description: translator.getText('yoBoorutatoMenuServiceDisabledDesc'),
+							default: !hasGelbooru,
+						},
+						{
+							value: 'on',
+							label: translator.getText('enabled'),
+							description: translator.getText('yoBoorutatoMenuServiceEnabledDesc'),
+							default: hasGelbooru,
 						},
 					),
 			),
@@ -721,12 +788,23 @@ const command = new Command('yo', tags)
 					],
 				});
 
-			default:
+			case 'twitter':
 				return interaction.update({
 					components: [
 						makeTwitterServicePickerContainer(
 							compressedAuthorId,
 							userConfigs.twitterPrefix,
+							translator,
+						),
+					],
+				});
+
+			case 'booru':
+				return interaction.update({
+					components: [
+						makeBoorutatoServicePickerContainer(
+							compressedAuthorId,
+							new Set(userConfigs.booruConverters),
 							translator,
 						),
 					],
@@ -926,11 +1004,6 @@ const command = new Command('yo', tags)
 
 			const translator = new Translator(userConfigs.language);
 
-			if (user.id !== decompressId(compressedAuthorId))
-				return interaction.editReply({
-					content: translator.getText('unauthorizedInteraction'),
-				});
-
 			let service = interaction.values[0];
 			if (service === 'none') service = '';
 
@@ -969,11 +1042,6 @@ const command = new Command('yo', tags)
 
 			const translator = new Translator(userConfigs.language);
 
-			if (user.id !== decompressId(compressedAuthorId))
-				return interaction.editReply({
-					content: translator.getText('unauthorizedInteraction'),
-				});
-
 			let service = interaction.values[0] as AcceptedTwitterConverterKey | 'none' | '';
 			if (service === 'none') service = '';
 
@@ -989,6 +1057,52 @@ const command = new Command('yo', tags)
 						makeTwitterServicePickerContainer(
 							compressedAuthorId,
 							userConfigs.twitterPrefix,
+							translator,
+						),
+					],
+				}),
+				interaction.editReply({
+					content: translator.getText('yoConversionServiceSuccess'),
+				}),
+			]);
+		},
+		{ userFilterIndex: 0 },
+	)
+	.setSelectMenuResponse(
+		async function setBooruConvert(
+			interaction,
+			compressedAuthorId,
+			service: AcceptedBoorutatoConverterKey,
+		) {
+			const { user } = interaction;
+
+			const [userConfigs] = await Promise.all([
+				UserConfigModel.findOne({ userId: user.id }),
+				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
+			]);
+			if (!userConfigs) return interaction.editReply({ content: userNotAvailableText });
+
+			const translator = new Translator(userConfigs.language);
+
+			const enabled = interaction.values[0] as 'on' | 'off';
+
+			if (!acceptedBoorutatoConverters.includes(service))
+				throw 'Resultado de servicio de conversión de Twitter inesperado';
+
+			const resultingServices = new Set(userConfigs.booruConverters);
+
+			if (enabled === 'on') resultingServices.add(service);
+			else resultingServices.delete(service);
+
+			userConfigs.booruConverters = [...resultingServices];
+
+			return Promise.all([
+				userConfigs.save().then(() => recacheUser(user.id)),
+				interaction.message.edit({
+					components: [
+						makeBoorutatoServicePickerContainer(
+							compressedAuthorId,
+							resultingServices,
 							translator,
 						),
 					],
