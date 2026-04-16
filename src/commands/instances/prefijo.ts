@@ -57,7 +57,7 @@ const command = new Command('prefijo', flags)
 		const pfpair =
 			(await PrefixPairModel.findOne(guildsearch)) || new PrefixPairModel(guildsearch);
 		const regex = new RegExp(
-			`^${prefix.replace(/[a-z]/g, (l) => `[${l.toUpperCase()}${l}]`).replace('\\', '\\\\')}[\n ]*`,
+			`^${prefix.replace(/[a-z]/g, (l) => `[${l.toUpperCase()}${l}]`).replace(/\\/g, '\\\\')}[\n ]*`,
 		);
 		prefixes[request.guildId] = {
 			// biome-ignore lint/suspicious/noAssignInExpressions: Asignación múltiple
