@@ -2481,6 +2481,11 @@ const localesObject = {
 		en: 'Fixes Twitter/X embeds automatically',
 		ja: 'Twitter/X の埋め込みを自動的に修正します',
 	},
+	yoDashboardMenuConfigBoorutatoDesc: {
+		es: 'Corrige enlaces de Boorus que envíes',
+		en: 'Fixes imageboard embeds automatically',
+		ja: '画像掲示板の埋め込みを自動的に修正します',
+	},
 	yoDashboardTimezone: {
 		es: 'Huso Horario...',
 		en: 'Time Zone...',
@@ -2741,6 +2746,26 @@ const localesObject = {
 		es: 'No convertir enlaces de Twitter/X automáticamente.',
 		en: 'Do not convert Twitter/X links automatically.',
 		ja: 'Twitter/X リンクを自動的に変換しない。',
+	},
+	yoBoorutatoTitle: {
+		es: '## <:purefeed:1460145550119669912> Preferencias de Boorutato',
+		en: '## <:purefeed:1460145550119669912> Boorutato preferences',
+		ja: '## <:purefeed:1460145550119669912> Boorutato の個人設定',
+	},
+	yoBoorutatoDesc: {
+		es: '-# Configura la conversión de enlaces de Boorus.',
+		en: '-# Configure the conversion of Imageboard links.',
+		ja: '-# 画像掲示板リンクの変換サービスを設定する。',
+	},
+	yoBoorutatoMenuServiceEnabledDesc: {
+		es: 'Convertir enlaces de Boorus automáticamente.',
+		en: 'Convert imageboard links automatically.',
+		ja: '画像掲示板リンクを自動的に変換します。',
+	},
+	yoBoorutatoMenuServiceDisabledDesc: {
+		es: 'No convertir enlaces de Boorus automáticamente.',
+		en: 'Do not convert imageboard links automatically.',
+		ja: '画像掲示板リンクを自動的に変換しない。',
 	},
 	yoSelectTagsChannelTitle: {
 		es: 'Selecciona uno de tus Feeds seguidos.',
