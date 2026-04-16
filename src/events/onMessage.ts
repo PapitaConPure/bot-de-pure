@@ -320,7 +320,7 @@ async function processLinkConverters(message: Message<true>, userCache: UserCach
 		.map((r) => r.flags)
 		.filter((f) => f != null)
 		.map((f) => new MessageFlagsBitField(+f))
-		.reduce((pf, f) => (pf == null ? f : pf.add(f)));
+		.reduce((pf, f) => pf.add(f), new MessageFlagsBitField(0));
 
 	const messageResult = mergedFlags.has(MessageFlags.IsComponentsV2)
 		? {
