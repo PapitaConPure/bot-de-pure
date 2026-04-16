@@ -9,7 +9,7 @@ import { ConverterEmptyPayload } from './converters';
 
 const { error } = Logger('WARN', 'BoorutatoConvert');
 
-export const acceptedBoorutatoConverters =  ['gelbooru'] as const;
+export const acceptedBoorutatoConverters = ['gelbooru'] as const;
 
 export type AcceptedBoorutatoConverterKey = (typeof acceptedBoorutatoConverters)[number];
 

@@ -417,7 +417,9 @@ const makeBoorutatoServicePickerContainer = (
 		.addActionRowComponents((actionRow) =>
 			actionRow.addComponents(
 				new StringSelectMenuBuilder()
-					.setCustomId(`yo_setBooruConvert_${compressedAuthorId}_${'gelbooru' as AcceptedBoorutatoConverterKey}`)
+					.setCustomId(
+						`yo_setBooruConvert_${compressedAuthorId}_${'gelbooru' as AcceptedBoorutatoConverterKey}`,
+					)
 					.setPlaceholder(translator.getText('yoConversionServiceMenuService'))
 					.setOptions(
 						{

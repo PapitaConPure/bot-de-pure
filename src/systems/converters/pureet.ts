@@ -18,7 +18,7 @@ const twitterConversionServices = {
 	fx: { name: 'fixTwitter', service: 'https://fxtwitter.com' },
 	girlcockx: { name: 'girlcockx', service: 'https://girlcockx.com' },
 	cunnyx: { name: 'cunnyx', service: 'https://cunnyx.com' },
-} as const satisfies Record<AcceptedTwitterConverterKey, { name: string, service: string }>;
+} as const satisfies Record<AcceptedTwitterConverterKey, { name: string; service: string }>;
 
 /**
  * @description Detecta enlaces de Twitter en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.

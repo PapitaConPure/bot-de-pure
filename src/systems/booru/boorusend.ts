@@ -720,7 +720,9 @@ export function getPostUrlFromComponents(containers: TopLevelComponent[]) {
 
 	if (!container) return undefined;
 
-	const containerButtonRow = container.components.find(c => c.type === ComponentType.ActionRow && c.components[0].type === ComponentType.Button) as ActionRow<ButtonComponent>;
+	const containerButtonRow = container.components.find(
+		(c) => c.type === ComponentType.ActionRow && c.components[0].type === ComponentType.Button,
+	) as ActionRow<ButtonComponent>;
 
 	return containerButtonRow.components[0].url;
 }

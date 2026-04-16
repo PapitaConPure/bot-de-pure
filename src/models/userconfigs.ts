@@ -100,10 +100,12 @@ const UserConfigSchema = new Mongoose.Schema({
 		default: 'vx',
 	},
 	booruConverters: {
-		type: [{
-			type: String,
-			enum: acceptedBoorutatoConverters,
-		}],
+		type: [
+			{
+				type: String,
+				enum: acceptedBoorutatoConverters,
+			},
+		],
 		default: ['gelbooru'],
 	},
 	showLevelUp: {

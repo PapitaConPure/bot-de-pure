@@ -15,7 +15,7 @@ export type AcceptedPixivConverterKey = (typeof acceptedPixivConvertersWithoutNo
 
 const pixivConversionServices = {
 	phixiv: { name: 'phixiv', service: 'https://www.phixiv.net' },
-} as const satisfies Record<AcceptedPixivConverterKey, { name: string, service: string }>;
+} as const satisfies Record<AcceptedPixivConverterKey, { name: string; service: string }>;
 
 /**
  * @description Detecta enlaces de pixiv en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
