@@ -165,7 +165,7 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 
 			bulkOps.push({
 				updateOne: {
-					filter: { _id: feed._id },
+					filter: { channelId: feed.channelId },
 					update: { $set: update },
 				},
 			});
@@ -374,7 +374,7 @@ export class BooruFeed {
 
 		return {
 			updateOne: {
-				filter: { _id: this.channelId },
+				filter: { channelId: this.channelId },
 				update: { $set: { faults: this.#faults } },
 			},
 		};
@@ -385,7 +385,7 @@ export class BooruFeed {
 
 		return {
 			updateOne: {
-				filter: { _id: this.channelId },
+				filter: { channelId: this.channelId },
 				update: { $set: { faults: this.#faults, lastFetchedAt: this.#lastFetchedAt } },
 			},
 		};
