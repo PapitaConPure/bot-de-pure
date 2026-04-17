@@ -33,7 +33,7 @@ import serverIds from '../data/serverIds.json';
 import PrefixPairs from '../models/prefixpair';
 import { PureTable, type PureTableSchemaType, pureTableAssets } from '../models/puretable';
 import UserConfigModel from '../models/userconfigs';
-import { feedTagSuscriptionsCache, setupFeedUpdateStack } from '../systems/booru/boorufeed';
+import { feedTagSubscriptionsCache, setupFeedUpdateStack } from '../systems/booru/boorufeed';
 import { auditSystem } from '../systems/others/auditor';
 import { initializeMessageCascades } from '../systems/others/messageCascades';
 import { prepareTracksPlayer } from '../systems/others/musicPlayer';
@@ -181,9 +181,9 @@ export async function onStartup(client: Client) {
 	userConfigs.forEach((config) => {
 		const suscriptions = new Map<string, string[]>();
 		for (const [chId, tags] of config.feedTagSuscriptions) suscriptions.set(chId, tags);
-		feedTagSuscriptionsCache.set(config.userId, suscriptions);
+		feedTagSubscriptionsCache.set(config.userId, suscriptions);
 	});
-	logOptions.feedSuscriptions && console.log({ feedTagSuscriptionsCache });
+	logOptions.feedSuscriptions && console.log({ feedTagSuscriptionsCache: feedTagSubscriptionsCache });
 
 	console.log(chalk.gray('Preparando recordatorios...'));
 	await processReminders();

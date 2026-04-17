@@ -14,7 +14,7 @@ import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import Logger from '@/utils/logs';
 import { getMainBooruClient } from './booruclient';
 
-const { debug, warn, error } = Logger('DEBUG', 'BooruFeed');
+const { debug, info, warn, error, fatal } = Logger('DEBUG', 'BooruFeed');
 
 export interface FeedData extends PostFormatData {
 	tags: string;
@@ -22,14 +22,17 @@ export interface FeedData extends PostFormatData {
 	faults?: number;
 }
 
-/** Global cache for user feed tag subscriptions */
-export const feedTagSuscriptionsCache: Map<Snowflake, Map<Snowflake, Array<string>>> = new Map();
+/**Global cache for user feed tag subscriptions.*/
+export const feedTagSubscriptionsCache: Map<Snowflake, Map<Snowflake, Array<string>>> = new Map();
 
-/** Feed update configuration */
+/**Base update interval for feeds before accounting for chunk subdivision.*/
 export const FEED_UPDATE_INTERVAL = minutesToMilliseconds(30);
+/**How many Posts can a Feed request from a Booru at a time.*/
 export const FEED_UPDATE_MAX_POST_COUNT = 32;
-export const FEED_BATCH_MAX_COUNT = 20;
+/**Maximum Feed count a chunk can contain before needing a new subdivision.*/
+export const FEED_CHUNK_MAX_SIZE = 5;
 
+/**Represents a collection of chunks to be batch-fetched together during Feed updates within a certain time period.*/
 export interface FeedChunk {
 	feeds: Map<string, FeedDocument>;
 	tid: NodeJS.Timeout | null;
@@ -39,8 +42,10 @@ export interface FeedChunk {
 async function updateBooruFeeds(feedChunk: FeedChunk): Promise<void> {
 	const booru = getMainBooruClient();
 	const startMs = Date.now();
+	debug(`Received a request to update Boorus at ${new Date(startMs)}.`);
 
 	try {
+		debug('About to update Boorus.');
 		await processFeeds(booru, feedChunk).catch(console.error);
 	} catch (err) {
 		const now = new Date(Date.now());
@@ -56,9 +61,11 @@ async function updateBooruFeeds(feedChunk: FeedChunk): Promise<void> {
 	}
 
 	const delayMs = Date.now() - startMs;
+	info(`Concluded a request to update Boorus in ${delayMs}ms (${delayMs / 1000}s).`);
 
-	// reschedule same chunk
-	setTimeout(updateBooruFeeds, FEED_UPDATE_INTERVAL - delayMs, feedChunk);
+	const nextMs = Math.max(10_000, FEED_UPDATE_INTERVAL - delayMs);
+	setTimeout(updateBooruFeeds, nextMs, feedChunk);
+	debug(`Next update request should have been programmed at ${new Date(Date.now() + nextMs)}.`);
 
 	auditAction('Feeds procesados', {
 		name: 'Feeds',
@@ -86,6 +93,8 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 
 	await Promise.all(
 		feeds.map(async (feed) => {
+			debug(`Processing Feed #${feed.channelId}`);
+
 			if (client == null) throw new ClientNotFoundError();
 
 			const guild = client.guilds.cache.get(feed.guildId);
@@ -96,39 +105,51 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 				| undefined;
 			if (!channel) return;
 
+			debug(
+				`Identified Feed #${feed.channelId} as belonging to channel "#${channel.name}" in guild "${guild.name}" (${guild.id})`,
+			);
+
 			const booruFeed = new BooruFeed(booru, feed.guildId, feed.channelId, feed.searchTags, {
 				lastFetchedAt: feed.lastFetchedAt,
 				faults: feed.faults,
 			});
 
 			if (!booruFeed.isRunning) return;
+			debug(`Feed #${feed.channelId} is running.`);
+
 			if (!booruFeed.isProcessable) return;
+			debug(`Feed #${feed.channelId} is processable.`);
 
 			const { success, posts, newPosts } = await booruFeed.fetchPosts();
+			debug(
+				`Feed #${feed.channelId} tried to fetch posts and was ${success ? 'SUCCESSFUL' : 'UNSUCCESSFUL'}.`,
+			);
 
 			if (!success) return;
+			debug(
+				`Feed #${feed.channelId} retrieved ${posts.length} posts, of which ${newPosts.length} were new.`,
+			);
 
 			if (!posts.length) {
+				debug(
+					`Because, no posts were retrieved for Feed #${feed.channelId}, it's processing will conclude as FAULTY for now.`,
+				);
 				const write = booruFeed.addFault();
 				if (write) bulkOps.push(write);
 				return;
 			}
 
-			if (!newPosts.length) {
-				//FIXME
-				bulkOps.push(booruFeed.reduceFaults());
-				return;
-			}
+			const feedSubscriptions: Suscription[] = [];
 
-			const feedSuscriptions: Suscription[] = [];
-
-			for (const [userId, feedMap] of feedTagSuscriptionsCache) {
+			debug(`Preparing candidate user Feed tag subscriptions for Feed #${feed.channelId}.`);
+			for (const [userId, feedMap] of feedTagSubscriptionsCache) {
 				const tags = feedMap.get(feed.channelId);
-				if (tags) feedSuscriptions.push({ userId, followedTags: tags });
+				if (tags) feedSubscriptions.push({ userId, followedTags: tags });
 			}
 
 			let faultedDuringSend = false;
 
+			debug(`Feed #${feed.channelId} is about to send Booru posts to Discord.`);
 			for (const post of newPosts) {
 				try {
 					const container = await formatBooruPostMessage(booru, post, booruFeed);
@@ -139,7 +160,7 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 					});
 
 					const members = guild.members.cache;
-					await notifyUsers(post, sent, members, feedSuscriptions);
+					await notifyUsers(post, sent, members, feedSubscriptions);
 				} catch (err) {
 					faultedDuringSend = true;
 					warn(`Error sending post ${post.id} in ${channel.name}`);
@@ -152,11 +173,15 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 				}
 			}
 
+			debug(
+				`Feed #${feed.channelId} ${faultedDuringSend ? 'FAILED TO SEND' : 'SUCCESSFULLY SENT'} posts to Discord.`,
+			);
+
 			if (faultedDuringSend) {
 				const write = booruFeed.addFault();
 				if (write) bulkOps.push(write);
 				return;
-			}
+			} else bulkOps.push(booruFeed.reduceFaults());
 
 			const update: Partial<FeedData> = {};
 
@@ -179,7 +204,7 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 	}
 }
 
-function getNextBaseUpdateStart(): number {
+function getNextBaseDelay(): number {
 	const now = new Date();
 
 	let delay =
@@ -192,16 +217,45 @@ function getNextBaseUpdateStart(): number {
 	return delay;
 }
 
+function getNextChunkDelay(
+	feedBaseUpdateDelay: number,
+	chunkIndex: number,
+	feedChunks: FeedChunk[],
+) {
+	const chunkCount = feedChunks.length;
+	return feedBaseUpdateDelay + (FEED_UPDATE_INTERVAL * chunkIndex) / chunkCount;
+}
+
 export async function setupFeedUpdateStack() {
 	const feeds = await FeedConfigModel.find({});
 
-	rebuildFeedChunks(feeds);
+	const shortestUpdateDelayMs = rebuildFeedChunks(feeds);
+	const feedCount = feeds.length;
+	const feedChunks = globalConfigs.feedChunks;
+	const chunkCount = feedChunks.length;
 
-	auditAction('Feeds inicializados', {
-		name: 'Feeds',
-		value: `${feeds.length}`,
-		inline: true,
-	});
+	if (!shortestUpdateDelayMs) {
+		const err = new Error("Couldn't set up Feed chunks.");
+		fatal(err);
+		throw err;
+	}
+
+	debug.dir({ feedCount, chunkCount, feedChunks, shortestUpdateDelayMs }, { depth: null });
+
+	auditAction(
+		'Se prepararon Feeds',
+		{
+			name: 'Primer Envío',
+			value: `<t:${Math.floor((Date.now() + shortestUpdateDelayMs) * 0.001)}:R>`,
+			inline: true,
+		},
+		{ name: 'Intervalo Base', value: `${FEED_UPDATE_INTERVAL / 60e3} minutos`, inline: true },
+		{
+			name: 'Subdivisiones',
+			value: `${chunkCount}\n-# ${feedCount} Feeds en total`,
+			inline: true,
+		},
+	);
 }
 
 function rebuildFeedChunks(feeds: Iterable<FeedDocument>) {
@@ -209,15 +263,15 @@ function rebuildFeedChunks(feeds: Iterable<FeedDocument>) {
 
 	for (const feed of feeds) feedMap.set(feed.channelId, feed);
 
-	const feedChunks = paginateFeeds(feedMap, FEED_BATCH_MAX_COUNT);
+	const feedChunks = paginateFeeds(feedMap, FEED_CHUNK_MAX_SIZE);
 
-	const feedUpdateStart = getNextBaseUpdateStart();
-	let shortestTime = 0;
+	const feedUpdateStart = getNextBaseDelay();
+	let shortestUpdateDelayMs: number | undefined;
 
 	feedChunks.forEach((feedChunk, i) => {
-		const delay = feedUpdateStart + FEED_UPDATE_INTERVAL * (i / feedChunks.length);
+		const delay = getNextChunkDelay(feedUpdateStart, i, feedChunks);
 
-		if (!shortestTime || delay < shortestTime) shortestTime = delay;
+		if (!shortestUpdateDelayMs || delay < shortestUpdateDelayMs) shortestUpdateDelayMs = delay;
 
 		feedChunk.tid = setTimeout(updateBooruFeeds, delay, feedChunk);
 		feedChunk.timestamp = new Date(Date.now() + delay);
@@ -225,7 +279,7 @@ function rebuildFeedChunks(feeds: Iterable<FeedDocument>) {
 
 	globalConfigs.feedChunks = feedChunks;
 
-	return shortestTime;
+	return shortestUpdateDelayMs;
 }
 
 function paginateFeeds(map: Map<string, FeedDocument>, size: number): FeedChunk[] {
@@ -252,14 +306,30 @@ export function addFeedToUpdateStack(feed: FeedDocument): number {
 
 	if (feedChunks.some((feedChunk) => feedChunk.feeds.has(feed.channelId))) return 0;
 
-	const feeds = feedChunks.flatMap((feedChunk) => [...feedChunk.feeds.values()]);
+	const lastChunk = feedChunks[feedChunks.length - 1];
+	const feedUpdateStart = getNextBaseDelay();
+	let shortestUpdateDelayMs: number | undefined;
 
-	feeds.push(feed);
+	if (lastChunk.feeds.size < FEED_CHUNK_MAX_SIZE) {
+		lastChunk.feeds.set(feed.channelId, feed);
+		shortestUpdateDelayMs = +(lastChunk.timestamp ?? 0) - Date.now();
+	} else {
+		const newChunk: FeedChunk = {
+			feeds: new Map([[feed.channelId, feed]]),
+			tid: null,
+			timestamp: null,
+		};
+		const delay = getNextChunkDelay(feedUpdateStart, feedChunks.length - 1, feedChunks);
 
-	const newUpdateDelay = rebuildFeedChunks(feeds);
+		if (!shortestUpdateDelayMs || delay < shortestUpdateDelayMs) shortestUpdateDelayMs = delay;
+
+		newChunk.tid = setTimeout(updateBooruFeeds, delay, newChunk);
+		newChunk.timestamp = new Date(Date.now() + delay);
+		feedChunks.push(newChunk);
+	}
 
 	auditAction(`Canal ${feed.channelId} incorporado a Feeds`);
-	return newUpdateDelay;
+	return shortestUpdateDelayMs;
 }
 
 export function updateFollowedFeedTagsCache(
@@ -273,19 +343,17 @@ export function updateFollowedFeedTagsCache(
 		throw ReferenceError('Se requiere una ID de canal de tipo string');
 	if (!Array.isArray(newTags)) throw TypeError('Las tags a incorporar deben ser un array');
 
-	if (!feedTagSuscriptionsCache.has(userId)) feedTagSuscriptionsCache.set(userId, new Map());
+	if (!feedTagSubscriptionsCache.has(userId)) feedTagSubscriptionsCache.set(userId, new Map());
 
-	const userMap = feedTagSuscriptionsCache.get(userId);
+	const userMap = feedTagSubscriptionsCache.get(userId) as Map<string, string[]>;
 
-	if (newTags.length) {
-		feedTagSuscriptionsCache.set(userId, new Map([[channelId, newTags]]));
+	if (!newTags.length) {
+		userMap.delete(channelId);
+		if (!userMap.size) feedTagSubscriptionsCache.delete(userId);
 		return;
 	}
 
-	if (!userMap) return;
-
-	userMap.delete(channelId);
-	if (!userMap.size) feedTagSuscriptionsCache.delete(userId);
+	userMap.set(channelId, newTags);
 }
 
 export interface FeedOptions {
