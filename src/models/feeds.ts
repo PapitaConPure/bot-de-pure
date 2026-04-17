@@ -1,11 +1,12 @@
 import Mongoose, { type InferSchemaType } from 'mongoose';
 
 export const FeedConfigSchema = new Mongoose.Schema({
-	guildId: {
+	channelId: {
 		type: String,
 		required: true,
+		unique: true,
 	},
-	channelId: {
+	guildId: {
 		type: String,
 		required: true,
 	},
