@@ -63,7 +63,7 @@ async function processFeeds(booru: BooruClient, guilds: Collection<Snowflake, Gu
 	const guildIds = guilds.map((g) => g.id);
 	const guildConfigs = await GuildConfigs.find({
 		guildId: { $in: guildIds },
-		feeds: { $exists: true, $ne: {} },
+		feeds: { $exists: true, $ne: new Map() },
 	});
 
 	const bulkOps: (AnyBulkWriteOperation<GuildConfigSchemaType> | undefined)[] = [];
