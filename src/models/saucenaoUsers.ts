@@ -11,6 +11,6 @@ export type SauceNAOUserSchemaType = InferSchemaType<typeof SauceNAOUserSchema>;
 
 const SauceNAOUserModel = Mongoose.model('SauceNAOUser', SauceNAOUserSchema);
 
-export type SauceNAOUserDocument = InferSchemaType<typeof SauceNAOUserModel>;
+export type SauceNAOUserDocument = InstanceType<typeof SauceNAOUserModel>;
 
 export default SauceNAOUserModel;
