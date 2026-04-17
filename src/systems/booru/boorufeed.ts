@@ -1,13 +1,12 @@
-import type { BooruClient, Post } from '@papitaconpure/booru-client';
-import chalk from 'chalk';
+import type { BooruClient } from '@papitaconpure/booru-client';
 import { getUnixTime, minutesToMilliseconds } from 'date-fns';
-import type { Client, Guild, GuildTextBasedChannel, Message, Snowflake } from 'discord.js';
-import { Collection, MessageFlags } from 'discord.js';
+import type { GuildTextBasedChannel, Snowflake } from 'discord.js';
+import { MessageFlags } from 'discord.js';
 import type { AnyBulkWriteOperation } from 'mongoose';
 import { ClientNotFoundError, client } from '@/core/client';
 import { globalConfigs } from '@/data/globalProps';
-import { isNSFWChannel, paginateRaw } from '@/func';
-import GuildConfigs, { type GuildConfigSchemaType } from '@/models/guildconfigs';
+import { isNSFWChannel } from '@/func';
+import { FeedConfigModel, type FeedDocument, type FeedSchemaType } from '@/models/feeds';
 import type { PostFormatData, Suscription } from '@/systems/booru/boorusend';
 import { formatBooruPostMessage, notifyUsers } from '@/systems/booru/boorusend';
 import { auditAction, auditError } from '@/systems/others/auditor';
@@ -15,7 +14,7 @@ import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import Logger from '@/utils/logs';
 import { getMainBooruClient } from './booruclient';
 
-const { debug, warn, error } = Logger('WARN', 'BooruSend');
+const { debug, warn, error } = Logger('DEBUG', 'BooruFeed');
 
 export interface FeedData extends PostFormatData {
 	tags: string;
@@ -23,298 +22,246 @@ export interface FeedData extends PostFormatData {
 	faults?: number;
 }
 
-//Configuraciones globales de actualización de Feeds
+/** Global cache for user feed tag subscriptions */
 export const feedTagSuscriptionsCache: Map<Snowflake, Map<Snowflake, Array<string>>> = new Map();
 
-/**@description Intervalo base de actualización de feeds.*/
+/** Feed update configuration */
 export const FEED_UPDATE_INTERVAL = minutesToMilliseconds(30);
-/**@description Máxima cantidad de posts por actualización de cada feed individual.*/
 export const FEED_UPDATE_MAX_POST_COUNT = 32;
-/**@description Máxima cantidad de feeds por bache de actualización.*/
-export const FEED_BATCH_MAX_COUNT = 5;
+export const FEED_BATCH_MAX_COUNT = 20;
 
-async function updateBooruFeeds(guilds: Collection<Snowflake, Guild>): Promise<void> {
+export interface FeedChunk {
+	feeds: Map<string, FeedDocument>;
+	tid: NodeJS.Timeout | null;
+	timestamp: Date | null;
+}
+
+async function updateBooruFeeds(feedChunk: FeedChunk): Promise<void> {
 	const booru = getMainBooruClient();
 	const startMs = Date.now();
 
 	try {
-		await processFeeds(booru, guilds).catch(console.error);
+		await processFeeds(booru, feedChunk).catch(console.error);
 	} catch (err) {
 		const now = new Date(Date.now());
 		const unixNow = getUnixTime(now);
+
 		auditError(err, {
-			brief: 'Ocurrió un error crítico y verdaderamente inesperado al procesar Feeds',
+			brief: 'Error crítico al procesar Feeds',
 			details: `<t:${unixNow}:F> <t:${unixNow}:R>`,
 			ping: true,
 		});
-		error(err, 'Fecha del error:', now);
+
+		error(err, 'Feed update crash:', now);
 	}
 
 	const delayMs = Date.now() - startMs;
-	setTimeout(updateBooruFeeds, FEED_UPDATE_INTERVAL - delayMs, guilds);
-	auditAction('Se procesaron Feeds', { name: 'Servers', value: `${guilds.size}`, inline: true });
+
+	// reschedule same chunk
+	setTimeout(updateBooruFeeds, FEED_UPDATE_INTERVAL - delayMs, feedChunk);
+
+	auditAction('Feeds procesados', {
+		name: 'Feeds',
+		value: `${feedChunk.feeds.size}`,
+		inline: true,
+	});
 }
 
-/**
- * @param booru El Booru a comprobar
- * @param guilds Colección de Guilds a procesar
- */
-async function processFeeds(booru: BooruClient, guilds: Collection<Snowflake, Guild>) {
-	const guildIds = guilds.map((g) => g.id);
-	const guildConfigs = await GuildConfigs.find({
-		guildId: { $in: guildIds },
-		feeds: { $exists: true, $ne: new Map() },
-	});
+async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
+	if (client == null) throw new ClientNotFoundError();
 
-	const bulkOps: (AnyBulkWriteOperation<GuildConfigSchemaType> | undefined)[] = [];
+	const feeds = [...feedChunk.feeds.values()];
+	const bulkOps: AnyBulkWriteOperation<FeedSchemaType>[] = [];
+
+	const guildGroups = new Map<Snowflake, FeedDocument[]>();
+	for (const feed of feeds) {
+		if (!guildGroups.has(feed.guildId)) guildGroups.set(feed.guildId, []);
+		guildGroups.get(feed.guildId)?.push(feed);
+	}
+
+	for (const guildId of guildGroups.keys()) {
+		const guild = client.guilds.cache.get(guildId);
+		if (guild) await fetchGuildMembers(guild);
+	}
 
 	await Promise.all(
-		guildConfigs.map(async (gcfg) => {
-			const guild = guilds.get(gcfg.guildId);
+		feeds.map(async (feed) => {
+			if (client == null) throw new ClientNotFoundError();
+
+			const guild = client.guilds.cache.get(feed.guildId);
 			if (!guild) return;
 
-			await fetchGuildMembers(guild);
-			const members = guild.members.cache;
+			const channel = guild.channels.cache.get(feed.channelId) as
+				| GuildTextBasedChannel
+				| undefined;
+			if (!channel) return;
 
-			await Promise.all(
-				[...gcfg.feeds.entries()].map(async ([channelId, feedData]) => {
-					const feed = new BooruFeed(booru, guild.id, channelId, feedData.tags, feedData);
-					if (!feed.isRunning) return;
-					if (!feed.isProcessable)
-						return feed.faults < 10 && bulkOps.push(feed.addFault());
+			const booruFeed = new BooruFeed(booru, feed.guildId, feed.channelId, feed.searchTags, {
+				lastFetchedAt: feed.lastFetchedAt,
+				faults: feed.faults,
+			});
 
-					//Recolectar últimas imágenes para el Feed
-					const { success, posts, newPosts } = await feed.fetchPosts();
-					if (!success) return;
-					if (!posts.length) return feed.faults < 10 && bulkOps.push(feed.addFault());
-					if (!newPosts.length) return bulkOps.push(feed.reduceFaults());
+			if (!booruFeed.isRunning) return;
+			if (!booruFeed.isProcessable) return;
 
-					const toSave: Partial<FeedData> = {};
+			const { success, posts, newPosts } = await booruFeed.fetchPosts();
 
-					if (feed.faults > 0) toSave.faults = Math.max(0, feed.faults - 2);
+			if (!success) return;
 
-					//Preparar suscripciones a Feeds
-					const feedSuscriptions: Suscription[] = [];
-					for (const [userId, feedSuscription] of feedTagSuscriptionsCache) {
-						if (!feedSuscription.has(channelId)) continue;
+			if (!posts.length) {
+				const write = booruFeed.addFault();
+				if (write) bulkOps.push(write);
+				return;
+			}
 
-						const followedTags = feedSuscription.get(channelId);
-						if (followedTags) feedSuscriptions.push({ userId, followedTags });
-					}
+			if (!newPosts.length) {
+				//FIXME
+				bulkOps.push(booruFeed.reduceFaults());
+				return;
+			}
 
-					//Comprobar recolectado en busca de imágenes nuevas
-					const channel = feed.channel;
-					const messagesToSend: Message<true>[] = [];
-					let faultedDuringPostSend = false;
+			const feedSuscriptions: Suscription[] = [];
 
-					await Promise.all(
-						newPosts.map(async (post) => {
-							try {
-								if (!feed.channel) {
-									faultedDuringPostSend = true;
-									return;
-								}
+			for (const [userId, feedMap] of feedTagSuscriptionsCache) {
+				const tags = feedMap.get(feed.channelId);
+				if (tags) feedSuscriptions.push({ userId, followedTags: tags });
+			}
 
-								const formattedContainer = await formatBooruPostMessage(
-									booru,
-									post,
-									feed,
-								);
-								const sent = await feed.channel.send({
-									flags: MessageFlags.IsComponentsV2,
-									components: [formattedContainer],
-								});
-								await notifyUsers(post, sent, members, feedSuscriptions);
-								messagesToSend.push(sent);
-							} catch (err) {
-								warn(
-									`Ocurrió un error al enviar la imagen de Feed: ${post.source ?? post.id} para ${channel?.name}`,
-								);
-								error(err);
-								auditError(err, {
-									brief: 'Ocurrió un error al enviar una imagen de Feed',
-									details: `\`Post<"${post.source ?? post.id}">\`\n${channel}`,
-								});
-							}
-						}),
-					);
+			let faultedDuringSend = false;
 
-					if (faultedDuringPostSend)
-						return feed.faults < 10 && bulkOps.push(feed.addFault());
+			for (const post of newPosts) {
+				try {
+					const container = await formatBooruPostMessage(booru, post, booruFeed);
 
-					//Eliminar aquellos Posts no coincidentes con lo encontrado y guardar
-					toSave.lastFetchedAt = feed.lastFetchedAt;
-
-					const $set = {};
-					for (const [key, value] of Object.entries(toSave))
-						$set[`feeds.${channelId}.${key}`] = value;
-
-					return bulkOps.push({
-						updateOne: {
-							filter: { guildId: gcfg.guildId },
-							update: { $set },
-						},
+					const sent = await channel.send({
+						flags: MessageFlags.IsComponentsV2,
+						components: [container],
 					});
-				}),
-			);
+
+					const members = guild.members.cache;
+					await notifyUsers(post, sent, members, feedSuscriptions);
+				} catch (err) {
+					faultedDuringSend = true;
+					warn(`Error sending post ${post.id} in ${channel.name}`);
+					error(err);
+
+					auditError(err, {
+						brief: 'Error enviando post de Feed',
+						details: `Post ${post.id} in ${channel.id}`,
+					});
+				}
+			}
+
+			if (faultedDuringSend) {
+				const write = booruFeed.addFault();
+				if (write) bulkOps.push(write);
+				return;
+			}
+
+			const update: Partial<FeedData> = {};
+
+			if (booruFeed.faults > 0) update.faults = booruFeed.faults;
+			update.lastFetchedAt = booruFeed.lastFetchedAt;
+
+			bulkOps.push({
+				updateOne: {
+					filter: { _id: feed._id },
+					update: { $set: update },
+				},
+			});
 		}),
 	);
 
 	debug.dir(bulkOps, { depth: null });
 
-	if (bulkOps.length) await GuildConfigs.bulkWrite(bulkOps.filter((b) => b != null));
+	if (bulkOps.length) {
+		await FeedConfigModel.bulkWrite(bulkOps);
+	}
 }
 
 function getNextBaseUpdateStart(): number {
-	//Encontrar próximo inicio de fracción de hora para actualizar Feeds
 	const now = new Date();
-	let feedUpdateStart =
+
+	let delay =
 		FEED_UPDATE_INTERVAL
 		- (now.getMinutes() * 60e3 + now.getSeconds() * 1e3 + now.getMilliseconds());
-	while (feedUpdateStart <= 0) feedUpdateStart += FEED_UPDATE_INTERVAL;
-	feedUpdateStart += 30e3; //Añadir 30 segundos para dar ventana de tiempo razonable al update de Gelbooru
-	return feedUpdateStart;
+
+	while (delay <= 0) delay += FEED_UPDATE_INTERVAL;
+
+	delay += 30e3;
+	return delay;
 }
 
-export interface GuildFeedChunk {
-	guilds: Array<[Snowflake, Guild]>;
-	tid: NodeJS.Timeout | null;
-	timestamp: Date | null;
+export async function setupFeedUpdateStack() {
+	const feeds = await FeedConfigModel.find({});
+
+	rebuildFeedChunks(feeds);
+
+	auditAction('Feeds inicializados', {
+		name: 'Feeds',
+		value: `${feeds.length}`,
+		inline: true,
+	});
 }
 
-/**@description Inicializa una cadena de actualización de Feeds en todas las Guilds que cuentan con uno.*/
-export async function setupGuildFeedUpdateStack(client: Client) {
+function rebuildFeedChunks(feeds: Iterable<FeedDocument>) {
+	const feedMap = new Map<string, FeedDocument>();
+
+	for (const feed of feeds) feedMap.set(feed.channelId, feed);
+
+	const feedChunks = paginateFeeds(feedMap, FEED_BATCH_MAX_COUNT);
+
 	const feedUpdateStart = getNextBaseUpdateStart();
-	const guildConfigs = await GuildConfigs.find({ feeds: { $exists: true } });
-
-	const feedChunks = paginateRaw(
-		client.guilds.cache.filter((guild) =>
-			guildConfigs.some((gcfg) => gcfg.guildId === guild.id),
-		),
-		FEED_BATCH_MAX_COUNT,
-	).map((g) => ({ guilds: g, tid: null, timestamp: null }) as GuildFeedChunk);
-
-	const feedCount = guildConfigs
-		.filter((gcfg) => gcfg.feeds.size)
-		.map((gcfg) => gcfg.feeds.size)
-		.reduce((previous, current) => previous + current, 0);
-	const chunkCount = feedChunks.length;
-
 	let shortestTime = 0;
-	feedChunks.forEach((chunk, i) => {
-		const guilds = new Collection(chunk.guilds);
-		let chunkUpdateStart = feedUpdateStart + FEED_UPDATE_INTERVAL * (i / chunkCount);
-		if (chunkUpdateStart - FEED_UPDATE_INTERVAL > 0) chunkUpdateStart -= FEED_UPDATE_INTERVAL;
-		if (!shortestTime || chunkUpdateStart < shortestTime) shortestTime = chunkUpdateStart;
 
-		feedChunks[i].tid = setTimeout(updateBooruFeeds, chunkUpdateStart, guilds);
-		feedChunks[i].timestamp = new Date(Date.now() + chunkUpdateStart);
+	feedChunks.forEach((feedChunk, i) => {
+		const delay = feedUpdateStart + FEED_UPDATE_INTERVAL * (i / feedChunks.length);
+
+		if (!shortestTime || delay < shortestTime) shortestTime = delay;
+
+		feedChunk.tid = setTimeout(updateBooruFeeds, delay, feedChunk);
+		feedChunk.timestamp = new Date(Date.now() + delay);
 	});
 
-	globalConfigs.feedGuildChunks = feedChunks;
+	globalConfigs.feedChunks = feedChunks;
 
-	debug({ feedChunks, feedCount, chunkCount, shortestTime });
+	return shortestTime;
+}
 
-	auditAction(
-		'Se prepararon Feeds',
-		{
-			name: 'Primer Envío',
-			value: `<t:${Math.floor((Date.now() + shortestTime) * 0.001)}:R>`,
-			inline: true,
-		},
-		{ name: 'Intervalo Base', value: `${FEED_UPDATE_INTERVAL / 60e3} minutos`, inline: true },
-		{ name: 'Subdivisiones', value: `${chunkCount}`, inline: true },
-	);
+function paginateFeeds(map: Map<string, FeedDocument>, size: number): FeedChunk[] {
+	const entries = [...map.entries()];
+	const result: FeedChunk[] = [];
 
-	return;
+	for (let i = 0; i < entries.length; i += size) {
+		result.push({
+			feeds: new Map(entries.slice(i, i + size)),
+			tid: null,
+			timestamp: null,
+		});
+	}
+
+	return result;
 }
 
 /**
  * @description Añade la Guild actual a la cadena de actualización de Feeds si aún no está en ella
  * @returns La cantidad de milisegundos que faltan para actualizar el Feed añadido por primera vez, ó -1 si no se pudo agregar
  */
-export function addGuildToFeedUpdateStack(guild: Guild): number {
-	if (!('feedGuildChunks' in globalConfigs)) return -1;
+export function addFeedToUpdateStack(feed: FeedDocument): number {
+	const feedChunks = globalConfigs.feedChunks;
 
-	if (!Array.isArray(globalConfigs.feedGuildChunks)) return -1;
+	if (feedChunks.some((feedChunk) => feedChunk.feeds.has(feed.channelId))) return 0;
 
-	const guildChunks: GuildFeedChunk[] = globalConfigs.feedGuildChunks;
-	const chunkAmount = guildChunks.length;
+	const feeds = feedChunks.flatMap((feedChunk) => [...feedChunk.feeds.values()]);
 
-	//Retornar temprano si la guild ya está integrada al stack
-	const chunkIndexWithThisGuild = guildChunks.findIndex((chunk) =>
-		chunk.guilds.some((g) => guild.id === g[0]),
-	);
-	if (chunkIndexWithThisGuild)
-		return (
-			getNextBaseUpdateStart()
-			+ FEED_UPDATE_INTERVAL * (chunkIndexWithThisGuild / chunkAmount)
-		);
+	feeds.push(feed);
 
-	//Añadir guild a stack en un chunk nuevo o uno ya definido
-	const feedUpdateStart = getNextBaseUpdateStart();
-	let newGuildChunkUpdateDelay = 0;
-	if (guildChunks[guildChunks.length - 1].guilds.length >= FEED_BATCH_MAX_COUNT) {
-		//Subdividir 1 nivel más
-		guildChunks.push({ tid: null, guilds: [[guild.id, guild]], timestamp: null });
-		const chunkAmount = guildChunks.length;
-		let shortestTime = 0;
-		guildChunks.forEach((chunk, i) => {
-			let chunkUpdateStart = feedUpdateStart + FEED_UPDATE_INTERVAL * (i / chunkAmount);
-			if (chunkUpdateStart - FEED_UPDATE_INTERVAL > 0)
-				chunkUpdateStart -= FEED_UPDATE_INTERVAL;
-			if (!shortestTime || chunkUpdateStart < shortestTime) shortestTime = chunkUpdateStart;
+	const newUpdateDelay = rebuildFeedChunks(feeds);
 
-			if (chunk.tid) clearTimeout(chunk.tid);
-			guildChunks[i].tid = setTimeout(
-				updateBooruFeeds,
-				chunkUpdateStart,
-				new Collection(chunk.guilds),
-			);
-			guildChunks[i].timestamp = new Date(Date.now() + chunkUpdateStart);
-		});
-
-		newGuildChunkUpdateDelay = +(guildChunks[chunkAmount - 1].timestamp as Date) - Date.now();
-
-		auditAction(
-			'Intervalos de Feed Reescritos',
-			{
-				name: 'Primer Envío',
-				value: `<t:${Math.floor((Date.now() + shortestTime) * 0.001)}:R>`,
-				inline: true,
-			},
-			{ name: 'Subdivisiones', value: `${chunkAmount}`, inline: true },
-		);
-	} else {
-		//Añadir a última subdivisión
-		guildChunks[guildChunks.length - 1].guilds.push([guild.id, guild]);
-		const chunk = guildChunks[guildChunks.length - 1];
-		const chunkAmount = guildChunks.length;
-		newGuildChunkUpdateDelay =
-			feedUpdateStart + (FEED_UPDATE_INTERVAL * (chunkAmount - 1)) / chunkAmount;
-
-		if (chunk.tid) clearTimeout(chunk.tid);
-		guildChunks[guildChunks.length - 1].tid = setTimeout(
-			updateBooruFeeds,
-			newGuildChunkUpdateDelay,
-			new Collection(chunk.guilds),
-		);
-		guildChunks[guildChunks.length - 1].timestamp = new Date(
-			Date.now() + newGuildChunkUpdateDelay,
-		);
-	}
-
-	auditAction(`Guild ${guild.id} Incorporada a Feeds`);
-	globalConfigs.feedGuildChunks = guildChunks;
-	return newGuildChunkUpdateDelay;
+	auditAction(`Canal ${feed.channelId} incorporado a Feeds`);
+	return newUpdateDelay;
 }
 
-/**
- * @description Actualiza el caché de una suscripción de Feed de un usuario con las tags suministradas
- * @param userId La ID del usuario suspcrito
- * @param channelId La ID del canal del Feed al cuál está suscripto el usuario
- * @param newTags Las tags con las cuáles reemplazar las actuales en caché
- */
 export function updateFollowedFeedTagsCache(
 	userId: Snowflake,
 	channelId: Snowflake,
@@ -328,48 +275,34 @@ export function updateFollowedFeedTagsCache(
 
 	if (!feedTagSuscriptionsCache.has(userId)) feedTagSuscriptionsCache.set(userId, new Map());
 
-	const userMap = feedTagSuscriptionsCache.get(userId) as Map<string, string[]>;
+	const userMap = feedTagSuscriptionsCache.get(userId);
 
-	if (!newTags.length) {
-		userMap.delete(channelId);
-		if (!userMap.size) feedTagSuscriptionsCache.delete(userId);
+	if (newTags.length) {
+		feedTagSuscriptionsCache.set(userId, new Map([[channelId, newTags]]));
 		return;
 	}
 
-	userMap.set(channelId, newTags);
+	if (!userMap) return;
+
+	userMap.delete(channelId);
+	if (!userMap.size) feedTagSuscriptionsCache.delete(userId);
 }
 
 export interface FeedOptions {
 	lastFetchedAt?: Date | null;
 	faults?: number | null;
-	maxTags?: number | null;
-	cornerIcon?: string | null;
-	title?: string | null;
-	subtitle?: string | null;
-	footer?: string | null;
 }
 
-/**@class Representa un Feed programado de imágenes de {@linkcode Booru}.*/
 export class BooruFeed {
-	booru: BooruClient;
-	channel: GuildTextBasedChannel | null;
-	tags: string;
+	readonly booru: BooruClient;
+	readonly tags: string;
+	readonly channel: GuildTextBasedChannel | null;
+	readonly guildId: string;
+	readonly channelId: string;
 
-	lastFetchedAt: Date;
-	faults: number;
-	maxTags: number;
-	cornerIcon: string | undefined;
-	title: string | undefined;
-	subtitle: string | undefined;
-	footer: string | undefined;
+	#lastFetchedAt: Date;
+	#faults: number;
 
-	#guildId: string;
-	#channelId: string;
-
-	/**
-	 * @description Crea una representación de un Feed programado de imágenes de {@linkcode Booru}.
-	 * @throws {TypeError}
-	 */
 	constructor(
 		booru: BooruClient,
 		guildId: string,
@@ -377,131 +310,84 @@ export class BooruFeed {
 		tags: string,
 		options?: FeedOptions,
 	) {
-		if (!client) throw new ClientNotFoundError();
-
-		const guild = client?.guilds.cache.get(guildId);
+		if (client == null) throw new ClientNotFoundError();
+		const guild = client.guilds.cache.get(guildId);
 		const channel = guild?.channels.cache.get(channelId);
 
 		this.booru = booru;
-		this.#guildId = guildId;
-		this.#channelId = channelId;
+		this.guildId = guildId;
+		this.channelId = channelId;
 		this.channel = channel?.isTextBased() ? channel : null;
 		this.tags = tags;
 
-		options ??= {};
-		this.lastFetchedAt =
-			options.lastFetchedAt ?? new Date(Math.floor(Date.now() - FEED_UPDATE_INTERVAL / 2));
-		this.faults = options.faults ?? 0;
-		this.maxTags = options.maxTags ?? 20;
-		this.cornerIcon = options.cornerIcon ?? undefined;
-		this.title = options.title ?? undefined;
-		this.subtitle = options.subtitle ?? undefined;
-		this.footer = options.footer ?? undefined;
+		this.#lastFetchedAt =
+			options?.lastFetchedAt ?? new Date(Date.now() - FEED_UPDATE_INTERVAL / 2);
+
+		this.#faults = options?.faults ?? 0;
 	}
 
 	get isProcessable() {
-		if (!this.booru || !this.channel || !this.tags) return false;
-
-		return this.channel?.guild?.channels.cache.has(this.channelId);
+		return !!this.channel && !!this.tags;
 	}
 
 	get isRunning() {
-		return !this.faults || this.faults < 10;
+		return this.#faults < 10;
 	}
 
-	/**@description Obtiene {@linkcode Post}s que no han sido publicados.*/
-	async fetchPosts(): Promise<
-		| { success: true; posts: Post[]; newPosts: Post[] }
-		| { success: false; posts: []; newPosts: [] }
-	> {
-		try {
-			const fetched = await this.booru.search(this.tags, {
-				limit: FEED_UPDATE_MAX_POST_COUNT,
-			});
-			if (!fetched.length) return { success: true, posts: [], newPosts: [] };
-
-			fetched.reverse();
-			const lastFetchedAt = new Date(this.lastFetchedAt);
-			const firstPost = fetched[0];
-			const lastPost = fetched[fetched.length - 1];
-			const mostRecentPost = firstPost.createdAt > lastPost.createdAt ? firstPost : lastPost;
-			this.lastFetchedAt = mostRecentPost.createdAt;
-
-			const newPosts = fetched.filter((post) => post.createdAt > lastFetchedAt);
-
-			return { success: true, posts: fetched, newPosts: newPosts };
-		} catch (error) {
-			console.log(
-				chalk.redBright(
-					'Ocurrió un problema mientras se esperaban los resultados de búsqueda de un Feed',
-				),
-			);
-			console.log({
-				guildName: this.channel?.guild?.name,
-				channelId: this.channelId,
-				feedTags: this.tags,
-			});
-			console.error(error);
-
-			return { success: false, posts: [], newPosts: [] };
-		}
+	get lastFetchedAt() {
+		return this.#lastFetchedAt;
 	}
 
-	/**
-	 * @description Aumenta el número de fallas del Feed en pasos de 1.
-	 * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}, o `undefined` si ya se registraron 10 fallas.
-	 */
-	addFault(): AnyBulkWriteOperation<GuildConfigSchemaType> | undefined {
-		const channel = this.channel;
-		const guild = channel?.guild;
-
-		auditAction(
-			'Comprobando eliminación de un Feed no disponible',
-			{ name: 'Servidor', value: `${guild}`, inline: true },
-			{ name: 'Canal', value: `${channel ?? 'No disponible'}`, inline: true },
-			{ name: 'Reintentos', value: `${this.faults + 1} / 10`, inline: true },
-		);
-
-		if (this.faults >= 10) return undefined;
-
-		this.faults += 1;
-		return {
-			updateOne: {
-				filter: { guildId: this.guildId },
-				update: { $set: { [`feeds.${this.channelId}.faults`]: this.faults } },
-			},
-		};
-	}
-
-	/**
-	 * @description Reduce progresivamente las fallas detectadas del Feed en pasos de 2.
-	 * @returns Una bulkOp de `updateOne` para un modelo {@linkcode GuildConfigs}.
-	 */
-	reduceFaults(): AnyBulkWriteOperation<GuildConfigSchemaType> | undefined {
-		this.faults = Math.max(0, this.faults - 2);
-		this.lastFetchedAt = new Date(Date.now());
-		return {
-			updateOne: {
-				filter: { guildId: this.guildId },
-				update: {
-					$set: {
-						[`feeds.${this.channelId}.faults`]: this.faults,
-						[`feeds.${this.channelId}.lastFetchedAt`]: this.lastFetchedAt,
-					},
-				},
-			},
-		};
+	get faults() {
+		return this.#faults;
 	}
 
 	get allowNSFW() {
 		return this.channel ? isNSFWChannel(this.channel) : false;
 	}
 
-	get guildId() {
-		return this.channel?.guild?.id ?? this.#guildId;
+	async fetchPosts() {
+		try {
+			const fetched = await this.booru.search(this.tags, {
+				limit: FEED_UPDATE_MAX_POST_COUNT,
+			});
+
+			if (!fetched.length) return { success: true, posts: [], newPosts: [] };
+
+			const last = new Date(this.#lastFetchedAt);
+
+			const newPosts = fetched.filter((p) => p.createdAt > last);
+
+			this.#lastFetchedAt = fetched[0].createdAt;
+
+			return { success: true, posts: fetched, newPosts };
+		} catch (err) {
+			console.error(err);
+			return { success: false, posts: [], newPosts: [] };
+		}
 	}
 
-	get channelId() {
-		return this.channel?.id ?? this.#channelId;
+	addFault(): AnyBulkWriteOperation<FeedSchemaType> | undefined {
+		if (this.#faults >= 10) return undefined;
+
+		this.#faults++;
+
+		return {
+			updateOne: {
+				filter: { _id: this.channelId },
+				update: { $set: { faults: this.#faults } },
+			},
+		};
+	}
+
+	reduceFaults(): AnyBulkWriteOperation<FeedSchemaType> {
+		this.#faults = Math.max(0, this.#faults - 2);
+
+		return {
+			updateOne: {
+				filter: { _id: this.channelId },
+				update: { $set: { faults: this.#faults, lastFetchedAt: this.#lastFetchedAt } },
+			},
+		};
 	}
 }

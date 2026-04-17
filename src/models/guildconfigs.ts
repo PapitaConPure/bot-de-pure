@@ -1,5 +1,4 @@
 import Mongoose, { type InferSchemaType } from 'mongoose';
-import { FeedConfigSchema, type FeedSchemaType } from './feeds';
 import { makeStringIdValidator } from './modelUtils';
 import { TuberSchema, type TuberSchemaType } from './tubers';
 
@@ -23,14 +22,6 @@ const GuildConfigSchema = new Mongoose.Schema(
 			default: () => new Map(),
 			required: true,
 		},
-
-		/**Feeds de imágenes del servidor. */
-		feeds: {
-			type: Map,
-			of: FeedConfigSchema,
-			default: () => new Map(),
-			required: true,
-		},
 	},
 	{
 		methods: {
@@ -45,20 +36,6 @@ const GuildConfigSchema = new Mongoose.Schema(
 				tuber[field] = value;
 				this.tubers.set(tuberId, tuber);
 				this.markModified(`tubers.${tuberId}.${field}`);
-
-				return true;
-			},
-			setFeedField<TKey extends keyof FeedSchemaType>(
-				feedId: string,
-				field: TKey,
-				value: FeedSchemaType[TKey],
-			) {
-				const feed = this.feeds.get(feedId);
-				if (!feed) return false;
-
-				feed[field] = value;
-				this.feeds.set(feedId, feed);
-				this.markModified(`feeds.${feedId}.${field}`);
 
 				return true;
 			},

@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { tenshiColor } from '@/data/globalProps';
-import GuildConfig from '@/models/guildconfigs.js';
+import FeedConfigModel from '@/models/feeds';
 import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('PAPA');
@@ -62,18 +62,16 @@ const command = new Command('papa-feedback', tags)
 			),
 		];
 
-		const guildConfigs = await GuildConfig.find({});
-		const guilds = client.guilds.cache;
-		guildConfigs.forEach((guildConfig) => {
-			const guild = guilds.get(guildConfig.guildId);
+		const feedConfigs = await FeedConfigModel.find({});
+		feedConfigs.forEach((feedConfig) => {
+			const guild = client.guilds.cache.get(feedConfig.guildId);
 			const channels = guild?.channels.cache;
-			[...guildConfig.feeds.entries()].forEach(([channelId]) => {
-				const channel = channels?.get(channelId);
-				if (!channel?.isSendable()) return;
-				channel.send({
-					embeds: [feedbackEmbed],
-					components: feedbackRows,
-				});
+			const channelId = feedConfig.channelId;
+			const channel = channels?.get(channelId);
+			if (!channel?.isSendable()) return;
+			channel.send({
+				embeds: [feedbackEmbed],
+				components: feedbackRows,
 			});
 		});
 	});

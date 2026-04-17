@@ -2,7 +2,7 @@ import { lookupService } from 'node:dns';
 import { promisify } from 'node:util';
 import { color } from 'bun';
 import type { Guild, GuildTextBasedChannel } from 'discord.js';
-import type { GuildFeedChunk } from '@/systems/booru/boorufeed';
+import type { FeedChunk } from '@/systems/booru/boorufeed';
 
 //Entorno
 /**@description Si se está en un entorno de producción (`true`) o de desarrollo (`false`, por defecto).*/
@@ -170,5 +170,5 @@ export const globalConfigs = {
 	pureTableImage: null,
 	/**@description Emojis cargados en memoria.*/
 	loademotes: {},
-	feedGuildChunks: [] as GuildFeedChunk[],
+	feedChunks: [] as FeedChunk[],
 };

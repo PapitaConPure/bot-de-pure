@@ -1,46 +1,51 @@
 import Mongoose, { type InferSchemaType } from 'mongoose';
 
-export const FeedConfigSchema = new Mongoose.Schema(
-	{
-		ids: {
-			type: [String],
-			default: [],
-		},
-		tags: {
-			type: String,
-			required: true,
-		},
-		faults: {
-			type: Number,
-			default: 0,
-		},
-		lastFetchedAt: {
-			type: Date,
-			default: Date.UTC(1970, 0, 1, 0, 0, 0, 0),
-		},
-		title: {
-			type: String,
-		},
-		subtitle: {
-			type: String,
-		},
-		maxTags: {
-			type: Number,
-		},
-		cornerIcon: {
-			type: String,
-		},
-		footer: {
-			type: String,
-		},
+export const FeedConfigSchema = new Mongoose.Schema({
+	guildId: {
+		type: String,
+		required: true,
 	},
-	{ _id: false },
-);
+	channelId: {
+		type: String,
+		required: true,
+	},
+	searchTags: {
+		type: String,
+		required: true,
+	},
+	sentIds: {
+		type: [String],
+		default: [],
+	},
+	faults: {
+		type: Number,
+		default: 0,
+	},
+	lastFetchedAt: {
+		type: Date,
+		required: true,
+	},
+	title: {
+		type: String,
+	},
+	subtitle: {
+		type: String,
+	},
+	maxGeneralTags: {
+		type: Number,
+	},
+	icon: {
+		type: String,
+	},
+	footerText: {
+		type: String,
+	},
+});
 
 export type FeedSchemaType = InferSchemaType<typeof FeedConfigSchema>;
 
-const FeedConfigModel = Mongoose.model('FeedConfig', FeedConfigSchema);
+export const FeedConfigModel = Mongoose.model('FeedConfig', FeedConfigSchema);
 
-export type FeedDocument = InferSchemaType<typeof FeedConfigModel>;
+export type FeedDocument = InstanceType<typeof FeedConfigModel>;
 
 export default FeedConfigModel;

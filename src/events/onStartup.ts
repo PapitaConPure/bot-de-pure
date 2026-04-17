@@ -33,7 +33,7 @@ import serverIds from '../data/serverIds.json';
 import PrefixPairs from '../models/prefixpair';
 import { PureTable, type PureTableSchemaType, pureTableAssets } from '../models/puretable';
 import UserConfigModel from '../models/userconfigs';
-import { feedTagSuscriptionsCache, setupGuildFeedUpdateStack } from '../systems/booru/boorufeed';
+import { feedTagSuscriptionsCache, setupFeedUpdateStack } from '../systems/booru/boorufeed';
 import { auditSystem } from '../systems/others/auditor';
 import { initializeMessageCascades } from '../systems/others/messageCascades';
 import { prepareTracksPlayer } from '../systems/others/musicPlayer';
@@ -256,5 +256,5 @@ export async function onStartup(client: Client) {
 		{ name: 'Fecha', value: `<t:${getUnixTime(new Date(Date.now()))}:f>`, inline: true },
 	);
 
-	await setupGuildFeedUpdateStack(client);
+	await setupFeedUpdateStack();
 }

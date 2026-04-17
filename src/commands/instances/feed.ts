@@ -31,9 +31,9 @@ import {
 	shortenTextLoose,
 } from '@/func';
 import { Translator } from '@/i18n';
-import GuildConfig from '@/models/guildconfigs.js';
+import FeedConfigModel from '@/models/feeds';
 import { getMainBooruClient } from '@/systems/booru/booruclient';
-import { addGuildToFeedUpdateStack } from '@/systems/booru/boorufeed';
+import { addFeedToUpdateStack } from '@/systems/booru/boorufeed';
 import {
 	formatBooruPostMessage,
 	formatTagNameListNew,
@@ -62,27 +62,23 @@ const safeTags = (_tags = '') => _tags.replace(/\\*\*/g, '\\*').replace(/\\*_/g,
 const generateFeedOptions = async (
 	interaction: ButtonInteraction,
 ): Promise<SelectMenuComponentOptionData[]> => {
-	const gcfg = await GuildConfig.findOne({ guildId: interaction.guild?.id });
+	const feeds = await FeedConfigModel.find({ guildId: interaction.guild?.id });
 
-	if (!gcfg) return [];
+	if (!feeds.length) return [];
 
-	const feedOptions = [...gcfg.feeds.entries()]
-		.map(([chid, feed]) => {
-			const channel = interaction.guild?.channels.cache.get(chid);
-			if (!channel) {
-				gcfg.feeds.delete(chid);
-				gcfg.markModified(`feeds.${chid}`);
-				return null;
-			}
+	const feedOptions = feeds
+		.map((feed) => {
+			const channel = interaction.guild?.channels.cache.get(feed.channelId);
+
+			if (!channel) return null;
+
 			return {
-				label: shortenText(feed.tags, 99),
+				label: shortenText(feed.searchTags, 99),
 				description: `#${channel.name}`,
-				value: chid,
+				value: feed.channelId,
 			};
 		})
 		.filter((feed) => feed != null);
-
-	gcfg.save();
 
 	return feedOptions;
 };
@@ -187,13 +183,11 @@ const command = new Command('feed', tags)
 	})
 	.setButtonResponse(async function startWizard(interaction) {
 		const guildQuery = { guildId: interaction.guild.id };
-		const promises = await Promise.all([
-			GuildConfig.findOne(guildQuery),
+		const [feeds, translator] = await Promise.all([
+			FeedConfigModel.find(guildQuery),
 			Translator.from(interaction.user.id),
 		]);
-		const gcfg = promises[0] || new GuildConfig(guildQuery);
-		const translator = promises[1];
-		const hasFeeds = gcfg.feeds.size;
+		const hasFeeds = feeds.length;
 
 		const authorId = compressId(interaction.user.id);
 		const wizard = new EmbedBuilder()
@@ -293,10 +287,10 @@ const command = new Command('feed', tags)
 					flags: MessageFlags.Ephemeral,
 				});
 
-			const guildQuery = { guildId: interaction.guild.id };
-			const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
+			const channelQuery = { channelId: fetchedChannel.id };
+			const channelHasFeed = await FeedConfigModel.exists(channelQuery);
 
-			if (gcfg.feeds.has(fetchedChannel.id))
+			if (channelHasFeed)
 				return interaction.reply({
 					content:
 						'⚠️ Ya existe un Feed en el canal solicitado. Prueba editarlo o crear un Feed en otro canal',
@@ -357,17 +351,15 @@ const command = new Command('feed', tags)
 					content: translator.getText('invalidChannel'),
 				});
 
-			const guildQuery = { guildId: interaction.guild.id };
-			const gcfg = (await GuildConfig.findOne(guildQuery)) || new GuildConfig(guildQuery);
-			const feedId = fetchedChannel.id;
+			const feed = await FeedConfigModel.findOne({ channelId });
 
-			if (!gcfg.feeds.get(feedId)) return interaction.deleteReply();
+			if (!feed) return interaction.deleteReply();
 
-			gcfg.setFeedField(feedId, 'tags', input);
-			gcfg.setFeedField(feedId, 'lastFetchedAt', new Date(Date.now()));
+			feed.searchTags = input;
+			feed.lastFetchedAt = new Date();
 
-			const firstUpdateDelay = addGuildToFeedUpdateStack(interaction.guild);
-			await gcfg.save();
+			const firstUpdateDelay = addFeedToUpdateStack(feed);
+			await feed.save();
 
 			const concludedEmbed = new EmbedBuilder()
 				.setColor(Colors.DarkVividPink)
@@ -697,11 +689,8 @@ const command = new Command('feed', tags)
 
 			const allowNSFW = isNSFWChannel(feedChannel);
 
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guildId });
-			if (!gcfg)
-				return interaction.editReply({ content: translator.getText('invalidChannel') });
+			const feed = await FeedConfigModel.findOne({ channelId: feedChannel.id });
 
-			const feed = gcfg.feeds.get(feedChannel.id);
 			if (!feed)
 				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
@@ -717,7 +706,7 @@ const command = new Command('feed', tags)
 						name: 'Destino',
 						value: `**${feedChannel.name}** (canal ${allowNSFW ? 'NSFW' : 'SFW'})`,
 					},
-					{ name: 'Tags del Feed', value: `\`\`\`${feed?.tags}\`\`\`` },
+					{ name: 'Tags del Feed', value: `\`\`\`${feed?.searchTags}\`\`\`` },
 				);
 
 			await interaction.message
@@ -736,7 +725,7 @@ const command = new Command('feed', tags)
 				.catch(console.error);
 
 			const booru = getMainBooruClient();
-			const post = randInArray(await booru.search(feed.tags, { limit: 42 }));
+			const post = randInArray(await booru.search(feed.searchTags, { limit: 42 }));
 			if (!post)
 				return interaction.editReply({
 					content: 'Las tags del feed no dieron ningún resultado',
@@ -764,8 +753,12 @@ const command = new Command('feed', tags)
 		async function selectedDelete(interaction, authorId) {
 			const translator = await Translator.from(interaction.user.id);
 			const chid = interaction.values[0];
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-			const tags = gcfg?.feeds[chid].tags;
+			const feed = await FeedConfigModel.findOne({ channelId: chid });
+
+			if (!feed)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
+
+			const tags = feed.searchTags;
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Red)
 				.setAuthor({
@@ -777,6 +770,7 @@ const command = new Command('feed', tags)
 					name: 'Confirmar eliminación de Feed',
 					value: `Estás por borrar el Feed _"${safeTags(tags)}"_ ubicado en el canal **<#${chid}>**. ¿Estás seguro?`,
 				});
+
 			return interaction.update({
 				embeds: [wizard],
 				components: [
@@ -818,15 +812,13 @@ const command = new Command('feed', tags)
 				finishButton(translator, authorId),
 			);
 
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
+			const feed = await FeedConfigModel.findOne({ channelId });
 
-			if (!gcfg)
-				throw new ReferenceError('GuildConfigs not found during deleteOne() user command.');
+			if (!feed)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
-			gcfg.feeds.delete(channelId);
-			gcfg.markModified('feeds');
 			return Promise.all([
-				gcfg.save(),
+				feed.deleteOne(),
 				interaction.update({
 					embeds: [wizard],
 					components: [rows],
@@ -1076,14 +1068,17 @@ const command = new Command('feed', tags)
 	)
 	.setModalResponse(
 		async function setCustomTitle(interaction, channelId) {
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-			if (!gcfg) return interaction.deleteReply();
+			const [feed, translator] = await Promise.all([
+				FeedConfigModel.findOne({ channelId }),
+				Translator.from(interaction),
+			]);
 
-			if (!gcfg.feeds.get(channelId)) return interaction.deleteReply();
+			if (!feed)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
 			const input = interaction.fields.getTextInputValue('titleInput');
-			gcfg.setFeedField(channelId, 'title', input);
-			gcfg.save();
+			feed.title = input;
+			await feed.save();
 
 			return interaction.reply({
 				content: '✅ Título actualizado',
@@ -1094,8 +1089,13 @@ const command = new Command('feed', tags)
 	)
 	.setModalResponse(
 		async function setCustomMaxTags(interaction, channelId) {
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-			if (!gcfg) return interaction.deleteReply();
+			const [feed, translator] = await Promise.all([
+				FeedConfigModel.findOne({ channelId }),
+				Translator.from(interaction),
+			]);
+
+			if (!feed)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
 			const input = interaction.fields.getTextInputValue('tagsInput');
 			const maxTags = parseInt(input, 10);
@@ -1105,10 +1105,8 @@ const command = new Command('feed', tags)
 					content: '⚠️ Cantidad inválida. Introduce un número entre 0 y 50',
 				});
 
-			if (!gcfg.feeds.get(channelId)) return interaction.deleteReply();
-
-			gcfg.setFeedField(channelId, 'maxTags', maxTags);
-			gcfg.save();
+			feed.maxGeneralTags = maxTags;
+			await feed.save();
 
 			return interaction.reply({
 				content: '✅ Cantidad de tags máxima actualizada',
@@ -1119,15 +1117,17 @@ const command = new Command('feed', tags)
 	)
 	.setModalResponse(
 		async function setCustomSubtitle(interaction, channelId) {
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-			if (!gcfg) return interaction.deleteReply();
+			const [feed, translator] = await Promise.all([
+				FeedConfigModel.findOne({ channelId }),
+				Translator.from(interaction),
+			]);
+
+			if (!feed)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
 			const input = interaction.fields.getTextInputValue('subtitleInput');
-
-			if (!gcfg.feeds.get(channelId)) return interaction.deleteReply();
-
-			gcfg.setFeedField(channelId, 'subtitle', input);
-			gcfg.save();
+			feed.subtitle = input;
+			await feed.save();
 
 			return interaction.reply({
 				content: '✅ Antetítulo actualizado',
@@ -1138,15 +1138,17 @@ const command = new Command('feed', tags)
 	)
 	.setModalResponse(
 		async function setCustomFooter(interaction, channelId) {
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-			if (!gcfg) return interaction.deleteReply();
+			const [feed, translator] = await Promise.all([
+				FeedConfigModel.findOne({ channelId }),
+				Translator.from(interaction),
+			]);
+
+			if (!feed)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
 			const input = interaction.fields.getTextInputValue('footerInput');
-
-			if (!gcfg.feeds.get(channelId)) return interaction.deleteReply();
-
-			gcfg.setFeedField(channelId, 'footer', input);
-			gcfg.save();
+			feed.footerText = input;
+			await feed.save();
 
 			return interaction.reply({
 				content: '✅ Pie de imagen actualizado',
@@ -1157,33 +1159,34 @@ const command = new Command('feed', tags)
 	)
 	.setModalResponse(
 		async function setCustomIcon(interaction, channelId) {
-			const [gcfg] = await Promise.all([
-				GuildConfig.findOne({ guildId: interaction.guild.id }),
+			const [feed, translator] = await Promise.all([
+				FeedConfigModel.findOne({ channelId }),
+				Translator.from(interaction),
 				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 			]);
-			if (!gcfg) return interaction.deleteReply();
+
+			if (!feed)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
 			const input = interaction.fields.getTextInputValue('iconInput');
 
-			//Crear embed de prueba para asegurarse de que el enlace sea una imagen válida
-			const testEmbed = new EmbedBuilder()
-				.setColor(Colors.White)
-				.setAuthor({ name: 'Verificando enlace...', iconURL: input });
-
 			try {
-				const sent = await interaction.channel?.send({ embeds: [testEmbed] });
-				console.log(sent?.embeds[0].author);
-				if (sent?.embeds[0].author?.iconURL) {
-					if (!gcfg.feeds.get(channelId)) return interaction.deleteReply();
+				//Crear embed de prueba para asegurarse de que el enlace sea una imagen válida
+				const testEmbed = new EmbedBuilder()
+					.setColor(Colors.White)
+					.setAuthor({ name: 'Verificando enlace...', iconURL: input });
 
-					gcfg.setFeedField(channelId, 'cornerIcon', input);
-					gcfg.save();
-				}
+				const sent = await interaction.channel?.send({ embeds: [testEmbed] });
+
 				setTimeout(() => {
 					if (sent?.deletable) sent.delete().catch(console.error);
 				}, 1500);
-				gcfg.markModified('feeds');
-				gcfg.save();
+
+				if (sent?.embeds[0].author?.iconURL) {
+					feed.icon = input;
+					await feed.save();
+				}
+
 				return interaction.editReply({ content: '✅ Ícono actualizado' });
 			} catch (error) {
 				auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
@@ -1197,18 +1200,23 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function removeCustomTitle(interaction, channelId, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const [feed, translator] = await Promise.all([
+				FeedConfigModel.findOne({ channelId }),
+				Translator.from(interaction),
+			]);
+
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
+			if (!fetchedChannel)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
-			const feed = gcfg.feeds.get(channelId);
-			if (!feed) return interaction.deleteReply();
+			if (!feed)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
+
+			await interaction.deferUpdate();
 
 			delete feed.title;
-			gcfg.feeds.set(channelId, feed);
-			await gcfg.save();
+			await feed.save();
 
 			const concludedEmbed = new EmbedBuilder()
 				.setColor(Colors.DarkGreen)
@@ -1219,8 +1227,9 @@ const command = new Command('feed', tags)
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha eliminado el título personalizado del Feed con las tags _"${safeTags(gcfg.feeds.get(channelId)?.tags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha eliminado el título personalizado del Feed con las tags _"${safeTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
+
 			return interaction.update({
 				embeds: [concludedEmbed],
 				components: [
@@ -1237,18 +1246,23 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function removeCustomTags(interaction, channelId, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const [feed, translator] = await Promise.all([
+				FeedConfigModel.findOne({ channelId }),
+				Translator.from(interaction),
+			]);
+
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
+			if (!fetchedChannel)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
-			const feed = gcfg.feeds.get(channelId);
-			if (!feed) return interaction.deleteReply();
+			if (!feed)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
-			delete feed.maxTags;
-			gcfg.feeds.set(channelId, feed);
-			await gcfg.save();
+			await interaction.deferUpdate();
+
+			delete feed.maxGeneralTags;
+			await feed.save();
 
 			const concludedEmbed = new EmbedBuilder()
 				.setColor(Colors.DarkGreen)
@@ -1259,7 +1273,7 @@ const command = new Command('feed', tags)
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha restaurado la cantidad de tags máxima por defecto del Feed con las tags _"${safeTags(gcfg.feeds.get(channelId)?.tags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha restaurado la cantidad de tags máxima por defecto del Feed con las tags _"${safeTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
@@ -1277,17 +1291,23 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function removeCustomFooter(interaction, channelId, authorId) {
-			const translator = await Translator.from(interaction.user.id);
-			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
+			const [feed, translator] = await Promise.all([
+				FeedConfigModel.findOne({ channelId }),
+				Translator.from(interaction),
+			]);
 
-			const feed = gcfg.feeds.get(channelId);
-			if (!feed) return interaction.deleteReply();
+			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
+
+			if (!fetchedChannel)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
+
+			if (!feed)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
+
+			await interaction.deferUpdate();
 
 			delete feed.subtitle;
-			gcfg.feeds.set(channelId, feed);
-			await gcfg.save();
+			await feed.save();
 
 			const concludedEmbed = new EmbedBuilder()
 				.setColor(Colors.DarkGreen)
@@ -1298,7 +1318,7 @@ const command = new Command('feed', tags)
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha eliminado el subtítulo personalizado del Feed con las tags _"${safeTags(gcfg.feeds.get(fetchedChannel.id)?.tags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha eliminado el subtítulo personalizado del Feed con las tags _"${safeTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
@@ -1316,17 +1336,23 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function removeCustomFooter(interaction, channelId, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const [feed, translator] = await Promise.all([
+				FeedConfigModel.findOne({ channelId }),
+				Translator.from(interaction),
+			]);
+
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
 
-			const feed = gcfg.feeds.get(channelId);
-			if (!feed) return interaction.deleteReply();
+			if (!fetchedChannel)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
-			delete feed.footer;
-			gcfg.feeds.set(channelId, feed);
-			await gcfg.save();
+			if (!feed)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
+
+			await interaction.deferUpdate();
+
+			delete feed.footerText;
+			await feed.save();
 
 			const concludedEmbed = new EmbedBuilder()
 				.setColor(Colors.DarkGreen)
@@ -1337,7 +1363,7 @@ const command = new Command('feed', tags)
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha eliminado el texto de pie personalizado del Feed con las tags _"${safeTags(gcfg.feeds.get(fetchedChannel.id)?.tags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha eliminado el texto de pie personalizado del Feed con las tags _"${safeTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
@@ -1355,17 +1381,23 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function removeCustomIcon(interaction, channelId, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const [feed, translator] = await Promise.all([
+				FeedConfigModel.findOne({ channelId }),
+				Translator.from(interaction),
+			]);
+
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
-			const gcfg = await GuildConfig.findOne({ guildId: interaction.guild.id });
-			if (!gcfg || !fetchedChannel) return interaction.deleteReply();
 
-			const feed = gcfg.feeds.get(channelId);
-			if (!feed) return interaction.deleteReply();
+			if (!fetchedChannel)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
-			delete feed.cornerIcon;
-			gcfg.feeds.set(channelId, feed);
-			await gcfg.save();
+			if (!feed)
+				return interaction.editReply({ content: translator.getText('invalidChannel') });
+
+			await interaction.deferUpdate();
+
+			delete feed.icon;
+			await feed.save();
 
 			const concludedEmbed = new EmbedBuilder()
 				.setColor(Colors.DarkGreen)
@@ -1376,7 +1408,7 @@ const command = new Command('feed', tags)
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha eliminado el ícono de esquina personalizado del Feed con las tags _"${safeTags(gcfg.feeds.get(fetchedChannel.id)?.tags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha eliminado el ícono de esquina personalizado del Feed con las tags _"${safeTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
