@@ -640,7 +640,7 @@ const command = new Command('feed', tags)
 									label: 'Tags',
 									description:
 										'Decide el máximo de tags mostradas por cada imagen',
-									value: 'tags',
+									value: 'searchTags',
 								},
 								{
 									label: 'Antetítulo',
@@ -652,13 +652,13 @@ const command = new Command('feed', tags)
 									label: 'Ícono de esquina',
 									description:
 										'Elige un ícono de esquina personalizado para cada imagen',
-									value: 'cornerIcon',
+									value: 'icon',
 								},
 								{
 									label: 'Pie',
 									description:
 										'Asigna o elimina un texto a mostrar debajo de cada imagen',
-									value: 'footer',
+									value: 'footerText',
 								},
 							]),
 					),
@@ -866,7 +866,7 @@ const command = new Command('feed', tags)
 					);
 					break;
 
-				case 'tags':
+				case 'searchTags':
 					wizard.addFields(
 						{
 							name: 'Personaliza la cantidad de tags',
@@ -906,7 +906,7 @@ const command = new Command('feed', tags)
 					);
 					break;
 
-				case 'cornerIcon':
+				case 'icon':
 					wizard.addFields({
 						name: 'Personaliza el ícono de esquina',
 						value: 'Clickea "Personalizar" e introduce un enlace a una imagen. Si quieres eliminar la imagen actual, usa el respectivo botón',
@@ -923,7 +923,7 @@ const command = new Command('feed', tags)
 					);
 					break;
 
-				case 'footer':
+				case 'footerText':
 					wizard.addFields({
 						name: 'Personaliza el pie',
 						value: 'Clickea "Personalizar" e introduce un texto breve. Si quieres eliminar el pie actual, usa el respectivo botón',

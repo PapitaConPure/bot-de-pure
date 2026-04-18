@@ -366,33 +366,33 @@ export function updateFollowedFeedTagsCache(
 export interface FeedOptions {
 	lastFetchedAt?: Date | null;
 	faults?: number | null;
-	maxTags?: number | null;
-	cornerIcon?: string | null;
+	maxGeneralTags?: number | null;
+	icon?: string | null;
 	title?: string | null;
 	subtitle?: string | null;
-	footer?: string | null;
+	footerText?: string | null;
 }
 
 export class BooruFeed {
 	readonly booru: BooruClient<Gelbooru>;
-	readonly tags: string;
+	readonly searchTags: string;
 	readonly channel: GuildTextBasedChannel | null;
 	readonly guildId: string;
 	readonly channelId: string;
 
 	#lastFetchedAt: Date;
 	#faults: number;
-	readonly maxTags: number;
-	readonly cornerIcon: string | undefined;
+	readonly maxGeneralTags: number;
+	readonly icon: string | undefined;
 	readonly title: string | undefined;
 	readonly subtitle: string | undefined;
-	readonly footer: string | undefined;
+	readonly footerText: string | undefined;
 
 	constructor(
 		booru: BooruClient,
 		guildId: string,
 		channelId: string,
-		tags: string,
+		searchTags: string,
 		options: FeedOptions = {},
 	) {
 		if (!client) throw new ClientNotFoundError();
@@ -404,20 +404,20 @@ export class BooruFeed {
 		this.guildId = guildId;
 		this.channelId = channelId;
 		this.channel = channel?.isTextBased() ? channel : null;
-		this.tags = tags;
+		this.searchTags = searchTags;
 
 		this.#lastFetchedAt =
 			options.lastFetchedAt ?? new Date(Math.floor(Date.now() - FEED_UPDATE_INTERVAL / 2));
 		this.#faults = options.faults ?? 0;
-		this.maxTags = options.maxTags ?? 20;
-		this.cornerIcon = options.cornerIcon ?? undefined;
+		this.maxGeneralTags = options.maxGeneralTags ?? 20;
+		this.icon = options.icon ?? undefined;
 		this.title = options.title ?? undefined;
 		this.subtitle = options.subtitle ?? undefined;
-		this.footer = options.footer ?? undefined;
+		this.footerText = options.footerText ?? undefined;
 	}
 
 	get isProcessable() {
-		return !!this.booru && !!this.channel && !!this.tags;
+		return !!this.booru && !!this.channel && !!this.searchTags;
 	}
 
 	get isRunning() {
@@ -442,7 +442,7 @@ export class BooruFeed {
 		| { success: false; posts: []; newPosts: [] }
 	> {
 		try {
-			const fetched = await this.booru.search(this.tags, {
+			const fetched = await this.booru.search(this.searchTags, {
 				limit: FEED_UPDATE_MAX_POST_COUNT,
 			});
 
@@ -466,7 +466,7 @@ export class BooruFeed {
 			const newPosts = fetched.filter((post) => post.createdAt > lastFetchedAt);
 
 			return { success: true, posts: fetched, newPosts: newPosts };
-		} catch (error) {
+		} catch (err) {
 			warn(
 				chalk.redBright(
 					'Ocurrió un problema mientras se esperaban los resultados de búsqueda de un Feed',
@@ -475,9 +475,9 @@ export class BooruFeed {
 			debug({
 				guildName: this.channel?.guild?.name,
 				channelId: this.channelId,
-				feedTags: this.tags,
+				feedTags: this.searchTags,
 			});
-			error(error);
+			error(err);
 
 			return { success: false, posts: [], newPosts: [] };
 		}

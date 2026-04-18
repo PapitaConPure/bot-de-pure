@@ -71,7 +71,7 @@ export async function sendConvertedBooruPosts(
 		const formattedGelbooruUrl = `${spoiler}<:gelbooru:919398540172750878>[\`${id}\`](${original})${spoiler}`;
 
 		const container = await formatBooruPostMessage(booru, post, {
-			maxTags: 0,
+			maxGeneralTags: 0,
 			manageableBy: message.author.id,
 			allowNSFW: isNSFWChannel(message.channel),
 			isNotFeed: true,

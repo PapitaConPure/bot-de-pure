@@ -29,17 +29,13 @@ import { getGuildEmoji as gEmo, isNSFWChannel, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import Logger from '@/utils/logs';
 import { getMainBooruClient } from './booruclient';
+import type { FeedOptions } from './boorufeed';
 import type { tagMaps } from './booruprops';
 import { getBaseTags, getSearchTags } from './booruprops';
 
 const { debug, info, warn, error } = Logger('WARN', 'BooruSend');
 
 export interface PostFormatData {
-	maxTags?: number | null;
-	title?: string | null;
-	subtitle?: string | null;
-	footer?: string | null;
-	cornerIcon?: string | null;
 	manageableBy?: string | null;
 	allowNSFW?: boolean | null;
 	isNotFeed?: boolean | null;
@@ -122,7 +118,7 @@ const ignoredTagsIfSexCount = new Set<string>(['multiple_girls', 'multiple_boys'
 export async function formatBooruPostMessage(
 	booru: BooruClient,
 	post: Post,
-	data: PostFormatData = {},
+	data: Omit<FeedOptions, 'lastFetchedAt' | 'faults'> & PostFormatData = {},
 ): Promise<ContainerBuilder> {
 	info('Se recibió una solicitud de formato de mensaje con Post de Booru');
 
@@ -281,7 +277,7 @@ export async function formatBooruPostMessage(
 
 	//Tags
 	debug('A punto de intentar procesar las tags del Post');
-	const maxTags = data.maxTags ?? 20;
+	const maxTags = data.maxGeneralTags ?? 20;
 	const actualMaxTags = Math.max(0, maxTags - specialTags.length);
 	const actualTotalTags = processedPostTags.length + specialTags.length;
 	try {
@@ -640,7 +636,7 @@ export async function searchAndReplyWithPost(
 		const containers = await Promise.all(
 			posts.map((post) =>
 				formatBooruPostMessage(booru, post, {
-					maxTags: 20,
+					maxGeneralTags: 20,
 					title: isnsfw ? nsfwTitle : sfwTitle,
 					manageableBy: author.id,
 					allowNSFW: isnsfw,
