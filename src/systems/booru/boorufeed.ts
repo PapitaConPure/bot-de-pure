@@ -1,4 +1,5 @@
-import type { BooruClient } from '@papitaconpure/booru-client';
+import type { BooruClient, Gelbooru, Post } from '@papitaconpure/booru-client';
+import chalk from 'chalk';
 import { getUnixTime, minutesToMilliseconds } from 'date-fns';
 import type { GuildTextBasedChannel, Snowflake } from 'discord.js';
 import { MessageFlags } from 'discord.js';
@@ -23,7 +24,7 @@ export interface FeedData extends PostFormatData {
 }
 
 /**Global cache for user feed tag subscriptions.*/
-export const feedTagSubscriptionsCache: Map<Snowflake, Map<Snowflake, Array<string>>> = new Map();
+export const feedTagSubscriptionsCache: Map<Snowflake, Map<Snowflake, string[]>> = new Map();
 
 /**Base update interval for feeds before accounting for chunk subdivision.*/
 export const FEED_UPDATE_INTERVAL = minutesToMilliseconds(30);
@@ -139,6 +140,11 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 				return;
 			}
 
+			if (!newPosts.length) {
+				bulkOps.push(booruFeed.reduceFaults());
+				return;
+			}
+
 			const feedSubscriptions: Suscription[] = [];
 
 			debug(`Preparing candidate user Feed tag subscriptions for Feed #${feed.channelId}.`);
@@ -199,9 +205,9 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 
 	debug.dir(bulkOps, { depth: null });
 
-	if (bulkOps.length) {
-		await FeedConfigModel.bulkWrite(bulkOps);
-	}
+	if (bulkOps.length) await FeedConfigModel.bulkWrite(bulkOps);
+
+	debug('Finished writing to DB.');
 }
 
 function getNextBaseDelay(): number {
@@ -335,7 +341,7 @@ export function addFeedToUpdateStack(feed: FeedDocument): number {
 export function updateFollowedFeedTagsCache(
 	userId: Snowflake,
 	channelId: Snowflake,
-	newTags: Array<string>,
+	newTags: string[],
 ): void {
 	if (typeof userId !== 'string')
 		throw ReferenceError('Se requiere una ID de usuario de tipo string');
@@ -359,10 +365,15 @@ export function updateFollowedFeedTagsCache(
 export interface FeedOptions {
 	lastFetchedAt?: Date | null;
 	faults?: number | null;
+	maxTags?: number | null;
+	cornerIcon?: string | null;
+	title?: string | null;
+	subtitle?: string | null;
+	footer?: string | null;
 }
 
 export class BooruFeed {
-	readonly booru: BooruClient;
+	readonly booru: BooruClient<Gelbooru>;
 	readonly tags: string;
 	readonly channel: GuildTextBasedChannel | null;
 	readonly guildId: string;
@@ -370,16 +381,22 @@ export class BooruFeed {
 
 	#lastFetchedAt: Date;
 	#faults: number;
+	readonly maxTags: number;
+	readonly cornerIcon: string | undefined;
+	readonly title: string | undefined;
+	readonly subtitle: string | undefined;
+	readonly footer: string | undefined;
 
 	constructor(
 		booru: BooruClient,
 		guildId: string,
 		channelId: string,
 		tags: string,
-		options?: FeedOptions,
+		options: FeedOptions = {},
 	) {
-		if (client == null) throw new ClientNotFoundError();
-		const guild = client.guilds.cache.get(guildId);
+		if (!client) throw new ClientNotFoundError();
+
+		const guild = client?.guilds.cache.get(guildId);
 		const channel = guild?.channels.cache.get(channelId);
 
 		this.booru = booru;
@@ -389,17 +406,21 @@ export class BooruFeed {
 		this.tags = tags;
 
 		this.#lastFetchedAt =
-			options?.lastFetchedAt ?? new Date(Date.now() - FEED_UPDATE_INTERVAL / 2);
-
-		this.#faults = options?.faults ?? 0;
+			options.lastFetchedAt ?? new Date(Math.floor(Date.now() - FEED_UPDATE_INTERVAL / 2));
+		this.#faults = options.faults ?? 0;
+		this.maxTags = options.maxTags ?? 20;
+		this.cornerIcon = options.cornerIcon ?? undefined;
+		this.title = options.title ?? undefined;
+		this.subtitle = options.subtitle ?? undefined;
+		this.footer = options.footer ?? undefined;
 	}
 
 	get isProcessable() {
-		return !!this.channel && !!this.tags;
+		return !!this.booru && !!this.channel && !!this.tags;
 	}
 
 	get isRunning() {
-		return this.#faults < 10;
+		return !this.#faults || this.#faults < 10;
 	}
 
 	get lastFetchedAt() {
@@ -414,7 +435,11 @@ export class BooruFeed {
 		return this.channel ? isNSFWChannel(this.channel) : false;
 	}
 
-	async fetchPosts() {
+	/**@description Obtiene {@linkcode Post}s que no han sido publicados.*/
+	async fetchPosts(): Promise<
+		| { success: true; posts: Post[]; newPosts: Post[] }
+		| { success: false; posts: []; newPosts: [] }
+	> {
 		try {
 			const fetched = await this.booru.search(this.tags, {
 				limit: FEED_UPDATE_MAX_POST_COUNT,
@@ -422,21 +447,45 @@ export class BooruFeed {
 
 			if (!fetched.length) return { success: true, posts: [], newPosts: [] };
 
-			const last = new Date(this.#lastFetchedAt);
+			fetched.reverse();
+			const lastFetchedAt = new Date(this.#lastFetchedAt);
+			const firstPost = fetched[0];
+			const lastPost = fetched[fetched.length - 1];
+			const mostRecentPost = firstPost.createdAt > lastPost.createdAt ? firstPost : lastPost;
+			this.#lastFetchedAt = mostRecentPost.createdAt;
 
-			const newPosts = fetched.filter((p) => p.createdAt > last);
+			const newPosts = fetched.filter((post) => post.createdAt > lastFetchedAt);
 
-			this.#lastFetchedAt = fetched[0].createdAt;
+			return { success: true, posts: fetched, newPosts: newPosts };
+		} catch (error) {
+			warn(
+				chalk.redBright(
+					'Ocurrió un problema mientras se esperaban los resultados de búsqueda de un Feed',
+				),
+			);
+			debug({
+				guildName: this.channel?.guild?.name,
+				channelId: this.channelId,
+				feedTags: this.tags,
+			});
+			error(error);
 
-			return { success: true, posts: fetched, newPosts };
-		} catch (err) {
-			console.error(err);
 			return { success: false, posts: [], newPosts: [] };
 		}
 	}
 
 	addFault(): AnyBulkWriteOperation<FeedSchemaType> | undefined {
+		const channel = this.channel;
+		const guild = channel?.guild;
+
 		if (this.#faults >= 10) return undefined;
+
+		auditAction(
+			'Comprobando eliminación de un Feed no disponible',
+			{ name: 'Servidor', value: `${guild} ?? 'No disponible'`, inline: true },
+			{ name: 'Canal', value: `${channel ?? 'No disponible'}`, inline: true },
+			{ name: 'Reintentos', value: `${this.faults + 1} / 10`, inline: true },
+		);
 
 		this.#faults++;
 
