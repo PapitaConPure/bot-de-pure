@@ -14,10 +14,6 @@ export const FeedConfigSchema = new Mongoose.Schema({
 		type: String,
 		required: true,
 	},
-	sentIds: {
-		type: [String],
-		default: [],
-	},
 	faults: {
 		type: Number,
 		default: 0,
