@@ -123,17 +123,17 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 
 			const { success, posts, newPosts } = await booruFeed.fetchPosts();
 			debug(
-				`Feed #${feed.channelId} tried to fetch posts and was ${success ? 'SUCCESSFUL' : 'UNSUCCESSFUL'}.`,
+				`Feed #${channel.name} (#${feed.channelId}) tried to fetch posts and was ${success ? 'SUCCESSFUL' : 'UNSUCCESSFUL'}.`,
 			);
 
 			if (!success) return;
 			debug(
-				`Feed #${feed.channelId} retrieved ${posts.length} posts, of which ${newPosts.length} were new.`,
+				`Feed #${channel.name} (#${feed.channelId}) retrieved ${posts.length} posts, of which ${newPosts.length} were new.`,
 			);
 
 			if (!posts.length) {
 				debug(
-					`Because, no posts were retrieved for Feed #${feed.channelId}, it's processing will conclude as FAULTY for now.`,
+					`Because, no posts were retrieved for Feed #${channel.name} (#${feed.channelId}), it's processing will conclude as FAULTY for now.`,
 				);
 				const write = booruFeed.addFault();
 				if (write) bulkOps.push(write);
@@ -141,13 +141,18 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 			}
 
 			if (!newPosts.length) {
+				debug(
+					`Because, no new posts were retrieved for Feed #${channel.name} (#${feed.channelId}), it's processing will conclude for now.`,
+				);
 				bulkOps.push(booruFeed.reduceFaults());
 				return;
 			}
 
 			const feedSubscriptions: Suscription[] = [];
 
-			debug(`Preparing candidate user Feed tag subscriptions for Feed #${feed.channelId}.`);
+			debug(
+				`Preparing candidate user Feed tag subscriptions for Feed #${channel.name} (#${feed.channelId}).`,
+			);
 			for (const [userId, feedMap] of feedTagSubscriptionsCache) {
 				const tags = feedMap.get(feed.channelId);
 				if (tags) feedSubscriptions.push({ userId, followedTags: tags });
@@ -155,7 +160,9 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 
 			let faultedDuringSend = false;
 
-			debug(`Feed #${feed.channelId} is about to send Booru posts to Discord.`);
+			debug(
+				`Feed #${channel.name} (#${feed.channelId}) is about to send Booru posts ${newPosts.map((post) => post.id).join(', ')} to Discord.`,
+			);
 			for (const post of newPosts) {
 				try {
 					const container = await formatBooruPostMessage(booru, post, booruFeed);
@@ -167,6 +174,9 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 
 					const members = guild.members.cache;
 					await notifyUsers(post, sent, members, feedSubscriptions);
+					debug(
+						`Feed #${channel.name} (#${feed.channelId}) formatted a post and notified users: ${post.id}`,
+					);
 				} catch (err) {
 					faultedDuringSend = true;
 					warn(`Error sending post ${post.id} in ${channel.name}`);
@@ -180,7 +190,7 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 			}
 
 			debug(
-				`Feed #${feed.channelId} ${faultedDuringSend ? 'FAILED TO SEND' : 'SUCCESSFULLY SENT'} posts to Discord.`,
+				`Feed #${channel.name} (#${feed.channelId}) ${faultedDuringSend ? 'FAILED TO SEND' : 'SUCCESSFULLY SENT'} posts to Discord.`,
 			);
 
 			if (faultedDuringSend) {
