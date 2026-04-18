@@ -470,7 +470,7 @@ export async function notifyUsers(
 	post: Post,
 	sent: Message<true>,
 	members: Collection<Snowflake, GuildMember>,
-	feedSuscriptions: Array<Suscription>,
+	feedSuscriptions: Suscription[],
 ) {
 	info(
 		'Se recibió una orden para notificar sobre un nuevo Post a usuarios suscriptos aplicables',
@@ -701,7 +701,7 @@ export function formatTagNameNew(tag: string) {
 }
 
 export function formatTagNameList(
-	tagNames: Array<string>,
+	tagNames: string[],
 	sep: string,
 	options: { leftStr?: string; rightStr?: string } = {},
 ) {
@@ -709,7 +709,7 @@ export function formatTagNameList(
 	return tagNames.map((tagName) => `${leftStr}${formatTagName(tagName)}${rightStr}`).join(sep);
 }
 
-export function formatTagNameListNew(tagNames: Array<string>, sep: string) {
+export function formatTagNameListNew(tagNames: string[], sep: string) {
 	return tagNames
 		.map((tagName) => (tagName === '(...)' ? '…' : formatTagNameNew(tagName)))
 		.join(sep);
