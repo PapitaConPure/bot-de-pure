@@ -46,7 +46,7 @@ async function updateBooruFeeds(feedChunk: FeedChunk): Promise<void> {
 	debug(`Received a request to update Boorus at ${new Date(startMs)}.`);
 
 	feedChunk = await refreshFeedChunk(feedChunk);
-	debug('Refreshed the feed chunk')
+	debug('Refreshed the feed chunk');
 
 	try {
 		debug('About to update Boorus.');

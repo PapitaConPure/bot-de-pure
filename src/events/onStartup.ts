@@ -183,7 +183,8 @@ export async function onStartup(client: Client) {
 		for (const [chId, tags] of config.feedTagSuscriptions) suscriptions.set(chId, tags);
 		feedTagSubscriptionsCache.set(config.userId, suscriptions);
 	});
-	logOptions.feedSuscriptions && console.log({ feedTagSuscriptionsCache: feedTagSubscriptionsCache });
+	logOptions.feedSuscriptions
+		&& console.log({ feedTagSuscriptionsCache: feedTagSubscriptionsCache });
 
 	console.log(chalk.gray('Preparando recordatorios...'));
 	await processReminders();
