@@ -229,7 +229,8 @@ function getNextChunkDelay(
 	feedChunks: FeedChunk[],
 ) {
 	const chunkCount = feedChunks.length;
-	return feedBaseUpdateDelay + (FEED_UPDATE_INTERVAL * chunkIndex) / chunkCount;
+	const chunkDelay = feedBaseUpdateDelay + (FEED_UPDATE_INTERVAL * chunkIndex) / chunkCount;
+	return chunkDelay > FEED_UPDATE_INTERVAL ? chunkDelay - FEED_UPDATE_INTERVAL : chunkDelay;
 }
 
 export async function setupFeedUpdateStack() {
@@ -453,6 +454,14 @@ export class BooruFeed {
 			const lastPost = fetched[fetched.length - 1];
 			const mostRecentPost = firstPost.createdAt > lastPost.createdAt ? firstPost : lastPost;
 			this.#lastFetchedAt = mostRecentPost.createdAt;
+
+			debug.dir({
+				lastFetchedAt,
+				firstPostCreatedAt: firstPost.createdAt,
+				lastPostCreatedAt: lastPost.createdAt,
+				mostRecentPostCreatedAt: mostRecentPost.createdAt,
+				thisLastFetchedAt: this.#lastFetchedAt,
+			});
 
 			const newPosts = fetched.filter((post) => post.createdAt > lastFetchedAt);
 
