@@ -45,6 +45,9 @@ async function updateBooruFeeds(feedChunk: FeedChunk): Promise<void> {
 	const startMs = Date.now();
 	debug(`Received a request to update Boorus at ${new Date(startMs)}.`);
 
+	feedChunk = await refreshFeedChunk(feedChunk);
+	debug('Refreshed the feed chunk')
+
 	try {
 		debug('About to update Boorus.');
 		await processFeeds(booru, feedChunk).catch(console.error);
@@ -110,10 +113,7 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 				`Identified Feed #${feed.channelId} as belonging to channel "#${channel.name}" in guild "${guild.name}" (${guild.id})`,
 			);
 
-			const booruFeed = new BooruFeed(booru, feed.guildId, feed.channelId, feed.searchTags, {
-				lastFetchedAt: feed.lastFetchedAt,
-				faults: feed.faults,
-			});
+			const booruFeed = new BooruFeed(booru, feed);
 
 			if (!booruFeed.isRunning) return;
 			debug(`Feed #${feed.channelId} is running.`);
@@ -193,6 +193,9 @@ async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
 
 			if (booruFeed.faults > 0) update.faults = booruFeed.faults;
 			update.lastFetchedAt = booruFeed.lastFetchedAt;
+
+			feed.faults = booruFeed.faults;
+			feed.lastFetchedAt = booruFeed.lastFetchedAt;
 
 			bulkOps.push({
 				updateOne: {
@@ -304,6 +307,18 @@ function paginateFeeds(map: Map<string, FeedDocument>, size: number): FeedChunk[
 	return result;
 }
 
+async function refreshFeedChunk(feedChunk: FeedChunk) {
+	feedChunk.feeds = new Map(
+		[
+			...(await FeedConfigModel.find({
+				channelId: { $in: [...feedChunk.feeds.values()].map((feed) => feed.channelId) },
+			})),
+		].map((feed) => [feed.channelId, feed]),
+	);
+
+	return feedChunk;
+}
+
 /**
  * @description Añade la Guild actual a la cadena de actualización de Feeds si aún no está en ella
  * @returns La cantidad de milisegundos que faltan para actualizar el Feed añadido por primera vez, ó -1 si no se pudo agregar
@@ -375,61 +390,59 @@ export interface FeedOptions {
 
 export class BooruFeed {
 	readonly booru: BooruClient<Gelbooru>;
-	readonly searchTags: string;
+	readonly #feedDoc: FeedDocument;
+
 	readonly channel: GuildTextBasedChannel | null;
-	readonly guildId: string;
-	readonly channelId: string;
 
-	#lastFetchedAt: Date;
-	#faults: number;
-	readonly maxGeneralTags: number;
-	readonly icon: string | undefined;
-	readonly title: string | undefined;
-	readonly subtitle: string | undefined;
-	readonly footerText: string | undefined;
-
-	constructor(
-		booru: BooruClient,
-		guildId: string,
-		channelId: string,
-		searchTags: string,
-		options: FeedOptions = {},
-	) {
+	constructor(booru: BooruClient, feed: FeedDocument) {
 		if (!client) throw new ClientNotFoundError();
+
+		const { guildId, channelId } = feed;
 
 		const guild = client?.guilds.cache.get(guildId);
 		const channel = guild?.channels.cache.get(channelId);
 
 		this.booru = booru;
-		this.guildId = guildId;
-		this.channelId = channelId;
+		this.#feedDoc = feed;
 		this.channel = channel?.isTextBased() ? channel : null;
-		this.searchTags = searchTags;
 
-		this.#lastFetchedAt =
-			options.lastFetchedAt ?? new Date(Math.floor(Date.now() - FEED_UPDATE_INTERVAL / 2));
-		this.#faults = options.faults ?? 0;
-		this.maxGeneralTags = options.maxGeneralTags ?? 20;
-		this.icon = options.icon ?? undefined;
-		this.title = options.title ?? undefined;
-		this.subtitle = options.subtitle ?? undefined;
-		this.footerText = options.footerText ?? undefined;
+		debug(`Created a BooruFeed with lastFetchedAt=${this.#feedDoc.lastFetchedAt}`);
 	}
 
 	get isProcessable() {
-		return !!this.booru && !!this.channel && !!this.searchTags;
+		return !!this.booru && !!this.channel && !!this.#feedDoc.searchTags;
 	}
 
 	get isRunning() {
-		return !this.#faults || this.#faults < 10;
+		return !this.#feedDoc.faults || this.#feedDoc.faults < 10;
 	}
 
 	get lastFetchedAt() {
-		return this.#lastFetchedAt;
+		return this.#feedDoc.lastFetchedAt;
 	}
 
 	get faults() {
-		return this.#faults;
+		return this.#feedDoc.faults;
+	}
+
+	get maxGeneralTags() {
+		return this.#feedDoc.maxGeneralTags;
+	}
+
+	get icon() {
+		return this.#feedDoc.icon;
+	}
+
+	get title() {
+		return this.#feedDoc.title;
+	}
+
+	get subtitle() {
+		return this.#feedDoc.subtitle;
+	}
+
+	get footerText() {
+		return this.#feedDoc.footerText;
 	}
 
 	get allowNSFW() {
@@ -442,25 +455,25 @@ export class BooruFeed {
 		| { success: false; posts: []; newPosts: [] }
 	> {
 		try {
-			const fetched = await this.booru.search(this.searchTags, {
+			const fetched = await this.booru.search(this.#feedDoc.searchTags, {
 				limit: FEED_UPDATE_MAX_POST_COUNT,
 			});
 
 			if (!fetched.length) return { success: true, posts: [], newPosts: [] };
 
 			fetched.reverse();
-			const lastFetchedAt = new Date(this.#lastFetchedAt);
+			const lastFetchedAt = new Date(this.#feedDoc.lastFetchedAt);
 			const firstPost = fetched[0];
 			const lastPost = fetched[fetched.length - 1];
 			const mostRecentPost = firstPost.createdAt > lastPost.createdAt ? firstPost : lastPost;
-			this.#lastFetchedAt = mostRecentPost.createdAt;
+			this.#feedDoc.lastFetchedAt = mostRecentPost.createdAt;
 
 			debug.dir({
 				lastFetchedAt,
 				firstPostCreatedAt: firstPost.createdAt,
 				lastPostCreatedAt: lastPost.createdAt,
 				mostRecentPostCreatedAt: mostRecentPost.createdAt,
-				thisLastFetchedAt: this.#lastFetchedAt,
+				thisLastFetchedAt: this.#feedDoc.lastFetchedAt,
 			});
 
 			const newPosts = fetched.filter((post) => post.createdAt > lastFetchedAt);
@@ -474,8 +487,8 @@ export class BooruFeed {
 			);
 			debug({
 				guildName: this.channel?.guild?.name,
-				channelId: this.channelId,
-				feedTags: this.searchTags,
+				channelId: this.#feedDoc.channelId,
+				feedTags: this.#feedDoc.searchTags,
 			});
 			error(err);
 
@@ -487,7 +500,7 @@ export class BooruFeed {
 		const channel = this.channel;
 		const guild = channel?.guild;
 
-		if (this.#faults >= 10) return undefined;
+		if (this.#feedDoc.faults >= 10) return undefined;
 
 		auditAction(
 			'Comprobando eliminación de un Feed no disponible',
@@ -496,23 +509,28 @@ export class BooruFeed {
 			{ name: 'Reintentos', value: `${this.faults + 1} / 10`, inline: true },
 		);
 
-		this.#faults++;
+		this.#feedDoc.faults++;
 
 		return {
 			updateOne: {
-				filter: { channelId: this.channelId },
-				update: { $set: { faults: this.#faults } },
+				filter: { channelId: this.#feedDoc.channelId },
+				update: { $set: { faults: this.#feedDoc.faults } },
 			},
 		};
 	}
 
 	reduceFaults(): AnyBulkWriteOperation<FeedSchemaType> {
-		this.#faults = Math.max(0, this.#faults - 2);
+		this.#feedDoc.faults = Math.max(0, this.#feedDoc.faults - 2);
 
 		return {
 			updateOne: {
-				filter: { channelId: this.channelId },
-				update: { $set: { faults: this.#faults, lastFetchedAt: this.#lastFetchedAt } },
+				filter: { channelId: this.#feedDoc.channelId },
+				update: {
+					$set: {
+						faults: this.#feedDoc.faults,
+						lastFetchedAt: this.#feedDoc.lastFetchedAt,
+					},
+				},
 			},
 		};
 	}
