@@ -3,9 +3,9 @@ import { booruApiKey, booruUserId } from '@/data/globalProps';
 import BooruTags from '@/models/boorutags';
 import { MongooseTagStore } from './dbTagStore';
 
-let mainBooru: BooruClient | null = null;
+let mainBooru: BooruClient<Gelbooru> | null = null;
 
-export function getMainBooruClient(): BooruClient {
+export function getMainBooruClient() {
 	if (!mainBooru)
 		mainBooru = new BooruClient(new Gelbooru(), {
 			credentials: { apiKey: booruApiKey, userId: booruUserId },
