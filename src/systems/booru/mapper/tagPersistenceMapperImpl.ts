@@ -8,7 +8,7 @@ export class TagPersistenceMapperImpl
 {
 	fromDocument(doc: TagSchemaType): Tag {
 		return new Tag({
-			id: doc.id,
+			id: `${doc.id}`,
 			name: doc.name,
 			count: doc.count,
 			type: doc.type as TagType,

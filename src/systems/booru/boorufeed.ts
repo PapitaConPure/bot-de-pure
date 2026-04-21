@@ -78,7 +78,7 @@ async function updateBooruFeeds(feedChunk: FeedChunk): Promise<void> {
 	});
 }
 
-async function processFeeds(booru: BooruClient, feedChunk: FeedChunk) {
+async function processFeeds(booru: BooruClient<Gelbooru>, feedChunk: FeedChunk) {
 	if (client == null) throw new ClientNotFoundError();
 
 	const feeds = [...feedChunk.feeds.values()];
@@ -404,7 +404,7 @@ export class BooruFeed {
 
 	readonly channel: GuildTextBasedChannel | null;
 
-	constructor(booru: BooruClient, feed: FeedDocument) {
+	constructor(booru: BooruClient<Gelbooru>, feed: FeedDocument) {
 		if (!client) throw new ClientNotFoundError();
 
 		const { guildId, channelId } = feed;
