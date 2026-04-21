@@ -40,7 +40,7 @@ La columna "Meta" indica los modificadores de interés de un comando:
 | estado          | ✅ | ✅ |  |
 | exhibir         | ✅ | ✅ | 🛡️🎎 |
 | feed            | ✅ | ✅ | 🛡️ |
-| g-indice        | ⛔ | ⛔ | 📖 |
+| g-introducción  | ⛔ | ⛔ | 📖 |
 | g-opciones      | ⛔ | ⛔ | 📖 |
 | g-parametros    | ⛔ | ⛔ | 📖 |
 | g-tipos         | ⛔ | ⛔ | 📖 |

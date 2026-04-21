@@ -3,8 +3,8 @@ import { Command, CommandTags } from '../commons/index.js';
 
 const tags = new CommandTags().add('GUIDE');
 
-const command = new Command('g-índice', tags)
-	.setAliases('g-indice', 'g-index', 'g-ind', 'g-i')
+const command = new Command('g-introducción', tags)
+	.setAliases('g-introduccion', 'g-intro', 'g-índice', 'g-indice', 'g-index', 'g-ind', 'g-i')
 	.setLongDescription(
 		'👋 ¡Buenas!',
 		'',
