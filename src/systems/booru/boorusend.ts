@@ -41,6 +41,7 @@ export interface PostFormatData {
 	isNotFeed?: boolean | null;
 	disableLinks?: boolean | null;
 	disableActions?: boolean | null;
+	componentKey?: number | string;
 }
 
 export interface SourceStyle {
@@ -122,7 +123,9 @@ export async function formatBooruPostMessage(
 ): Promise<ContainerBuilder> {
 	info('Se recibió una solicitud de formato de mensaje con Post de Booru');
 
-	const { allowNSFW = false, disableLinks = false, disableActions = false } = data;
+	const { allowNSFW = false, disableLinks = false, disableActions = false, componentKey } = data;
+
+	const componentKeySuffix = componentKey ? `_${componentKey}` : '';
 
 	let containerColor = noSource.color;
 	const buttonRow = new ActionRowBuilder<ButtonBuilder>();
@@ -156,7 +159,7 @@ export async function formatBooruPostMessage(
 			debug('El Post no tiene enlaces como fuentes. Se aplicará un botón de texto plano');
 			buttonRow.addComponents(
 				new ButtonBuilder()
-					.setCustomId('feed_plainText')
+					.setCustomId(`feed_plainText${componentKeySuffix}`)
 					.setStyle(ButtonStyle.Secondary)
 					.setLabel(shortenText(post.source, 72))
 					.setDisabled(true),
@@ -220,7 +223,9 @@ export async function formatBooruPostMessage(
 		new ButtonBuilder()
 			.setEmoji('921788204540100608')
 			.setStyle(ButtonStyle.Primary)
-			.setCustomId(`feed_showFeedImageTags_${data.isNotFeed ? 'NaF' : ''}`)
+			.setCustomId(
+				`feed_showFeedImageTags_${data.isNotFeed ? 'NaF' : ''}${componentKeySuffix}`,
+			)
 			.setDisabled(!!disableActions),
 	);
 
@@ -230,7 +235,7 @@ export async function formatBooruPostMessage(
 			new ButtonBuilder()
 				.setEmoji('1355496081550606486')
 				.setStyle(ButtonStyle.Success)
-				.setCustomId(`feed_contribute`)
+				.setCustomId(`feed_contribute${componentKeySuffix}`)
 				.setDisabled(!!disableActions),
 		);
 
@@ -239,7 +244,9 @@ export async function formatBooruPostMessage(
 		new ButtonBuilder()
 			.setEmoji('1355143793577426962')
 			.setStyle(ButtonStyle.Danger)
-			.setCustomId(`feed_deletePost_${data.manageableBy ?? ''}_${data.isNotFeed ?? ''}`)
+			.setCustomId(
+				`feed_deletePost_${data.manageableBy ?? ''}_${data.isNotFeed ?? ''}${componentKeySuffix}`,
+			)
 			.setDisabled(!!disableActions),
 	);
 
@@ -427,8 +434,11 @@ export async function formatBooruPostMessage(
 }
 
 /**@description Devuelve un botón y color de contenedor para la fuente especificada (si está disponible).*/
-function getSourceButtonAndColor(source: string, options: { disableLinks?: boolean } = {}) {
-	const { disableLinks = false } = options;
+function getSourceButtonAndColor(
+	source: string,
+	options: { disableLinks?: boolean; componentKey?: number | string } = {},
+) {
+	const { disableLinks = false, componentKey } = options;
 
 	debug('Antes de mapeos de fuente:', source);
 	sourceMappings.forEach((mapping) => {
@@ -447,7 +457,7 @@ function getSourceButtonAndColor(source: string, options: { disableLinks?: boole
 	const sourceButton = sourceTooLong
 		? new ButtonBuilder()
 				.setStyle(ButtonStyle.Danger)
-				.setCustomId('feed_invalidUrl')
+				.setCustomId(`feed_invalidUrl${componentKey ? `_${componentKey}` : ''}`)
 				.setDisabled(true)
 		: new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(source).setDisabled(!!disableLinks);
 
@@ -584,7 +594,7 @@ export async function searchAndReplyWithPost(
 	const clampPoolSize = (x: number) => Math.max(2, Math.min(x, 10));
 	const poolSize = args.flagExprIf(
 		'bomba',
-		(x) => clampPoolSize(CommandOptionSolver.asNumber(x)),
+		(x) => clampPoolSize(CommandOptionSolver.asNumber(x ? +x : 1)),
 		1,
 	);
 	const words = (args.getString('etiquetas', true) ?? '').split(/\s+/);
@@ -600,10 +610,15 @@ export async function searchAndReplyWithPost(
 	const baseTags = getBaseTags('gelbooru', isnsfw);
 	const searchTags = [commandTag ?? '', baseTags].join(' ').trim();
 	const userTags = getSearchTags(words, 'gelbooru', commandTag || 'general');
-	const finalTags = [searchTags, userTags];
+	const composedTags = [searchTags, userTags];
+	const sortRegex = /\bsort:[^\s]+/gi;
+	const finalTags = composedTags.some((t) => sortRegex.test(t))
+		? composedTags
+		: [...composedTags, 'sort:random'];
 	debug('baseTags =', baseTags);
 	debug('searchTags =', searchTags);
 	debug('userTags =', userTags);
+	debug('composedTags =', composedTags);
 	debug('finalTags =', finalTags);
 
 	const author = request.user;
@@ -612,10 +627,10 @@ export async function searchAndReplyWithPost(
 	try {
 		info('Buscando Posts...');
 		const booru = getMainBooruClient();
-		const response = await booru.search(finalTags, { limit: 100, random: true });
+		const posts = await booru.search(finalTags, { limit: +poolSize });
 
 		//Manejo de respuesta
-		if (!response.length) {
+		if (!posts.length) {
 			warn('La respuesta de búsqueda no tiene resultados');
 			const replyOptions = {
 				content: `⚠️ No hay resultados en **Gelbooru** para las tags **"${userTags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**`,
@@ -625,22 +640,20 @@ export async function searchAndReplyWithPost(
 
 		debug('Se obtuvieron resultados de búsqueda válidos');
 
-		//Seleccionar imágenes
-		const posts = response.sort(() => 0.5 - Math.random()).slice(0, poolSize);
-
 		debug('posts =');
 		debug.dir(posts);
 
 		//Crear presentaciones
 		info('Preparando mensaje(s) de respuesta de búsqueda...');
 		const containers = await Promise.all(
-			posts.map((post) =>
+			posts.map((post, i) =>
 				formatBooruPostMessage(booru, post, {
 					maxGeneralTags: 20,
 					title: isnsfw ? nsfwTitle : sfwTitle,
 					manageableBy: author.id,
 					allowNSFW: isnsfw,
 					isNotFeed: true,
+					componentKey: i,
 				}),
 			),
 		);
