@@ -355,7 +355,11 @@ const command = new Command('feed', tags)
 
 			if (!feed) return interaction.deleteReply();
 
-			feed.searchTags = input;
+			const sortRegex = /\bsort:[^\s]+/gi;
+			feed.searchTags = input
+				.split(/\s+/)
+				.filter((t) => t.length && sortRegex.test(t))
+				.join(' ');
 			feed.lastFetchedAt = new Date();
 
 			const firstUpdateDelay = addFeedToUpdateStack(feed);
