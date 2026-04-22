@@ -1,5 +1,5 @@
 import { Locale as DiscordLocaleKey } from 'discord.js';
-import { getBotEmoji } from '@/utils/emojis';
+import { getBotEmoji, getBotEmojiResult } from '@/utils/emojis';
 import type { UserCacheResolvable } from '@/utils/usercache';
 import { fetchUserCache } from '@/utils/usercache';
 import type { ValuesOf } from '../types/util';
@@ -121,14 +121,23 @@ const localesObject = {
 		ja: '日本語',
 	},
 	currentLanguageEmojiId: {
-		en: '1084646415319453756',
-		es: '1084646419853488209',
-		ja: '🇯🇵',
+		en: () => {
+			const emojiResult = getBotEmojiResult('langEs');
+			return emojiResult.app ? emojiResult.emoji.id : emojiResult.emoji;
+		},
+		es: () => {
+			const emojiResult = getBotEmojiResult('langEn');
+			return emojiResult.app ? emojiResult.emoji.id : emojiResult.emoji;
+		},
+		ja: () => {
+			const emojiResult = getBotEmojiResult('langJa');
+			return emojiResult.app ? emojiResult.emoji.id : emojiResult.emoji;
+		},
 	},
 	currentLanguageEmoji: {
-		en: '<:en:1084646415319453756>',
-		es: '<:es:1084646419853488209>',
-		ja: '🇯🇵',
+		en: () => getBotEmoji('langEs'),
+		es: () => getBotEmoji('langEn'),
+		ja: () => getBotEmoji('langJa'),
 	},
 	languageMenuPlaceholder: {
 		es: 'Seleccionar idioma',
