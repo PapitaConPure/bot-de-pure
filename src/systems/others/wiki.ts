@@ -91,12 +91,6 @@ export const makeCategoriesRow = (
 			.setDescription('Comandos PuréMusic para reproducir música.')
 			.setDefault(getDefault('MUSIC')),
 		new StringSelectMenuOptionBuilder()
-			.setValue('EMOTE')
-			.setEmoji('704612794921779290')
-			.setLabel('Emotes')
-			.setDescription('Comandos de emotes. Puedes llamarlos &así.')
-			.setDefault(getDefault('EMOTE')),
-		new StringSelectMenuOptionBuilder()
 			.setValue('MEME')
 			.setEmoji('721973016455807017')
 			.setLabel('Memes')
@@ -241,7 +235,6 @@ const displayTagMappings = {
 	SAKI: 'Saki Scans',
 	CHAOS: 'Caos',
 	COMMON: 'Común',
-	EMOTE: 'Emote',
 	GAME: 'Juego',
 	MEME: 'Meme',
 	MUSIC: 'Música',

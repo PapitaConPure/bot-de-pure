@@ -9,16 +9,15 @@ const bigIntField = (n: number | bigint) => 2n ** BigInt(n);
 export const CommandTag = {
 	COMMON: bigIntField(1),
 	MOD: bigIntField(2),
-	EMOTE: bigIntField(3),
-	MEME: bigIntField(4),
-	CHAOS: bigIntField(5),
-	GAME: bigIntField(6),
-	MAINTENANCE: bigIntField(7),
-	OUTDATED: bigIntField(8),
-	GUIDE: bigIntField(9),
-	PAPA: bigIntField(10),
-	SAKI: bigIntField(11),
-	MUSIC: bigIntField(12),
+	MEME: bigIntField(3),
+	CHAOS: bigIntField(4),
+	GAME: bigIntField(5),
+	MAINTENANCE: bigIntField(6),
+	OUTDATED: bigIntField(7),
+	GUIDE: bigIntField(8),
+	PAPA: bigIntField(9),
+	SAKI: bigIntField(10),
+	MUSIC: bigIntField(11),
 } as const;
 
 export type CommandTagStringField = keyof typeof CommandTag;

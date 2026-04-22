@@ -223,35 +223,11 @@ function handleMessageCommandError(
 	return isPermissionsError ? CommandResults.VOID : CommandResults.FAILED;
 }
 
-async function checkEmoteCommand(message: Message<true>): Promise<CommandResult> {
-	const { content } = message;
-
-	const words = content.split(/[\n ]+/);
-	const emoteCommandIndex = words.findIndex((word) => word.startsWith('&'));
-	if (emoteCommandIndex === -1) return CommandResults.VOID;
-
-	auditRequest(message);
-
-	const args = words.slice(emoteCommandIndex + 1);
-	const commandName = words[emoteCommandIndex].toLowerCase().slice(1);
-	const command =
-		puré.emotes.get(commandName)
-		|| puré.emotes.find((cmd) => cmd.aliases?.includes(commandName));
-	if (!command) return CommandResults.VOID;
-
-	try {
-		await handleMessageCommand(message, command, args);
-		return CommandResults.SUCCEEDED;
-	} catch (error) {
-		return handleMessageCommandError(error, message, commandName, args);
-	}
-}
-
 async function processCommand(message: Message<true>): Promise<CommandResult> {
 	const { content, guildId } = message;
 	const ppure = p_pure(guildId);
 
-	if (!content.toLowerCase().match(ppure.regex)) return checkEmoteCommand(message);
+	if (!content.toLowerCase().match(ppure.regex)) return CommandResults.VOID;
 
 	auditRequest(message);
 

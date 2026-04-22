@@ -9,7 +9,6 @@ import type { Command } from '../commands/commons';
 const puré = {
 	commands: new Collection<string, Command>(),
 	actions: new Collection<string, ContextMenuAction>(),
-	emotes: new Collection<string, Command>(),
 	slash: new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
 	slashSaki: new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
 	contextMenu: new Collection<string, RESTPostAPIContextMenuApplicationCommandsJSONBody>(),

@@ -3,7 +3,7 @@ import { Command, CommandOptions, CommandTags } from '../commons';
 const options = new CommandOptions()
 	.addParam('mensaje', 'TEXT', 'para especificar qué decir')
 	.addFlag(['b', 'd'], ['borrar', 'delete'], 'para borrar el mensaje original');
-const flags = new CommandTags().add('COMMON', 'EMOTE');
+const flags = new CommandTags().add('COMMON');
 const command = new Command('decir', flags)
 	.setAliases('exclamar', 'escribir', 'say', 'echo')
 	.setLongDescription('Me hace decir lo que quieras que diga')

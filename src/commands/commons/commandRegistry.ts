@@ -10,7 +10,6 @@ import type { AnySlashCommandOption, SlashCommandBuilderAddFunctionName } from '
 interface CommandRegistryLogTableRow {
 	name: string;
 	flags: string;
-	tieneEmote: string;
 	tieneMod: string;
 }
 
@@ -24,11 +23,8 @@ export function registerCommands(commands: Command[], log: boolean = false) {
 			&& commandTableStack.push({
 				name: command.name,
 				flags: command.flags.keys.join(', '),
-				tieneEmote: command.flags.has('EMOTE') ? '✅' : '❌',
 				tieneMod: command.flags.has('MOD') ? '✅' : '❌',
 			});
-
-		if (command.flags.has('EMOTE')) puré.emotes.set(command.name, command);
 
 		if (command.flags.any('PAPA', 'OUTDATED', 'MAINTENANCE', 'GUIDE')) continue;
 

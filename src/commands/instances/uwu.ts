@@ -14,7 +14,7 @@ const options = new CommandOptions()
 	.addFlag('u', 'uwuwu', 'uwu')
 	.addFlag('bd', ['borrar', 'delete'], 'para borrar el mensaje original');
 
-const tags = new CommandTags().add('MEME', 'EMOTE');
+const tags = new CommandTags().add('MEME');
 
 const command = new Command('uwu', tags)
 	.setAliases('uwu')

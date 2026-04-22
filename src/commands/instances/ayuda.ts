@@ -210,22 +210,14 @@ async function listCommands(
 
 	const contentContainer: ContainerBuilder = new ContainerBuilder()
 		.setAccentColor(tenshiAltColor)
-		.addTextDisplayComponents(
-			(textDisplay) =>
-				textDisplay.setContent(
-					[
-						'### -# Ejemplos de uso',
-						`${prefix}avatar ${request.client.user}`,
-						`${prefix}dados 5d6`,
-					].join('\n'),
-				),
-			(textDisplay) =>
-				textDisplay.setContent(
-					[
-						'### -# Emotes rápidos',
-						'Para usar un **&comando de emote**, solo coloca & y el nombre de un comando en cualquier parte de tus mensajes.',
-					].join('\n'),
-				),
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(
+				[
+					'### -# Ejemplos de uso',
+					`${prefix}avatar ${request.client.user}`,
+					`${prefix}dados 5d6`,
+				].join('\n'),
+			),
 		)
 		.addActionRowComponents(makeGuideRow(request))
 		.addSeparatorComponents((separator) => separator.setDivider(true))
