@@ -66,7 +66,6 @@ function subif<TReplacement>(
 	return `${i}{...}<!{${condition}:${r}|'${whenTrue}'}<?{'${whenFalse}'}`;
 }
 
-/**@satisfies {Record<string, Translation>}*/
 const localesObject = {
 	currentLanguage: {
 		es: 'Español',
@@ -3070,7 +3069,7 @@ const localesObject = {
 		en: "<You aren't following any tag yet>",
 		ja: '【まだタグをフォローしていません】',
 	},
-} as const;
+} as const satisfies Record<string, Translation>;
 
 export type LocaleIds = keyof typeof localesObject;
 
