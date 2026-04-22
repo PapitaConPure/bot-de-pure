@@ -4,6 +4,7 @@ import { dateToUTCFormat } from '@/func';
 import { Translator } from '@/i18n';
 import UserConfigModel from '@/models/userconfigs';
 import { addTime, parseDateFromNaturalLanguage, utcStartOfTzToday } from '@/utils/datetime';
+import { getBotEmoji } from '@/utils/emojis';
 import { sanitizeTzCode, toUtcOffset, utcOffsetDisplay } from '@/utils/timezones';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
@@ -70,7 +71,7 @@ const command = new Command(
 			const now = new Date(Date.now());
 			const dateAtThisTime = addMinutes(now, utcOffset);
 			return request.reply({
-				content: `${dateToUTCFormat(dateAtThisTime, '`HH:mm:ss` `yyyy-MM-dd`', translator.locale)} — <:clock:1357498813144760603> ${utcOffsetDisplay(tzCode)}`,
+				content: `${dateToUTCFormat(dateAtThisTime, '`HH:mm:ss` `yyyy-MM-dd`', translator.locale)} — ${getBotEmoji('clockAccent')} ${utcOffsetDisplay(tzCode)}`,
 			});
 		}
 

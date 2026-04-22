@@ -12,6 +12,7 @@ export type LocaleKey = ValuesOf<typeof Locales>;
 type ConditionString = (typeof ConditionFields)[keyof typeof ConditionFields];
 
 export type Translation = Record<LocaleKey, string>;
+export type JustInTimeTranslation = Record<LocaleKey, () => string>;
 
 export const validLocaleKeys: string[] = Object.values(Locales);
 export function isValidLocaleKey(locale: unknown): locale is LocaleKey {
@@ -967,9 +968,9 @@ const localesObject = {
 		ja: 'You grew potatoes!',
 	},
 	cultivarDescription: {
-		es: `Ahora tienes <:prc:1097208828946301123> ${subl(0)}`,
-		en: `You now have <:prc:1097208828946301123> ${subl(0)}`,
-		ja: `You now have <:prc:1097208828946301123> ${subl(0)}`,
+		es: () => `Ahora tienes ${getBotEmoji('prc')} ${subl(0)}`,
+		en: () => `You now have ${getBotEmoji('prc')} ${subl(0)}`,
+		ja: () => `You now have ${getBotEmoji('prc')} ${subl(0)}`,
 	},
 
 	transferAmountExpected: {
@@ -983,19 +984,22 @@ const localesObject = {
 		ja: '⚠️ 対象ユーザーを示すことが期待されていました',
 	},
 	transferHumanExpected: {
-		es: '❌ No se puede transferir <:prc:1097208828946301123> a bots',
-		en: "❌ Can't transfer <:prc:1097208828946301123> to bots",
-		ja: '❌ <:prc:1097208828946301123>をボットに転送できません',
+		es: () => `❌ No se puede transferir ${getBotEmoji('prc')} a bots`,
+		en: () => `❌ Can't transfer ${getBotEmoji('prc')} to bots`,
+		ja: () => `❌ ${getBotEmoji('prc')}をボットに転送できません`,
 	},
 	transferOtherExpected: {
-		es: '❌ No puedes transferirte <:prc:1097208828946301123> a ti mismo',
-		en: "❌ You can't transfer <:prc:1097208828946301123> to yourself",
-		ja: '❌ <:prc:1097208828946301123>を自分自身に譲渡することはできません',
+		es: () => `❌ No puedes transferirte ${getBotEmoji('prc')} a ti mismo`,
+		en: () => `❌ You can't transfer ${getBotEmoji('prc')} to yourself`,
+		ja: () => `❌ ${getBotEmoji('prc')}を自分自身に譲渡することはできません`,
 	},
 	transferAmountTooLow: {
-		es: '❌ El monto de la transferencia es demasiado bajo. Debes transferir al menos <:prc:1097208828946301123> 1',
-		en: '❌ The transfer amount is too low. You must transfer at least <:prc:1097208828946301123> 1',
-		ja: '❌ 転送量が少なすぎます。少なくとも<:prc:1097208828946301123> 1を転送する必要があります',
+		es: () =>
+			`❌ El monto de la transferencia es demasiado bajo. Debes transferir al menos ${getBotEmoji('prc')} 1`,
+		en: () =>
+			`❌ The transfer amount is too low. You must transfer at least ${getBotEmoji('prc')} 1`,
+		ja: () =>
+			`❌ 転送量が少なすぎます。少なくとも${getBotEmoji('prc')} 1を転送する必要があります`,
 	},
 	transferInsufficient: {
 		es: '⚠️ Saldo insuficiente',
@@ -2756,14 +2760,14 @@ const localesObject = {
 		ja: '### -# 時間帯',
 	},
 	yoDashboardNoTZ: {
-		es: '<:clock:1357498813144760603> _Sin huso horario_',
-		en: '<:clock:1357498813144760603> _No time zone_',
-		ja: '<:clock:1357498813144760603> _時間帯なし_',
+		es: () => `${getBotEmoji('clockAccent')} _Sin huso horario_`,
+		en: () => `${getBotEmoji('clockAccent')} _No time zone_`,
+		ja: () => `${getBotEmoji('clockAccent')} _時間帯なし_`,
 	},
 	yoDashboardPRC: {
-		es: `<:prc:1097208828946301123> ${subl(0)} créditos`,
-		en: `<:prc:1097208828946301123> ${subl(0)} credits`,
-		ja: `<:prc:1097208828946301123> ${subl(0)}クレジット`,
+		es: () => `${getBotEmoji('prc')} ${subl(0)} créditos`,
+		en: () => `${getBotEmoji('prc')} ${subl(0)} credits`,
+		ja: () => `${getBotEmoji('prc')} ${subl(0)}クレジット`,
 	},
 	yoDashboardFeedTagsName: {
 		es: 'Tags de Feed seguidas',
@@ -2771,9 +2775,11 @@ const localesObject = {
 		ja: 'フォローされたフィードタグ',
 	},
 	yoDashboardFeedTagsValue: {
-		es: `${getBotEmoji('tagColor')} Siguiendo ${subl(0)} tag${subif(0, '!=', 1, 's')} en ${subl(1)} canal${subif(1, '!=', 1, 'es')}`,
-		en: `${getBotEmoji('tagColor')} Following ${subl(0)} tag${subif(0, '!=', 1, 's')} in ${subl(1)} channel${subif(1, '!=', 1, 's')}`,
-		ja: `${getBotEmoji('tagColor')} ${subl(1)}チャンネルで${subl(0)}タグをフォロー`,
+		es: () =>
+			`${getBotEmoji('tagAccent')} Siguiendo ${subl(0)} tag${subif(0, '!=', 1, 's')} en ${subl(1)} canal${subif(1, '!=', 1, 'es')}`,
+		en: () =>
+			`${getBotEmoji('tagAccent')} Following ${subl(0)} tag${subif(0, '!=', 1, 's')} in ${subl(1)} channel${subif(1, '!=', 1, 's')}`,
+		ja: () => `${getBotEmoji('tagAccent')} ${subl(1)}チャンネルで${subl(0)}タグをフォロー`,
 	},
 	yoDashboardName: {
 		es: 'Panel Principal',
@@ -2892,9 +2898,9 @@ const localesObject = {
 		),
 	},
 	yoVoiceTitle: {
-		es: '## <:purevoice:1460145551847723132> Preferencias de PuréVoice',
-		en: '## <:purevoice:1460145551847723132> PuréVoice preferences',
-		ja: '## <:purevoice:1460145551847723132> PuréVoice の個人設定',
+		es: () => `## ${getBotEmoji('purevoiceFullColor')} Preferencias de PuréVoice`,
+		en: () => `## ${getBotEmoji('purevoiceFullColor')} PuréVoice preferences`,
+		ja: () => `## ${getBotEmoji('purevoiceFullColor')} PuréVoice の個人設定`,
 	},
 	yoVoiceDescription: {
 		es: '-# Configura tus preferencias de PuréVoice',
@@ -3116,7 +3122,7 @@ const localesObject = {
 		en: "<You aren't following any tag yet>",
 		ja: '【まだタグをフォローしていません】',
 	},
-} as const satisfies Record<string, Translation>;
+} as const satisfies Record<string, Translation | JustInTimeTranslation>;
 
 export type LocaleIds = keyof typeof localesObject;
 
@@ -3203,10 +3209,13 @@ export class Translator {
 				`Se esperaba una clave de localización válida. Se recibió: ${id} :: ${locale}`,
 			);
 
+		const actualTranslationTemplate =
+			typeof translationTemplate === 'function' ? translationTemplate() : translationTemplate;
+
 		//Ejemplo: 1{...}<?{'por defecto'}
 		const subLocaleRegex =
 			/(\d+){\.\.\.}(?:<!{((?:[!=<>]{1,2}):[^|]+)\|'((?:(?!'}).)*)'})?(?:<\?{'((?:(?!'}).)*)'})?/g;
-		const translation = translationTemplate.replace(
+		const translation = actualTranslationTemplate.replace(
 			subLocaleRegex,
 			(_match, i: string, condition: string, whenTrue: string, defaultValue: string) => {
 				const value = values[+i];
@@ -3298,9 +3307,15 @@ export class Translator {
 	 * @param id id de traducción
 	 */
 	static getTranslation(id: LocaleIds): Translation {
-		const localeSet = localesObject[id];
-		if (!localeSet)
+		const translation = localesObject[id];
+
+		if (!translation)
 			throw ReferenceError(`Se esperaba una id de traducción válida. Se recibió: ${id}`);
-		return localeSet;
+
+		if (typeof translation[defaultLocale] !== 'function') return translation;
+
+		return Object.fromEntries(
+			Object.entries(translation).map(([key, fn]) => [key, fn()]),
+		) as Translation;
 	}
 }

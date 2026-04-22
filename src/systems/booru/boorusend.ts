@@ -233,7 +233,7 @@ export async function formatBooruPostMessage(
 	if (hasTagMe || hasRequestTags)
 		buttonRow.addComponents(
 			new ButtonBuilder()
-				.setEmoji('1355496081550606486')
+				.setEmoji(getBotEmojiResolvable('handshakeWhite'))
 				.setStyle(ButtonStyle.Success)
 				.setCustomId(`feed_contribute${componentKeySuffix}`)
 				.setDisabled(!!disableActions),
@@ -242,7 +242,7 @@ export async function formatBooruPostMessage(
 	//Botón de eliminación
 	buttonRow.addComponents(
 		new ButtonBuilder()
-			.setEmoji('1355143793577426962')
+			.setEmoji(getBotEmojiResolvable('xmarkWhite'))
 			.setStyle(ButtonStyle.Danger)
 			.setCustomId(
 				`feed_deletePost_${data.manageableBy ?? ''}_${data.isNotFeed ?? ''}${componentKeySuffix}`,
@@ -330,7 +330,7 @@ export async function formatBooruPostMessage(
 
 		const otherTags = postOtherTags.slice(0, actualMaxTags);
 		const displayedTagsCount = Math.min(otherTags.length + specialTags.length, maxTags);
-		const generalTagsTitle = `${getBotEmoji('tagColor')} (${displayedTagsCount}/${actualTotalTags})`;
+		const generalTagsTitle = `${getBotEmoji('tagAccent')} (${displayedTagsCount}/${actualTotalTags})`;
 		const generalTagsContent =
 			`${specialTags.join(' ')} ${formatTagNameListNew(otherTags, ' ')}`.trim();
 		const postGeneralTags = shortenText(`-# ${generalTagsTitle} ${generalTagsContent}`, 1020);
@@ -405,7 +405,7 @@ export async function formatBooruPostMessage(
 		debug('displayedTagsCount =', displayedTagsCount);
 		if (displayedTagsCount > 0) {
 			debug('A punto de insertar un campo de tags');
-			const generalTagsTitle = `${getBotEmoji('tagColor')} (${displayedTagsCount}/${actualTotalTags})`;
+			const generalTagsTitle = `${getBotEmoji('tagAccent')} (${displayedTagsCount}/${actualTotalTags})`;
 			const generalTagsContent =
 				`${specialTags.join(' ')} ${formatTagNameListNew(filteredTags, ' ')}`.trim();
 			const postGeneralTags = shortenText(

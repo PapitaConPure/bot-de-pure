@@ -22,7 +22,7 @@ import type { ComplexCommandRequest, ComponentInteraction } from 'types/commands
 import { compressId, decompressId, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import { saveTracksQueue, tryRecoverSavedTracksQueue } from '@/models/playerQueue';
-
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import Logger from '@/utils/logs';
 
 const { debug, info, warn, error } = Logger('DEBUG', 'PuréMusic');
@@ -457,7 +457,7 @@ function getQueueActionRow(
 		actionRow.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`cola_clearQueue_${compressedUserId}`)
-				.setEmoji('1355143793577426962')
+				.setEmoji(getBotEmojiResolvable('xmarkWhite'))
 				.setLabel(translator.getText('queueButtonClearQueue'))
 				.setStyle(ButtonStyle.Danger),
 		);

@@ -25,6 +25,7 @@ import {
 	parseTimeFromNaturalLanguage,
 	utcStartOfTzToday,
 } from '@/utils/datetime';
+import { getBotEmoji } from '@/utils/emojis';
 import { p_pure } from '@/utils/prefixes';
 import { sanitizeTzCode, toUtcOffset } from '@/utils/timezones';
 import {
@@ -64,7 +65,7 @@ async function makeRemindersListContainer(compressedUserId: string, translator: 
 						.addTextDisplayComponents((textDisplay) =>
 							textDisplay.setContent(
 								[
-									`-# <:bell:1458732220016627734> <t:${unix}:R> → <#${decompressId(reminder.channelId)}> <:clock:1357498813144760603> <t:${unix}:t>`,
+									`-# ${getBotEmoji('bellAccent')} <t:${unix}:R> → <#${decompressId(reminder.channelId)}> ${getBotEmoji('clockAccent')} <t:${unix}:t>`,
 									shortenText(reminder.content, 64),
 								].join('\n'),
 							),

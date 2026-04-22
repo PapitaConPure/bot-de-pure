@@ -13,63 +13,117 @@ export interface BotEmoji extends StaticBotEmoji {
 }
 
 const expectedBotEmojis = {
-	//Common UI
+	//Common UI (any color)
 	checkmark: { fallback: '✅' },
 	xmark: { fallback: '❌' },
 	warning: { fallback: '⚠️' },
 	ballotCheckmark: { fallback: '☑️' },
-	refresh: { fallback: '🔃' },
-	redo: { fallback: '🔄' },
-	plus: { fallback: '➕' },
-	trash: { fallback: '🗑️' },
-	eye: { fallback: '👁️' },
-	comment: { fallback: '🗨️' },
-	reply: { fallback: '↪️' },
-	bell: { fallback: '🔔' },
-	hash: { fallback: '#️⃣' },
-	clock: { fallback: '🕒' },
-	ellipsis: { fallback: '⚫' },
-	image: { fallback: '🖼️' },
-	video: { fallback: '🎞️' },
-	handshake: { fallback: '🤝' },
-	globe: { fallback: '🌐' },
-	magGlassLeft: { fallback: '🔍' },
-	magGlassRight: { fallback: '🔎' },
 
-	//Main Icons
-	guide: { fallback: '📘' },
-	command: { fallback: '⚙️' },
-	purefeed: { fallback: '🖼️' },
-	purevoice: { fallback: '🔊' },
-	confessions: { fallback: '🕊️' },
+	//Primary/Success/Danger Button Icons (white)
+	checkmarkWhite: { fallback: '✅' },
+	xmarkWhite: { fallback: '❌' },
+	refreshWhite: { fallback: '🔃' },
+	redoWhite: { fallback: '🔄' },
+	plusWhite: { fallback: '➕' },
+	trashWhite: { fallback: '🗑️' },
+	eyeWhite: { fallback: '👁️' },
+	clockWhite: { fallback: '🕒' },
+	handshakeWhite: { fallback: '🤝' },
+	magGlassLeftWhite: { fallback: '🔍' },
+	magGlassRightWhite: { fallback: '🔎' },
 
-	//Navigation
-	backwardstep: { fallback: '⏮️' },
-	previous: { fallback: '◀️' },
-	next: { fallback: '▶️' },
-	forwardstep: { fallback: '⏭️' },
-	back: { fallback: '↩️' },
+	//Secondary Button Icons (accent color)
+	firstAccent: { fallback: '⏮️' },
+	prevAccent: { fallback: '◀️' },
+	nextAccent: { fallback: '▶️' },
+	lastAccent: { fallback: '⏭️' },
+	backAccent: { fallback: '↩️' },
+	xmarkAccent: { fallback: '❌' },
+	urlAccent: { fallback: '🔗' },
 
-	//Music UI
-	play: { fallback: '▶️' },
-	pause: { fallback: '⏸️' },
-	stop: { fallback: '⏹️' },
-	forward: { fallback: '⏩' },
-	volumeHigh: { fallback: '🔊' },
-	headphonessimple: { fallback: '🎧' },
-	repeat: { fallback: '🔁' },
-	shuffle: { fallback: '🔀' },
-	unshuffle: { fallback: '↩️' },
+	//Common UI (accent color)
+	userAccent: { fallback: '👤' },
+	commentAccent: { fallback: '🗨️' },
+	replyAccent: { fallback: '↪️' },
+	clockAccent: { fallback: '🕒' },
+	bellAccent: { fallback: '🔔' },
+	hashAccent: { fallback: '#️⃣' },
+	globeAccent: { fallback: '🌐' },
+	imageAccent: { fallback: '🖼️' },
+	videoAccent: { fallback: '🎞️' },
 
-	//Boorus
-	gelbooru: { fallback: '🇬' },
-	tagColor: { fallback: '🏷️' },
+	//Language Flags (full color, of course)
+	langEs: { fallback: '🇪🇸' },
+	langEn: { fallback: '🇬🇧' },
+	langJa: { fallback: '🇯🇵' },
+
+	//PRC (currency color)
+	prc: { fallback: '🥔' },
+
+	//Header Icons (primary-colored box with carved shapes)
+	guidePrimary: { fallback: '📘' },
+	commandPrimary: { fallback: '⚙️' },
+
+	//Hero Icons (primary gradient-colored box with accent-colored shapes
+	purefeedFullColor: { fallback: '🖼️' },
+	purevoiceFullColor: { fallback: '🔊' },
+	confessionsFullColor: { fallback: '🕊️' },
+
+	//Hero Icons with site-specific theming
+	twitterFullColor: { fallback: '𝕏' },
+	pixivFullColor: { fallback: '🇵' },
+
+	//Music Buttons (white)
+	playWhite: { fallback: '▶️' },
+	pauseWhite: { fallback: '⏸️' },
+	stopWhite: { fallback: '⏹️' },
+	skipWhite: { fallback: '⏩' },
+	repeatWhite: { fallback: '🔁' },
+	shuffleWhite: { fallback: '🔀' },
+	unshuffleWhite: { fallback: '↩️' },
+
+	//Voice and Music UI (accent color)
+	speakerAccent: { fallback: '🔊' },
+	headphonesAccent: { fallback: '🎧' },
+	shuffledAccent: { fallback: '🔀' },
+	unshuffledAccent: { fallback: '➡️' },
+
+	//Booru General Icons
+	gelbooruAccent: { fallback: '🇬' },
+	tagAccent: { fallback: '🏷️' },
 	tagWhite: { fallback: '🏷️' },
 	tagPlus: { fallback: '➕' },
 	tagMinus: { fallback: '➖' },
-	copyrightTag: { fallback: '🏛️' },
-	artistTag: { fallback: '🧑‍🎨' },
-	characterTag: { fallback: '🧍' },
+	copyrightTagAccent: { fallback: '🏛️' },
+	artistTagAccent: { fallback: '🧑‍🎨' },
+	characterTagAccent: { fallback: '🧍' },
+
+	//Source Icons (specific website's primary color)
+	//-- Unless it breaks ToS, in which case the website's color & fill guidelines should be followed
+	//-- Also, in the case of neutral sites like X, this bot's accent color should be used instead (for legibility).
+	gelbooruColor: { fallback: '🇬' },
+	twitterColor: { fallback: '𝕏' },
+	pixivColor: { fallback: '🇵' },
+	redditColor: { fallback: '🤖' },
+	tumblrColor: { fallback: '🇹' },
+	fanboxColor: { fallback: '🐙' },
+	fantiaColor: { fallback: '🇫' },
+	skebColor: { fallback: '📓' },
+	lofterColor: { fallback: '🇱' },
+	bilibiliColor: { fallback: '🌏' },
+	blueskyColor: { fallback: '🦋' },
+	caraColor: { fallback: '🇨' },
+	gdriveColor: { fallback: '🇬' },
+	youtubeColor: { fallback: '▶️' },
+	boothColor: { fallback: '🦙' },
+	weiboColor: { fallback: '👁‍🗨' },
+	dvntartColor: { fallback: '🌐' },
+	githubColor: { fallback: '🚀' },
+	niconicoColor: { fallback: '📺' },
+	patreonColor: { fallback: '🇵' },
+	newgroundsColor: { fallback: '⚔️' },
+
+	//Booru Tag icons ()
 	boy: { fallback: '♂️' },
 	girl: { fallback: '♀️' },
 	futa: { fallback: '🍆' },
@@ -77,8 +131,6 @@ const expectedBotEmojis = {
 	highRes: { fallback: '📈' },
 	absurdRes: { fallback: '🧬' },
 	incrediblyAbsurdRes: { fallback: '🌌' },
-	twitterfullcolor: { fallback: '𝕏' },
-	pixivfullcolor: { fallback: '🇵' },
 } as const satisfies Record<string, StaticBotEmoji>;
 export type BotEmojiName = keyof typeof expectedBotEmojis;
 
@@ -96,7 +148,8 @@ export async function setupAppEmojis() {
 
 	for (const [expectedEmojiName, staticBotEmoji] of Object.entries(expectedBotEmojis)) {
 		const matchingAppEmoji = appEmojisByName.get(expectedEmojiName);
-		console.log(expectedEmojiName, staticBotEmoji, matchingAppEmoji?.name);
+
+		debug(expectedEmojiName, staticBotEmoji, matchingAppEmoji?.name);
 
 		botEmojis.set(expectedEmojiName as BotEmojiName, {
 			...staticBotEmoji,

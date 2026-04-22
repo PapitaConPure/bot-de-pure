@@ -35,7 +35,7 @@ const command = new Command(
 			return request.reply({
 				content:
 					'Prefijo reestablecido a la configuración por defecto.\n'
-					+ `\`${prefixes['0'].raw}\` <:arrowl:681963688361590897> \`${preraw}\``,
+					+ `\`${prefixes['0'].raw}\` ← \`${preraw}\``,
 			});
 		}
 
@@ -76,7 +76,7 @@ const command = new Command(
 		return request.reply({
 			content: [
 				'Prefijo cambiado',
-				`\`${preraw}\` <:arrowr:681963688411922460> \`${pfpair.pure.raw}\``,
+				`\`${preraw}\` → \`${pfpair.pure.raw}\``,
 				`||Expresión Regular (avanzado): \`${shortenText(regex.toString(), 500)}\`||`,
 			].join('\n'),
 		});

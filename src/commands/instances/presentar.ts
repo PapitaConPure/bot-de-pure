@@ -2,6 +2,7 @@ import { ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags } from 'disc
 import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { Translator } from '@/i18n';
+import { getBotEmoji } from '@/utils/emojis';
 import { Command, CommandTags, commandFilenames } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
@@ -98,7 +99,7 @@ const command = new Command(
 					textDisplay.setContent(
 						[
 							'## Créditos',
-							'Todas estas personas hacen posible el proyecto de Bot de Puré. ¡Gracias!',
+							'Todas estas personas hicieron posible el proyecto de Bot de Puré. ¡Gracias!',
 						].join('\n'),
 					),
 				)
@@ -136,8 +137,8 @@ const command = new Command(
 							(textDisplay) =>
 								textDisplay.setContent(
 									[
-										`<:pixivfullcolor:1460135891841585385> [\`rakkidei\`](https://www.pixiv.net/en/users/58442175 "Contiene enlaces a sus otras redes")`,
-										`<:twitterfullcolor:1460135894404305019> [\`@rakkidei\`](https://x.com/rakkidei "@rakkidei")`,
+										`${getBotEmoji('pixivFullColor')} [\`rakkidei\`](https://www.pixiv.net/en/users/58442175 "Contiene enlaces a sus otras redes")`,
+										`${getBotEmoji('twitterFullColor')} [\`@rakkidei\`](https://x.com/rakkidei "@rakkidei")`,
 									].join(' '),
 								),
 						)

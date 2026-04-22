@@ -22,13 +22,14 @@ import {
 	makePVSessionName,
 	PureVoiceSessionMember,
 } from '@/systems/others/purevoice.js';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
 const cancelbutton = (compressedUserId: string) =>
 	new ButtonBuilder()
 		.setCustomId(`voz_cancelWizard_${compressedUserId}`)
-		.setEmoji('1355143793577426962')
+		.setEmoji(getBotEmojiResolvable('xmarkAccent'))
 		.setStyle(ButtonStyle.Secondary);
 
 const options = new CommandOptions()

@@ -29,6 +29,7 @@ import type { AcceptedTwitterConverterKey } from '@/systems/converters/pureet';
 import { acceptedTwitterConverters } from '@/systems/converters/pureet';
 import { auditError } from '@/systems/others/auditor';
 import { makeSessionAutoname } from '@/systems/others/purevoice';
+import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { sanitizeTzCode, toUtcOffset, utcOffsetDisplayFull } from '@/utils/timezones';
 import { recacheUser } from '@/utils/usercache';
 import { Command, CommandFlag, CommandOptions, CommandTags } from '../commons';
@@ -45,7 +46,7 @@ const backToDashboardButton = (compressedAuthorId: string) =>
 const cancelButton = (compressedAuthorId: string) =>
 	new ButtonBuilder()
 		.setCustomId(`yo_cancelWizard_${compressedAuthorId}`)
-		.setEmoji('1355143793577426962')
+		.setEmoji(getBotEmojiResolvable('xmarkAccent'))
 		.setStyle(ButtonStyle.Secondary);
 
 function makeDashboardContainer(
@@ -93,7 +94,7 @@ function makeDashboardContainer(
 						[
 							translator.getText('yoDashboardTimezoneName'),
 							tzCode?.length
-								? `<:clock:1357498813144760603> ${utcOffsetDisplayFull(tzCode)}`
+								? `${getBotEmoji('clockAccent')} ${utcOffsetDisplayFull(tzCode)}`
 								: translator.getText('yoDashboardNoTZ'),
 						].join('\n'),
 					),
@@ -412,7 +413,7 @@ const makeBoorutatoServicePickerContainer = (
 		)
 		.addSeparatorComponents((separator) => separator.setDivider(true))
 		.addTextDisplayComponents((textDisplay) =>
-			textDisplay.setContent('### -# <:gelbooru:919398540172750878> Gelbooru'),
+			textDisplay.setContent(`### -# ${getBotEmoji('gelbooruColor')} Gelbooru`),
 		)
 		.addActionRowComponents((actionRow) =>
 			actionRow.addComponents(

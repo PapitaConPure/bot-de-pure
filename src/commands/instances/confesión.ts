@@ -19,6 +19,7 @@ import ConfessionSystems from '@/models/confessionSystems.js';
 import PendingConfessions from '@/models/pendingConfessions.js';
 import { auditError } from '@/systems/others/auditor';
 import { DiscordAgent } from '@/utils/discordagent';
+import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import { Command, CommandPermissions, CommandTags } from '../commons';
 
@@ -292,20 +293,20 @@ const command = new Command(
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents([
 			new ButtonBuilder()
 				.setCustomId(`confesión_acceptConfession_${confId}_${userId}`)
-				.setEmoji('1163687887120891955')
+				.setEmoji(getBotEmojiResolvable('checkmarkWhite'))
 				.setStyle(ButtonStyle.Success),
 			new ButtonBuilder()
 				.setCustomId(`confesión_rejectConfession_${confId}`)
-				.setEmoji('1355143793577426962')
+				.setEmoji(getBotEmojiResolvable('xmarkAccent'))
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
 				.setCustomId(`confesión_timeoutConfessant_${confId}_${userId}`)
-				.setEmoji('1355143793577426962')
+				.setEmoji(getBotEmojiResolvable('xmarkWhite'))
 				.setLabel('Rechazar y Aislar')
 				.setStyle(ButtonStyle.Danger),
 			new ButtonBuilder()
 				.setCustomId(`confesión_banConfessant_${confId}_${userId}`)
-				.setEmoji('1355143793577426962')
+				.setEmoji(getBotEmojiResolvable('xmarkWhite'))
 				.setLabel('Rechazar y Bannear')
 				.setStyle(ButtonStyle.Danger),
 		]);
@@ -382,7 +383,7 @@ const command = new Command(
 				.setStyle(ButtonStyle.Secondary);
 
 			if (confession.anonymous) {
-				confessionContent += '<:person:1355128242993893539> Confesión anónima';
+				confessionContent += `${getBotEmoji('userAccent')} Confesión anónima`;
 				confessionSection.setButtonAccessory(replyButton);
 			} else {
 				await fetchGuildMembers(interaction.guild);
@@ -390,7 +391,7 @@ const command = new Command(
 				const miembro = interaction.guild.members.cache.get(gmid);
 
 				if (miembro) {
-					confessionContent += `<:person:1355128242993893539> Confesión de ${miembro}`;
+					confessionContent += `${getBotEmoji('userAccent')} Confesión de ${miembro}`;
 					confessionSection.setThumbnailAccessory((accessory) =>
 						accessory.setURL(miembro.displayAvatarURL({ size: 256 })),
 					);
@@ -635,20 +636,20 @@ const command = new Command(
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents([
 			new ButtonBuilder()
 				.setCustomId(`confesión_acceptConfession_${responseId}_${userId}_${messageId}`)
-				.setEmoji('1163687887120891955')
+				.setEmoji(getBotEmojiResolvable('checkmarkWhite'))
 				.setStyle(ButtonStyle.Success),
 			new ButtonBuilder()
 				.setCustomId(`confesión_rejectConfession_${responseId}`)
-				.setEmoji('1355143793577426962')
+				.setEmoji(getBotEmojiResolvable('xmarkAccent'))
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
 				.setCustomId(`confesión_timeoutConfessant_${responseId}_${userId}`)
-				.setEmoji('1355143793577426962')
+				.setEmoji(getBotEmojiResolvable('xmarkWhite'))
 				.setLabel('Rechazar y Aislar')
 				.setStyle(ButtonStyle.Danger),
 			new ButtonBuilder()
 				.setCustomId(`confesión_banConfessant_${responseId}_${userId}`)
-				.setEmoji('1355143793577426962')
+				.setEmoji(getBotEmojiResolvable('xmarkWhite'))
 				.setLabel('Rechazar y Bannear')
 				.setStyle(ButtonStyle.Danger),
 		]);

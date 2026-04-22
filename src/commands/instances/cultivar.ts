@@ -4,6 +4,7 @@ import { tenshiColor } from '@/data/globalProps';
 import { improveNumber, randRange } from '@/func';
 import { Translator } from '@/i18n';
 import UserConfigModel from '@/models/userconfigs';
+import { getBotEmoji } from '@/utils/emojis';
 import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
@@ -19,7 +20,7 @@ const command = new Command(
 	.setAliases('cosechar', 'cosecha', 'recolectar', 'cultivate', 'farm', 'cv', 'c')
 	.setBriefDescription('Permite cultivar entre 54 y 66 PRC diario')
 	.setDescription(
-		'Permite cultivar <:prc:1097208828946301123> 54~66.',
+		`Permite cultivar ${getBotEmoji('prc')} 54~66.`,
 		'Solo se puede hacer una vez por día.',
 	)
 	.setExecution(async (request) => {

@@ -45,6 +45,7 @@ import {
 	type RuntimeValue,
 	ValueKindTranslationLookups,
 } from '@/systems/ps/v1.1/interpreter/values';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchExt } from '@/utils/fetchext';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import { p_pure } from '@/utils/prefixes';
@@ -91,7 +92,7 @@ function paginationRows(page: number, lastPage: number, navigationEnabled: boole
 			new ButtonBuilder()
 				.setCustomId('tubérculo_filterClear')
 				.setLabel('Mostrar todo')
-				.setEmoji('1355143793577426962')
+				.setEmoji(getBotEmojiResolvable('xmarkWhite'))
 				.setStyle(ButtonStyle.Danger),
 		),
 	);

@@ -6,6 +6,7 @@ import { Translator } from '@/i18n';
 import { defaultLocale } from '@/i18n/locales';
 import UserConfigModel from '@/models/userconfigs';
 import { auditError } from '@/systems/others/auditor';
+import { getBotEmoji } from '@/utils/emojis';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
@@ -99,7 +100,7 @@ const command = new Command(
 					},
 					{
 						name: translator.getText('transferAmountName'),
-						value: `<:prc:1097208828946301123>  ${improveNumber(amount, { shorten: true })}`,
+						value: `${getBotEmoji('prc')} ${improveNumber(amount, { shorten: true })}`,
 						inline: true,
 					},
 					{

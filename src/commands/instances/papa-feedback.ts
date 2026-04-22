@@ -1,6 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { tenshiColor } from '@/data/globalProps';
 import FeedConfigModel from '@/models/feeds';
+import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('PAPA');
@@ -24,17 +25,17 @@ const command = new Command('papa-feedback', tags)
 			.setTimestamp(Date.now())
 			.addFields(
 				{
-					name: '<:es:1084646419853488209>',
+					name: getBotEmoji('langEs'),
 					value: '¿Qué piensas del nuevo formato de etiquetas de Post?\nSolo se registra una respuesta por usuario',
 					inline: true,
 				},
 				{
-					name: '<:en:1084646415319453756>',
+					name: getBotEmoji('langEn'),
 					value: 'What do you think about the new Post tags formatting?\nOnly one answer is registered per user',
 					inline: true,
 				},
 				{
-					name: '🇯🇵',
+					name: getBotEmoji('langJa'),
 					value: '新しい投稿タグ形式についてどう思いますか？\n ユーザーごとに登録できる回答は 1つだけです',
 					inline: true,
 				},
@@ -44,12 +45,12 @@ const command = new Command('papa-feedback', tags)
 			new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
 					.setCustomId('feed_giveFeedback_Y')
-					.setEmoji('1163687887120891955')
+					.setEmoji(getBotEmojiResolvable('checkmarkWhite'))
 					.setLabel('Me gusta / I like it / いいね')
 					.setStyle(ButtonStyle.Success),
 				new ButtonBuilder()
 					.setCustomId('feed_giveFeedback_N')
-					.setEmoji('1355143793577426962')
+					.setEmoji(getBotEmojiResolvable('xmarkWhite'))
 					.setLabel("No me gusta / I don't like it / 良くないです")
 					.setStyle(ButtonStyle.Danger),
 			),

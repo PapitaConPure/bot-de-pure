@@ -48,7 +48,7 @@ const wizTitle = (translator: Translator) => translator.getText('feedAuthor');
 const cancelbutton = (compressedAuthorId: string) =>
 	new ButtonBuilder()
 		.setCustomId(`feed_cancelWizard_${compressedAuthorId}`)
-		.setEmoji('1355143793577426962')
+		.setEmoji(getBotEmojiResolvable('xmarkAccent'))
 		.setStyle(ButtonStyle.Secondary);
 
 const finishButton = (translator: Translator, compressedAuthorId: string) =>
@@ -89,7 +89,7 @@ function tagsSetupPrompt(
 	translator: Translator,
 ) {
 	const fetchedChannel = interaction.guild?.channels.cache.get(channelId) as GuildBasedChannel;
-	const gelEmoji = getBotEmoji('gelbooru');
+	const gelEmoji = getBotEmoji('gelbooruAccent');
 	const embed = new EmbedBuilder()
 		.setColor(Colors.Blurple)
 		.setAuthor({
@@ -1501,7 +1501,7 @@ const command = new Command('feed', tags)
 				.filter((t) => !otherTagTypes.includes(t.type))
 				.map((t) => t.name);
 
-			const tagEmoji = getBotEmoji('tagColor');
+			const tagEmoji = getBotEmoji('tagAccent');
 			const tagsContent = formatTagNameListNew(postOtherTags, ' ');
 
 			const source = post.source;
@@ -1512,7 +1512,7 @@ const command = new Command('feed', tags)
 				tagsContainer
 					.addTextDisplayComponents((textDisplay) =>
 						textDisplay.setContent(
-							`### <:palette:1355128249658638488> Artistas\n${shortenText(artistTagsContent, 400, '…')}`,
+							`### ${getBotEmoji('artistTagAccent')} Artistas\n${shortenText(artistTagsContent, 400, '…')}`,
 						),
 					)
 					.addSeparatorComponents((separator) => separator.setDivider(false));
@@ -1522,7 +1522,7 @@ const command = new Command('feed', tags)
 				tagsContainer
 					.addTextDisplayComponents((textDisplay) =>
 						textDisplay.setContent(
-							`### <:person:1355128242993893539> Personajes\n${shortenText(characterTagsContent, 400, '…')}`,
+							`### ${getBotEmoji('characterTagAccent')} Personajes\n${shortenText(characterTagsContent, 400, '…')}`,
 						),
 					)
 					.addSeparatorComponents((separator) => separator.setDivider(false));
@@ -1532,7 +1532,7 @@ const command = new Command('feed', tags)
 				tagsContainer
 					.addTextDisplayComponents((textDisplay) =>
 						textDisplay.setContent(
-							`### <:landmark:1355128256432443584> Copyright\n${shortenText(copyrightTagsContent, 400, '…')}`,
+							`### ${getBotEmoji('copyrightTagAccent')} Copyright\n${shortenText(copyrightTagsContent, 400, '…')}`,
 						),
 					)
 					.addSeparatorComponents((separator) => separator.setDivider(false));
@@ -1547,14 +1547,14 @@ const command = new Command('feed', tags)
 				.addSeparatorComponents((separator) => separator.setDivider(true))
 				.addTextDisplayComponents((textDisplay) =>
 					textDisplay.setContent(
-						`### [<:gelbooru:919398540172750878> **Post**](${url})\n\`\`\`\n${url}\n\`\`\``,
+						`### [${getBotEmoji('gelbooruAccent')} **Post**](${url})\n\`\`\`\n${url}\n\`\`\``,
 					),
 				);
 
 			if (source) {
 				tagsContainer.addTextDisplayComponents((textDisplay) =>
 					textDisplay.setContent(
-						`### [<:urlwhite:922669195521568818> **Fuente**](${source})\n\`\`\`\n${source}\n\`\`\``,
+						`### [${getBotEmoji('urlAccent')} **Fuente**](${source})\n\`\`\`\n${source}\n\`\`\``,
 					),
 				);
 			}
@@ -1668,7 +1668,7 @@ const command = new Command('feed', tags)
 			if (!post)
 				return Promise.all([
 					interaction.reply({
-						content: `<:gelbooru:919398540172750878> **${translator.getText('feedDeletePostTitle')}** <${url}>`,
+						content: `${getBotEmoji('gelbooruColor')} **${translator.getText('feedDeletePostTitle')}** <${url}>`,
 						flags: MessageFlags.Ephemeral,
 					}),
 					message.delete().catch(console.error),
@@ -1681,11 +1681,11 @@ const command = new Command('feed', tags)
 				.setDescription(translator.getText('feedDeletePostAdvice'))
 				.addFields(
 					{
-						name: `${getBotEmoji('tagColor')} ${translator.getText('feedDeletePostTagsName')}`,
+						name: `${getBotEmoji('tagAccent')} ${translator.getText('feedDeletePostTagsName')}`,
 						value: tags,
 					},
 					{
-						name: `<:urlwhite:922669195521568818> ${translator.getText('feedDeletePostLinkName')}`,
+						name: `${getBotEmoji('urlAccent')} ${translator.getText('feedDeletePostLinkName')}`,
 						value: `[Gelbooru](${url})`,
 					},
 				);

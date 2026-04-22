@@ -11,6 +11,7 @@ import {
 import { saki } from '@/data/sakiProps';
 import serverIds from '@/data/serverIds.json';
 import { DiscordAgent } from '@/utils/discordagent';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { Command, CommandTags } from '../commons';
 import { CommandPermissions } from '../commons/cmdPerms.js';
 
@@ -46,7 +47,7 @@ const command = new Command('exhibir', flags)
 						.setStyle(ButtonStyle.Danger),
 					new ButtonBuilder()
 						.setCustomId(`exhibir_cancelFlush_${user.id}`)
-						.setEmoji('1355143793577426962')
+						.setEmoji(getBotEmojiResolvable('xmark'))
 						.setStyle(ButtonStyle.Secondary),
 				),
 			],
