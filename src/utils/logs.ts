@@ -73,9 +73,21 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
 	debug.dir = (data: unknown, options?: Record<string, unknown>) => {
 		if (LOG_LEVEL > LogLevels.DEBUG) return;
 		console.log(logLevelPrefix('DEBUG'), prefix);
-		console.log(logLevelOutput('INFO', '- '.repeat(5)));
+		console.log(logLevelOutput('DEBUG', '- '.repeat(5)));
 		console.dir(data, options);
-		console.log(logLevelOutput('INFO', '- '.repeat(5)));
+		console.log(logLevelOutput('DEBUG', '~ '.repeat(5)));
+	};
+
+	/**
+	 * La firma es idéntica a {@link console.table}. Produce una auditoría de depuración utilizando el mismo.
+	 * Requiere un nivel de advertencias de "DEBUG"
+	 */
+	debug.table = (data: unknown, properties?: string[]) => {
+		if (LOG_LEVEL > LogLevels.DEBUG) return;
+		console.log(logLevelPrefix('DEBUG'), prefix);
+		console.log(logLevelOutput('DEBUG', '- '.repeat(5)));
+		console.table(data, properties);
+		console.log(logLevelOutput('DEBUG', '~ '.repeat(5)));
 	};
 
 	/**
@@ -100,6 +112,18 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
 		console.log(logLevelOutput('INFO', '- '.repeat(5)));
 		console.dir(data, options);
 		console.log(logLevelOutput('INFO', '- '.repeat(5)));
+	};
+
+	/**
+	 * La firma es idéntica a {@link console.table}. Produce una auditoría de depuración utilizando el mismo.
+	 * Requiere un nivel de advertencias de "INFO"
+	 */
+	info.table = (data: unknown, properties?: string[]) => {
+		if (LOG_LEVEL > LogLevels.INFO) return;
+		console.log(logLevelPrefix('INFO'), prefix);
+		console.log(logLevelOutput('INFO', '- '.repeat(5)));
+		console.table(data, properties);
+		console.log(logLevelOutput('INFO', '~ '.repeat(5)));
 	};
 
 	/**
