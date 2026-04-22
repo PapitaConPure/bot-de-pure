@@ -10,7 +10,6 @@ const puré = {
 	commands: new Collection<string, Command>(),
 	actions: new Collection<string, ContextMenuAction>(),
 	slash: new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
-	slashSaki: new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
 	contextMenu: new Collection<string, RESTPostAPIContextMenuApplicationCommandsJSONBody>(),
 } as const;
 

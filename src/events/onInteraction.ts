@@ -55,7 +55,7 @@ async function handleCommand(
 	stats: StatsDocument,
 ) {
 	const { commandName } = interaction;
-	const slash = puré.slash.get(commandName) ?? puré.slashSaki.get(commandName);
+	const slash = puré.slash.get(commandName);
 	if (!slash) return;
 
 	try {
