@@ -4,7 +4,14 @@ import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('gatos', tags)
+const command = new Command(
+	{
+		es: 'gatos',
+		en: 'cats',
+		ja: 'cats',
+	},
+	tags,
+)
 	.setAliases(
 		'gato',
 		'felino',

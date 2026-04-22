@@ -22,7 +22,14 @@ const options = new CommandOptions()
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('hora', tags)
+const command = new Command(
+	{
+		es: 'hora',
+		en: 'time',
+		ja: 'time',
+	},
+	tags,
+)
 	.setAliases('horario', 'time', 'schedule')
 	.setBriefDescription(
 		'Muestra una fecha y hora automáticamente adaptados según el huso horario que proporciones',

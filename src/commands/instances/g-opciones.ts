@@ -3,7 +3,14 @@ import { Command, CommandTags } from '../commons/index.js';
 
 const tags = new CommandTags().add('GUIDE');
 
-const command = new Command('g-opciones', tags)
+const command = new Command(
+	{
+		es: 'g-opciones',
+		en: 'g-options',
+		ja: 'g-オプション',
+	},
+	tags,
+)
 	.setAliases('g-banderas', 'g-opt', 'g-flags')
 	.setLongDescription(
 		'Algunos comandos pueden usar `--banderas`',

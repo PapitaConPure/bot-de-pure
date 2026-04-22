@@ -9,7 +9,14 @@ import { Command, CommandTags } from '../commons';
 
 const flags = new CommandTags().add('COMMON', 'MUSIC');
 
-const command = new Command('sonando', flags)
+const command = new Command(
+	{
+		es: 'sonando',
+		en: 'nowplaying',
+		ja: 'saiseichuu',
+	},
+	flags,
+)
 	.setAliases('reproduciendo', 'escuchando', 'playing', 'listening', 'np')
 	.setBriefDescription('Indica la pista que está sonando actualmente')
 	.setLongDescription(

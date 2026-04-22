@@ -1,4 +1,5 @@
 import { EmbedBuilder, MessageFlags } from 'discord.js';
+import { Translator } from '@/i18n/index.js';
 import GuildConfig from '@/models/guildconfigs.js';
 import { p_pure } from '@/utils/prefixes';
 import { CommandPermissions } from '../commons/cmdPerms.js';
@@ -15,7 +16,14 @@ const options = new CommandOptions()
 
 const tags = new CommandTags().add('MOD');
 
-const command = new Command('caos', tags)
+const command = new Command(
+	{
+		es: 'caos',
+		en: 'chaos',
+		ja: 'chaos',
+	},
+	tags,
+)
 	.setAliases('chaos')
 	.setLongDescription('Para activar o desactivar comandos caóticos en un servidor')
 	.setPermissions(perms)
@@ -24,7 +32,11 @@ const command = new Command('caos', tags)
 		const activate = args.hasFlag('activar');
 		const deactivate = args.hasFlag('desactivar');
 		const guildsearch = { guildId: request.guild.id };
-		const gcfg = (await GuildConfig.findOne(guildsearch)) || new GuildConfig(guildsearch);
+		const [gcfg, translator] = await Promise.all([
+			(async () =>
+				(await GuildConfig.findOne(guildsearch)) || new GuildConfig(guildsearch))(),
+			Translator.from(request),
+		]);
 
 		if (activate && deactivate)
 			return request.reply({
@@ -42,7 +54,7 @@ const command = new Command('caos', tags)
 		}
 
 		const chaosCommands = await fetchCommandsFromFiles({ includeTags: 'CHAOS' });
-		const chaosnames = chaosCommands.map((c) => c.name);
+		const chaosnames = chaosCommands.map((c) => c.localizedNames[translator.locale]);
 
 		const embed = new EmbedBuilder()
 			.setColor(0xb8322c)

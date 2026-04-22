@@ -3,8 +3,10 @@ import type { ComplexCommandRequest } from 'types/commands';
 import { globalConfigs, tenshiColor } from '@/data/globalProps';
 import { compressId, improveNumber, sleep } from '@/func';
 import { Translator } from '@/i18n';
+import { defaultLocale } from '@/i18n/locales';
 import UserConfigModel from '@/models/userconfigs';
 import { auditError } from '@/systems/others/auditor';
+import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
 const transferLocks = new Set<string>();
@@ -14,7 +16,14 @@ const options = new CommandOptions()
 	.addParam('usuario', 'USER', 'para especificar el usuario al cual transferir PRC');
 
 const flags = new CommandTags().add('COMMON');
-const command = new Command('transferir', flags)
+const command = new Command(
+	{
+		es: 'transferir',
+		en: 'transfer',
+		ja: 'transfer',
+	},
+	flags,
+)
 	.setAliases('transfer', 'tf')
 	.setDescription('Permite transferir PRC a otro usuario')
 	.setOptions(options)
@@ -113,7 +122,7 @@ const command = new Command('transferir', flags)
 			auditError(error, {
 				request,
 				brief: 'Ocurrió un error durante una transacción',
-				details: `${request.isInteraction ? '/' : 'p!'}${command.name} ${amount} ${userId}`,
+				details: `${p_pure(request)}${command.localizedNames[defaultLocale]} ${amount} ${userId}`,
 				ping: true,
 			});
 			return request.editReply({ content: translator.getText('transferError') });

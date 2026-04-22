@@ -3,8 +3,15 @@ import { Command, CommandTags } from '../commons/index.js';
 
 const tags = new CommandTags().add('GUIDE');
 
-const command = new Command('g-tipos', tags)
-	.setAliases('g-valores', 'g-types', 'g-values', 'g-t', 'g-v')
+const command = new Command(
+	{
+		es: 'g-tipos',
+		en: 'g-types',
+		ja: 'g-パラメータ型',
+	},
+	tags,
+)
+	.setAliases('g-valores', 'g-paramtypes', 'g-values', 'g-t', 'g-v')
 	.setLongDescription(
 		'Al usar un comando, sus `<parámetros>` y `--banderas` con parámetro esperan ciertos _(tipos)_ de valores',
 		'No puedes usar un comando si escribes mal un valor. ¡Si es un Comando Slash, ni siquiera puedes enviarlo!',

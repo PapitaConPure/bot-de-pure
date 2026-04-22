@@ -12,7 +12,14 @@ const options = new CommandOptions()
 
 const tags = new CommandTags().add('MOD');
 
-const command = new Command('aislar', tags)
+const command = new Command(
+	{
+		es: 'aislar',
+		en: 'timeout',
+		ja: 'timeout',
+	},
+	tags,
+)
 	.setAliases('mutear', 'silenciar', 'mute', 'timeout', 'm')
 	.setBriefDescription('Aisla miembros en el server por un cierto tiempo')
 	.setLongDescription(

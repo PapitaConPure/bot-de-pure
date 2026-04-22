@@ -41,7 +41,14 @@ const flags = new CommandTags().add('MEME', 'CHAOS');
 const options = new CommandOptions()
 	.addParam('cantidad', 'NUMBER', 'para indicar la cantidad de veces que se debe pinguear')
 	.addParam('usuario', 'USER', 'para indicar el usuario a pinguear');
-const command = new Command('pinguear', flags)
+const command = new Command(
+	{
+		es: 'pinguear',
+		en: 'ping',
+		ja: 'ping',
+	},
+	flags,
+)
 	.setAliases('pingear', 'pingeara', 'pingueara', 'mencionar', 'mention', 'pingsomeone')
 	.setBriefDescription('Pingea a un usuario una cantidad de veces')
 	.setLongDescription('Pingea a un `<usuario>` una `<cantidad>` de veces')

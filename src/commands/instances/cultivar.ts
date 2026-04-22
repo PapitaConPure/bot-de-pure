@@ -8,7 +8,14 @@ import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('cultivar', tags)
+const command = new Command(
+	{
+		es: 'cultivar',
+		en: 'farm',
+		ja: 'farm',
+	},
+	tags,
+)
 	.setAliases('cosechar', 'cosecha', 'recolectar', 'cultivate', 'farm', 'cv', 'c')
 	.setBriefDescription('Permite cultivar entre 54 y 66 PRC diario')
 	.setDescription(

@@ -6,7 +6,14 @@ import { Command, CommandTags, commandFilenames } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('presentar', tags)
+const command = new Command(
+	{
+		es: 'presentar',
+		en: 'showcase',
+		ja: 'intro',
+	},
+	tags,
+)
 	.setAliases('presentacion', 'presentación', 'hola', 'saludar', 'presentarse', 'puré', 'pure')
 	.setDescription('Me presento y digo cositas sobre mí~')
 	.setExecution(async (request) => {

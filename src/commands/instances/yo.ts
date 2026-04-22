@@ -588,7 +588,14 @@ const options = new CommandOptions().addOptions(
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('yo', tags)
+const command = new Command(
+	{
+		es: 'yo',
+		en: 'me',
+		ja: 'watashi',
+	},
+	tags,
+)
 	.setAliases(
 		'usuario',
 		'configurar',
@@ -596,7 +603,13 @@ const command = new Command('yo', tags)
 		'configuracion',
 		'preferencias',
 		'me',
+		'self',
 		'myself',
+		'atashi',
+		'ateshi',
+		'atishi',
+		'boku',
+		'ore',
 		'configs',
 		'config',
 	)

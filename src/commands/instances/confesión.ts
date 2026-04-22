@@ -30,7 +30,14 @@ const perms = new CommandPermissions()
 
 const tags = new CommandTags().add('MOD');
 
-const command = new Command('confesión', tags)
+const command = new Command(
+	{
+		es: 'confesión',
+		en: 'confess',
+		ja: 'confess',
+	},
+	tags,
+)
 	.setAliases(
 		'confesion',
 		'confesiones',

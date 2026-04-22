@@ -46,7 +46,14 @@ const options = new CommandOptions()
 
 const tags = new CommandTags().add('MOD');
 
-const command = new Command('borrar', tags)
+const command = new Command(
+	{
+		es: 'borrar',
+		en: 'clear',
+		ja: 'clear',
+	},
+	tags,
+)
 	.setAliases('borrarmsg', 'deletemsg', 'delete', 'del', 'd')
 	.setLongDescription('Elimina una cierta cantidad de mensajes entre 2 y 100')
 	.setPermissions(perms)

@@ -10,7 +10,14 @@ export const searchCommandOptions = new CommandOptions()
 
 const flags = new CommandTags().add('COMMON');
 
-const command = new Command('buscar', flags)
+const command = new Command(
+	{
+		es: 'buscar',
+		en: 'search',
+		ja: 'search',
+	},
+	flags,
+)
 	.setAliases('imágenes', 'imagenes', 'search', 'image', 'img')
 	.setBriefDescription('Muestra imágenes desde Gelbooru')
 	.setLongDescription(

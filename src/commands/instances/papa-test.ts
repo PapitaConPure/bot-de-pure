@@ -19,14 +19,15 @@ const command = new Command('papa-test', tags)
 	.setLongDescription('Comando de pruebas 😳👉👈')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
+		const translator = new Translator('es');
+
 		const search = args.getString('texto');
 		const guildPrefix = p_pure(request.guildId).raw;
-		const helpCommand = `${guildPrefix}${command.name}`;
-		const translator = new Translator('es');
+		const helpCommand = `${guildPrefix}${command.localizedNames[translator.locale]}`;
 
 		if (!search) return request.reply({ content: 'wah' });
 
-		const foundCommand = await searchCommand(request, search);
+		const foundCommand = await searchCommand(request, search, translator);
 
 		if (!foundCommand) {
 			const embed = new EmbedBuilder()

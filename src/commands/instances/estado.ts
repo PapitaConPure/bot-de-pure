@@ -25,7 +25,14 @@ function listFormat(str: string, request: AnyRequest) {
 }
 
 const flags = new CommandTags().add('COMMON');
-const command = new Command('estado', flags)
+const command = new Command(
+	{
+		es: 'estado',
+		en: 'status',
+		ja: 'status',
+	},
+	flags,
+)
 	.setAliases('status', 'botstatus')
 	.setLongDescription(
 		'Muestra mi estado actual. Eso incluye versión, registro de cambios, cosas por hacer, etc',
@@ -124,13 +131,12 @@ const command = new Command('estado', flags)
 		});
 	})
 	.setSelectMenuResponse(async function getHelp(interaction) {
+		const translator = await Translator.from(interaction);
+
 		const guildPrefix = p_pure(interaction).raw;
-		const helpCommand = `${guildPrefix}${command.name}`;
+		const helpCommand = `${guildPrefix}${command.localizedNames[translator.locale]}`;
 		const query = interaction.values[0];
-		const [foundCommand, translator] = await Promise.all([
-			await searchCommand(interaction, query),
-			Translator.from(interaction),
-		]);
+		const foundCommand = await searchCommand(interaction, query, translator);
 
 		if (!foundCommand) {
 			const embed = new EmbedBuilder()

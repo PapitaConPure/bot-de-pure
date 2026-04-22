@@ -1,10 +1,9 @@
-import type { AnyComponentBuilder, MessageActionRowComponentBuilder } from 'discord.js';
+import type { MessageActionRowComponentBuilder } from 'discord.js';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	ContainerBuilder,
-	EmbedBuilder,
 	SectionBuilder,
 	SeparatorBuilder,
 	SeparatorSpacingSize,
@@ -21,7 +20,6 @@ import type {
 	CommandTagStringField,
 } from '@/commands/commons';
 import { CommandTag, fetchCommandsFromFiles } from '@/commands/commons';
-import { ClientNotFoundError, client } from '@/core/client';
 import { tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { compressId, edlDistance, isNotModerator, toCapitalized } from '@/func';
@@ -147,7 +145,9 @@ export const makeGuideMenu = (request: AnyRequest, translator: Translator) =>
 		);
 
 export const makeGuideRow = (request: AnyRequest, translator: Translator) =>
-	new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(makeGuideMenu(request, translator));
+	new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
+		makeGuideMenu(request, translator),
+	);
 
 /**
  * @description
@@ -155,10 +155,14 @@ export const makeGuideRow = (request: AnyRequest, translator: Translator) =>
  *
  * Si no se encuentran resultados, se devuelve `null`
  */
-export async function searchCommand(request: AnyRequest, nameOrAlias: string) {
+export async function searchCommand(
+	request: AnyRequest,
+	nameOrAlias: string,
+	translator: Translator,
+) {
 	const commands = await fetchCommandsFromFiles({
 		filter: (command) =>
-			command.name === nameOrAlias
+			command.localizedNames[translator.locale] === nameOrAlias
 			|| !!command.aliases?.some((alias) => alias === nameOrAlias),
 	});
 
@@ -183,7 +187,7 @@ export async function searchCommand(request: AnyRequest, nameOrAlias: string) {
  *
  * Si no se encuentran resultados, se devuelve `null`.
  */
-export async function searchCommands(request: AnyRequest, query: string) {
+export async function searchCommands(request: AnyRequest, query: string, translator: Translator) {
 	const commandsWithDistance: { command: Command; distance: number }[] = [];
 
 	const commands = await fetchCommandsFromFiles({
@@ -192,7 +196,7 @@ export async function searchCommands(request: AnyRequest, query: string) {
 	const nameBias = 0.334;
 
 	for (const command of commands) {
-		let distance = edlDistance(command.name, query);
+		let distance = edlDistance(command.localizedNames[translator.locale], query);
 
 		if (distance > 3) {
 			if (!command.aliases) continue;
@@ -221,12 +225,6 @@ export async function searchCommands(request: AnyRequest, query: string) {
 }
 
 /**@description Representa un objeto de carga útil para inyectar en una página de wiki de comando.*/
-interface WikiPageInjectionPayload {
-	embeds: EmbedBuilder[];
-	components: ActionRowBuilder<AnyComponentBuilder>[];
-}
-
-/**@description Representa un objeto de carga útil para inyectar en una página de wiki de comando.*/
 type WikiPageInjectionPayloadV2 = MessageComponentDataResolvable[];
 
 const displayTagMappings = {
@@ -245,98 +243,15 @@ const displayTagMappings = {
 
 const listExists = (l: string[] | null | undefined): l is string[] => !!l?.[0]?.length;
 
-/**
- * @description Añade embeds y componentes de una wiki de comando a la carga indicada.
- * @deprecated
- */
-export function injectWikiPage(
-	command: Command<CommandOptions | undefined>,
-	guildId: string,
-	payload: WikiPageInjectionPayload,
-) {
-	const { name, aliases, flags } = command;
-	const { embeds, components } = payload;
-
-	const title = (commandName: string) => {
-		const pfi = commandName.indexOf('-') + 1;
-		commandName = flags.has('GUIDE')
-			? `${commandName.slice(pfi)} (Página de Guía)`
-			: commandName;
-		commandName = flags.has('MOD') ? `${commandName} (Mod)` : commandName;
-		commandName = flags.has('PAPA')
-			? `${commandName.slice(pfi)} (Papita con Puré)`
-			: commandName;
-		return `${commandName[0].toUpperCase()}${commandName.slice(1)}`;
-	};
-	const isNotGuidePage = !flags.has('GUIDE');
-
-	if (!client) throw new ClientNotFoundError();
-
-	//Embed de metadatos
-	embeds.push(
-		new EmbedBuilder()
-			.setColor(tenshiColor)
-			.setAuthor({
-				name: title(name),
-				iconURL:
-					client.user?.displayAvatarURL({ extension: 'png', size: 512 }) ?? undefined,
-			})
-			.addFields(
-				{ name: 'Nombre', value: `\`${name}\``, inline: true },
-				{
-					name: 'Alias',
-					value: listExists(aliases)
-						? aliases.map((i) => `\`${i}\``).join(', ')
-						: ':label: Sin alias',
-					inline: true,
-				},
-				{
-					name: 'Etiquetas',
-					value: flags.keys.map((f) => `\`${f}\``).join(', '),
-					inline: true,
-				},
-			),
-	);
-
-	//Embed de información
-	const infoEmbed = new EmbedBuilder().setColor(0xbf94e4).addFields({
-		name: 'Descripción',
-		value:
-			command.desc
-			|| '⚠️ Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde',
-	});
-
-	embeds.push(infoEmbed);
-
-	if (isNotGuidePage)
-		infoEmbed.addFields(
-			{
-				name: 'Uso (plantilla)',
-				value: `\`${p_pure(guildId).raw}${command.name}${command.callx ? ` ${command.callx}` : ''}\``,
-			},
-			{ name: 'Opciones', value: command.options?.display || ':abacus: Sin opciones' },
-		);
-
-	components.push(
-		new ActionRowBuilder().addComponents([
-			new ButtonBuilder()
-				.setCustomId('ayuda_porfavorayuden')
-				.setLabel('Muéstrame cómo')
-				.setStyle(ButtonStyle.Primary)
-				.setEmoji('📖')
-				.setDisabled(true),
-		]),
-	);
-}
-
 /**@description Añade embeds y componentes de una wiki de comando a la carga indicada (utiliza Componentes V2).*/
 export function getWikiPageComponentsV2(
 	command: Command<CommandOptions | undefined>,
 	request: ComplexCommandRequest,
 	translator: Translator,
 ): WikiPageInjectionPayloadV2 {
-	const { name: commandName, aliases, flags: commandTags } = command;
+	const { localizedNames: localizedCommandNames, aliases, flags: commandTags } = command;
 
+	const commandName = localizedCommandNames[translator.locale];
 	const components: WikiPageInjectionPayloadV2 = [];
 
 	const getDisplayFlags = () =>
@@ -408,7 +323,7 @@ export function getWikiPageComponentsV2(
 			translator.getText('wikiCommandUsageName'),
 		);
 		const usageTextBuilder = new TextDisplayBuilder().setContent(
-			`\`\`\`bnf\n${p_pure(request).raw}${commandName}${command.callx ? ` ${command.callx}` : ''}\n\`\`\``,
+			`\`\`\`bnf\n${p_pure(request).raw}${localizedCommandNames}${command.callx ? ` ${command.callx}` : ''}\n\`\`\``,
 		);
 		const usageSectionBuilder = new SectionBuilder()
 			.addTextDisplayComponents(usageHeaderTextBuilder, usageTextBuilder)

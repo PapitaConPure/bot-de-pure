@@ -238,7 +238,14 @@ const options = new CommandOptions()
 
 const tags = new CommandTags().add('COMMON', 'GAME');
 
-const command = new Command('anarquia', tags)
+const command = new Command(
+	{
+		es: 'anarquía',
+		en: 'anarchy',
+		ja: 'anarchy',
+	},
+	tags,
+)
 	.setAliases('anarquía', 'a')
 	.setBriefDescription('Para interactuar con la Tabla de Puré')
 	.setLongDescription(

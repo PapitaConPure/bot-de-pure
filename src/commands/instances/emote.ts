@@ -11,7 +11,14 @@ const options = new CommandOptions()
 	});
 
 const flags = new CommandTags().add('COMMON');
-const command = new Command('emote', flags)
+const command = new Command(
+	{
+		es: 'emote',
+		en: 'emoji',
+		ja: 'emoji',
+	},
+	flags,
+)
 	.setAliases('emotes', 'emoji', 'emojis', 'emt', 'emj', 'e')
 	.setDescription('Muestra el enlace del emote especificado')
 	.setOptions(options)

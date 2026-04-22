@@ -66,8 +66,15 @@ const options = new CommandOptions()
 	.addParam('script', 'TEXT', 'para designar código PuréScript a ejecutar')
 	.addParam('archivo', 'FILE', 'para importar código PuréScript a ejecutar');
 const flags = new CommandTags().add('COMMON');
-const command = new Command('purescript', flags)
-	.setAliases('puréscript', 'ps')
+const command = new Command(
+	{
+		es: 'puréscript',
+		en: 'purescript',
+		ja: 'purescript',
+	},
+	flags,
+)
+	.setAliases('puréscript', 'purescript', 'ps')
 	.setBriefDescription('Interpreta y ejecuta código PuréScript')
 	.setLongDescription(
 		'Interpreta y ejecuta el código PuréScript ingresado',

@@ -25,7 +25,7 @@ import type {
 	ComponentInteraction,
 	ExtendedCommandRequest,
 } from 'types/commands';
-import type { Translator } from '@/i18n';
+import type { Translation, Translator } from '@/i18n';
 import type { CommandOptionSolver, CommandOptions } from './cmdOpts';
 import type { CommandPermissions } from './cmdPerms';
 import type { CommandTags } from './cmdTags';
@@ -195,31 +195,53 @@ interface CommandWikiData {
 
 /**@class Representa un comando.*/
 export class Command<TOptions extends CommandOptions | undefined = undefined> {
-	name: string;
+	readonly localizedNames: Translation;
 	aliases: string[] | null;
 	desc: string | undefined;
 	brief: string | undefined;
-	flags: CommandTags;
+	readonly flags: CommandTags;
 	permissions: CommandPermissions | undefined;
 	options: TOptions;
 	callx: string | undefined;
-	memory: Map<string, unknown>;
-	wiki: CommandWikiData;
+	readonly memory: Map<string, unknown>;
+	readonly wiki: CommandWikiData;
 	reply: CommandReplyOptions | undefined;
 	execute: ExecutionFunction<TOptions>;
 
 	/**
 	 * @description Crea un comando.
-	 * @param name El nombre identificador del comando
+	 * @param localizedNames El nombre identificador del comando
 	 * @param tags Un objeto {@linkcode CommandTags} con las flags del comando
 	 */
-	constructor(name: string, tags: CommandTags) {
-		if (typeof name !== 'string') throw new TypeError('El nombre debe ser un string');
-		if (!name.length) throw new Error('El nombre del comando no puede estar vacío');
-		if (!tags) throw new TypeError('Debes suministrar CommandTags para el comando');
-		if (tags.bitfield == null) throw new TypeError('Las tags deben ser un CommandTags');
-		if (!tags.bitfield) throw new Error('Las tags no pueden estar vacías');
-		this.name = name;
+	constructor(localizedNames: string | Translation, tags: CommandTags) {
+		let actualLocalizedNames: Translation;
+
+		if (typeof localizedNames === 'string') {
+			if (!localizedNames.length)
+				throw new Error('El nombre del comando no puede estar vacío.');
+
+			actualLocalizedNames = {
+				es: localizedNames,
+				en: localizedNames,
+				ja: localizedNames,
+			};
+		} else if (typeof localizedNames === 'object') {
+			if (
+				!localizedNames.es?.length
+				|| !localizedNames.en?.length
+				|| !localizedNames.ja?.length
+			)
+				throw new Error('Ninguna traducción de nombre del comando puede estar vacía.');
+
+			actualLocalizedNames = localizedNames;
+		} else
+			throw new TypeError('El nombre debe ser un string o una entrada de traducción válida.');
+
+		if (!tags) throw new TypeError('Debes suministrar CommandTags para el comando.');
+		if (tags.bitfield == null) throw new TypeError('Las tags deben ser un CommandTags.');
+		if (tags.bitfield <= 0n) throw new Error('Las tags no pueden estar vacías.');
+
+		this.localizedNames = actualLocalizedNames;
 		this.aliases = [];
 		this.flags = tags;
 		this.memory = new Map();

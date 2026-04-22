@@ -241,7 +241,14 @@ const options = new CommandOptions()
 
 const flags = new CommandTags().add('COMMON');
 
-const command = new Command('tubérculo', flags)
+const command = new Command(
+	{
+		es: 'tubérculo',
+		en: 'tubercle',
+		ja: 'custom',
+	},
+	flags,
+)
 	.setAliases('tuberculo', 'tubercle', 'tuber', 't')
 	.setBriefDescription(
 		'Permite crear, editar, listar, borrar o ejecutar comandos personalizados de servidor',
@@ -354,7 +361,11 @@ const command = new Command('tubérculo', flags)
 				flags: MessageFlags.Ephemeral,
 			});
 
-		const components = getWikiPageComponentsV2(command, Command.requestize(interaction), translator);
+		const components = getWikiPageComponentsV2(
+			command,
+			Command.requestize(interaction),
+			translator,
+		);
 
 		return interaction.reply({ flags: MessageFlags.IsComponentsV2, components });
 	})

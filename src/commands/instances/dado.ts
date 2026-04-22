@@ -60,7 +60,14 @@ const options = new CommandOptions().addOptions(
 
 const flags = new CommandTags().add('COMMON');
 
-const command = new Command('dados', flags)
+const command = new Command(
+	{
+		es: 'dado',
+		en: 'dice',
+		ja: 'dice',
+	},
+	flags,
+)
 	.setAliases('dado', 'tirar', 'random', 'roll', 'rolldie', 'dice', 'die')
 	.setBriefDescription(
 		'Tira 1 ó más dados de la cantidad de caras deseadas y muestra el resultado',

@@ -24,7 +24,14 @@ const options = new CommandOptions().addParam('persona', 'USER', 'el usuario a m
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('mimar', tags)
+const command = new Command(
+	{
+		es: 'mimar',
+		en: 'hug',
+		ja: 'hug',
+	},
+	tags,
+)
 	.setAliases('mimos', 'besar', 'abrazar', 'hug', 'kiss')
 	.setBriefDescription(
 		'Mima al usuario mencionado y te da un resumen de cómo estuvo el mimo para ambas partes',

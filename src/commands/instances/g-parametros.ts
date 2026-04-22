@@ -3,7 +3,14 @@ import { Command, CommandTags } from '../commons/index.js';
 
 const tags = new CommandTags().add('GUIDE');
 
-const command = new Command('g-parametros', tags)
+const command = new Command(
+	{
+		es: 'g-parámetros',
+		en: 'g-parameters',
+		ja: 'g-パラメータ',
+	},
+	tags,
+)
 	.setAliases('g-parámetros', 'g-argumentos', 'g-parameters', 'g-arguments', 'g-param', 'g-args')
 	.setLongDescription(
 		'Algunos comandos pueden requerir `<parámetros>`',

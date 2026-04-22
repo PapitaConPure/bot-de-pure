@@ -1,3 +1,4 @@
+import { Locale as DiscordLocaleKey } from 'discord.js';
 import type { UserCacheResolvable } from '@/utils/usercache';
 import { fetchUserCache } from '@/utils/usercache';
 import type { ValuesOf } from '../types/util';
@@ -9,11 +10,56 @@ export type LocaleKey = ValuesOf<typeof Locales>;
 
 type ConditionString = (typeof ConditionFields)[keyof typeof ConditionFields];
 
-type Translation = Record<LocaleKey, string>;
+export type Translation = Record<LocaleKey, string>;
 
 export const validLocaleKeys: string[] = Object.values(Locales);
 export function isValidLocaleKey(locale: unknown): locale is LocaleKey {
 	return typeof locale === 'string' && validLocaleKeys.includes(locale);
+}
+
+export const botToDiscordLocaleMap = {
+	es: DiscordLocaleKey.SpanishLATAM,
+	en: DiscordLocaleKey.EnglishUS,
+	ja: DiscordLocaleKey.Japanese,
+} as const satisfies Record<LocaleKey, DiscordLocaleKey>;
+
+export function botTranslationToDiscordLocalizations(
+	translation: Translation,
+): Partial<Record<DiscordLocaleKey, string>> {
+	const entries = Object.entries(translation) as [LocaleKey, string][];
+
+	return Object.fromEntries(
+		entries.map(([key, value]) => [botToDiscordLocaleMap[key], value]),
+	) as Partial<Record<DiscordLocaleKey, string>>;
+}
+
+export const discordToBotLocaleMap = {
+	[DiscordLocaleKey.SpanishLATAM]: Locales.Spanish,
+	[DiscordLocaleKey.SpanishES]: Locales.Spanish,
+	[DiscordLocaleKey.EnglishUS]: Locales.English,
+	[DiscordLocaleKey.EnglishGB]: Locales.English,
+	[DiscordLocaleKey.Japanese]: Locales.Japanese,
+} as const satisfies Partial<Record<DiscordLocaleKey, LocaleKey>>;
+
+export function discordTranslationToBotLocalizations(
+	translation: Partial<Record<DiscordLocaleKey, string>>,
+): Translation {
+	const botLocaleKeys = Object.keys(botToDiscordLocaleMap) as LocaleKey[];
+
+	const entries = botLocaleKeys.map((botLocale) => {
+		const discordValue = Object.entries(discordToBotLocaleMap).find(
+			([discordKey, targetBotLocale]) =>
+				targetBotLocale === botLocale && translation[discordKey as DiscordLocaleKey],
+		);
+
+		const finalValue = discordValue
+			? translation[discordValue[0] as DiscordLocaleKey]
+			: translation[botToDiscordLocaleMap[defaultLocale]];
+
+		return [botLocale, finalValue];
+	});
+
+	return Object.fromEntries(entries) as Translation;
 }
 
 function paragraph(...lines: string[]) {
@@ -774,7 +820,7 @@ const localesObject = {
 	helpMainBasicUsageContent: {
 		es: paragraph(`${subl(0)}yo`, `${subl(0)}avatar ${subl(1)}`, `${subl(0)}dados 5d6`),
 		en: paragraph(`${subl(0)}me`, `${subl(0)}avatar ${subl(1)}`, `${subl(0)}roll 5d6`),
-		ja: paragraph(`${subl(0)}me`, `${subl(0)}avatar ${subl(1)}`, `${subl(0)}roll 5d6`),
+		ja: paragraph(`${subl(0)}watashi`, `${subl(0)}avatar ${subl(1)}`, `${subl(0)}roll 5d6`),
 	},
 	helpMainBasicUsageButton: {
 		es: 'Introducción',
@@ -797,9 +843,9 @@ const localesObject = {
 		ja: '指定したすべてのカテゴリに一致するコマンドはありません。もう少し緩い条件で試してください。',
 	},
 	helpCommandNotFoundTitle: {
-		es: 'Sin resultados',
-		en: 'Command Not Found',
-		ja: 'コマンドが見つかりません',
+		es: '## 🍃 Sin resultados',
+		en: '## 🍃 Command Not Found',
+		ja: '## 🍃 コマンドが見つかりません',
 	},
 	helpCommandNotFoundName: {
 		es: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
@@ -3073,7 +3119,6 @@ const localesObject = {
 
 export type LocaleIds = keyof typeof localesObject;
 
-/**@type {Map<ConditionString, (a: String, b: String) => Boolean>}*/
 const conditionFns: Map<ConditionString, (a: string, b: string) => boolean> = new Map();
 conditionFns
 	.set('=', (a, b) => a === b)

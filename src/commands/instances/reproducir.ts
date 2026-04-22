@@ -32,7 +32,14 @@ const options = new CommandOptions().addOptions(
 
 const tags = new CommandTags().add('COMMON', 'MUSIC');
 
-const command = new Command('reproducir', tags)
+const command = new Command(
+	{
+		es: 'reproducir',
+		en: 'play',
+		ja: 'play',
+	},
+	tags,
+)
 	.setAliases('tocar', 'play', 'p')
 	.setBriefDescription('Reproduce pistas de audio')
 	.setLongDescription('Reproduce una pista de audio según la `búsqueda` realizada.')

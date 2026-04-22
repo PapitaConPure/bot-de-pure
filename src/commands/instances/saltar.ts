@@ -7,7 +7,14 @@ import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON', 'MUSIC');
 
-const command = new Command('saltar', tags)
+const command = new Command(
+	{
+		es: 'saltar',
+		en: 'skip',
+		ja: 'skip',
+	},
+	tags,
+)
 	.setAliases('skip', 's')
 	.setBriefDescription('Salta la pista actual')
 	.setLongDescription(

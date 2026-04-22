@@ -6,7 +6,14 @@ import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON', 'MUSIC');
 
-const command = new Command('pausar', tags)
+const command = new Command(
+	{
+		es: 'pausar',
+		en: 'pause',
+		ja: 'pause',
+	},
+	tags,
+)
 	.setAliases('pausa', 'pause')
 	.setBriefDescription('Pausa una pista de audio en reproducción')
 	.setLongDescription(

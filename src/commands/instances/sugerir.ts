@@ -4,7 +4,14 @@ import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('sugerir', tags)
+const command = new Command(
+	{
+		es: 'sugerir',
+		en: 'suggest',
+		ja: 'suggest',
+	},
+	tags,
+)
 	.setAliases('reportar', 'informar')
 	.setDescription('Para sugerir mejoras sobre Bot de Puré, o reportar un error')
 	.setExecution(async (request) => {

@@ -15,7 +15,14 @@ const tags = new CommandTags().add('MOD', 'MAINTENANCE');
 
 const permissions = new CommandPermissions().requireAnyOf(['ManageGuild']);
 
-const command = new Command('servidor', tags)
+const command = new Command(
+	{
+		es: 'servidor',
+		en: 'server',
+		ja: 'server',
+	},
+	tags,
+)
 	.setAliases('server', 'guild', 'sv')
 	.setBriefDescription(
 		'Para ver y configurar las preferencias del servidor por medio de un Asistente',

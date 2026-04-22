@@ -12,7 +12,14 @@ const options = new CommandOptions().addFlag(
 
 const flags = new CommandTags().add('MOD', 'MAINTENANCE');
 
-const command = new Command('bienvenida', flags)
+const command = new Command(
+	{
+		es: 'bienvenida',
+		en: 'welcome',
+		ja: 'welcome',
+	},
+	flags,
+)
 	.setBriefDescription('Configura una bienvenida para este servidor')
 	.setLongDescription(
 		'Edita el mensaje de bienvenida para este servidor.',

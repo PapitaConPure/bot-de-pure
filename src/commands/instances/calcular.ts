@@ -19,7 +19,14 @@ const options = new CommandOptions()
 		type: 'NUMBER',
 	});
 
-const command = new Command('calcular', tags)
+const command = new Command(
+	{
+		es: 'calcular',
+		en: 'calculate',
+		ja: 'calculate',
+	},
+	tags,
+)
 	.setAliases('calc', 'clc', 'cx')
 	.setBriefDescription('Realiza un cálculo básico y devuelve el resultado')
 	.setLongDescription(

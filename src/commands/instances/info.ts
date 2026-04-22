@@ -46,7 +46,14 @@ const options = new CommandOptions()
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('info', tags)
+const command = new Command(
+	{
+		es: 'info',
+		en: 'info',
+		ja: 'info',
+	},
+	tags,
+)
 	.setAliases('informacion', 'información', 'inf', 'serverinfo', 'svinfo', 'svinf', 'i')
 	.setLongDescription('Muestra información estadística paginada del servidor')
 	.setOptions(options)

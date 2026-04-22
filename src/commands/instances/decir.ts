@@ -4,7 +4,14 @@ const options = new CommandOptions()
 	.addParam('mensaje', 'TEXT', 'para especificar qué decir')
 	.addFlag(['b', 'd'], ['borrar', 'delete'], 'para borrar el mensaje original');
 const flags = new CommandTags().add('COMMON');
-const command = new Command('decir', flags)
+const command = new Command(
+	{
+		es: 'decir',
+		en: 'say',
+		ja: 'say',
+	},
+	flags,
+)
 	.setAliases('exclamar', 'escribir', 'say', 'echo')
 	.setLongDescription('Me hace decir lo que quieras que diga')
 	.setOptions(options)

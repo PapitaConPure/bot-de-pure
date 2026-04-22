@@ -5,7 +5,14 @@ import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('ping', tags)
+const command = new Command(
+	{
+		es: 'latencia',
+		en: 'latency',
+		ja: 'latency',
+	},
+	tags,
+)
 	.setLongDescription('Muestra el tiempo de respuesta del Bot y la API')
 	.setExecution(async (request) => {
 		const sent = (await request.reply({

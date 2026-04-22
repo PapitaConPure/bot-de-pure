@@ -4,7 +4,14 @@ import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('café', tags)
+const command = new Command(
+	{
+		es: 'café',
+		en: 'coffee',
+		ja: 'coffee',
+	},
+	tags,
+)
 	.setAliases('cafe', 'cafecito', 'coffee', 'cawfee')
 	.setLongDescription('Muestra imágenes de café. API: https://coffee.alexflipnote.dev')
 	.setExecution(async (request) => {

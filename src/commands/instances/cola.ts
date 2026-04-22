@@ -22,7 +22,14 @@ import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON', 'MUSIC');
 
-const command = new Command('cola', tags)
+const command = new Command(
+	{
+		es: 'cola',
+		en: 'queue',
+		ja: 'queue',
+	},
+	tags,
+)
 	.setAliases('queue', 'q')
 	.setBriefDescription('Muestra la cola de reproducción')
 	.setLongDescription(

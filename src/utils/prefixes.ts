@@ -1,7 +1,6 @@
-import type { AnySelectMenuInteraction } from 'discord.js';
 import type { PrefixPair } from '../data/globalProps';
 import { prefixes } from '../data/globalProps';
-import type { ComplexCommandRequest } from '../types/commands';
+import type { AnyRequest } from '../types/commands';
 
 export const slashPrefixPair = { raw: '/', regex: /\//i } as const satisfies PrefixPair;
 
@@ -10,7 +9,7 @@ export const slashPrefixPair = { raw: '/', regex: /\//i } as const satisfies Pre
  * @returns Un objeto conteniendo el texto crudo y RegExp del prefijo
  */
 export function p_pure(
-	context: ComplexCommandRequest | AnySelectMenuInteraction<'cached'> | string = '0',
+	context: AnyRequest | string = '0',
 ): PrefixPair {
 	if (typeof context === 'string') return prefixes[context] || prefixes['0'];
 

@@ -12,7 +12,14 @@ const options = new CommandOptions()
 	.addParam('prefijo', 'TEXT', 'para cambiar el prefijo del servidor', { optional: true })
 	.addFlag('r', ['reestablecer', 'reiniciar', 'reset'], 'para volver al prefijo por defecto');
 
-const command = new Command('prefijo', flags)
+const command = new Command(
+	{
+		es: 'prefijo',
+		en: 'prefix',
+		ja: 'prefix',
+	},
+	flags,
+)
 	.setAliases('prefix', 'pf')
 	.setLongDescription('Cambia o muestra el prefijo del servidor actual')
 	.setPermissions(perms)

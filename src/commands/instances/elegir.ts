@@ -11,7 +11,14 @@ const options = new CommandOptions().addParam(
 
 const flags = new CommandTags().add('COMMON');
 
-const command = new Command('elegir', flags)
+const command = new Command(
+	{
+		es: 'elegir',
+		en: 'choose',
+		ja: 'choose',
+	},
+	flags,
+)
 	.setAliases('choose')
 	.setLongDescription(
 		'Elige una de las opciones que hayas especificado, puedes separar opciones con comas',

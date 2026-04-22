@@ -98,7 +98,17 @@ async function handleInvalidCommand(
 		const lowestDistance = Math.min(...distances.map((d) => d.d));
 		if (lowestDistance < 3) foundList.push({ command: cmd, distance: lowestDistance });
 	}
-	const suggestions = foundList.sort((a, b) => a.distance - b.distance).slice(0, 5);
+
+	const translator = await Translator.from(message.author.id);
+
+	const suggestions = [
+		...new Map(
+			foundList.map((found) => [found.command.localizedNames[translator.locale], found]),
+		),
+	]
+		.map(([, found]) => found)
+		.sort((a, b) => a.distance - b.distance)
+		.slice(0, 5);
 
 	if (!suggestions.length) return replyAndDelete();
 
@@ -117,7 +127,10 @@ async function handleInvalidCommand(
 			(textDisplay) =>
 				textDisplay.setContent(
 					suggestions
-						.map((found) => `* ${prefixPair.raw}${found.command.name}`)
+						.map(
+							(found) =>
+								`* ${prefixPair.raw}${found.command.localizedNames[translator.locale]}`,
+						)
 						.join('\n'),
 				),
 			(textDisplay) => textDisplay.setContent('-# Basado en nombres y alias de comando'),

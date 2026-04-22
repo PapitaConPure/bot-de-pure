@@ -34,7 +34,14 @@ const options = new CommandOptions()
 	);
 
 const flags = new CommandTags().add('MOD');
-const command = new Command('inforol', flags)
+const command = new Command(
+	{
+		es: 'info-rol',
+		en: 'role-info',
+		ja: 'role-info',
+	},
+	flags,
+)
 	.setAliases(
 		'cuántos',
 		'cuantos',

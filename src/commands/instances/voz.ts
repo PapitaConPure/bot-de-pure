@@ -45,7 +45,14 @@ const options = new CommandOptions()
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('voz', tags)
+const command = new Command(
+	{
+		es: 'voz',
+		en: 'voice',
+		ja: 'voice',
+	},
+	tags,
+)
 	.setAliases('purévoz', 'purevoz', 'voice', 'purévoice', 'purevoice', 'vc')
 	.setBriefDescription(
 		'Para inyectar un Sistema PuréVoice en una categoria por medio de un Asistente',

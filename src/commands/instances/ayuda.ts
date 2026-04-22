@@ -1,12 +1,7 @@
 import type { AnySelectMenuInteraction, GuildChannelResolvable, GuildMember } from 'discord.js';
-import {
-	ButtonBuilder,
-	ButtonStyle,
-	ContainerBuilder,
-	EmbedBuilder,
-	MessageFlags,
-} from 'discord.js';
+import { ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags } from 'discord.js';
 import type { AnyRequest, ComplexCommandRequest } from 'types/commands';
+import puré from '@/core/puréRegistry';
 import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { compressId, isNotModerator, shortenText } from '@/func';
@@ -44,24 +39,36 @@ const options = new CommandOptions().addOptions(
 		.setDesc('para ver ayuda en un comando en específico')
 		.setOptional(true)
 		.setAutocomplete(async (interaction, query) => {
-			const commands = await searchCommands(interaction, query);
+			const translator = await Translator.from(interaction);
+			const commands = await searchCommands(interaction, query, translator);
 
 			return interaction.respond(
 				commands
 					.sort(({ distance: a }, { distance: b }) => a - b)
 					.slice(0, 10)
-					.map(({ command }) => ({
-						name: shortenText(
-							`${command.name} - ${command.brief ?? command.desc ?? '...'}`,
-							100,
-						),
-						value: command.name,
-					})),
+					.map(({ command }) => {
+						const localizedName = command.localizedNames[translator.locale];
+
+						return {
+							name: shortenText(
+								`${localizedName} - ${command.brief ?? command.desc ?? '...'}`,
+								100,
+							),
+							value: localizedName,
+						};
+					}),
 			);
 		}),
 );
 
-const command = new Command('ayuda', tags)
+const command = new Command(
+	{
+		es: 'ayuda',
+		en: 'help',
+		ja: 'help',
+	},
+	tags,
+)
 	.setAliases('comandos', 'acciones', 'help', 'commands', 'h')
 	.setBriefDescription('Muestra una lista de comandos o un comando en detalle')
 	.setLongDescription(
@@ -71,8 +78,7 @@ const command = new Command('ayuda', tags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const guildPrefix = p_pure(request.guildId).raw;
-		const helpCommand = `${guildPrefix}${command.name}`;
+		const translator = await Translator.from(request);
 
 		const search = args.getString('comando');
 
@@ -82,22 +88,13 @@ const command = new Command('ayuda', tags)
 				components: await listCommands(request, ['COMMON']),
 			});
 
-		const [foundCommand, translator] = await Promise.all([
-			searchCommand(request, search),
-			Translator.from(request),
-		]);
+		const foundCommand = await searchCommand(request, search, translator);
 
-		if (!foundCommand) {
-			const embed = new EmbedBuilder()
-				.setColor(0xe44545)
-				.setTitle(translator.getText('helpCommandNotFoundTitle'))
-				.addFields({
-					name: translator.getText('helpCommandNotFoundName'),
-					value: translator.getText('helpCommandNotFoundValue', helpCommand),
-				});
-			const components = [makeGuideRow(request, translator)];
-			return request.reply({ embeds: [embed], components });
-		}
+		if (!foundCommand)
+			return request.reply({
+				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+				components: [makeCommandNotFoundContainer(request, translator)],
+			});
 
 		const components = getWikiPageComponentsV2(foundCommand, request, translator);
 		return request.reply({ flags: MessageFlags.IsComponentsV2, components });
@@ -114,30 +111,15 @@ const command = new Command('ayuda', tags)
 		{ userFilterIndex: 0 },
 	)
 	.setButtonResponse(async function showCommand(interaction, search) {
-		const request = Command.requestize(interaction);
-		const guildPrefix = p_pure(request).raw;
-		const helpCommand = `${guildPrefix}${command.name}`;
+		const translator = await Translator.from(interaction);
 
-		const [foundCommand, translator] = await Promise.all([
-			searchCommand(interaction, search),
-			Translator.from(interaction),
-		]);
+		const foundCommand = await searchCommand(interaction, search, translator);
 
-		if (!foundCommand) {
-			const embed = new EmbedBuilder()
-				.setColor(0xe44545)
-				.setTitle(translator.getText('helpCommandNotFoundTitle'))
-				.addFields({
-					name: translator.getText('helpCommandNotFoundName'),
-					value: translator.getText('helpCommandNotFoundValue', helpCommand),
-				});
-			const components = [makeGuideRow(request, translator)];
+		if (!foundCommand)
 			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
-				embeds: [embed],
-				components,
+				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+				components: [makeCommandNotFoundContainer(interaction, translator)],
 			});
-		}
 
 		const components = getWikiPageComponentsV2(
 			foundCommand,
@@ -156,44 +138,37 @@ const command = new Command('ayuda', tags)
 			if (!isMenu && !isButton) return;
 			if (!interaction.guild) return;
 
-			const guildPrefix = p_pure(interaction.guild.id).raw;
-			const helpCommand = `${guildPrefix}${command.name}`;
+			const translator = await Translator.from(interaction);
 
-			let search: string;
+			let search: string | undefined;
 			switch (isMenu ? interaction.values[0] : 'index') {
 				case 'index':
-					search = 'g-introducción';
+					search = puré.commands.get('g-introducción')?.localizedNames[translator.locale];
 					break;
 				case 'options':
-					search = 'g-opciones';
+					search = puré.commands.get('g-opciones')?.localizedNames[translator.locale];
 					break;
 				case 'params':
-					search = 'g-parametros';
+					search = puré.commands.get('g-parámetros')?.localizedNames[translator.locale];
 					break;
 				case 'types':
-					search = 'g-tipos';
-					break;
-				default:
-					search = '';
+					search = puré.commands.get('g-tipos')?.localizedNames[translator.locale];
 					break;
 			}
 
-			const [foundCommand, translator] = await Promise.all([
-				searchCommand(interaction as AnyRequest, search),
-				Translator.from(interaction),
-			]);
+			const foundCommand = await searchCommand(
+				interaction as AnyRequest,
+				search ?? '',
+				translator,
+			);
 
-			if (!foundCommand) {
-				const embed = new EmbedBuilder()
-					.setColor(0xe44545)
-					.setTitle(translator.getText('helpCommandNotFoundTitle'))
-					.addFields({
-						name: translator.getText('helpCommandNotFoundName'),
-						value: translator.getText('helpCommandNotFoundValue', helpCommand),
-					});
-				const components = [makeGuideRow(interaction as AnyRequest, translator)];
-				return interaction.update({ embeds: [embed], components });
-			}
+			if (!foundCommand)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+					components: [
+						makeCommandNotFoundContainer(interaction as AnyRequest, translator),
+					],
+				});
 
 			const components = getWikiPageComponentsV2(
 				foundCommand,
@@ -210,13 +185,30 @@ const command = new Command('ayuda', tags)
 
 export default command;
 
+function makeCommandNotFoundContainer(
+	request: AnyRequest,
+	translator: Translator,
+): ContainerBuilder {
+	const helpCommand = `${p_pure(request).raw}${command.localizedNames[translator.locale]}`;
+
+	return new ContainerBuilder()
+		.setAccentColor(0xe44545)
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(translator.getText('helpCommandNotFoundTitle')),
+		)
+		.addSeparatorComponents((separator) => separator.setDivider(true))
+		.addTextDisplayComponents(
+			(textDisplay) => textDisplay.setContent(translator.getText('helpCommandNotFoundName')),
+			(textDisplay) =>
+				textDisplay.setContent(translator.getText('helpCommandNotFoundValue', helpCommand)),
+		)
+		.addActionRowComponents(makeGuideRow(request, translator));
+}
+
 async function listCommands(
 	request: ComplexCommandRequest | AnySelectMenuInteraction<'cached'>,
 	filter?: CommandTagResolvable[],
 ) {
-	const prefix = p_pure(request).raw;
-	const helpCommand = `${prefix}${command.name}`;
-
 	const [commands, translator] = await Promise.all([
 		lookupCommands({
 			tags: filter,
@@ -225,6 +217,9 @@ async function listCommands(
 		}),
 		Translator.from(request),
 	]);
+
+	const prefix = p_pure(request).raw;
+	const helpCommand = `${prefix}${command.localizedNames[translator.locale]}`;
 
 	const headerContainer: ContainerBuilder = new ContainerBuilder()
 		.setAccentColor(tenshiColor)
@@ -261,7 +256,9 @@ async function listCommands(
 					? [
 							translator.getText('helpMainCommandsListName'),
 							translator.getText('helpMainCommandsListSuggestion', helpCommand),
-							commands.map((c) => `\`${c.name}\``).join(' '),
+							commands
+								.map((c) => `\`${c.localizedNames[translator.locale]}\``)
+								.join(' '),
 						]
 					: [
 							translator.getText('helpMainCommandsListName'),

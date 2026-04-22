@@ -5,6 +5,8 @@ import type { Command, CommandOptions } from '@/commands/commons';
 import puré from '@/core/puréRegistry';
 import { UnexpectedValueError } from '@/errors/unexpectedValue';
 import { shortenText } from '@/func';
+import { botTranslationToDiscordLocalizations } from '@/i18n';
+import { defaultLocale } from '@/i18n/locales';
 import type { AnySlashCommandOption, SlashCommandBuilderAddFunctionName } from '@/types/discord';
 
 interface CommandRegistryLogTableRow {
@@ -17,11 +19,12 @@ export function registerCommands(commands: Command[], log: boolean = false) {
 	const commandTableStack: CommandRegistryLogTableRow[] = [];
 
 	for (const command of commands) {
-		puré.commands.set(command.name, command);
+		for (const localeKey in command.localizedNames)
+			puré.commands.set(command.localizedNames[localeKey], command);
 
 		log
 			&& commandTableStack.push({
-				name: command.name,
+				name: command.localizedNames[defaultLocale],
 				flags: command.flags.keys.join(', '),
 				tieneMod: command.flags.has('MOD') ? '✅' : '❌',
 			});
@@ -29,9 +32,10 @@ export function registerCommands(commands: Command[], log: boolean = false) {
 		if (command.flags.any('PAPA', 'OUTDATED', 'MAINTENANCE', 'GUIDE')) continue;
 
 		const slash = new SlashCommandBuilder()
-			.setName(command.name)
+			.setName(command.localizedNames[defaultLocale])
 			.setDescription(command.brief || shortenText(command.desc ?? 'Sin descripción.', 100))
-			.setContexts(InteractionContextType.Guild);
+			.setContexts(InteractionContextType.Guild)
+			.setNameLocalizations(botTranslationToDiscordLocalizations(command.localizedNames));
 
 		if (command.flags.has('MOD'))
 			slash.setDefaultMemberPermissions(
@@ -42,7 +46,8 @@ export function registerCommands(commands: Command[], log: boolean = false) {
 		if (options) setupOptionBuilders(slash, options, log);
 
 		const jsonData = slash.toJSON();
-		puré.slash.set(command.name, jsonData);
+		for (const localeKey in command.localizedNames)
+			puré.slash.set(command.localizedNames[localeKey], jsonData);
 	}
 
 	log && console.table(commandTableStack);

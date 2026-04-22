@@ -16,7 +16,14 @@ const options = new CommandOptions()
 		type: 'NUMBER',
 	});
 
-const command = new Command('número', tags)
+const command = new Command(
+	{
+		es: 'número',
+		en: 'number',
+		ja: 'number',
+	},
+	tags,
+)
 	.setAliases('numero', 'núm', 'num')
 	.setDescription('Para operar un número. Sí, solo eso, tenía ganas de jugar con algo')
 	.setOptions(options)

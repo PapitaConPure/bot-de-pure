@@ -293,7 +293,14 @@ const options = new CommandOptions().addOptions(
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('recordatorio', tags)
+const command = new Command(
+	{
+		es: 'recordatorio',
+		en: 'remind',
+		ja: 'remind',
+	},
+	tags,
+)
 	.setAliases(
 		'recordar',
 		'recordatorios',

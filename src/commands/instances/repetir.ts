@@ -16,7 +16,14 @@ import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON', 'MUSIC');
 
-const command = new Command('repetir', tags)
+const command = new Command(
+	{
+		es: 'repetir',
+		en: 'loop',
+		ja: 'loop',
+	},
+	tags,
+)
 	.setAliases('bucle', 'autodj', 'loop', 'repeat', 'dj', 'l')
 	.setBriefDescription('Cambia el modo de repetición de la cola de reproducción')
 	.setLongDescription(

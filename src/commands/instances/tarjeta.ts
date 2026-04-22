@@ -1,6 +1,7 @@
 import Canvas from '@napi-rs/canvas';
 import { AttachmentBuilder } from 'discord.js';
 import { improveNumber } from '@/func';
+import { Translator } from '@/i18n';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandFlag, CommandOptions, CommandParam, CommandTags } from '../commons';
 
@@ -111,7 +112,14 @@ const options = new CommandOptions().addOptions(
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('tarjeta', tags)
+const command = new Command(
+	{
+		es: 'tarjeta',
+		en: 'card',
+		ja: 'card',
+	},
+	tags,
+)
 	.setAliases('logro', 'achievement')
 	.setBriefDescription('Para crear una tarjeta de logro personal. Imágenes por WMX#7937')
 	.setLongDescription(
@@ -122,6 +130,8 @@ const command = new Command('tarjeta', tags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
+		const translator = await Translator.from(request);
+
 		//Cargar imágenes derivadas de flags
 		const canvas = Canvas.createCanvas(640, 1120);
 		const ctx = canvas.getContext('2d');
@@ -129,7 +139,7 @@ const command = new Command('tarjeta', tags)
 			.map((ch) => args.flagIf(ch, ch))
 			.filter((ch) => ch);
 
-		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda ${command.name}\` para más información`;
+		const helpstr = `Usa \`${p_pure(request.guildId).raw}ayuda ${command.localizedNames[translator.locale]}\` para más información`;
 		if (request.isMessage && args.count < 3)
 			return request.reply({
 				content: `⚠️ Debes ingresar al menos el juego completado, la dificultad y la calidad de supervivencia.\n${helpstr}`,

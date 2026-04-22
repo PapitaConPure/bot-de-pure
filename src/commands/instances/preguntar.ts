@@ -16,7 +16,14 @@ const options = new CommandOptions().addParam(
 
 const tags = new CommandTags().add('COMMON');
 
-const command = new Command('preguntar', tags)
+const command = new Command(
+	{
+		es: 'preguntar',
+		en: 'ask',
+		ja: 'ask',
+	},
+	tags,
+)
 	.setAliases('pregunta', 'question', 'ia', 'ai', 'prompt', 'ask')
 	.setLongDescription('Muestra el tiempo de respuesta del Bot y la API')
 	.setOptions(options)
