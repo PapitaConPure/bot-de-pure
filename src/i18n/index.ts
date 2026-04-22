@@ -525,6 +525,294 @@ const localesObject = {
 		ja: 'ユーザー設定',
 	},
 
+	commandTagLabelGuide: {
+		es: 'Página de Guía',
+		en: 'Guide Page',
+		ja: 'ガイドページ',
+	},
+	commandTagLabelCommon: {
+		es: 'General',
+		en: 'General',
+		ja: '一般',
+	},
+	commandTagLabelMod: {
+		es: 'Moderación',
+		en: 'Moderation',
+		ja: 'モデレーション',
+	},
+	commandTagLabelPapa: {
+		es: 'Papita con Puré',
+		en: 'Papita con Puré',
+		ja: 'Papita con Puré',
+	},
+	commandTagLabelOutdated: {
+		es: 'Desactualizado',
+		en: 'Outdated',
+		ja: '廃止',
+	},
+	commandTagLabelMaintenance: {
+		es: 'En mantenimiento',
+		en: 'Maintenance',
+		ja: 'メンテナンス中',
+	},
+	commandTagLabelMusic: {
+		es: 'Música',
+		en: 'Music',
+		ja: '音楽',
+	},
+	commandTagLabelMeme: {
+		es: 'Memes',
+		en: 'Memes',
+		ja: 'ミーム',
+	},
+	commandTagLabelGame: {
+		es: 'Juegos',
+		en: 'Game',
+		ja: 'ゲーム',
+	},
+	commandTagLabelChaos: {
+		es: 'Caos',
+		en: 'Chaos',
+		ja: 'カオス',
+	},
+
+	wikiCommandCategoriesMenuPlaceholder: {
+		es: 'Categorías de comando...',
+		en: 'Command categories...',
+		ja: 'コマンドカテゴリ',
+	},
+	wikiCommandCategoriesMenuOptionCommonLabel: {
+		es: 'General',
+		en: 'General',
+		ja: '一般',
+	},
+	wikiCommandCategoriesMenuOptionCommonDescription: {
+		es: 'Comandos comunes, de propósito general.',
+		en: 'Common, general-purpose commands.',
+		ja: '一般的に使われる汎用コマンドです。',
+	},
+	wikiCommandCategoriesMenuOptionModLabel: {
+		es: 'Moderación',
+		en: 'Moderation',
+		ja: 'モデレーション',
+	},
+	wikiCommandCategoriesMenuOptionModDescription: {
+		es: 'Comandos limitados a moderadores.',
+		en: 'Commands restricted to moderators.',
+		ja: 'モデレーター専用のコマンドです。',
+	},
+	wikiCommandCategoriesMenuOptionPapaLabel: {
+		es: 'Papita con Puré',
+		en: 'Papita con Puré',
+		ja: 'Papita con Puré',
+	},
+	wikiCommandCategoriesMenuOptionPapaDescription: {
+		es: 'Comandos restringidos a Papita con Puré.',
+		en: 'Commands restricted to Papita con Puré.',
+		ja: 'Papita con Puré専用のコマンドです。',
+	},
+	wikiCommandCategoriesMenuOptionOutdatedLabel: {
+		es: 'Desactualizado',
+		en: 'Outdated',
+		ja: '廃止',
+	},
+	wikiCommandCategoriesMenuOptionOutdatedDescription: {
+		es: 'Comandos en desuso, ya no pueden llamarse.',
+		en: 'Deprecated commands that can no longer be used.',
+		ja: '廃止されたコマンドで、現在は使用できません。',
+	},
+	wikiCommandCategoriesMenuOptionMaintenanceLabel: {
+		es: 'En mantenimiento',
+		en: 'Maintenance',
+		ja: 'メンテナンス中',
+	},
+	wikiCommandCategoriesMenuOptionMaintenanceDescription: {
+		es: 'Comandos en desarrollo o mantenimiento.',
+		en: 'Commands under development or maintenance.',
+		ja: '開発中またはメンテナンス中のコマンドです。',
+	},
+	wikiCommandCategoriesMenuOptionMusicLabel: {
+		es: 'Música',
+		en: 'Music',
+		ja: '音楽',
+	},
+	wikiCommandCategoriesMenuOptionMusicDescription: {
+		es: 'Comandos PuréMusic para reproducir música.',
+		en: 'PuréMusic commands for playing music.',
+		ja: '音楽を再生するためのPuréMusicコマンドです。',
+	},
+	wikiCommandCategoriesMenuOptionMemeLabel: {
+		es: 'Memes',
+		en: 'Memes',
+		ja: 'ミーム',
+	},
+	wikiCommandCategoriesMenuOptionMemeDescription: {
+		es: 'Comandos de carácter memético.',
+		en: 'Commands of memetic nature.',
+		ja: 'ミーム系のコマンドです。',
+	},
+	wikiCommandCategoriesMenuOptionGameLabel: {
+		es: 'Juegos',
+		en: 'Game',
+		ja: 'ゲーム',
+	},
+	wikiCommandCategoriesMenuOptionGameDescription: {
+		es: 'Comandos de juego y/o fiesta.',
+		en: 'Game and party commands.',
+		ja: 'ゲームやパーティー向けのコマンドです。',
+	},
+	wikiCommandCategoriesMenuOptionChaosLabel: {
+		es: 'Caos',
+		en: 'Chaos',
+		ja: 'カオス',
+	},
+	wikiCommandCategoriesMenuOptionChaosDescription: {
+		es: 'Comandos caóticos. Requieren habilitarse.',
+		en: 'Chaotic commands. Must be enabled first.',
+		ja: 'カオスなコマンドです。事前に有効化が必要です。',
+	},
+	wikiCommandIdentifiersName: {
+		es: '### -# Nombres',
+		en: '### -# Names',
+		ja: '### -# 名前',
+	},
+	wikiCommandDescriptionName: {
+		es: '### -# Descripción',
+		en: '### -# Description',
+		ja: '### -# 説明',
+	},
+	wikiCommandDescriptionNoDescription: {
+		es: '⚠️ Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde',
+		en: '⚠️ This command does not have a description at the moment. Please try again later.',
+		ja: '⚠️ このコマンドには現在説明がありません。後でもう一度お試しください。',
+	},
+	wikiCommandUsageName: {
+		es: '### -# Uso (plantilla)',
+		en: '### -# Usage (template)',
+		ja: '### -# 使用方法（テンプレート）',
+	},
+	wikiCommandUsageTryItButton: {
+		es: 'Probar',
+		en: 'Try It',
+		ja: '試してみて',
+	},
+	wikiCommandOptionsName: {
+		es: '### -# Uso (plantilla)',
+		en: '### -# Usage (template)',
+		ja: '### -# 使用方法（テンプレート）',
+	},
+	wikiCommandOptionsComposeButton: {
+		es: 'Componer...',
+		en: 'Compose...',
+		ja: '作成する…',
+	},
+	wikiCommandOptionsNoOptions: {
+		es: '### 🧮 Sin opciones',
+		en: '### 🧮 No options',
+		ja: '### 🧮 選択肢なし',
+	},
+	wikiGuideMenuPlaceholder: {
+		es: 'Guías...',
+		en: 'Guides...',
+		ja: 'ガイド…',
+	},
+	wikiGuideMenuOptionIntroLabel: {
+		es: 'Guía Introductoria',
+		en: 'Introduction Guide',
+		ja: 'はじめにガイド',
+	},
+	wikiGuideMenuOptionIntroDescription: {
+		es: 'Pantallazo general del modo de utilización de Bot de Puré.',
+		en: 'A general overview of how to use Bot de Puré.',
+		ja: 'Bot de Puréの使い方の概要です。',
+	},
+	wikiGuideMenuOptionOptionsLabel: {
+		es: 'Guía de Opciones',
+		en: 'Options Guide',
+		ja: 'オプションガイド',
+	},
+	wikiGuideMenuOptionOptionsDescription: {
+		es: 'Información acerca de las Opciones de Comando.',
+		en: 'Information about command options.',
+		ja: 'コマンドのオプションに関する情報です。',
+	},
+	wikiGuideMenuOptionParamsLabel: {
+		es: 'Guía de Parámetros',
+		en: 'Parameters Guide',
+		ja: 'パラメータガイド',
+	},
+	wikiGuideMenuOptionParamsDescription: {
+		es: 'Explicación detallada sobre los Parámetros de Comando.',
+		en: 'A detailed explanation of command parameters.',
+		ja: 'コマンドのパラメータについての詳細な説明です。',
+	},
+	wikiGuideMenuOptionParamTypesLabel: {
+		es: 'Guía de Tipos de Parámetro',
+		en: 'Parameter Types Guide',
+		ja: 'パラメータ型ガイド',
+	},
+	wikiGuideMenuOptionParamTypesDescription: {
+		es: 'Detalles sobre los Tipos de Parámetro u Expresiones de Bandera.',
+		en: 'Details about parameter types and flag expressions.',
+		ja: 'パラメータの型やフラグ表現についての詳細です。',
+	},
+
+	helpMainHeaderTitle: {
+		es: '# <:guide:1369552945309290647> Centro de ayuda',
+		en: '# <:guide:1369552945309290647> Help Center',
+		ja: '# <:guide:1369552945309290647> ヘルプセンター',
+	},
+	helpMainHeaderSubtitle: {
+		es: '-# Aprende las diferentes formas de interactuar con Bot de Puré.',
+		en: '-# Learn all the different ways you can interact with Bot de Puré.',
+		ja: '-# Bot de Puréとのさまざまな使い方を学びましょう。',
+	},
+	helpMainBasicUsageName: {
+		es: '### -# Uso básico',
+		en: '### -# Basic Usage',
+		ja: '### -# 基本的な使い方',
+	},
+	helpMainBasicUsageContent: {
+		es: paragraph(`${subl(0)}yo`, `${subl(0)}avatar ${subl(1)}`, `${subl(0)}dados 5d6`),
+		en: paragraph(`${subl(0)}me`, `${subl(0)}avatar ${subl(1)}`, `${subl(0)}roll 5d6`),
+		ja: paragraph(`${subl(0)}me`, `${subl(0)}avatar ${subl(1)}`, `${subl(0)}roll 5d6`),
+	},
+	helpMainBasicUsageButton: {
+		es: 'Introducción',
+		en: 'Introduction',
+		ja: 'はじめにガイド',
+	},
+	helpMainCommandsListName: {
+		es: '### -# Lista de comandos',
+		en: '### -# Commands List',
+		ja: '### -# コマンド一覧',
+	},
+	helpMainCommandsListSuggestion: {
+		es: `Puedes usar \`${subl(0)}\` con el nombre de alguno de estos comandos:`,
+		en: `You can use \`${subl(0)}\` with any of these command names:`,
+		ja: `\`${subl(0)}\` にこれらのコマンド名を指定して使えます：`,
+	},
+	helpMainCommandsListNoResults: {
+		es: 'Ningún comando que puedas usar tiene todas las categorías que indicaste. Prueba filtrar de forma menos estricta.',
+		en: 'No command you can use matches all the categories you picked. Try a looser filter instead.',
+		ja: '指定したすべてのカテゴリに一致するコマンドはありません。もう少し緩い条件で試してください。',
+	},
+	helpCommandNotFoundTitle: {
+		es: 'Sin resultados',
+		en: 'Command Not Found',
+		ja: 'コマンドが見つかりません',
+	},
+	helpCommandNotFoundName: {
+		es: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
+		en: 'No command you can use was found with this name',
+		ja: 'この名前で実行できるコマンドは見つかりませんでした',
+	},
+	helpCommandNotFoundValue: {
+		es: `Utiliza \`${subl(0)}\` para ver una lista de comandos disponibles y luego usa \`${subl(0)} <comando>\` para ver un comando en específico`,
+		en: `Use \`${subl(0)}\` to see a list of available commands, then use \`${subl(0)} <command>\` to view a specific command`,
+		ja: `\`${subl(0)}\` で利用可能なコマンド一覧を表示し、\`${subl(0)} <コマンド>\` で特定のコマンドを確認できます`,
+	},
+
 	aislarNoTimeProvided: {
 		es: '⚠️ Debes indicar la duración del castigo en minutos',
 		en: '⚠️ You need to indicate the timeout duration in minutes',

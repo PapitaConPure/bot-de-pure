@@ -25,6 +25,7 @@ import type {
 	ComponentInteraction,
 	ExtendedCommandRequest,
 } from 'types/commands';
+import type { Translator } from '@/i18n';
 import type { CommandOptionSolver, CommandOptions } from './cmdOpts';
 import type { CommandPermissions } from './cmdPerms';
 import type { CommandTags } from './cmdTags';
@@ -179,7 +180,10 @@ export type AnyCommandComponentResponseFunction = ((
 ) => Promise<unknown>) &
 	InteractionResponseOptions;
 
-export type WikiComponentEvaluator = (request: AnyRequest) => MessageActionRowComponentBuilder;
+export type WikiComponentEvaluator = (
+	request: AnyRequest,
+	translator: Translator,
+) => MessageActionRowComponentBuilder;
 
 export type WikiRowDefinition = WikiComponentEvaluator[];
 

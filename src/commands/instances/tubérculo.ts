@@ -354,7 +354,7 @@ const command = new Command('tubérculo', flags)
 				flags: MessageFlags.Ephemeral,
 			});
 
-		const components = getWikiPageComponentsV2(command, Command.requestize(interaction));
+		const components = getWikiPageComponentsV2(command, Command.requestize(interaction), translator);
 
 		return interaction.reply({ flags: MessageFlags.IsComponentsV2, components });
 	})

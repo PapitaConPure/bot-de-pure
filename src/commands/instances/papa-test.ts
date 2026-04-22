@@ -1,4 +1,5 @@
 import { EmbedBuilder, MessageFlags } from 'discord.js';
+import { Translator } from '@/i18n';
 import { getWikiPageComponentsV2, searchCommand } from '@/systems/others/wiki.js';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandTags } from '../commons';
@@ -21,6 +22,7 @@ const command = new Command('papa-test', tags)
 		const search = args.getString('texto');
 		const guildPrefix = p_pure(request.guildId).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;
+		const translator = new Translator('es');
 
 		if (!search) return request.reply({ content: 'wah' });
 
@@ -40,7 +42,7 @@ const command = new Command('papa-test', tags)
 			});
 		}
 
-		const components = getWikiPageComponentsV2(foundCommand, request);
+		const components = getWikiPageComponentsV2(foundCommand, request, translator);
 
 		return request.reply({
 			flags: MessageFlags.IsComponentsV2,

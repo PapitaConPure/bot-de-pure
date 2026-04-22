@@ -10,6 +10,7 @@ import type { AnyRequest, ComplexCommandRequest } from 'types/commands';
 import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { compressId, isNotModerator, shortenText } from '@/func';
+import { Translator } from '@/i18n';
 import {
 	getWikiPageComponentsV2,
 	makeCategoriesRow,
@@ -81,21 +82,24 @@ const command = new Command('ayuda', tags)
 				components: await listCommands(request, ['COMMON']),
 			});
 
-		const foundCommand = await searchCommand(request, search);
+		const [foundCommand, translator] = await Promise.all([
+			searchCommand(request, search),
+			Translator.from(request),
+		]);
 
 		if (!foundCommand) {
 			const embed = new EmbedBuilder()
 				.setColor(0xe44545)
-				.setTitle('Sin resultados')
+				.setTitle(translator.getText('helpCommandNotFoundTitle'))
 				.addFields({
-					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
-					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
+					name: translator.getText('helpCommandNotFoundName'),
+					value: translator.getText('helpCommandNotFoundValue', helpCommand),
 				});
-			const components = [makeGuideRow(request)];
+			const components = [makeGuideRow(request, translator)];
 			return request.reply({ embeds: [embed], components });
 		}
 
-		const components = getWikiPageComponentsV2(foundCommand, request);
+		const components = getWikiPageComponentsV2(foundCommand, request, translator);
 		return request.reply({ flags: MessageFlags.IsComponentsV2, components });
 	})
 	.setSelectMenuResponse(
@@ -114,17 +118,20 @@ const command = new Command('ayuda', tags)
 		const guildPrefix = p_pure(request).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;
 
-		const foundCommand = await searchCommand(interaction, search);
+		const [foundCommand, translator] = await Promise.all([
+			searchCommand(interaction, search),
+			Translator.from(interaction),
+		]);
 
 		if (!foundCommand) {
 			const embed = new EmbedBuilder()
 				.setColor(0xe44545)
-				.setTitle('Sin resultados')
+				.setTitle(translator.getText('helpCommandNotFoundTitle'))
 				.addFields({
-					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
-					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
+					name: translator.getText('helpCommandNotFoundName'),
+					value: translator.getText('helpCommandNotFoundValue', helpCommand),
 				});
-			const components = [makeGuideRow(request)];
+			const components = [makeGuideRow(request, translator)];
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral,
 				embeds: [embed],
@@ -132,7 +139,11 @@ const command = new Command('ayuda', tags)
 			});
 		}
 
-		const components = getWikiPageComponentsV2(foundCommand, Command.requestize(interaction));
+		const components = getWikiPageComponentsV2(
+			foundCommand,
+			Command.requestize(interaction),
+			translator,
+		);
 		return interaction.reply({
 			flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
 			components,
@@ -167,23 +178,27 @@ const command = new Command('ayuda', tags)
 					break;
 			}
 
-			const foundCommand = await searchCommand(interaction as AnyRequest, search);
+			const [foundCommand, translator] = await Promise.all([
+				searchCommand(interaction as AnyRequest, search),
+				Translator.from(interaction),
+			]);
 
 			if (!foundCommand) {
 				const embed = new EmbedBuilder()
 					.setColor(0xe44545)
-					.setTitle('Sin resultados')
+					.setTitle(translator.getText('helpCommandNotFoundTitle'))
 					.addFields({
-						name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
-						value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
+						name: translator.getText('helpCommandNotFoundName'),
+						value: translator.getText('helpCommandNotFoundValue', helpCommand),
 					});
-				const components = [makeGuideRow(interaction as AnyRequest)];
+				const components = [makeGuideRow(interaction as AnyRequest, translator)];
 				return interaction.update({ embeds: [embed], components });
 			}
 
 			const components = getWikiPageComponentsV2(
 				foundCommand,
 				Command.requestize(interaction as AnyRequest),
+				translator,
 			);
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
@@ -202,21 +217,22 @@ async function listCommands(
 	const prefix = p_pure(request).raw;
 	const helpCommand = `${prefix}${command.name}`;
 
-	const commands = await lookupCommands({
-		tags: filter,
-		excludedTags: makeExcludedTags(request),
-		context: request,
-	});
+	const [commands, translator] = await Promise.all([
+		lookupCommands({
+			tags: filter,
+			excludedTags: makeExcludedTags(request),
+			context: request,
+		}),
+		Translator.from(request),
+	]);
 
 	const headerContainer: ContainerBuilder = new ContainerBuilder()
 		.setAccentColor(tenshiColor)
 		.addTextDisplayComponents((textDisplay) =>
-			textDisplay.setContent('# <:guide:1369552945309290647> Centro de Ayuda'),
+			textDisplay.setContent(translator.getText('helpMainHeaderTitle')),
 		)
 		.addTextDisplayComponents((textDisplay) =>
-			textDisplay.setContent(
-				'-# Aprende las diferentes formas de interactuar con Bot de Puré.',
-			),
+			textDisplay.setContent(translator.getText('helpMainHeaderSubtitle')),
 		);
 
 	const contentContainer: ContainerBuilder = new ContainerBuilder()
@@ -226,17 +242,15 @@ async function listCommands(
 				.addTextDisplayComponents((textDisplay) =>
 					textDisplay.setContent(
 						[
-							'### -# Uso básico',
-							`${prefix}yo`,
-							`${prefix}avatar ${request.user}`,
-							`${prefix}dados 5d6`,
+							translator.getText('helpMainBasicUsageName'),
+							translator.getText('helpMainBasicUsageContent', prefix, request.user),
 						].join('\n'),
 					),
 				)
 				.setButtonAccessory(
 					new ButtonBuilder()
 						.setCustomId(`ayuda_viewGuideWiki_${compressId(request.user.id)}`)
-						.setLabel('Introducción')
+						.setLabel(translator.getText('helpMainBasicUsageButton'))
 						.setStyle(ButtonStyle.Primary),
 				),
 		)
@@ -245,18 +259,18 @@ async function listCommands(
 			textDisplay.setContent(
 				(commands.length
 					? [
-							'### -# Lista de comandos',
-							`Puedes usar ${helpCommand} con el nombre de alguno de estos comandos:`,
+							translator.getText('helpMainCommandsListName'),
+							translator.getText('helpMainCommandsListSuggestion', helpCommand),
 							commands.map((c) => `\`${c.name}\``).join(' '),
 						]
 					: [
-							'### -# Lista de comandos',
-							'Ningún comando que puedas usar tiene todas las categorías que indicaste. Prueba filtrando de manera menos estricta.',
+							translator.getText('helpMainCommandsListName'),
+							translator.getText('helpMainCommandsListNoResults'),
 						]
 				).join('\n'),
 			),
 		)
-		.addActionRowComponents(makeCategoriesRow(request, filter ?? []));
+		.addActionRowComponents(await makeCategoriesRow(request, filter ?? []));
 
 	return [headerContainer, contentContainer];
 }

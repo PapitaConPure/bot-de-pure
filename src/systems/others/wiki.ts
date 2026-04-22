@@ -25,25 +25,29 @@ import { ClientNotFoundError, client } from '@/core/client';
 import { tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { compressId, edlDistance, isNotModerator, toCapitalized } from '@/func';
+import { Translator } from '@/i18n';
 import { p_pure } from '@/utils/prefixes';
 
-export const makeCategoriesRow = (
+export const makeCategoriesRow = async (
 	request: ComplexCommandRequest | ComponentInteraction,
 	selections: CommandTagResolvable[],
 ) => {
+	const translator = await Translator.from(request);
 	const getDefault = (d: CommandTagResolvable) => !!selections.includes(d);
 
 	const categoriesMenu = new StringSelectMenuBuilder()
 		.setCustomId(`ayuda_viewCategory_${compressId(request.user.id)}`)
-		.setPlaceholder('Categorías de Comandos...')
+		.setPlaceholder(translator.getText('wikiCommandCategoriesMenuPlaceholder'))
 		.setMinValues(0)
 		.setMaxValues(6)
 		.addOptions(
 			new StringSelectMenuOptionBuilder()
 				.setValue('COMMON')
 				.setEmoji('828736342372253697')
-				.setLabel('General')
-				.setDescription('Comandos comunes, de propósito general.')
+				.setLabel(translator.getText('wikiCommandCategoriesMenuOptionCommonLabel'))
+				.setDescription(
+					translator.getText('wikiCommandCategoriesMenuOptionCommonDescription'),
+				)
 				.setDefault(getDefault('COMMON')),
 		);
 
@@ -52,8 +56,8 @@ export const makeCategoriesRow = (
 			new StringSelectMenuOptionBuilder()
 				.setValue('MOD')
 				.setEmoji('704612794921779290')
-				.setLabel('Moderación')
-				.setDescription('Comandos limitados a moderadores.')
+				.setLabel(translator.getText('wikiCommandCategoriesMenuOptionModLabel'))
+				.setDescription(translator.getText('wikiCommandCategoriesMenuOptionModDescription'))
 				.setDefault(getDefault('MOD')),
 		);
 
@@ -62,20 +66,26 @@ export const makeCategoriesRow = (
 			new StringSelectMenuOptionBuilder()
 				.setValue('PAPA')
 				.setEmoji('797295151356969030')
-				.setLabel('Papita con Puré')
-				.setDescription('Comandos restringidos a Papita con Puré.')
+				.setLabel(translator.getText('wikiCommandCategoriesMenuOptionPapaLabel'))
+				.setDescription(
+					translator.getText('wikiCommandCategoriesMenuOptionPapaDescription'),
+				)
 				.setDefault(getDefault('PAPA')),
 			new StringSelectMenuOptionBuilder()
 				.setValue('OUTDATED')
 				.setEmoji('657367372285476905')
-				.setLabel('Desactualizado')
-				.setDescription('Comandos en desuso, ya no pueden llamarse.')
+				.setLabel(translator.getText('wikiCommandCategoriesMenuOptionOutdatedLabel'))
+				.setDescription(
+					translator.getText('wikiCommandCategoriesMenuOptionOutdatedDescription'),
+				)
 				.setDefault(getDefault('OUTDATED')),
 			new StringSelectMenuOptionBuilder()
 				.setValue('MAINTENANCE')
 				.setEmoji('🛠️')
-				.setLabel('En mantenimiento')
-				.setDescription('Comandos en desarrollo o mantenimiento.')
+				.setLabel(translator.getText('wikiCommandCategoriesMenuOptionMaintenanceLabel'))
+				.setDescription(
+					translator.getText('wikiCommandCategoriesMenuOptionMaintenanceDescription'),
+				)
 				.setDefault(getDefault('MAINTENANCE')),
 		);
 
@@ -83,61 +93,61 @@ export const makeCategoriesRow = (
 		new StringSelectMenuOptionBuilder()
 			.setValue('MUSIC')
 			.setEmoji('🎵')
-			.setLabel('Música')
-			.setDescription('Comandos PuréMusic para reproducir música.')
+			.setLabel(translator.getText('wikiCommandCategoriesMenuOptionMusicLabel'))
+			.setDescription(translator.getText('wikiCommandCategoriesMenuOptionMusicDescription'))
 			.setDefault(getDefault('MUSIC')),
 		new StringSelectMenuOptionBuilder()
 			.setValue('MEME')
 			.setEmoji('721973016455807017')
-			.setLabel('Memes')
-			.setDescription('Comandos de carácter memético.')
+			.setLabel(translator.getText('wikiCommandCategoriesMenuOptionMemeLabel'))
+			.setDescription(translator.getText('wikiCommandCategoriesMenuOptionMemeDescription'))
 			.setDefault(getDefault('MEME')),
 		new StringSelectMenuOptionBuilder()
 			.setValue('GAME')
 			.setEmoji('🎲')
-			.setLabel('Juegos')
-			.setDescription('Comandos de juego y/o fiesta.')
+			.setLabel(translator.getText('wikiCommandCategoriesMenuOptionGameLabel'))
+			.setDescription(translator.getText('wikiCommandCategoriesMenuOptionGameDescription'))
 			.setDefault(getDefault('GAME')),
 		new StringSelectMenuOptionBuilder()
 			.setValue('CHAOS')
 			.setEmoji('👹')
-			.setLabel('Caos')
-			.setDescription('Comandos caóticos. Requieren habilitarse.')
+			.setLabel(translator.getText('wikiCommandCategoriesMenuOptionChaosLabel'))
+			.setDescription(translator.getText('wikiCommandCategoriesMenuOptionChaosDescription'))
 			.setDefault(getDefault('CHAOS')),
 	);
 
 	return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(categoriesMenu);
 };
 
-export const makeGuideMenu = (request: AnyRequest) =>
+export const makeGuideMenu = (request: AnyRequest, translator: Translator) =>
 	new StringSelectMenuBuilder()
 		.setCustomId(`ayuda_viewGuideWiki_${compressId(request.user.id)}`)
-		.setPlaceholder('Guías...')
+		.setPlaceholder(translator.getText('wikiGuideMenuPlaceholder'))
 		.setOptions(
 			new StringSelectMenuOptionBuilder()
 				.setValue('index')
 				.setEmoji('📚')
-				.setLabel('Guía Introductoria')
-				.setDescription('Pantallazo general del modo de utilización de Bot de Puré.'),
+				.setLabel(translator.getText('wikiGuideMenuOptionIntroLabel'))
+				.setDescription(translator.getText('wikiGuideMenuOptionIntroDescription')),
 			new StringSelectMenuOptionBuilder()
 				.setValue('options')
 				.setEmoji('🧮')
-				.setLabel('Guía de Opciones')
-				.setDescription('Información acerca de las Opciones de Comando.'),
+				.setLabel(translator.getText('wikiGuideMenuOptionOptionsLabel'))
+				.setDescription(translator.getText('wikiGuideMenuOptionOptionsDescription')),
 			new StringSelectMenuOptionBuilder()
 				.setValue('params')
 				.setEmoji('🎛️')
-				.setLabel('Guía de Parámetros')
-				.setDescription('Explicación detallada sobre los Parámetros de Comando.'),
+				.setLabel(translator.getText('wikiGuideMenuOptionParamsLabel'))
+				.setDescription(translator.getText('wikiGuideMenuOptionParamsDescription')),
 			new StringSelectMenuOptionBuilder()
 				.setValue('types')
 				.setEmoji('❔')
-				.setLabel('Guía de Tipos de Parámetro')
-				.setDescription('Detalles sobre los Tipos de Parámetro u Expresiones de Bandera.'),
+				.setLabel(translator.getText('wikiGuideMenuOptionParamTypesLabel'))
+				.setDescription(translator.getText('wikiGuideMenuOptionParamTypesDescription')),
 		);
 
-export const makeGuideRow = (request: AnyRequest) =>
-	new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(makeGuideMenu(request));
+export const makeGuideRow = (request: AnyRequest, translator: Translator) =>
+	new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(makeGuideMenu(request, translator));
 
 /**
  * @description
@@ -220,18 +230,18 @@ interface WikiPageInjectionPayload {
 type WikiPageInjectionPayloadV2 = MessageComponentDataResolvable[];
 
 const displayTagMappings = {
-	GUIDE: 'Página de Guía',
-	MOD: 'Mod',
-	PAPA: 'Papita con Puré',
-	MAINTENANCE: 'Mantenimiento',
-	OUTDATED: 'Obsoleto',
-	SAKI: 'Saki Scans',
-	CHAOS: 'Caos',
-	COMMON: 'Común',
-	GAME: 'Juego',
-	MEME: 'Meme',
-	MUSIC: 'Música',
-} as const satisfies Record<CommandTagStringField, string>;
+	GUIDE: (translator) => translator.getText('commandTagLabelGuide'),
+	COMMON: (translator) => translator.getText('commandTagLabelCommon'),
+	MOD: (translator) => translator.getText('commandTagLabelMod'),
+	PAPA: (translator) => translator.getText('commandTagLabelPapa'),
+	OUTDATED: (translator) => translator.getText('commandTagLabelOutdated'),
+	MAINTENANCE: (translator) => translator.getText('commandTagLabelMaintenance'),
+	SAKI: () => 'Saki Scans',
+	MUSIC: (translator) => translator.getText('commandTagLabelMusic'),
+	MEME: (translator) => translator.getText('commandTagLabelMeme'),
+	GAME: (translator) => translator.getText('commandTagLabelGame'),
+	CHAOS: (translator) => translator.getText('commandTagLabelChaos'),
+} as const satisfies Record<CommandTagStringField, (translator: Translator) => string>;
 
 const listExists = (l: string[] | null | undefined): l is string[] => !!l?.[0]?.length;
 
@@ -323,13 +333,14 @@ export function injectWikiPage(
 export function getWikiPageComponentsV2(
 	command: Command<CommandOptions | undefined>,
 	request: ComplexCommandRequest,
+	translator: Translator,
 ): WikiPageInjectionPayloadV2 {
 	const { name: commandName, aliases, flags: commandTags } = command;
 
 	const components: WikiPageInjectionPayloadV2 = [];
 
 	const getDisplayFlags = () =>
-		`${commandTags.keys.map((t) => displayTagMappings[t]).join(', ')}`;
+		`${commandTags.keys.map((t) => displayTagMappings[t](translator)).join(', ')}`;
 	const isNotGuidePage = !commandTags.has('GUIDE');
 
 	//Contenedor de metadatos
@@ -347,7 +358,9 @@ export function getWikiPageComponentsV2(
 		.addTextDisplayComponents(titleTextBuilder, taglineTextBuilder);
 
 	if (isNotGuidePage) {
-		const namesHeaderTextBuilder = new TextDisplayBuilder().setContent('### Nombres');
+		const namesHeaderTextBuilder = new TextDisplayBuilder().setContent(
+			translator.getText('wikiCommandIdentifiersName'),
+		);
 		const namesContent = `\`${commandName}\`, ${listExists(aliases) ? aliases.map((i) => `\`${i}\``).join(', ') : ''}`;
 		const namesTextBuilder = new TextDisplayBuilder().setContent(namesContent);
 
@@ -362,18 +375,19 @@ export function getWikiPageComponentsV2(
 	const infoContainerBuilder = new ContainerBuilder().setAccentColor(0xbf94e4);
 
 	if (isNotGuidePage) {
-		const descriptionHeaderTextBuilder = new TextDisplayBuilder().setContent('### Descripción');
+		const descriptionHeaderTextBuilder = new TextDisplayBuilder().setContent(
+			translator.getText('wikiCommandDescriptionName'),
+		);
 		infoContainerBuilder.addTextDisplayComponents(descriptionHeaderTextBuilder);
 	}
 
 	const descriptionTextBuilder = new TextDisplayBuilder().setContent(
-		command.desc
-			|| '⚠️ Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde',
+		command.desc || translator.getText('wikiCommandDescriptionNoDescription'),
 	);
 
 	const wikiRows = command.wiki.rows.map((row) =>
 		new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-			row.map((componentEvaluator) => componentEvaluator(request)),
+			row.map((componentEvaluator) => componentEvaluator(request, translator)),
 		),
 	);
 
@@ -385,12 +399,14 @@ export function getWikiPageComponentsV2(
 
 	if (isNotGuidePage) {
 		const showMeHowButton = new ButtonBuilder()
-			.setCustomId('ayuda_porfavorayuden')
-			.setLabel('Probar')
+			.setCustomId('help_porfavorayuden')
+			.setLabel(translator.getText('wikiCommandUsageTryItButton'))
 			.setStyle(ButtonStyle.Primary)
 			.setDisabled(true);
 
-		const usageHeaderTextBuilder = new TextDisplayBuilder().setContent('### Uso (plantilla)');
+		const usageHeaderTextBuilder = new TextDisplayBuilder().setContent(
+			translator.getText('wikiCommandUsageName'),
+		);
 		const usageTextBuilder = new TextDisplayBuilder().setContent(
 			`\`\`\`bnf\n${p_pure(request).raw}${commandName}${command.callx ? ` ${command.callx}` : ''}\n\`\`\``,
 		);
@@ -405,12 +421,14 @@ export function getWikiPageComponentsV2(
 
 		if (command.options?.display) {
 			const composeButton = new ButtonBuilder()
-				.setCustomId('ayuda_compose')
-				.setLabel('Componer...')
+				.setCustomId('help_compose')
+				.setLabel(translator.getText('wikiCommandOptionsComposeButton'))
 				.setStyle(ButtonStyle.Secondary)
 				.setDisabled(true);
 
-			const optionsHeaderTextBuilder = new TextDisplayBuilder().setContent('### Opciones');
+			const optionsHeaderTextBuilder = new TextDisplayBuilder().setContent(
+				translator.getText('wikiCommandOptionsName'),
+			);
 			const optionsTextBuilder = new TextDisplayBuilder().setContent(
 				command.options?.display,
 			);
@@ -421,7 +439,7 @@ export function getWikiPageComponentsV2(
 			infoContainerBuilder.addSectionComponents(optionsSectionBuilder);
 		} else {
 			const optionsTextBuilder = new TextDisplayBuilder().setContent(
-				':abacus: _Sin opciones._',
+				translator.getText('wikiCommandOptionsNoOptions'),
 			);
 			infoContainerBuilder.addTextDisplayComponents(optionsTextBuilder);
 		}

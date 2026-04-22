@@ -124,10 +124,13 @@ const command = new Command('estado', flags)
 		});
 	})
 	.setSelectMenuResponse(async function getHelp(interaction) {
-		const guildPrefix = p_pure(interaction.guildId).raw;
+		const guildPrefix = p_pure(interaction).raw;
 		const helpCommand = `${guildPrefix}${command.name}`;
 		const query = interaction.values[0];
-		const foundCommand = await searchCommand(interaction, query);
+		const [foundCommand, translator] = await Promise.all([
+			await searchCommand(interaction, query),
+			Translator.from(interaction),
+		]);
 
 		if (!foundCommand) {
 			const embed = new EmbedBuilder()
@@ -137,11 +140,15 @@ const command = new Command('estado', flags)
 					name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
 					value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
 				});
-			const components = [makeGuideRow(interaction)];
+			const components = [makeGuideRow(interaction, translator)];
 			return interaction.update({ embeds: [embed], components });
 		}
 
-		const components = getWikiPageComponentsV2(foundCommand, Command.requestize(interaction));
+		const components = getWikiPageComponentsV2(
+			foundCommand,
+			Command.requestize(interaction),
+			translator,
+		);
 		return interaction.reply({
 			flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 			components: components,
