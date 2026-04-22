@@ -4,7 +4,6 @@ import type {
 	AnyThreadChannel,
 	Collection,
 	Client as DiscordClient,
-	Emoji,
 	Guild,
 	GuildBasedChannel,
 	GuildMember,
@@ -959,13 +958,6 @@ export function parseUnicodeEmoji(emoji: string): string | null {
  * ```
  */
 export const discordEmojiRegex = /<a?:(?<name>\w+):(?<id>[0-9]+)>/g;
-
-/**@description Devuelve el primer emoji de servidor encontrado con el string.*/
-export function getGuildEmoji(emoji: string, guild: Guild): Emoji | null {
-	const parsedEmoji = emoji.match(discordEmojiRegex)?.[0];
-	if (!parsedEmoji) return guild.emojis.cache.find((e) => e.name === emoji) || null;
-	return guild.emojis.resolve(parsedEmoji);
-}
 
 export function isNSFWChannel(channel: GuildBasedChannel) {
 	if (channel.isThread()) return channel.parent?.nsfw ?? false;

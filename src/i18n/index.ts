@@ -1,4 +1,5 @@
 import { Locale as DiscordLocaleKey } from 'discord.js';
+import { getBotEmoji } from '@/utils/emojis';
 import type { UserCacheResolvable } from '@/utils/usercache';
 import { fetchUserCache } from '@/utils/usercache';
 import type { ValuesOf } from '../types/util';
@@ -2770,9 +2771,9 @@ const localesObject = {
 		ja: 'フォローされたフィードタグ',
 	},
 	yoDashboardFeedTagsValue: {
-		es: `<:tagswhite:921788204540100608> Siguiendo ${subl(0)} tag${subif(0, '!=', 1, 's')} en ${subl(1)} canal${subif(1, '!=', 1, 'es')}`,
-		en: `<:tagswhite:921788204540100608> Following ${subl(0)} tag${subif(0, '!=', 1, 's')} in ${subl(1)} channel${subif(1, '!=', 1, 's')}`,
-		ja: `<:tagswhite:921788204540100608> ${subl(1)}チャンネルで${subl(0)}タグをフォロー`,
+		es: `${getBotEmoji('tagColor')} Siguiendo ${subl(0)} tag${subif(0, '!=', 1, 's')} en ${subl(1)} canal${subif(1, '!=', 1, 'es')}`,
+		en: `${getBotEmoji('tagColor')} Following ${subl(0)} tag${subif(0, '!=', 1, 's')} in ${subl(1)} channel${subif(1, '!=', 1, 's')}`,
+		ja: `${getBotEmoji('tagColor')} ${subl(1)}チャンネルで${subl(0)}タグをフォロー`,
 	},
 	yoDashboardName: {
 		es: 'Panel Principal',

@@ -23,10 +23,10 @@ import {
 import type { ComplexCommandRequest } from 'types/commands';
 import { CommandOptionSolver } from '@/commands/commons/cmdOpts';
 import rakki from '@/commands/instances/rakkidei';
-import { globalConfigs } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
-import { getGuildEmoji as gEmo, isNSFWChannel, shortenText } from '@/func';
+import { isNSFWChannel, shortenText } from '@/func';
 import { Translator } from '@/i18n';
+import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import Logger from '@/utils/logs';
 import { getMainBooruClient } from './booruclient';
 import type { FeedOptions } from './boorufeed';
@@ -221,7 +221,7 @@ export async function formatBooruPostMessage(
 	//Botón de tags
 	buttonRow.addComponents(
 		new ButtonBuilder()
-			.setEmoji('921788204540100608')
+			.setEmoji(getBotEmojiResolvable('tagWhite'))
 			.setStyle(ButtonStyle.Primary)
 			.setCustomId(
 				`feed_showFeedImageTags_${data.isNotFeed ? 'NaF' : ''}${componentKeySuffix}`,
@@ -328,10 +328,9 @@ export async function formatBooruPostMessage(
 		debug('copyright =', postCopyrightTags);
 		debug('restantes =', postOtherTags);
 
-		const s3 = globalConfigs.slots.slot3;
 		const otherTags = postOtherTags.slice(0, actualMaxTags);
 		const displayedTagsCount = Math.min(otherTags.length + specialTags.length, maxTags);
-		const generalTagsTitle = `${gEmo('tagswhite', s3)} (${displayedTagsCount}/${actualTotalTags})`;
+		const generalTagsTitle = `${getBotEmoji('tagColor')} (${displayedTagsCount}/${actualTotalTags})`;
 		const generalTagsContent =
 			`${specialTags.join(' ')} ${formatTagNameListNew(otherTags, ' ')}`.trim();
 		const postGeneralTags = shortenText(`-# ${generalTagsTitle} ${generalTagsContent}`, 1020);
@@ -406,7 +405,7 @@ export async function formatBooruPostMessage(
 		debug('displayedTagsCount =', displayedTagsCount);
 		if (displayedTagsCount > 0) {
 			debug('A punto de insertar un campo de tags');
-			const generalTagsTitle = `${gEmo('tagswhite', globalConfigs.slots.slot3)} (${displayedTagsCount}/${actualTotalTags})`;
+			const generalTagsTitle = `${getBotEmoji('tagColor')} (${displayedTagsCount}/${actualTotalTags})`;
 			const generalTagsContent =
 				`${specialTags.join(' ')} ${formatTagNameListNew(filteredTags, ' ')}`.trim();
 			const postGeneralTags = shortenText(

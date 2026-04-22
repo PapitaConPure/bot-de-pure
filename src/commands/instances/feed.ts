@@ -20,10 +20,9 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
-import { globalConfigs, tenshiAltColor } from '@/data/globalProps';
+import { tenshiAltColor } from '@/data/globalProps';
 import {
 	compressId,
-	getGuildEmoji,
 	isNotModerator,
 	isNSFWChannel,
 	randInArray,
@@ -41,6 +40,7 @@ import {
 } from '@/systems/booru/boorusend.js';
 import { auditAction, auditError } from '@/systems/others/auditor';
 import type { AnyCommandInteraction } from '@/types/commands';
+import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { Command, CommandPermissions, CommandTags } from '../commons';
 
 const wizTitle = (translator: Translator) => translator.getText('feedAuthor');
@@ -89,7 +89,7 @@ function tagsSetupPrompt(
 	translator: Translator,
 ) {
 	const fetchedChannel = interaction.guild?.channels.cache.get(channelId) as GuildBasedChannel;
-	const gelEmoji = getGuildEmoji('gelbooru', globalConfigs.slots.slot3);
+	const gelEmoji = getBotEmoji('gelbooru');
 	const embed = new EmbedBuilder()
 		.setColor(Colors.Blurple)
 		.setAuthor({
@@ -222,7 +222,7 @@ const command = new Command('feed', tags)
 				new ActionRowBuilder<ButtonBuilder>().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`feed_selectEdit_${authorId}`)
-						.setEmoji('921788204540100608')
+						.setEmoji(getBotEmojiResolvable('tagWhite'))
 						.setLabel(translator.getText('buttonEdit'))
 						.setStyle(ButtonStyle.Primary)
 						.setDisabled(!hasFeeds),
@@ -1501,7 +1501,7 @@ const command = new Command('feed', tags)
 				.filter((t) => !otherTagTypes.includes(t.type))
 				.map((t) => t.name);
 
-			const tagEmoji = getGuildEmoji('tagswhite', globalConfigs.slots.slot3);
+			const tagEmoji = getBotEmoji('tagColor');
 			const tagsContent = formatTagNameListNew(postOtherTags, ' ');
 
 			const source = post.source;
@@ -1576,7 +1576,7 @@ const command = new Command('feed', tags)
 					actionRow.addComponents(
 						new ButtonBuilder()
 							.setCustomId(`yo_modifyFollowedTags_${compressedUserId}_ALT`)
-							.setEmoji('921788204540100608')
+							.setEmoji(getBotEmojiResolvable('tagWhite'))
 							.setLabel(translator.getText('feedSetTagsButtonView'))
 							.setStyle(ButtonStyle.Primary),
 						new ButtonBuilder()
@@ -1681,7 +1681,7 @@ const command = new Command('feed', tags)
 				.setDescription(translator.getText('feedDeletePostAdvice'))
 				.addFields(
 					{
-						name: `<:tagswhite:921788204540100608> ${translator.getText('feedDeletePostTagsName')}`,
+						name: `${getBotEmoji('tagColor')} ${translator.getText('feedDeletePostTagsName')}`,
 						value: tags,
 					},
 					{

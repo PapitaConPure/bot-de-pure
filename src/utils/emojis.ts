@@ -1,4 +1,4 @@
-import type { ApplicationEmoji, EmojiResolvable } from 'discord.js';
+import type { ApplicationEmoji, ComponentEmojiResolvable } from 'discord.js';
 import { ClientNotFoundError, client } from '@/core/client';
 import Logger from '@/utils/logs';
 
@@ -36,7 +36,7 @@ const expectedBotEmojis = {
 	magGlassLeft: { fallback: '🔍' },
 	magGlassRight: { fallback: '🔎' },
 
-	//Header Icons
+	//Main Icons
 	guide: { fallback: '📘' },
 	command: { fallback: '⚙️' },
 	purefeed: { fallback: '🖼️' },
@@ -62,6 +62,11 @@ const expectedBotEmojis = {
 	unshuffle: { fallback: '↩️' },
 
 	//Boorus
+	gelbooru: { fallback: '🇬' },
+	tagColor: { fallback: '🏷️' },
+	tagWhite: { fallback: '🏷️' },
+	tagPlus: { fallback: '➕' },
+	tagMinus: { fallback: '➖' },
 	copyrightTag: { fallback: '🏛️' },
 	artistTag: { fallback: '🧑‍🎨' },
 	characterTag: { fallback: '🧍' },
@@ -73,7 +78,7 @@ const expectedBotEmojis = {
 	absurdRes: { fallback: '🧬' },
 	incrediblyAbsurdRes: { fallback: '🌌' },
 	twitterfullcolor: { fallback: '𝕏' },
-	pixivfullcolor: { fallback: '🅿' },
+	pixivfullcolor: { fallback: '🇵' },
 } as const satisfies Record<string, StaticBotEmoji>;
 export type BotEmojiName = keyof typeof expectedBotEmojis;
 
@@ -136,7 +141,7 @@ export function getBotEmojiResult(
 		: { app: false, emoji: botEmoji.fallback };
 }
 
-export function getBotEmojiResolvable(emojiName: BotEmojiName): EmojiResolvable {
+export function getBotEmojiResolvable(emojiName: BotEmojiName): ComponentEmojiResolvable {
 	const botEmoji = expectBotEmoji(emojiName);
 
 	return botEmoji.appEmoji ?? botEmoji.fallback;
