@@ -18,7 +18,12 @@ import {
 } from 'discord.js';
 import type { AnyRequest, ComplexCommandRequest, ComponentInteraction } from 'types/commands';
 import type { MessageComponentDataResolvable } from 'types/discord';
-import type { Command, CommandOptions, CommandTagStringField } from '@/commands/commons';
+import type {
+	Command,
+	CommandOptions,
+	CommandTagResolvable,
+	CommandTagStringField,
+} from '@/commands/commons';
 import { CommandTag, fetchCommandsFromFiles } from '@/commands/commons';
 import { ClientNotFoundError, client } from '@/core/client';
 import { tenshiColor } from '@/data/globalProps';
@@ -28,9 +33,9 @@ import { p_pure } from '@/utils/prefixes';
 
 export const makeCategoriesRow = (
 	request: ComplexCommandRequest | ComponentInteraction,
-	selections: string[],
+	selections: CommandTagResolvable[],
 ) => {
-	const getDefault = (d: string) => !!selections.includes(d);
+	const getDefault = (d: CommandTagResolvable) => !!selections.includes(d);
 
 	const categoriesMenu = new StringSelectMenuBuilder()
 		.setCustomId(`ayuda_viewCategory_${compressId(request.user.id)}`)
@@ -348,15 +353,19 @@ export function getWikiPageComponentsV2(
 		isNotGuidePage ? `-# Comando • ${getDisplayFlags()}` : `-# ${getDisplayFlags()}`,
 	);
 
-	const namesHeaderTextBuilder = new TextDisplayBuilder().setContent('### Nombres');
-	const namesContent = `\`${commandName}\`, ${listExists(aliases) ? aliases.map((i) => `\`${i}\``).join(', ') : ''}`;
-	const namesTextBuilder = new TextDisplayBuilder().setContent(namesContent);
-
 	const metadataContainerBuilder = new ContainerBuilder()
 		.setAccentColor(tenshiColor)
-		.addTextDisplayComponents(titleTextBuilder, taglineTextBuilder)
-		.addSeparatorComponents(new SeparatorBuilder())
-		.addTextDisplayComponents(namesHeaderTextBuilder, namesTextBuilder);
+		.addTextDisplayComponents(titleTextBuilder, taglineTextBuilder);
+
+	if (isNotGuidePage) {
+		const namesHeaderTextBuilder = new TextDisplayBuilder().setContent('### Nombres');
+		const namesContent = `\`${commandName}\`, ${listExists(aliases) ? aliases.map((i) => `\`${i}\``).join(', ') : ''}`;
+		const namesTextBuilder = new TextDisplayBuilder().setContent(namesContent);
+
+		metadataContainerBuilder
+			.addSeparatorComponents(new SeparatorBuilder())
+			.addTextDisplayComponents(namesHeaderTextBuilder, namesTextBuilder);
+	}
 
 	components.push(metadataContainerBuilder);
 
