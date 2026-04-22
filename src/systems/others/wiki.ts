@@ -1,8 +1,4 @@
-import type {
-	AnyComponentBuilder,
-	MessageActionRowComponentBuilder,
-	MessageComponentInteraction,
-} from 'discord.js';
+import type { AnyComponentBuilder, MessageActionRowComponentBuilder } from 'discord.js';
 import {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -113,9 +109,7 @@ export const makeCategoriesRow = (
 	return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(categoriesMenu);
 };
 
-export const makeGuideMenu = (
-	request: ComplexCommandRequest | MessageComponentInteraction<'cached'>,
-) =>
+export const makeGuideMenu = (request: AnyRequest) =>
 	new StringSelectMenuBuilder()
 		.setCustomId(`ayuda_viewGuideWiki_${compressId(request.user.id)}`)
 		.setPlaceholder('Guías...')
@@ -142,9 +136,8 @@ export const makeGuideMenu = (
 				.setDescription('Detalles sobre los Tipos de Parámetro u Expresiones de Bandera.'),
 		);
 
-export const makeGuideRow = (
-	request: ComplexCommandRequest | MessageComponentInteraction<'cached'>,
-) => new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(makeGuideMenu(request));
+export const makeGuideRow = (request: AnyRequest) =>
+	new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(makeGuideMenu(request));
 
 /**
  * @description
@@ -242,7 +235,10 @@ const displayTagMappings = {
 
 const listExists = (l: string[] | null | undefined): l is string[] => !!l?.[0]?.length;
 
-/**@description Añade embeds y componentes de una wiki de comando a la carga indicada.*/
+/**
+ * @description Añade embeds y componentes de una wiki de comando a la carga indicada.
+ * @deprecated
+ */
 export function injectWikiPage(
 	command: Command<CommandOptions | undefined>,
 	guildId: string,
@@ -363,9 +359,13 @@ export function getWikiPageComponentsV2(
 	components.push(metadataContainerBuilder);
 
 	//Contenedor de información
-	const descriptionHeaderTextBuilder = new TextDisplayBuilder().setContent(
-		isNotGuidePage ? '### Descripción' : '### Explicación',
-	);
+	const infoContainerBuilder = new ContainerBuilder().setAccentColor(0xbf94e4);
+
+	if (isNotGuidePage) {
+		const descriptionHeaderTextBuilder = new TextDisplayBuilder().setContent('### Descripción');
+		infoContainerBuilder.addTextDisplayComponents(descriptionHeaderTextBuilder);
+	}
+
 	const descriptionTextBuilder = new TextDisplayBuilder().setContent(
 		command.desc
 			|| '⚠️ Este comando no tiene descripción por el momento. Inténtalo nuevamente más tarde',
@@ -376,9 +376,9 @@ export function getWikiPageComponentsV2(
 			row.map((componentEvaluator) => componentEvaluator(request)),
 		),
 	);
-	const infoContainerBuilder = new ContainerBuilder()
-		.setAccentColor(0xbf94e4)
-		.addTextDisplayComponents(descriptionHeaderTextBuilder, descriptionTextBuilder)
+
+	infoContainerBuilder
+		.addTextDisplayComponents(descriptionTextBuilder)
 		.addActionRowComponents(wikiRows);
 
 	components.push(infoContainerBuilder);

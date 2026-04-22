@@ -1,9 +1,15 @@
 import type { AnySelectMenuInteraction, GuildChannelResolvable, GuildMember } from 'discord.js';
-import { ContainerBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
-import type { ComplexCommandRequest } from 'types/commands';
+import {
+	ButtonBuilder,
+	ButtonStyle,
+	ContainerBuilder,
+	EmbedBuilder,
+	MessageFlags,
+} from 'discord.js';
+import type { AnyRequest, ComplexCommandRequest } from 'types/commands';
 import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
-import { isNotModerator, shortenText } from '@/func';
+import { compressId, isNotModerator, shortenText } from '@/func';
 import {
 	getWikiPageComponentsV2,
 	makeCategoriesRow,
@@ -132,13 +138,18 @@ const command = new Command('ayuda', tags)
 			components,
 		});
 	})
-	.setSelectMenuResponse(
+	.setInteractionResponse(
 		async function viewGuideWiki(interaction) {
-			const guildPrefix = p_pure(interaction.guildId).raw;
+			const isMenu = interaction.isStringSelectMenu();
+			const isButton = interaction.isButton();
+			if (!isMenu && !isButton) return;
+			if (!interaction.guild) return;
+
+			const guildPrefix = p_pure(interaction.guild.id).raw;
 			const helpCommand = `${guildPrefix}${command.name}`;
 
 			let search: string;
-			switch (interaction.values[0]) {
+			switch (isMenu ? interaction.values[0] : 'index') {
 				case 'index':
 					search = 'g-introducción';
 					break;
@@ -156,7 +167,7 @@ const command = new Command('ayuda', tags)
 					break;
 			}
 
-			const foundCommand = await searchCommand(interaction, search);
+			const foundCommand = await searchCommand(interaction as AnyRequest, search);
 
 			if (!foundCommand) {
 				const embed = new EmbedBuilder()
@@ -166,13 +177,13 @@ const command = new Command('ayuda', tags)
 						name: 'No se ha encontrado ningún comando que puedas llamar con este nombre',
 						value: `Utiliza \`${helpCommand}\` para ver una lista de comandos disponibles y luego usa \`${guildPrefix}ayuda <comando>\` para ver un comando en específico`,
 					});
-				const components = [makeGuideRow(interaction)];
+				const components = [makeGuideRow(interaction as AnyRequest)];
 				return interaction.update({ embeds: [embed], components });
 			}
 
 			const components = getWikiPageComponentsV2(
 				foundCommand,
-				Command.requestize(interaction),
+				Command.requestize(interaction as AnyRequest),
 			);
 			return interaction.reply({
 				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
@@ -210,16 +221,25 @@ async function listCommands(
 
 	const contentContainer: ContainerBuilder = new ContainerBuilder()
 		.setAccentColor(tenshiAltColor)
-		.addTextDisplayComponents((textDisplay) =>
-			textDisplay.setContent(
-				[
-					'### -# Ejemplos de uso',
-					`${prefix}avatar ${request.client.user}`,
-					`${prefix}dados 5d6`,
-				].join('\n'),
-			),
+		.addSectionComponents((section) =>
+			section
+				.addTextDisplayComponents((textDisplay) =>
+					textDisplay.setContent(
+						[
+							'### -# Uso básico',
+							`${prefix}yo`,
+							`${prefix}avatar ${request.user}`,
+							`${prefix}dados 5d6`,
+						].join('\n'),
+					),
+				)
+				.setButtonAccessory(
+					new ButtonBuilder()
+						.setCustomId(`ayuda_viewGuideWiki_${compressId(request.user.id)}`)
+						.setLabel('Introducción')
+						.setStyle(ButtonStyle.Primary),
+				),
 		)
-		.addActionRowComponents(makeGuideRow(request))
 		.addSeparatorComponents((separator) => separator.setDivider(true))
 		.addTextDisplayComponents((textDisplay) =>
 			textDisplay.setContent(

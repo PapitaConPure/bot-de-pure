@@ -10,7 +10,6 @@ import type {
 	Interaction,
 	InteractionDeferReplyOptions,
 	MessageActionRowComponentBuilder,
-	MessageComponentInteraction,
 	MessageReplyOptions,
 	ModalMessageModalSubmitInteraction,
 	User,
@@ -18,6 +17,7 @@ import type {
 import { Collection, InteractionType, Message, PermissionsBitField } from 'discord.js';
 import type {
 	AnyCommandInteraction,
+	AnyRequest,
 	CommandEditReplyOptions,
 	CommandReplyOptions,
 	CommandRequest,
@@ -180,7 +180,7 @@ export type AnyCommandComponentResponseFunction = ((
 	InteractionResponseOptions;
 
 export type WikiComponentEvaluator = (
-	request: ComplexCommandRequest | MessageComponentInteraction<'cached'>,
+	request: AnyRequest,
 ) => MessageActionRowComponentBuilder;
 
 export type WikiRowDefinition = WikiComponentEvaluator[];
