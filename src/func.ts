@@ -811,12 +811,6 @@ export function fetchRole(data: string, guild: Guild): Role | undefined {
 	return role;
 }
 
-/**@deprecated Mantenido por compatibilidad. No debe reusarse nunca hoy en día, y en su lugar: deben usarse componentes de entrada de usuario de */
-export const fetchArrows = (emojiscache: Collection<Snowflake, Emoji>): [Emoji, Emoji] => [
-	emojiscache.get('681963688361590897') as Emoji,
-	emojiscache.get('681963688411922460') as Emoji,
-];
-
 /**
  * @param args An array of words, which may contain double-quote groups
  * @param i Index from which to extract a sentence, be it a single word or a group
@@ -973,17 +967,6 @@ export function getGuildEmoji(emoji: string, guild: Guild): Emoji | null {
 	if (!parsedEmoji) return guild.emojis.cache.find((e) => e.name === emoji) || null;
 	return guild.emojis.resolve(parsedEmoji);
 }
-
-/**@description Devuelve el primer emoji global o de servidor encontrado en el string.*/
-export const getEmojiString = (emoji: string, guild: Guild): string | null => {
-	const unicodeEmoji = parseUnicodeEmoji(emoji);
-	if (unicodeEmoji) return unicodeEmoji;
-
-	const guildEmoji = getGuildEmoji(emoji, guild);
-	if (guildEmoji) return `${guildEmoji}`;
-
-	return null;
-};
 
 export function isNSFWChannel(channel: GuildBasedChannel) {
 	if (channel.isThread()) return channel.parent?.nsfw ?? false;
