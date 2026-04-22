@@ -83,7 +83,6 @@ La columna "Meta" indica los modificadores de interés de un comando:
 | touhou          | ✅ | ✅ |  |
 | transferir      | ✅ | ✅ |  |
 | tubérculo       | ✅ | ✅ |  |
-| uwu             | ✅ | ✅ |  |
 | uwus            | ✅ | ✅ |  |
 | voz             | ✅ | ✅ |  |
 | vtubers         | ✅ | ✅ |  |
