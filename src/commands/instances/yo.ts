@@ -40,7 +40,7 @@ const userNotAvailableText =
 const backToDashboardButton = (compressedAuthorId: string) =>
 	new ButtonBuilder()
 		.setCustomId(`yo_goToDashboard_${compressedAuthorId}`)
-		.setEmoji('1355128236790644868')
+		.setEmoji(getBotEmojiResolvable('backAccent'))
 		.setStyle(ButtonStyle.Secondary);
 
 const cancelButton = (compressedAuthorId: string) =>
