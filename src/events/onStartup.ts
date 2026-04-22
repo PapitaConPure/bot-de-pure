@@ -13,6 +13,7 @@ import { Routes } from 'discord-api-types/v9';
 import { connect, set } from 'mongoose';
 import { databaseUri } from '@/core/db';
 import { initializeWebhookMessageOwners } from '@/utils/discordagent';
+import { setupAppEmojis } from '@/utils/emojis';
 import { fetchAllGuildMembers } from '@/utils/guildratekeeper';
 import { withTimeout } from '@/utils/promises';
 import { fetchActionsFromFiles } from '../actions/commons/actionDiscovery';
@@ -98,6 +99,10 @@ export async function onStartup(client: Client) {
 
 	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
 	await fetchAllGuildMembers();
+	confirm();
+
+	console.log(chalk.magenta('Preparando definiciones de emojis...'));
+	await setupAppEmojis();
 	confirm();
 
 	console.log(chalk.bold.magentaBright('Cargando comandos Slash y Contextuales...'));
