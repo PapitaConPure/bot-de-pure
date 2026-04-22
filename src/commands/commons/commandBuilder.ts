@@ -179,9 +179,7 @@ export type AnyCommandComponentResponseFunction = ((
 ) => Promise<unknown>) &
 	InteractionResponseOptions;
 
-export type WikiComponentEvaluator = (
-	request: AnyRequest,
-) => MessageActionRowComponentBuilder;
+export type WikiComponentEvaluator = (request: AnyRequest) => MessageActionRowComponentBuilder;
 
 export type WikiRowDefinition = WikiComponentEvaluator[];
 
