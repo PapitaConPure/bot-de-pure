@@ -814,9 +814,9 @@ const localesObject = {
 	},
 
 	helpMainHeaderTitle: {
-		es: '# <:guide:1369552945309290647> Centro de ayuda',
-		en: '# <:guide:1369552945309290647> Help Center',
-		ja: '# <:guide:1369552945309290647> ヘルプセンター',
+		es: () => `# ${getBotEmoji('guidePrimary')} Centro de ayuda`,
+		en: () => `# ${getBotEmoji('guidePrimary')} Help Center`,
+		ja: () => `# ${getBotEmoji('guidePrimary')} ヘルプセンター`,
 	},
 	helpMainHeaderSubtitle: {
 		es: '-# Aprende las diferentes formas de interactuar con Bot de Puré.',
@@ -1130,24 +1130,24 @@ const localesObject = {
 		ja: '再生キューが空です',
 	},
 	queueDescriptionLoopTrack: {
-		es: '<:repeat:1356977712149037087> Modo de repetición de pista activo',
-		en: '<:repeat:1356977712149037087> Track loop mode is enabled',
-		ja: '<:repeat:1356977712149037087> トラックループモードが有効になりました',
+		es: `${getBotEmoji('repeatedAccent')} Modo de repetición de pista activo`,
+		en: `${getBotEmoji('repeatedAccent')} Track loop mode is enabled`,
+		ja: `${getBotEmoji('repeatedAccent')} トラックループモードが有効になりました`,
 	},
 	queueDescriptionLoopQueue: {
-		es: '<:repeat:1356977712149037087> Modo de repetición de cola activo',
-		en: '<:repeat:1356977712149037087> Queue loop mode is enabled',
-		ja: '<:repeat:1356977712149037087> キューループモードが有効になりました',
+		es: `${getBotEmoji('repeatedAccent')} Modo de repetición de cola activo`,
+		en: `${getBotEmoji('repeatedAccent')} Queue loop mode is enabled`,
+		ja: `${getBotEmoji('repeatedAccent')} キューループモードが有効になりました`,
 	},
 	queueDescriptionLoopAutoplay: {
-		es: '<:headphonessimple:1360868342411427892> Auto-DJ activo',
-		en: '<:headphonessimple:1360868342411427892> Auto DJ is enabled',
-		ja: '<:headphonessimple:1360868342411427892> オート DJ が有効になりました',
+		es: `${getBotEmoji('headphonesAccent')} Auto-DJ activo`,
+		en: `${getBotEmoji('headphonesAccent')} Auto DJ is enabled`,
+		ja: `${getBotEmoji('headphonesAccent')} オート DJ が有効になりました`,
 	},
 	queueDescriptionShuffle: {
-		es: '<:shuffle:1356977721799868426> Modo de cola aleatoria activo',
-		en: '<:shuffle:1356977721799868426> Queue shuffle mode is enabled',
-		ja: '<:shuffle:1356977721799868426> キューシャッフルが有効になりました',
+		es: `${getBotEmoji('shuffledAccent')} Modo de cola aleatoria activo`,
+		en: `${getBotEmoji('shuffledAccent')} Queue shuffle mode is enabled`,
+		ja: `${getBotEmoji('shuffledAccent')} キューシャッフルが有効になりました`,
 	},
 	queueNowPlayingName: {
 		es: 'Escuchando Ahora',
@@ -1220,18 +1220,21 @@ const localesObject = {
 		ja: '⚠️ リピートモードを切り替えることはできません。',
 	},
 	queueLoopDescAutoplayEnabled: {
-		es: paragraph(
-			'El modo de repetición no se puede alternar porque el <:headphonessimple:1360868342411427892> Auto-DJ está activo.',
-			`Debes desactivar el <:headphonessimple:1360868342411427892> Auto-DJ para usar este botón. También puedes usar \`${subl(0, '/')}repetir\`.`,
-		),
-		en: paragraph(
-			'Loop mode cannot be toggled because <:headphonessimple:1360868342411427892> Auto-DJ is active.',
-			`You must turn off <:headphonessimple:1360868342411427892> Auto DJ to use this button. You can also use \`${subl(0, '/')}loop\`.`,
-		),
-		ja: paragraph(
-			'リピートモードは、<:headphonessimple:1360868342411427892> オート DJ がアクティブなため変更できません。',
-			`このボタンを使用するには、<:headphonessimple:1360868342411427892> オート DJ をオフにする必要があります。\`${subl(0, '/')}loop\`を使用することもできます。`,
-		),
+		es: () =>
+			paragraph(
+				`El modo de repetición no se puede alternar porque el ${getBotEmoji('headphonesAccent')} Auto-DJ está activo.`,
+				`Debes desactivar el ${getBotEmoji('headphonesAccent')} Auto-DJ para usar este botón. También puedes usar \`${subl(0, '/')}repetir\`.`,
+			),
+		en: () =>
+			paragraph(
+				`Loop mode cannot be toggled because ${getBotEmoji('headphonesAccent')} Auto-DJ is active.`,
+				`You must turn off ${getBotEmoji('headphonesAccent')} Auto DJ to use this button. You can also use \`${subl(0, '/')}loop\`.`,
+			),
+		ja: () =>
+			paragraph(
+				`リピートモードは、${getBotEmoji('headphonesAccent')} オート DJ がアクティブなため変更できません。`,
+				`このボタンを使用するには、${getBotEmoji('headphonesAccent')} オート DJ をオフにする必要があります。\`${subl(0, '/')}loop\`を使用することもできます。`,
+			),
 	},
 	queueLoopTitle: {
 		es: 'Establece un modo de repetición',
@@ -1844,9 +1847,9 @@ const localesObject = {
 		ja: 'この投稿には保留中の注文を示すタグが付いています。適切なタグを付けるなど、Gelbooru の品質向上に貢献してください。',
 	},
 	feedContributeTagsName: {
-		es: '<:handshake:1355496081550606486> Tags de pedidos pendientes',
-		en: '<:handshake:1355496081550606486> Pending requests tags',
-		ja: '<:handshake:1355496081550606486> 保留中のリクエストタグ',
+		es: () => `${getBotEmoji('handshakeAccent')} Tags de pedidos pendientes`,
+		en: () => `${getBotEmoji('handshakeAccent')} Pending requests tags`,
+		ja: () => `${getBotEmoji('handshakeAccent')} 保留中のリクエストタグ`,
 	},
 	feedContributeDanbooruFooter: {
 		es: 'Este Post fue automáticamente portado desde Danbooru, por lo que es mejor concretar los pedidos ahí. Los cambios utilitarios hechos en Danbooru se verán reflejados en Gelbooru.',
@@ -3037,9 +3040,9 @@ const localesObject = {
 		ja: 'pixiv リンクコンバーター',
 	},
 	yoPixivTitle: {
-		es: '## <:pixivfullcolor:1460135891841585385> Preferencias de PuréPix',
-		en: '## <:pixivfullcolor:1460135891841585385> PuréPix preferences',
-		ja: '## <:pixivfullcolor:1460135891841585385> PuréPix の個人設定',
+		es: () => `## ${getBotEmoji('pixivFullColor')} Preferencias de PuréPix`,
+		en: () => `## ${getBotEmoji('pixivFullColor')} PuréPix preferences`,
+		ja: () => `## ${getBotEmoji('pixivFullColor')} PuréPix の個人設定`,
 	},
 	yoPixivDesc: {
 		es: '-# Configura la conversión de enlaces de pixiv.',
@@ -3072,9 +3075,9 @@ const localesObject = {
 		ja: 'Twitter/X リンクコンバーター',
 	},
 	yoTwitterTitle: {
-		es: '## <:twitterfullcolor:1460135894404305019> Preferencias de Puréet',
-		en: '## <:twitterfullcolor:1460135894404305019> Puréet preferences',
-		ja: '## <:twitterfullcolor:1460135894404305019> Puréet の個人設定',
+		es: () => `## ${getBotEmoji('twitterFullColor')} Preferencias de Puréet`,
+		en: () => `## ${getBotEmoji('twitterFullColor')} Puréet preferences`,
+		ja: () => `## ${getBotEmoji('twitterFullColor')} Puréet の個人設定`,
 	},
 	yoTwitterDesc: {
 		es: '-# Configura la conversión de enlaces de Twitter/X.',
@@ -3097,9 +3100,9 @@ const localesObject = {
 		ja: 'Twitter/X リンクを自動的に変換しない。',
 	},
 	yoBoorutatoTitle: {
-		es: '## <:purefeed:1460145550119669912> Preferencias de Boorutato',
-		en: '## <:purefeed:1460145550119669912> Boorutato preferences',
-		ja: '## <:purefeed:1460145550119669912> Boorutato の個人設定',
+		es: `## ${getBotEmoji('boorutatoFullColor')} Preferencias de Boorutato`,
+		en: `## ${getBotEmoji('boorutatoFullColor')} Boorutato preferences`,
+		ja: `## ${getBotEmoji('boorutatoFullColor')} Boorutato の個人設定`,
 	},
 	yoBoorutatoDesc: {
 		es: '-# Configura la conversión de enlaces de Boorus.',

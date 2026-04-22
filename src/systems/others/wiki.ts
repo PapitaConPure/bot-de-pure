@@ -24,6 +24,7 @@ import { tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { compressId, edlDistance, isNotModerator, toCapitalized } from '@/func';
 import { Translator } from '@/i18n';
+import { getBotEmoji } from '@/utils/emojis';
 import { p_pure } from '@/utils/prefixes';
 
 export const makeCategoriesRow = async (
@@ -261,8 +262,8 @@ export function getWikiPageComponentsV2(
 	//Contenedor de metadatos
 	const titleTextBuilder = new TextDisplayBuilder().setContent(
 		isNotGuidePage
-			? `# <:command:1369424059871395950> ${toCapitalized(commandName)}`
-			: `# <:guide:1369552945309290647> ${toCapitalized(commandName.slice(2))}`,
+			? `# ${getBotEmoji('commandPrimary')} ${toCapitalized(commandName)}`
+			: `# ${getBotEmoji('guidePrimary')} ${toCapitalized(commandName.slice(2))}`,
 	);
 	const taglineTextBuilder = new TextDisplayBuilder().setContent(
 		isNotGuidePage ? `-# Comando • ${getDisplayFlags()}` : `-# ${getDisplayFlags()}`,

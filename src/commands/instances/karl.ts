@@ -26,7 +26,7 @@ const tiers: WeightedDecision<Tier>[] = [
 			hex: 0xa0a0a0,
 			label: 'Común',
 			image: 'https://i.imgur.com/ShmLYeU.png',
-			karl: 'Hola, soy Karl. No me hago responsable por esta mamadera <:reibu:1107876018171162705>',
+			karl: 'Hola, soy Karl. No me hago responsable por esta mamadera',
 		},
 	},
 	{
@@ -36,7 +36,7 @@ const tiers: WeightedDecision<Tier>[] = [
 			hex: 0x4caf50,
 			label: 'Raro',
 			image: 'https://i.imgur.com/5xi2Ub3.png',
-			karl: 'Buenas, soy Karl. Combina estas weás, créeme soy licenciado <:reibu:1107876018171162705> :thumbsup:',
+			karl: 'Buenas, soy Karl. Combina estas weás, créeme soy licenciado',
 		},
 	},
 	{
@@ -46,7 +46,7 @@ const tiers: WeightedDecision<Tier>[] = [
 			hex: 0x2196f3,
 			label: 'Épico',
 			image: 'https://i.imgur.com/uMcSxEf.png',
-			karl: 'Aló, soy Karl. ¿Y esa mamasita? Te traes unos MIDIS muy buenos eh <:reibu:1107876018171162705> :thumbsup:',
+			karl: 'Aló, soy Karl. ¿Y esa mamasita? Te traes unos MIDIS muy buenos eh',
 		},
 	},
 	{
@@ -56,7 +56,7 @@ const tiers: WeightedDecision<Tier>[] = [
 			hex: 0x9c27b0,
 			label: 'Pachamama',
 			image: 'https://i.imgur.com/uMcSxEf.png',
-			karl: 'Mucho gusto, soy Karl. Te traes unas trompetas muy chad la verdad :muscle: <:reibu:1107876018171162705>',
+			karl: 'Mucho gusto, soy Karl. Te traes unas trompetas muy chad la verdad',
 		},
 	},
 	{
@@ -66,7 +66,7 @@ const tiers: WeightedDecision<Tier>[] = [
 			hex: 0xff9800,
 			label: 'Machu Picchu',
 			image: 'https://i.imgur.com/7h840q1.png',
-			karl: 'Muy buenas tardes, soy Karl y... QUÉ ES ESO LOCO, TREMENDO MIDI <:reibu:1107876018171162705> :ok_hand:',
+			karl: 'Muy buenas tardes, soy Karl y... QUÉ ES ESO LOCO, TREMENDO MIDI. VENTE PA ACÁ PE',
 		},
 	},
 	{
@@ -76,7 +76,7 @@ const tiers: WeightedDecision<Tier>[] = [
 			hex: 0xe53935,
 			label: 'Perútensoku',
 			image: 'https://i.imgur.com/qbPwCy9.png',
-			karl: 'TAMARE OE, QUE SOY KARL CAUSA. AHORA SÍ ME LAS VAS A PAGAR ZUN :muscle: <:reibu:1107876018171162705> :trumpet:',
+			karl: 'TAMARE OE, QUE SOY KARL CAUSA. AHORA SÍ ME LAS VAS A PAGAR ZUN',
 		},
 	},
 ];

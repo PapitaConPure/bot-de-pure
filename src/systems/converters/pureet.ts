@@ -1,5 +1,6 @@
 import type { Message } from 'discord.js';
 import { ChannelType } from 'discord.js';
+import { getBotEmoji } from '@/utils/emojis';
 import Logger from '@/utils/logs';
 import type { ConverterPayload } from './converters';
 import { ConverterEmptyPayload } from './converters';
@@ -73,7 +74,7 @@ export async function sendConvertedTwitterPosts(
 			langSuffix = `/${ls}`;
 			warnAboutUnsupportedTranslationUrls ||= !!ls && converterKey === 'vx';
 		}
-		return `${spoiler}<:twitter2:1232243415165440040>[\`${artist}/${id}\`](${service}/${artist}/status/${id}${langSuffix})${spoiler}`;
+		return `${spoiler}${getBotEmoji('twitterColor')}[\`${artist}/${id}\`](${service}/${artist}/status/${id}${langSuffix})${spoiler}`;
 	});
 
 	let content = formattedTweetUrls.join(' ');

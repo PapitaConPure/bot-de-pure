@@ -25,6 +25,7 @@ import type { PureVoiceDocument } from '@/models/purevoice.js';
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice.js';
 import type { UserConfigSchemaType } from '@/models/userconfigs.js';
 import UserConfigModel from '@/models/userconfigs.js';
+import { getBotEmoji } from '@/utils/emojis';
 import Logger from '@/utils/logs.js';
 import { p_pure } from '@/utils/prefixes';
 
@@ -1070,17 +1071,17 @@ export async function createPVControlPanelChannel(
 		.setAuthor({ name: 'Bot de Puré • PuréVoice', url: 'https://i.imgur.com/P9eeVWC.png' })
 		.addFields(
 			{
-				name: '<:es:1084646419853488209> Panel de Control',
+				name: `${getBotEmoji('langEs')} Panel de Control`,
 				value: 'Configura una sesión aquí',
 				inline: true,
 			},
 			{
-				name: '<:en:1084646415319453756> Control Panel',
+				name: `${getBotEmoji('langEn')} Control Panel`,
 				value: 'Configure a session here',
 				inline: true,
 			},
 			{
-				name: '🇯🇵 コントロールパネル',
+				name: `${getBotEmoji('langJa')} コントロールパネル`,
 				value: 'ここでセッションを設定',
 				inline: true,
 			},

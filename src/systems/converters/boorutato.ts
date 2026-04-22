@@ -1,6 +1,7 @@
 import type { ContainerBuilder, Message } from 'discord.js';
 import { ChannelType, MessageFlags, TextDisplayBuilder } from 'discord.js';
 import { isNSFWChannel } from '@/func';
+import { getBotEmoji } from '@/utils/emojis';
 import Logger from '@/utils/logs';
 import { getMainBooruClient } from '../booru/booruclient';
 import { formatBooruPostMessage } from '../booru/boorusend';
@@ -68,7 +69,7 @@ export async function sendConvertedBooruPosts(
 		if (!post) continue;
 
 		const spoiler = st.includes('||') && ed.includes('||') ? '||' : '';
-		const formattedGelbooruUrl = `${spoiler}<:gelbooru:919398540172750878>[\`${id}\`](${original})${spoiler}`;
+		const formattedGelbooruUrl = `${spoiler}${getBotEmoji('gelbooruColor')}[\`${id}\`](${original})${spoiler}`;
 
 		const container = await formatBooruPostMessage(booru, post, {
 			maxGeneralTags: 0,

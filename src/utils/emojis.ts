@@ -51,6 +51,7 @@ const expectedBotEmojis = {
 	globeAccent: { fallback: '🌐' },
 	imageAccent: { fallback: '🖼️' },
 	videoAccent: { fallback: '🎞️' },
+	handshakeAccent: { fallback: '🤝' },
 
 	//Language Flags (full color, of course)
 	langEs: { fallback: '🇪🇸' },
@@ -65,7 +66,7 @@ const expectedBotEmojis = {
 	commandPrimary: { fallback: '⚙️' },
 
 	//Hero Icons (primary gradient-colored box with accent-colored shapes
-	purefeedFullColor: { fallback: '🖼️' },
+	boorutatoFullColor: { fallback: '🖼️' },
 	purevoiceFullColor: { fallback: '🔊' },
 	confessionsFullColor: { fallback: '🕊️' },
 
@@ -85,6 +86,7 @@ const expectedBotEmojis = {
 	//Voice and Music UI (accent color)
 	speakerAccent: { fallback: '🔊' },
 	headphonesAccent: { fallback: '🎧' },
+	repeatedAccent: { fallback: '🔁' },
 	shuffledAccent: { fallback: '🔀' },
 	unshuffledAccent: { fallback: '➡️' },
 

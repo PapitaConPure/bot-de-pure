@@ -359,10 +359,10 @@ export async function formatBooruPostMessage(
 				textDisplay.setContent(
 					[
 						maxTags > 0 ? '###' : '',
-						getCategoryFieldString('<:palette:1355128249658638488>', postArtistTags),
-						getCategoryFieldString('<:person:1355128242993893539>', postCharacterTags),
+						getCategoryFieldString(getBotEmoji('artistTagAccent'), postArtistTags),
+						getCategoryFieldString(getBotEmoji('characterTagAccent'), postCharacterTags),
 						getCategoryFieldString(
-							'<:landmark:1355128256432443584>',
+							getBotEmoji('copyrightTagAccent'),
 							postCopyrightTags,
 						),
 					]

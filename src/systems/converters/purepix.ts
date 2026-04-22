@@ -1,5 +1,6 @@
 import type { Message } from 'discord.js';
 import { ChannelType } from 'discord.js';
+import { getBotEmoji } from '@/utils/emojis';
 import Logger from '@/utils/logs';
 import type { ConverterPayload } from './converters';
 import { ConverterEmptyPayload } from './converters';
@@ -65,7 +66,7 @@ export async function sendConvertedPixivPosts(
 		const { st = '', id, lang = '', page = null, ed = '' } = u.groups ?? {};
 		const spoiler = st.includes('||') && ed.includes('||') ? '||' : '';
 		const idAndPage = page ? `${id}/${page}` : id;
-		return `${spoiler}<:pixiv2:1334816111270563880>[\`${idAndPage}\`](${service}${lang}/artworks/${idAndPage})${spoiler}`;
+		return `${spoiler}${getBotEmoji('pixivColor')}[\`${idAndPage}\`](${service}${lang}/artworks/${idAndPage})${spoiler}`;
 	});
 
 	const content = formattedPixivUrls.join(' ');
