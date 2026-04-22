@@ -46,8 +46,7 @@ export function registerCommands(commands: Command[], log: boolean = false) {
 		if (options) setupOptionBuilders(slash, options, log);
 
 		const jsonData = slash.toJSON();
-		for (const localeKey in command.localizedNames)
-			puré.slash.set(command.localizedNames[localeKey], jsonData);
+		puré.slash.set(command.localizedNames[defaultLocale], jsonData);
 	}
 
 	log && console.table(commandTableStack);
