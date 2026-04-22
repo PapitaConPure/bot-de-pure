@@ -26,7 +26,7 @@ import rakki from '@/commands/instances/rakkidei';
 import userIds from '@/data/userIds.json';
 import { isNSFWChannel, shortenText } from '@/func';
 import { Translator } from '@/i18n';
-import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
+import { type BotEmojiName, getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import Logger from '@/utils/logs';
 import { getMainBooruClient } from './booruclient';
 import type { FeedOptions } from './boorufeed';
@@ -96,17 +96,17 @@ const noSource: SourceStyle = { color: Colors.Aqua, emoji: undefined };
 const unknownSource: SourceStyle = { color: 0x1bb76e, emoji: '969664712604262400' };
 
 const resMappings = {
-	lowres: { order: 0, emote: '<:lowRes:1355765055945310238>' },
-	highres: { order: 1, emote: '<:highRes:1355765065772699719>' },
-	absurdres: { order: 2, emote: '<:absurdRes:1355765080800890891>' },
-	incredibly_absurdres: { order: 3, emote: '<:incrediblyAbsurdRes:1355765110387507374>' },
-} as const satisfies Record<string, { order: number; emote: string }>;
+	lowres: { order: 0, emote: 'lowRes' },
+	highres: { order: 1, emote: 'highRes' },
+	absurdres: { order: 2, emote: 'absurdRes' },
+	incredibly_absurdres: { order: 3, emote: 'incrediblyAbsurdRes' },
+} as const satisfies Record<string, { order: number; emote: BotEmojiName }>;
 
 const sexEmotes = {
-	girl: '<:girl:1355803255481045053>',
-	boy: '<:boy:1355803803248623646>',
-	futa: '<:futa:1355803817089831055>',
-} as const satisfies Record<string, string>;
+	girl: 'girl',
+	boy: 'boy',
+	futa: 'futa',
+} as const satisfies Record<string, BotEmojiName>;
 
 const ignoredTagsIfSexCount = new Set<string>(['multiple_girls', 'multiple_boys', 'multiple_futa']);
 
@@ -186,11 +186,11 @@ export async function formatBooruPostMessage(
 			return false;
 		}
 
-		const resMapping = resMappings[t];
+		const resMapping = resMappings[t] as { order: number; emote: BotEmojiName } | undefined;
 		if (resMapping) {
 			const { order: resOrder, emote: resEmote } = resMapping;
 			if (resOrder > maxResOrder) {
-				resTag = resEmote;
+				resTag = getBotEmoji(resEmote);
 				maxResOrder = resOrder;
 			}
 			return false;
@@ -198,7 +198,7 @@ export async function formatBooruPostMessage(
 
 		const sexTag = t.match(/([0-9]\+?)(girl|boy|futa)s?/);
 		if (sexTag) {
-			sexTags.push(`${sexEmotes[sexTag[2]]}${sexTag[1]}`);
+			sexTags.push(`${getBotEmoji(sexEmotes[sexTag[2]])}${sexTag[1]}`);
 			return false;
 		}
 
