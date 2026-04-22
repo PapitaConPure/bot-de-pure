@@ -11,7 +11,6 @@ import type {
 	GuildTextBasedChannel,
 	Message,
 	Role,
-	Snowflake,
 	User,
 } from 'discord.js';
 import {
