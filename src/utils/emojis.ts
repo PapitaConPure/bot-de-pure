@@ -169,7 +169,7 @@ export async function setupAppEmojis() {
 }
 
 function expectBotEmoji(emojiName: BotEmojiName): BotEmoji {
-	if (!ready) throw new Error('Emojis were not set up properly. Call setupAppEmojis() first.');
+	if (!ready) throw new Error(`Emojis were not set up properly before trying to get emoji "${emojiName}". Call setupAppEmojis() first.`, { cause: emojiName });
 
 	const botEmoji = botEmojis.get(emojiName);
 
