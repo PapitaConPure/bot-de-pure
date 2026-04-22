@@ -83,6 +83,14 @@ export async function onStartup(client: Client) {
 		console.error(error);
 	}
 
+	console.log(chalk.magenta('Preparando definiciones de emojis...'));
+	await setupAppEmojis();
+	confirm();
+
+	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
+	await fetchAllGuildMembers();
+	confirm();
+
 	console.log(chalk.bold.magentaBright('Compilando comandos...'));
 	const commands = await fetchCommandsFromFiles();
 	registerCommands(commands, false);
@@ -96,14 +104,6 @@ export async function onStartup(client: Client) {
 	if (remoteStartup)
 		console.log(chalk.redBright.bold('Se inicializará para un entorno de producción.'));
 	else console.log(chalk.cyanBright.bold('Se inicializará para un entorno de desarrollo.'));
-
-	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
-	await fetchAllGuildMembers();
-	confirm();
-
-	console.log(chalk.magenta('Preparando definiciones de emojis...'));
-	await setupAppEmojis();
-	confirm();
 
 	console.log(chalk.bold.magentaBright('Cargando comandos Slash y Contextuales...'));
 	const restGlobal = new REST({ version: '9' }).setToken(discordToken);
