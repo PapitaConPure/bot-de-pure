@@ -1,7 +1,7 @@
 import type { AnySelectMenuInteraction, GuildChannelResolvable, GuildMember } from 'discord.js';
-import { EmbedBuilder, MessageFlags } from 'discord.js';
+import { ContainerBuilder, EmbedBuilder, MessageFlags } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
-import { tenshiColor } from '@/data/globalProps';
+import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { isNotModerator, shortenText } from '@/func';
 import {
@@ -69,43 +69,11 @@ const command = new Command('ayuda', tags)
 
 		const search = args.getString('comando');
 
-		//Análisis de comandos
-		if (!search) {
-			const commands = await lookupCommands({
-				excludedTags: makeExcludedTags(request),
-				context: request,
-			});
-
-			//Embed de metadatos
-			const embed = new EmbedBuilder()
-				.setColor(tenshiColor)
-				.setAuthor({
-					name: 'Bot de Puré',
-					iconURL: request.client.user.displayAvatarURL({ extension: 'png', size: 512 }),
-				})
-				.setTitle('Centro de Ayuda')
-				.addFields(
-					{
-						name: 'Ejemplos de uso',
-						value: `${guildPrefix}avatar ${request.client.user}\n${guildPrefix}dados 5d6`,
-						inline: true,
-					},
-					{
-						name: 'Emotes rápidos',
-						value: `Usa un **&comando de emote** en cualquier parte de tus mensajes`,
-						inline: true,
-					},
-					{
-						name: `Puedes usar ${helpCommand} con el nombre de alguno de estos comandos:`,
-						value: commands.map((c) => `\`${c.name}\``).join(', '),
-					},
-				);
-
+		if (!search)
 			return request.reply({
-				embeds: [embed],
-				components: [makeCategoriesRow(request, []), makeGuideRow(request)],
+				flags: MessageFlags.IsComponentsV2,
+				components: await listCommands(request, ['COMMON']),
 			});
-		}
 
 		const foundCommand = await searchCommand(request, search);
 
@@ -126,54 +94,11 @@ const command = new Command('ayuda', tags)
 	})
 	.setSelectMenuResponse(
 		async function viewCategory(interaction) {
-			const guildPrefix = p_pure(interaction.guildId).raw;
-			const helpCommand = `${guildPrefix}${command.name}`;
-
-			const commands = await lookupCommands({
-				tags: interaction.values as CommandTagResolvable[],
-				excludedTags: makeExcludedTags(interaction),
-				context: interaction,
-			});
-
-			//Embed de metadatos
-			const embed = new EmbedBuilder()
-				.setColor(tenshiColor)
-				.setAuthor({
-					name: 'Bot de Puré',
-					iconURL: interaction.client.user.displayAvatarURL({
-						extension: 'png',
-						size: 512,
-					}),
-				})
-				.setTitle('Centro de Ayuda')
-				.addFields(
-					{
-						name: 'Ejemplos de uso',
-						value: `${guildPrefix}avatar ${interaction.client.user}\n${guildPrefix}dados 5d6`,
-						inline: true,
-					},
-					{
-						name: 'Emotes rápidos',
-						value: `Usa un **&comando de emote** en cualquier parte de tus mensajes`,
-						inline: true,
-					},
-					commands.length
-						? {
-								name: `Puedes usar ${helpCommand} con el nombre de alguno de estos comandos:`,
-								value: commands.map((c) => `\`${c.name}\``).join(', '),
-							}
-						: {
-								name: `Demasiados filtros`,
-								value: 'Ningún comando que puedas usar tiene todas las categorías que indicaste. Prueba filtrar de manera menos estricta',
-							},
-				);
-
 			return interaction.update({
-				embeds: [embed],
-				components: [
-					makeCategoriesRow(interaction, interaction.values),
-					makeGuideRow(interaction),
-				],
+				components: await listCommands(
+					interaction,
+					interaction.values as CommandTagResolvable[],
+				),
 			});
 		},
 		{ userFilterIndex: 0 },
@@ -215,7 +140,7 @@ const command = new Command('ayuda', tags)
 			let search: string;
 			switch (interaction.values[0]) {
 				case 'index':
-					search = 'g-indice';
+					search = 'g-introducción';
 					break;
 				case 'options':
 					search = 'g-opciones';
@@ -258,6 +183,71 @@ const command = new Command('ayuda', tags)
 	);
 
 export default command;
+
+async function listCommands(
+	request: ComplexCommandRequest | AnySelectMenuInteraction<'cached'>,
+	filter?: CommandTagResolvable[],
+) {
+	const prefix = p_pure(request).raw;
+	const helpCommand = `${prefix}${command.name}`;
+
+	const commands = await lookupCommands({
+		tags: filter,
+		excludedTags: makeExcludedTags(request),
+		context: request,
+	});
+
+	const headerContainer: ContainerBuilder = new ContainerBuilder()
+		.setAccentColor(tenshiColor)
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent('# <:guide:1369552945309290647> Centro de Ayuda'),
+		)
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(
+				'-# Aprende las diferentes formas de interactuar con Bot de Puré.',
+			),
+		);
+
+	const contentContainer: ContainerBuilder = new ContainerBuilder()
+		.setAccentColor(tenshiAltColor)
+		.addTextDisplayComponents(
+			(textDisplay) =>
+				textDisplay.setContent(
+					[
+						'### -# Ejemplos de uso',
+						`${prefix}avatar ${request.client.user}`,
+						`${prefix}dados 5d6`,
+					].join('\n'),
+				),
+			(textDisplay) =>
+				textDisplay.setContent(
+					[
+						'### -# Emotes rápidos',
+						'Para usar un **&comando de emote**, solo coloca & y el nombre de un comando en cualquier parte de tus mensajes.',
+					].join('\n'),
+				),
+		)
+		.addActionRowComponents(makeGuideRow(request))
+		.addSeparatorComponents((separator) => separator.setDivider(true))
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(
+				(commands.length
+					? [
+							'### -# Lista de comandos',
+							`Puedes usar ${helpCommand} con el nombre de alguno de estos comandos:`,
+							commands.map((c) => `\`${c.name}\``).join(' '),
+						]
+					: [
+							'### -# Lista de comandos',
+							'Ningún comando que puedas usar tiene todas las categorías que indicaste. Prueba filtrando de manera menos estricta.',
+						]
+				).join('\n'),
+			),
+		)
+		.addActionRowComponents(makeCategoriesRow(request, filter ?? []));
+
+	return [headerContainer, contentContainer];
+}
 
 export interface CommandsLookupQuery {
 	tags?: CommandTagResolvable[];
