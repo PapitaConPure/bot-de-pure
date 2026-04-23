@@ -1682,7 +1682,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 
 	/**Devuelve el valor ingresado como un string si se ingresó la bandera especificada. De lo contrario, se devuelve `fallback` o `undefined`.*/
 	parseFlagExpr(identifier: string, fallback?: string) {
-		return CommandOptionSolver.asString(
+		return CommandOptionSolver.asStringOrUndefined(
 			this.#options.fetchFlag(this.#args, identifier, {
 				callback: (x) => x,
 				fallback,
