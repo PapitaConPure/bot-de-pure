@@ -60,6 +60,7 @@ const expectedBotEmojis = {
 	expandAccent: { fallback: '💻' },
 	ellipsisAccent: { fallback: '💻' },
 	handshakeAccent: { fallback: '🤝' },
+	heartAccent: { fallback: '❤️' },
 
 	//Language Flags (full color, of course)
 	langEs: { fallback: '🇪🇸' },
@@ -133,6 +134,7 @@ const expectedBotEmojis = {
 	niconicoColor: { fallback: '📺' },
 	patreonColor: { fallback: '🇵' },
 	newgroundsColor: { fallback: '⚔️' },
+	nitterColor: { fallback: '🐦' },
 
 	//Booru Tag icons ()
 	boy: { fallback: '♂️' },

@@ -45,7 +45,7 @@ export interface PostFormatData {
 }
 
 export interface SourceStyle {
-	emoji?: string;
+	emoji?: BotEmojiName;
 	color: number;
 }
 
@@ -68,32 +68,32 @@ const sourceMappings: ReadonlyArray<{ pattern: RegExp; replacement: string }> = 
 ];
 
 export const SOURCE_STYLES: ReadonlyArray<SourceStyle & { pattern: RegExp }> = [
-	{ color: 0x0096fa, emoji: '1334816111270563880', pattern: /pixiv\.net(?!\/fanbox)/ },
-	{ color: 0x040404, emoji: '1232243415165440040', pattern: /(twitter|twimg|x)\.com/ },
-	{ color: 0xfaf18a, emoji: '999783444655648869', pattern: /pixiv\.net\/fanbox|fanbox\.cc/ },
-	{ color: 0xea4c89, emoji: '1000265840182181899', pattern: /fantia\.jp/ },
-	{ color: 0x28837f, emoji: '1001397393511682109', pattern: /skeb\.jp/ },
-	{ color: 0x0085ff, emoji: '1298259199477678115', pattern: /bsky\.app/ },
-	{ color: 0x00e59b, emoji: '1299754762115219681', pattern: /deviantart\.com/ },
-	{ color: 0x009c94, emoji: '1297689776941568073', pattern: /lofter\.com/ },
-	{ color: 0x23aee5, emoji: '1297697987014824066', pattern: /t\.bilibili\.com/ },
-	{ color: 0x020814, emoji: '1298264258991095850', pattern: /cara\.app/ },
-	{ color: 0x36465d, emoji: '969666470252511232', pattern: /tumblr\.com/ },
-	{ color: 0x252525, emoji: '1334123400024817724', pattern: /seiga\.nicovideo\.jp/ },
-	{ color: 0x0b69b7, emoji: '1334123419733721153', pattern: /www\.patreon\.com/ },
-	{ color: 0xfcbd00, emoji: '1298305816247664640', pattern: /drive\.google\.com/ },
-	{ color: 0xff4500, emoji: '969666029045317762', pattern: /(reddit\.com)|(([iv]\.)?redd\.it)/ },
-	{ color: 0xff9a30, emoji: '1299753011932827749', pattern: /weibo\.com/ },
-	{ color: 0xff6c60, emoji: '919403803114094682', pattern: /nitter\.net/ },
-	{ color: 0xff5c67, emoji: '1298674477470716106', pattern: /booth\.pm/ },
-	{ color: 0xff0033, emoji: '1298671334246715453', pattern: /youtube\.com/ },
-	{ color: 0xfda238, emoji: '1334813506599649311', pattern: /www\.newgrounds\.com/ },
-	{ color: 0x2c424f, emoji: '1303457942468690050', pattern: /github\.com/ },
-	{ color: 0x252525, emoji: '1334123400024817724', pattern: /www\.nicovideo\.jp/ },
+	{ color: 0x0096fa, emoji: 'pixivColor', pattern: /pixiv\.net(?!\/fanbox)/ },
+	{ color: 0x040404, emoji: 'twitterColor', pattern: /(twitter|twimg|x)\.com/ },
+	{ color: 0xfaf18a, emoji: 'fanboxColor', pattern: /pixiv\.net\/fanbox|fanbox\.cc/ },
+	{ color: 0xea4c89, emoji: 'fantiaColor', pattern: /fantia\.jp/ },
+	{ color: 0x28837f, emoji: 'skebColor', pattern: /skeb\.jp/ },
+	{ color: 0x0085ff, emoji: 'blueskyColor', pattern: /bsky\.app/ },
+	{ color: 0x00e59b, emoji: 'dvntartColor', pattern: /deviantart\.com/ },
+	{ color: 0x009c94, emoji: 'lofterColor', pattern: /lofter\.com/ },
+	{ color: 0x23aee5, emoji: 'bilibiliColor', pattern: /t\.bilibili\.com/ },
+	{ color: 0x020814, emoji: 'caraColor', pattern: /cara\.app/ },
+	{ color: 0x36465d, emoji: 'tumblrColor', pattern: /tumblr\.com/ },
+	{ color: 0x252525, emoji: 'niconicoColor', pattern: /seiga\.nicovideo\.jp/ },
+	{ color: 0x0b69b7, emoji: 'patreonColor', pattern: /www\.patreon\.com/ },
+	{ color: 0xfcbd00, emoji: 'gdriveColor', pattern: /drive\.google\.com/ },
+	{ color: 0xff4500, emoji: 'redditColor', pattern: /(reddit\.com)|(([iv]\.)?redd\.it)/ },
+	{ color: 0xff9a30, emoji: 'weiboColor', pattern: /weibo\.com/ },
+	{ color: 0xff6c60, emoji: 'nitterColor', pattern: /nitter\.net/ },
+	{ color: 0xff5c67, emoji: 'boothColor', pattern: /booth\.pm/ },
+	{ color: 0xff0033, emoji: 'youtubeColor', pattern: /youtube\.com/ },
+	{ color: 0xfda238, emoji: 'newgroundsColor', pattern: /www\.newgrounds\.com/ },
+	{ color: 0x2c424f, emoji: 'githubColor', pattern: /github\.com/ },
+	{ color: 0x252525, emoji: 'niconicoColor', pattern: /www\.nicovideo\.jp/ },
 ];
 
 const noSource: SourceStyle = { color: Colors.Aqua, emoji: undefined };
-const unknownSource: SourceStyle = { color: 0x1bb76e, emoji: '969664712604262400' };
+const unknownSource: SourceStyle = { color: 0x1bb76e, emoji: 'heartAccent' };
 
 const resMappings = {
 	lowres: { order: 0, emote: 'lowRes' },
@@ -463,7 +463,7 @@ function getSourceButtonAndColor(
 				.setDisabled(true)
 		: new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(source).setDisabled(!!disableLinks);
 
-	if (buttonEmoji) sourceButton.setEmoji(buttonEmoji);
+	if (buttonEmoji) sourceButton.setEmoji(getBotEmojiResolvable(buttonEmoji));
 
 	return { sourceButton, containerColor };
 }
@@ -605,7 +605,9 @@ export async function searchAndReplyWithPost(
 	debug('Verificando que la solicitud haya sido aprobada por el Vaticano');
 	if (isUnholy(isnsfw, request, [commandTag ?? '', ...words])) {
 		const rakki = await import('@/commands/instances/rakkidei');
-		const rakkiCommand = (rakki instanceof Command ? rakki : rakki.default) as Command<undefined>;
+		const rakkiCommand = (
+			rakki instanceof Command ? rakki : rakki.default
+		) as Command<undefined>;
 		return rakkiCommand.execute(request);
 	}
 
