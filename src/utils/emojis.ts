@@ -2,7 +2,7 @@ import type { ApplicationEmoji, ComponentEmojiResolvable } from 'discord.js';
 import { ClientNotFoundError, client } from '@/core/client';
 import Logger from '@/utils/logs';
 
-const { debug } = Logger('DEBUG', 'Emojis');
+const { debug, info, warn } = Logger('DEBUG', 'Emojis');
 
 export interface StaticBotEmoji {
 	fallback: string;
@@ -14,10 +14,8 @@ export interface BotEmoji extends StaticBotEmoji {
 
 const expectedBotEmojis = {
 	//Common UI (any color)
-	checkmark: { fallback: '✅' },
 	xmark: { fallback: '❌' },
-	warning: { fallback: '⚠️' },
-	ballotCheckmark: { fallback: '☑️' },
+	bot: { fallback: '🤖' },
 
 	//Primary/Success/Danger Button Icons (white)
 	checkmarkWhite: { fallback: '✅' },
@@ -50,7 +48,6 @@ const expectedBotEmojis = {
 
 	//Common UI (accent color)
 	userAccent: { fallback: '👤' },
-	commentAccent: { fallback: '🗨️' },
 	clockAccent: { fallback: '🕒' },
 	bellAccent: { fallback: '🔔' },
 	hashAccent: { fallback: '#️⃣' },
@@ -67,8 +64,15 @@ const expectedBotEmojis = {
 	langEn: { fallback: '🇬🇧' },
 	langJa: { fallback: '🇯🇵' },
 
-	//PRC (currency color)
-	prc: { fallback: '🥔' },
+	//Command Categories
+	cmdMod: { fallback: '⭐' },
+	cmdPapa: { fallback: '🥔' },
+	cmdOutdated: { fallback: '🏚️' },
+	cmdMaintenance: { fallback: '🛠️' },
+	cmdMusic: { fallback: '🎵' },
+	cmdMeme: { fallback: '🐸' },
+	cmdGame: { fallback: '🎲' },
+	cmdChaos: { fallback: '👹' },
 
 	//Header Icons (primary-colored box with carved shapes)
 	guidePrimary: { fallback: '📘' },
@@ -84,6 +88,9 @@ const expectedBotEmojis = {
 	twitterFullColor: { fallback: '𝕏' },
 	pixivFullColor: { fallback: '🇵' },
 
+	//PRC (currency color)
+	prc: { fallback: '🥔' },
+
 	//Music Buttons (white)
 	playWhite: { fallback: '▶️' },
 	pauseWhite: { fallback: '⏸️' },
@@ -92,6 +99,7 @@ const expectedBotEmojis = {
 	repeatWhite: { fallback: '🔁' },
 	shuffleWhite: { fallback: '🔀' },
 	unshuffleWhite: { fallback: '↩️' },
+	headphonesWhite: { fallback: '🎧' },
 
 	//Voice and Music UI (accent color)
 	speakerAccent: { fallback: '🔊' },
@@ -136,7 +144,7 @@ const expectedBotEmojis = {
 	newgroundsColor: { fallback: '⚔️' },
 	nitterColor: { fallback: '🐦' },
 
-	//Booru Tag icons ()
+	//Booru Tag icons (full color)
 	boy: { fallback: '♂️' },
 	girl: { fallback: '♀️' },
 	futa: { fallback: '🍆' },
@@ -144,6 +152,9 @@ const expectedBotEmojis = {
 	highRes: { fallback: '📈' },
 	absurdRes: { fallback: '🧬' },
 	incrediblyAbsurdRes: { fallback: '🌌' },
+
+	//Other
+	emptySpace: { fallback: '⚫' },
 } as const satisfies Record<string, StaticBotEmoji>;
 export type BotEmojiName = keyof typeof expectedBotEmojis;
 
@@ -162,12 +173,18 @@ export async function setupAppEmojis() {
 	for (const [expectedEmojiName, staticBotEmoji] of Object.entries(expectedBotEmojis)) {
 		const matchingAppEmoji = appEmojisByName.get(expectedEmojiName);
 
-		debug(expectedEmojiName, staticBotEmoji, matchingAppEmoji?.name);
-
 		botEmojis.set(expectedEmojiName as BotEmojiName, {
 			...staticBotEmoji,
 			appEmoji: matchingAppEmoji,
 		});
+
+		debug(
+			`Processed "${expectedEmojiName}". ${
+				matchingAppEmoji?.name
+					? `It successfully matched an application emoji of ID: "${matchingAppEmoji.id}".`
+					: `Couldn't find a matching application emoji, so "${staticBotEmoji.fallback}" will be used instead as a fallback.`
+			}`,
+		);
 	}
 
 	debug.table(
@@ -177,6 +194,42 @@ export async function setupAppEmojis() {
 			fallback: e.fallback,
 		})),
 	);
+
+	const leftOutEmojis = appEmojis.filter((e) => !(e.name in expectedBotEmojis));
+
+	if (leftOutEmojis.size) {
+		warn(
+			'Some registered application emojis were left out during setup because they were not expected to exist. Enable DEBUG level logging for more information.',
+		);
+		debug(
+			`${leftOutEmojis.size} out of ${appEmojis.size} emojis were ignored because their name is not accounted for within the registry of ${botEmojis.size} expected emojis.`,
+		);
+		debug(`Ignored emojis are listed below:`);
+		debug.table(
+			leftOutEmojis.map((e) => ({
+				name: e.name,
+				id: e.id,
+			})),
+		);
+		debug(
+			'If these emojis were supposed to be expected already, please check the casing and ensure the names properly match expected emoji entries.',
+		);
+		debug(
+			'If there is a new emoji, please register it accordingly inside the expectedBotEmojis record.',
+		);
+	}
+
+	const botEmojisWithOnlyFallback = [...botEmojis.values()].filter((e) => !e.appEmoji);
+	if (botEmojisWithOnlyFallback.length) {
+		info(
+			`Prepared ${botEmojis.size} emoji entries, of which ${botEmojisWithOnlyFallback.length} resorted to fallback versions because some expected names didn't match an application emoji name.`,
+		);
+		info('For more information, enable DEBUG level logging.');
+	} else {
+		info(
+			`Prepared ${botEmojis.size} emoji entries. All expected names match an application emoji name.`,
+		);
+	}
 
 	ready = true;
 }

@@ -22,7 +22,7 @@ import type { ComplexCommandRequest, ComponentInteraction } from 'types/commands
 import { compressId, decompressId, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import { saveTracksQueue, tryRecoverSavedTracksQueue } from '@/models/playerQueue';
-import { getBotEmojiResolvable } from '@/utils/emojis';
+import { getBotEmojiResolvable, getBotEmojiResult } from '@/utils/emojis';
 import Logger from '@/utils/logs';
 
 const { debug, info, warn, error } = Logger('DEBUG', 'PuréMusic');
@@ -30,7 +30,7 @@ const { debug, info, warn, error } = Logger('DEBUG', 'PuréMusic');
 export function makePuréMusicEmbed(
 	request: ComplexCommandRequest | ComponentInteraction | ModalSubmitInteraction<'cached'>,
 	color: ColorResolvable = Colors.Blurple,
-	iconUrl: string = 'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless',
+	iconUrl?: string,
 	additionalFooterData: string[] = [],
 ) {
 	const { channel } = request.member.voice;
@@ -216,12 +216,12 @@ export async function showQueuePage(
 	const fullRows = !!op && ['EX', 'SF', 'AP', 'RP', 'LP'].includes(op);
 
 	if (!queue?.currentTrack && !queue?.size) {
+		const iconEmojiResult = getBotEmojiResult('purevoiceFullColor');
 		const embed = makeReplyEmbed(Colors.Blurple)
 			.setDescription(translator.getText('queueDescriptionEmptyQueue'))
 			.setFooter({
 				text: `${shortChannelName}`,
-				iconURL:
-					'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless',
+				iconURL: iconEmojiResult.app ? iconEmojiResult.emoji.imageURL() : undefined,
 			});
 
 		const components: ActionRowBuilder<ButtonBuilder>[] = [];
@@ -289,10 +289,10 @@ export async function showQueuePage(
 				break;
 		}
 	} else {
+		const iconEmojiResult = getBotEmojiResult('purevoiceFullColor');
 		queueEmbed = makeReplyEmbed(Colors.Blurple).setFooter({
 			text: footerText,
-			iconURL:
-				'https://cdn.discordapp.com/emojis/1354500099799257319.webp?size=32&quality=lossless',
+			iconURL: iconEmojiResult.app ? iconEmojiResult.emoji.imageURL() : undefined,
 		});
 	}
 
@@ -400,18 +400,18 @@ function getTrackActionRow(
 		const pauseOrResumeButton = queue.node.isPaused()
 			? new ButtonBuilder()
 					.setCustomId(`cola_resume_${compressedUserId}_${page}`)
-					.setEmoji('1356977685468942416')
+					.setEmoji(getBotEmojiResolvable('playWhite'))
 					.setStyle(ButtonStyle.Primary)
 			: new ButtonBuilder()
 					.setCustomId(`cola_pause_${compressedUserId}_${page}`)
-					.setEmoji('1356977691122995371')
+					.setEmoji(getBotEmojiResolvable('pauseWhite'))
 					.setStyle(ButtonStyle.Primary);
 
 		actionRow.addComponents(
 			pauseOrResumeButton,
 			new ButtonBuilder()
 				.setCustomId(`cola_skip_${compressedUserId}_${page}`)
-				.setEmoji('1356974499542732902')
+				.setEmoji(getBotEmojiResolvable('skipWhite'))
 				.setStyle(ButtonStyle.Primary),
 		);
 	}
@@ -441,15 +441,15 @@ function getQueueActionRow(
 	const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
 		new ButtonBuilder()
 			.setCustomId(`cola_autoplay_${compressedUserId}_${page}`)
-			.setEmoji('1360868342411427892')
+			.setEmoji(getBotEmojiResolvable('headphonesWhite'))
 			.setStyle(ButtonStyle.Primary),
 		new ButtonBuilder()
 			.setCustomId(`cola_repeat_${compressedUserId}_${page}`)
-			.setEmoji('1356977712149037087')
+			.setEmoji(getBotEmojiResolvable('repeatWhite'))
 			.setStyle(ButtonStyle.Primary),
 		new ButtonBuilder()
 			.setCustomId(`cola_shuffle_${compressedUserId}_${page}`)
-			.setEmoji(queue.isShuffling ? '1356993337843781722' : '1356977721799868426')
+			.setEmoji(getBotEmojiResolvable(queue.isShuffling ? 'unshuffleWhite' : 'shuffleWhite'))
 			.setStyle(ButtonStyle.Primary),
 	);
 

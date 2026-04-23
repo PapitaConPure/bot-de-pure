@@ -121,11 +121,11 @@ const localesObject = {
 		ja: '日本語',
 	},
 	currentLanguageEmojiId: {
-		en: () => {
+		es: () => {
 			const emojiResult = getBotEmojiResult('langEs');
 			return emojiResult.app ? emojiResult.emoji.id : emojiResult.emoji;
 		},
-		es: () => {
+		en: () => {
 			const emojiResult = getBotEmojiResult('langEn');
 			return emojiResult.app ? emojiResult.emoji.id : emojiResult.emoji;
 		},
@@ -135,8 +135,8 @@ const localesObject = {
 		},
 	},
 	currentLanguageEmoji: {
-		en: () => getBotEmoji('langEs'),
-		es: () => getBotEmoji('langEn'),
+		es: () => getBotEmoji('langEs'),
+		en: () => getBotEmoji('langEn'),
 		ja: () => getBotEmoji('langJa'),
 	},
 	languageMenuPlaceholder: {

@@ -24,7 +24,7 @@ import { tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { compressId, edlDistance, isNotModerator, toCapitalized } from '@/func';
 import { Translator } from '@/i18n';
-import { getBotEmoji } from '@/utils/emojis';
+import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { p_pure } from '@/utils/prefixes';
 
 export const makeCategoriesRow = async (
@@ -42,7 +42,7 @@ export const makeCategoriesRow = async (
 		.addOptions(
 			new StringSelectMenuOptionBuilder()
 				.setValue('COMMON')
-				.setEmoji('828736342372253697')
+				.setEmoji(getBotEmojiResolvable('bot'))
 				.setLabel(translator.getText('wikiCommandCategoriesMenuOptionCommonLabel'))
 				.setDescription(
 					translator.getText('wikiCommandCategoriesMenuOptionCommonDescription'),
@@ -54,7 +54,7 @@ export const makeCategoriesRow = async (
 		&& categoriesMenu.addOptions(
 			new StringSelectMenuOptionBuilder()
 				.setValue('MOD')
-				.setEmoji('704612794921779290')
+				.setEmoji(getBotEmojiResolvable('cmdMod'))
 				.setLabel(translator.getText('wikiCommandCategoriesMenuOptionModLabel'))
 				.setDescription(translator.getText('wikiCommandCategoriesMenuOptionModDescription'))
 				.setDefault(getDefault('MOD')),
@@ -64,7 +64,7 @@ export const makeCategoriesRow = async (
 		&& categoriesMenu.addOptions(
 			new StringSelectMenuOptionBuilder()
 				.setValue('PAPA')
-				.setEmoji('797295151356969030')
+				.setEmoji(getBotEmojiResolvable('cmdPapa'))
 				.setLabel(translator.getText('wikiCommandCategoriesMenuOptionPapaLabel'))
 				.setDescription(
 					translator.getText('wikiCommandCategoriesMenuOptionPapaDescription'),
@@ -72,7 +72,7 @@ export const makeCategoriesRow = async (
 				.setDefault(getDefault('PAPA')),
 			new StringSelectMenuOptionBuilder()
 				.setValue('OUTDATED')
-				.setEmoji('657367372285476905')
+				.setEmoji(getBotEmojiResolvable('cmdOutdated'))
 				.setLabel(translator.getText('wikiCommandCategoriesMenuOptionOutdatedLabel'))
 				.setDescription(
 					translator.getText('wikiCommandCategoriesMenuOptionOutdatedDescription'),
@@ -80,7 +80,7 @@ export const makeCategoriesRow = async (
 				.setDefault(getDefault('OUTDATED')),
 			new StringSelectMenuOptionBuilder()
 				.setValue('MAINTENANCE')
-				.setEmoji('🛠️')
+				.setEmoji(getBotEmojiResolvable('cmdMaintenance'))
 				.setLabel(translator.getText('wikiCommandCategoriesMenuOptionMaintenanceLabel'))
 				.setDescription(
 					translator.getText('wikiCommandCategoriesMenuOptionMaintenanceDescription'),
@@ -91,25 +91,25 @@ export const makeCategoriesRow = async (
 	categoriesMenu.addOptions(
 		new StringSelectMenuOptionBuilder()
 			.setValue('MUSIC')
-			.setEmoji('🎵')
+			.setEmoji(getBotEmojiResolvable('cmdMusic'))
 			.setLabel(translator.getText('wikiCommandCategoriesMenuOptionMusicLabel'))
 			.setDescription(translator.getText('wikiCommandCategoriesMenuOptionMusicDescription'))
 			.setDefault(getDefault('MUSIC')),
 		new StringSelectMenuOptionBuilder()
 			.setValue('MEME')
-			.setEmoji('721973016455807017')
+			.setEmoji(getBotEmojiResolvable('cmdMeme'))
 			.setLabel(translator.getText('wikiCommandCategoriesMenuOptionMemeLabel'))
 			.setDescription(translator.getText('wikiCommandCategoriesMenuOptionMemeDescription'))
 			.setDefault(getDefault('MEME')),
 		new StringSelectMenuOptionBuilder()
 			.setValue('GAME')
-			.setEmoji('🎲')
+			.setEmoji(getBotEmojiResolvable('cmdGame'))
 			.setLabel(translator.getText('wikiCommandCategoriesMenuOptionGameLabel'))
 			.setDescription(translator.getText('wikiCommandCategoriesMenuOptionGameDescription'))
 			.setDefault(getDefault('GAME')),
 		new StringSelectMenuOptionBuilder()
 			.setValue('CHAOS')
-			.setEmoji('👹')
+			.setEmoji(getBotEmojiResolvable('cmdChaos'))
 			.setLabel(translator.getText('wikiCommandCategoriesMenuOptionChaosLabel'))
 			.setDescription(translator.getText('wikiCommandCategoriesMenuOptionChaosDescription'))
 			.setDefault(getDefault('CHAOS')),

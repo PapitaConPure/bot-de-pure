@@ -91,8 +91,8 @@ const command = new Command(
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
 							.setCustomId(`sonando_expand_${compressId(request.userId)}`)
-							.setStyle(ButtonStyle.Secondary)
-							.setEmoji(getBotEmojiResolvable('expandAccent')),
+							.setEmoji(getBotEmojiResolvable('expandAccent'))
+							.setStyle(ButtonStyle.Secondary),
 					),
 				],
 			});
