@@ -10,11 +10,12 @@ import {
 } from 'discord.js';
 import type { AnyRequest } from 'types/commands';
 import { changelog, note, todo as toDo, version } from '@/data/botStatus.json';
-import { remoteStartup, tenshiColor } from '@/data/globalProps';
+import { tenshiColor } from '@/data/globalProps';
 import { quantityDisplay } from '@/func';
 import { Translator } from '@/i18n';
 import { StatsModel } from '@/models/stats';
 import { getWikiPageComponentsV2, makeGuideRow, searchCommand } from '@/systems/others/wiki';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandTags, commandFilenames } from '../commons';
 
@@ -88,12 +89,12 @@ const command = new Command(
 				actionRow.addComponents(
 					new ButtonBuilder()
 						.setCustomId('estado_showChanges')
-						.setEmoji(remoteStartup ? '1356977730754842684' : '👁️')
+						.setEmoji(getBotEmojiResolvable('eyeAccent'))
 						.setLabel(translator.getText('estadoDevelopmentChangesButton'))
 						.setStyle(ButtonStyle.Secondary),
 					new ButtonBuilder()
 						.setCustomId('estado_showUpcoming')
-						.setEmoji(remoteStartup ? '1356977730754842684' : '👁️')
+						.setEmoji(getBotEmojiResolvable('eyeAccent'))
 						.setLabel(translator.getText('estadoDevelopmentUpcomingButton'))
 						.setStyle(ButtonStyle.Secondary),
 				),
