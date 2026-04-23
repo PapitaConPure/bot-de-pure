@@ -635,6 +635,11 @@ export async function searchAndReplyWithPost(
 	try {
 		info('Buscando Posts...');
 		const booru = getMainBooruClient();
+		if (!booru)
+			return request.editReply({
+				content: (await Translator.from(request)).getText('missingBooruCredentials'),
+			});
+
 		const posts = await booru.search(finalTags, { limit: +poolSize });
 
 		//Manejo de respuesta

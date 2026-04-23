@@ -4,9 +4,11 @@ import { compressId, fetchChannel, fetchMember, fetchRole } from '@/func';
 import { Translator } from '@/i18n';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
-const groq = new Groq({
-	apiKey: process.env.GROQ_KEY,
-});
+const groq = process.env.GROQ_KEY
+	? new Groq({
+			apiKey: process.env.GROQ_KEY,
+		})
+	: undefined;
 
 const options = new CommandOptions().addParam(
 	'mensaje',
@@ -53,6 +55,8 @@ const command = new Command(
 			mentionRegex,
 			(match, id) => namesMap.get(id) || match,
 		);
+
+		if(!groq) return request.editReply({ content: translator.getText('missingGroqCredentials') });
 
 		const chatCompletion = await groq.chat.completions.create({
 			messages: [

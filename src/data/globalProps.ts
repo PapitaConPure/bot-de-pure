@@ -2,6 +2,7 @@ import { lookupService } from 'node:dns';
 import { promisify } from 'node:util';
 import { color } from 'bun';
 import type { Guild, GuildTextBasedChannel } from 'discord.js';
+import { EnvVarError } from '@/errors/envVar';
 import type { FeedChunk } from '@/systems/booru/boorufeed';
 
 //Entorno
@@ -11,13 +12,7 @@ export const remoteStartup: boolean = process.env.NODE_ENV === 'production';
 //Claves
 
 if (!process.env.DISCORD_TOKEN)
-	throw new Error("Couldn't find environment variable for: DISCORD_TOKEN");
-
-if (!process.env.GELBOORU_APIKEY)
-	throw new Error("Couldn't find environment variable for: GELBOORU_APIKEY");
-
-if (!process.env.GELBOORU_USERID)
-	throw new Error("Couldn't find environment variable for: GELBOORU_USERID");
+	throw new EnvVarError('DISCORD_TOKEN');
 
 /**
  * @description
@@ -43,7 +38,7 @@ export const discordToken: string = process.env.DISCORD_TOKEN;
  * @see https://github.com/PapitaConPure/bot-de-pure
  * @see https://gelbooru.com/index.php?page=wiki&s=view&id=18780
  */
-export const booruApiKey: string = process.env.GELBOORU_APIKEY;
+export const booruApiKey: string | undefined = process.env.GELBOORU_APIKEY;
 
 /**
  * @description
@@ -56,7 +51,7 @@ export const booruApiKey: string = process.env.GELBOORU_APIKEY;
  * @see https://github.com/PapitaConPure/bot-de-pure
  * @see https://gelbooru.com/index.php?page=wiki&s=view&id=18780
  */
-export const booruUserId: string = process.env.GELBOORU_USERID;
+export const booruUserId: string | undefined = process.env.GELBOORU_USERID;
 
 //Prefijos
 export interface PrefixPair {

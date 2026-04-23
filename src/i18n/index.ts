@@ -237,6 +237,49 @@ const localesObject = {
 		),
 	},
 
+	missingBooruCredentials: {
+		es: paragraph(
+			'⚠️ El desarrollador no indicó credenciales de Gelbooru válidas, por lo que las características de Boorus están desactivadas.',
+			'Si el problema persiste, intenta comentarles al respecto a los actuales mantenedores de este bot.',
+		),
+		en: paragraph(
+			'⚠️ The developers did not provide valid Gelbooru credentials, so Booru-related features are disabled for now.',
+			'If the issue persists, consider contacting the current maintainers of this bot on the matter.',
+		),
+		ja: paragraph(
+			'⚠️ 開発者から有効な認証情報が提供されなかったため、画像掲示板関連の機能は無効になっています。',
+			'問題が解決しない場合は、このボットの現在の管理者に問い合わせることを検討してください。',
+		),
+	},
+	missingImgurCredentials: {
+		es: paragraph(
+			'⚠️ El desarrollador no indicó credenciales de Imgur válidas, por lo que las características de Imgur están desactivadas.',
+			'Si el problema persiste, intenta comentarles al respecto a los actuales mantenedores de este bot.',
+		),
+		en: paragraph(
+			'⚠️ The developers did not provide valid Imgur credentials, so Imgur-related features are disabled for now.',
+			'If the issue persists, consider contacting the current maintainers of this bot on the matter.',
+		),
+		ja: paragraph(
+			'⚠️ 開発者から有効なImgur認証情報が提供されなかったため、Imgur関連機能は現在無効になっています。',
+			'問題が解決しない場合は、このボットの現在の管理者に問い合わせることを検討してください。',
+		),
+	},
+	missingGroqCredentials: {
+		es: paragraph(
+			'⚠️ El desarrollador no indicó credenciales de Groq válidas, por lo que las características de IA están desactivadas.',
+			'Si el problema persiste, intenta comentarles al respecto a los actuales mantenedores de este bot.',
+		),
+		en: paragraph(
+			'⚠️ The developers did not provide valid Groq credentials, so AI-related features are disabled for now.',
+			'If the issue persists, consider contacting the current maintainers of this bot on the matter.',
+		),
+		ja: paragraph(
+			'⚠️ 開発者から有効なGroq認証情報が提供されなかったため、AI関連機能は現在無効になっています。',
+			'問題が解決しない場合は、このボットの現在の管理者に問い合わせることを検討してください。',
+		),
+	},
+
 	suggestHelpForCommand: {
 		es: `Usa \`${subl(0)}ayuda ${subl(1)}\` para más información`,
 		en: `Use \`${subl(0)}help ${subl(1)}\` for more information`,

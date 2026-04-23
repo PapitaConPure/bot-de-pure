@@ -1,9 +1,9 @@
 import { createCipheriv, createDecipheriv } from 'node:crypto';
+import { EnvVarError } from '@/errors/envVar';
 
-if (!process.env.ENCRYPTION_KEY)
-	throw new Error("Couldn't find environment variable for: ENCRYPTION_KEY");
+if (!process.env.ENCRYPTION_KEY) throw new EnvVarError('ENCRYPTION_KEY');
 
-if (!process.env.IV) throw new Error("Couldn't find environment variable for: IV");
+if (!process.env.IV) throw new EnvVarError('IV');
 
 const key = process.env.ENCRYPTION_KEY;
 const iv = process.env.IV;

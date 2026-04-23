@@ -13,6 +13,7 @@ import {
 import type { ComplexCommandRequest } from 'types/commands';
 import { Translator } from '@/i18n';
 import SauceNAOUserModel from '@/models/saucenaoUsers';
+import { getMainBooruClient } from '@/systems/booru/booruclient';
 import { pourSauce, testSauceNAOToken } from '@/systems/others/saucenao';
 import { getBotEmojiResolvable } from '@/utils/emojis';
 import Logger from '@/utils/logs';
@@ -101,6 +102,13 @@ const command = new Command('saucenao', flags)
 			return request.reply({
 				content: translator.getText('saucenaoInvalidImage'),
 				flags: MessageFlags.Ephemeral,
+			});
+
+		const booru = getMainBooruClient();
+		if (!booru)
+			return request.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('missingBooruCredentials'),
 			});
 
 		await request.deferReply();

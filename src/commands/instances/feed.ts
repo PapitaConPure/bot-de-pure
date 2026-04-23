@@ -729,6 +729,11 @@ const command = new Command('feed', tags)
 				.catch(console.error);
 
 			const booru = getMainBooruClient();
+			if (!booru)
+				return interaction.editReply({
+					content: translator.getText('missingBooruCredentials'),
+				});
+
 			const post = randInArray(await booru.search(feed.searchTags, { limit: 42 }));
 			if (!post)
 				return interaction.editReply({
@@ -1480,6 +1485,11 @@ const command = new Command('feed', tags)
 		});
 
 		const booru = getMainBooruClient();
+		if (!booru)
+			return interaction.editReply({
+				content: translator.getText('missingBooruCredentials'),
+			});
+
 		try {
 			const post = await booru.fetchPostByUrl(url);
 			if (!post) return interaction.deleteReply();
@@ -1666,6 +1676,10 @@ const command = new Command('feed', tags)
 			]);
 
 		const booru = getMainBooruClient();
+		if (!booru)
+			return interaction.editReply({
+				content: translator.getText('missingBooruCredentials'),
+			});
 
 		try {
 			const post = await booru.fetchPostByUrl(url);
@@ -1734,6 +1748,11 @@ const command = new Command('feed', tags)
 		if (!url) return interaction.deleteReply();
 
 		const booru = getMainBooruClient();
+		if (!booru)
+			return interaction.editReply({
+				content: translator.getText('missingBooruCredentials'),
+			});
+
 		try {
 			const post = await booru.fetchPostByUrl(url);
 			if (!post) return interaction.deleteReply();

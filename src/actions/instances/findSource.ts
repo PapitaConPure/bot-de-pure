@@ -6,6 +6,7 @@ import {
 } from 'discord.js';
 import { Translator } from '@/i18n';
 import SauceNAOUserModel from '@/models/saucenaoUsers';
+import { getMainBooruClient } from '@/systems/booru/booruclient';
 import { pourSauce } from '@/systems/others/saucenao';
 import { ContextMenuAction } from '../commons/actionBuilder';
 
@@ -38,6 +39,13 @@ const action = new ContextMenuAction('actionFindSource', 'Message').setMessageRe
 			return interaction.reply({
 				content: translator.getText('saucenaoInvalidImage'),
 				flags: MessageFlags.Ephemeral,
+			});
+
+		const booru = getMainBooruClient();
+		if (!booru)
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('missingBooruCredentials'),
 			});
 
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });

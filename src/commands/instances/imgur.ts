@@ -102,7 +102,10 @@ const command = new Command('imgur', tags)
 		const imgurUser =
 			(await ImgurUserModel.findOne({ userId: request.userId }))
 			|| new ImgurUserModel({ userId: request.userId });
+
 		const clientId = imgurUser.clientId ?? process.env.IMGUR_CLIENT_ID;
+		if (!clientId) return request.editReply({ content: translator.getText('missingImgurCredentials') });
+
 		const client = new ImgurClient(clientId);
 
 		const directUrls = CommandOptionSolver.asStrings(args.parsePolyParamSync('enlaces')).filter(

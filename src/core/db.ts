@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { EnvVarError } from '@/errors/envVar';
 import { getRuntimeEnvHint } from '@/utils/runtime';
 
 let redacted = false;
@@ -26,7 +27,7 @@ export const databaseUri = {
 		}
 
 		const hint = getRuntimeEnvHint();
-		throw new Error(`Missing MongoDB database environment variable.\n\n${hint}`);
+		throw new EnvVarError({ hint: `Missing MongoDB database environment variable.\n\n${hint}` });
 	},
 };
 

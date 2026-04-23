@@ -58,6 +58,7 @@ export async function sendConvertedBooruPosts(
 	if (!gelbooruUrls.length) return ConverterEmptyPayload;
 
 	const booru = getMainBooruClient();
+	if (!booru) return ConverterEmptyPayload;
 
 	const formattedGelbooruUrls: string[] = [];
 	const containers: ContainerBuilder[] = [];

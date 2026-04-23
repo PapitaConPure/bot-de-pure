@@ -48,6 +48,8 @@ export async function pourSauce(
 	}
 
 	const booru = getMainBooruClient();
+	if (!booru) return;
+
 	for (let q = 0; q < queries.length; q++) {
 		const query = queries[q];
 		const count = q + 1;
