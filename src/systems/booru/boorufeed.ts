@@ -15,7 +15,7 @@ import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import Logger from '@/utils/logs';
 import { getMainBooruClient } from './booruclient';
 
-const { debug, info, warn, error, fatal } = Logger('DEBUG', 'BooruFeed');
+const { debug, info, warn, error, fatal } = Logger('INFO', 'BooruFeed');
 
 export interface FeedData extends PostFormatData {
 	tags: string;
