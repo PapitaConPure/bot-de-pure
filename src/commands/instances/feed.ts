@@ -1475,6 +1475,10 @@ const command = new Command('feed', tags)
 		const url = getPostUrlFromComponents(interaction.message.components);
 		if (!url) return interaction.deleteReply();
 
+		await interaction.deferReply({
+			flags: MessageFlags.Ephemeral,
+		});
+
 		const booru = getMainBooruClient();
 		try {
 			const post = await booru.fetchPostByUrl(url);
@@ -1593,8 +1597,8 @@ const command = new Command('feed', tags)
 				);
 			}
 
-			return interaction.reply({
-				flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+			return interaction.editReply({
+				flags: MessageFlags.IsComponentsV2,
 				components: [tagsContainer],
 			});
 		} catch (error) {
@@ -1602,13 +1606,13 @@ const command = new Command('feed', tags)
 			auditError(error, { brief: 'Ha ocurrido un error al procesar un Post de Feed' });
 
 			if (error instanceof BooruUnknownPostError)
-				return interaction.reply({
-					flags: MessageFlags.Ephemeral,
+				return interaction.editReply({
+					flags: MessageFlags.IsComponentsV2,
 					content: translator.getText('feedPostTagsInaccessible'),
 				});
 
-			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
+			return interaction.editReply({
+				flags: MessageFlags.IsComponentsV2,
 				content: translator.getText('feedPostTagsUnknownError'),
 			});
 		}
