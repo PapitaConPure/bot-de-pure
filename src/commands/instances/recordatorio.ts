@@ -370,7 +370,7 @@ const command = new Command(
 			});
 
 		const date =
-			parseDateFromNaturalLanguage(dateStr, translator.locale)
+			(dateStr ? parseDateFromNaturalLanguage(dateStr, translator.locale) : undefined)
 			?? utcStartOfTzToday(sanitizedTzCode);
 		if (!validateDate(date, sanitizedTzCode))
 			return request.reply({
@@ -379,7 +379,8 @@ const command = new Command(
 			});
 
 		const time =
-			parseTimeFromNaturalLanguage(timeStr, utcOffset) ?? addMinutes(new Date(0), -utcOffset);
+			(timeStr ? parseTimeFromNaturalLanguage(timeStr, utcOffset) : undefined)
+			?? addMinutes(new Date(0), -utcOffset);
 		if (!validateTime(time))
 			return request.reply({
 				flags: MessageFlags.Ephemeral,

@@ -58,7 +58,9 @@ const command = new Command(
 		const utcOffset = toUtcOffset(sanitizedTzCode) ?? 0;
 
 		const dateStr = args.parseFlagExpr('fecha');
-		const date = parseDateFromNaturalLanguage(dateStr, translator.locale, sanitizedTzCode);
+		const date = dateStr
+			? parseDateFromNaturalLanguage(dateStr, translator.locale, sanitizedTzCode)
+			: undefined;
 		const time = args.getTime('hora', utcOffset);
 
 		if (!time) {
