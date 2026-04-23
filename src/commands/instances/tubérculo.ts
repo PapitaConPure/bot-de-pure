@@ -82,12 +82,12 @@ function paginationRows(page: number, lastPage: number, navigationEnabled: boole
 			new ButtonBuilder()
 				.setCustomId('tubérculo_filterItems_AUTHOR')
 				.setLabel('Filtrar Autor')
-				.setEmoji('1355133341984100483')
+				.setEmoji(getBotEmojiResolvable('magGlassLeftWhite'))
 				.setStyle(ButtonStyle.Success),
 			new ButtonBuilder()
 				.setCustomId('tubérculo_filterItems_TID')
 				.setLabel('Filtrar TuberID')
-				.setEmoji('1355133341984100483')
+				.setEmoji(getBotEmojiResolvable('magGlassLeftWhite'))
 				.setStyle(ButtonStyle.Success),
 			new ButtonBuilder()
 				.setCustomId('tubérculo_filterClear')
@@ -265,7 +265,7 @@ const command = new Command(
 		new ButtonBuilder()
 			.setURL('https://papitaconpure.github.io/ps/')
 			.setLabel(`Abrir editor de PuréScript (v${CURRENT_PS_VERSION})`)
-			.setEmoji('1309359188929151098')
+			.setEmoji(getBotEmojiResolvable('psFullColor'))
 			.setStyle(ButtonStyle.Link),
 		new ButtonBuilder()
 			.setURL('https://papitaconpure.github.io/ps-docs/')
@@ -877,11 +877,11 @@ function viewTuber(
 			variantButtons.push(
 				new ButtonBuilder()
 					.setCustomId(`tubérculo_getTuberHelp_${tuberId}_${previousPage}_A`)
-					.setEmoji('934430008343158844')
+					.setEmoji(getBotEmojiResolvable('navPrevAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
 					.setCustomId(`tubérculo_getTuberHelp_${tuberId}_${nextPage}_B`)
-					.setEmoji('934430008250871818')
+					.setEmoji(getBotEmojiResolvable('navNextAccent'))
 					.setStyle(ButtonStyle.Secondary),
 			);
 		}

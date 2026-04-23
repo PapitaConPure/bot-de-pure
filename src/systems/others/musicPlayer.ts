@@ -333,11 +333,11 @@ export async function showQueuePage(
 			const navigationRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
 					.setCustomId(`cola_showPage_FP_${compressedUserId}_0`)
-					.setEmoji('1357002075531382805')
+					.setEmoji(getBotEmojiResolvable('navFirstAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
 					.setCustomId(`cola_showPage_PV_${compressedUserId}_${previousPage}`)
-					.setEmoji('934430008343158844')
+					.setEmoji(getBotEmojiResolvable('navPrevAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
 					.setCustomId(`cola_showPage_IN_${compressedUserId}_${previousPage}`)
@@ -346,11 +346,11 @@ export async function showQueuePage(
 					.setDisabled(),
 				new ButtonBuilder()
 					.setCustomId(`cola_showPage_NX_${compressedUserId}_${nextPage}`)
-					.setEmoji('934430008250871818')
+					.setEmoji(getBotEmojiResolvable('navNextAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
 					.setCustomId(`cola_showPage_LP_${compressedUserId}_${lastPage}`)
-					.setEmoji('1356975962990051472')
+					.setEmoji(getBotEmojiResolvable('navLastAccent'))
 					.setStyle(ButtonStyle.Secondary),
 			);
 
@@ -384,7 +384,7 @@ function getTrackActionRow(
 	const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
 		new ButtonBuilder()
 			.setCustomId(`cola_add_${compressedUserId}_${page}`)
-			.setEmoji('1291900911643263008')
+			.setEmoji(getBotEmojiResolvable('plusWhite'))
 			.setStyle(ButtonStyle.Success),
 	);
 
@@ -392,7 +392,7 @@ function getTrackActionRow(
 		return actionRow.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`cola_showPage_CU_${compressedUserId}_${page}`)
-				.setEmoji('1357001126674825379')
+				.setEmoji(getBotEmojiResolvable('refreshWhite'))
 				.setStyle(ButtonStyle.Primary),
 		);
 
@@ -419,11 +419,11 @@ function getTrackActionRow(
 	actionRow.addComponents(
 		new ButtonBuilder()
 			.setCustomId(`cola_showPage_${fullRows ? 'NX' : 'EX'}_${compressedUserId}_${page}`)
-			.setEmoji('1357007956947767498')
+			.setEmoji(getBotEmojiResolvable('ellipsisAccent'))
 			.setStyle(ButtonStyle.Secondary),
 		new ButtonBuilder()
 			.setCustomId(`cola_showPage_CU_${compressedUserId}_${page}`)
-			.setEmoji('1357001126674825379')
+			.setEmoji(getBotEmojiResolvable('refreshWhite'))
 			.setStyle(ButtonStyle.Secondary),
 	);
 

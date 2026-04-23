@@ -6,6 +6,7 @@ import {
 	MessageFlags,
 } from 'discord.js';
 import { Translator } from '@/i18n';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { ContextMenuAction } from '../commons/actionBuilder';
 
 const action = new ContextMenuAction('actionGetSticker', 'Message').setMessageResponse(
@@ -32,7 +33,7 @@ const action = new ContextMenuAction('actionGetSticker', 'Message').setMessageRe
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 			new ButtonBuilder()
 				.setURL(sticker.url)
-				.setEmoji('922669195521568818')
+				.setEmoji(getBotEmojiResolvable('urlAccent'))
 				.setStyle(ButtonStyle.Link),
 		);
 

@@ -25,7 +25,7 @@ import type { PureVoiceDocument } from '@/models/purevoice.js';
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice.js';
 import type { UserConfigSchemaType } from '@/models/userconfigs.js';
 import UserConfigModel from '@/models/userconfigs.js';
-import { getBotEmoji } from '@/utils/emojis';
+import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import Logger from '@/utils/logs.js';
 import { p_pure } from '@/utils/prefixes';
 
@@ -1090,19 +1090,19 @@ export async function createPVControlPanelChannel(
 	const controlPanelButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
 		new ButtonBuilder()
 			.setCustomId('voz_setSessionName')
-			.setEmoji('1288444896331698241')
+			.setEmoji(getBotEmojiResolvable('pencilWhite'))
 			.setStyle(ButtonStyle.Primary),
 		new ButtonBuilder()
 			.setCustomId('voz_editSessionMembers')
-			.setEmoji('1288445753425002527')
+			.setEmoji(getBotEmojiResolvable('userWhite'))
 			.setStyle(ButtonStyle.Primary),
 		new ButtonBuilder()
 			.setCustomId('voz_editSessionKillDelay')
-			.setEmoji('1296729492550582363')
+			.setEmoji(getBotEmojiResolvable('timerWhite'))
 			.setStyle(ButtonStyle.Primary),
 		new ButtonBuilder()
 			.setCustomId('voz_freezeSession')
-			.setEmoji('1296661603814473758')
+			.setEmoji(getBotEmojiResolvable('freezeWhite'))
 			.setStyle(ButtonStyle.Danger),
 	);
 

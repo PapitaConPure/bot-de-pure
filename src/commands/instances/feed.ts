@@ -208,12 +208,12 @@ const command = new Command('feed', tags)
 				new ActionRowBuilder<ButtonBuilder>().addComponents(
 					new ButtonBuilder()
 						.setCustomId(`feed_createNew_${authorId}`)
-						.setEmoji('1291900911643263008')
+						.setEmoji(getBotEmojiResolvable('plusWhite'))
 						.setLabel(translator.getText('buttonCreate'))
 						.setStyle(ButtonStyle.Success),
 					new ButtonBuilder()
 						.setCustomId(`feed_selectDelete_${authorId}`)
-						.setEmoji('1458130451834081513')
+						.setEmoji(getBotEmojiResolvable('trashWhite'))
 						.setLabel(translator.getText('buttonDelete'))
 						.setStyle(ButtonStyle.Danger)
 						.setDisabled(!hasFeeds),
@@ -228,13 +228,13 @@ const command = new Command('feed', tags)
 						.setDisabled(!hasFeeds),
 					new ButtonBuilder()
 						.setCustomId(`feed_selectCustomize_${authorId}`)
-						.setEmoji('1288444896331698241')
+						.setEmoji(getBotEmojiResolvable('pencilWhite'))
 						.setLabel(translator.getText('buttonCustomize'))
 						.setStyle(ButtonStyle.Primary)
 						.setDisabled(!hasFeeds),
 					new ButtonBuilder()
 						.setCustomId(`feed_selectView_${authorId}`)
-						.setEmoji('1087075525245272104')
+						.setEmoji(getBotEmojiResolvable('eyeWhite'))
 						.setLabel(translator.getText('buttonView'))
 						.setStyle(ButtonStyle.Primary)
 						.setDisabled(!hasFeeds),
@@ -308,7 +308,7 @@ const command = new Command('feed', tags)
 							.setStyle(ButtonStyle.Primary),
 						new ButtonBuilder()
 							.setCustomId(`feed_startWizard_${authorId}`)
-							.setEmoji('1355128236790644868')
+							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
 						cancelbutton(authorId),
 					),
@@ -433,7 +433,7 @@ const command = new Command('feed', tags)
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
 							.setCustomId(`feed_startWizard_${authorId}`)
-							.setEmoji('1355128236790644868')
+							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
 						cancelbutton(authorId),
 					),
@@ -474,7 +474,7 @@ const command = new Command('feed', tags)
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
 							.setCustomId(`feed_startWizard_${authorId}`)
-							.setEmoji('1355128236790644868')
+							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
 						cancelbutton(authorId),
 					),
@@ -515,7 +515,7 @@ const command = new Command('feed', tags)
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
 							.setCustomId(`feed_startWizard_${authorId}`)
-							.setEmoji('1355128236790644868')
+							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
 						cancelbutton(authorId),
 					),
@@ -556,7 +556,7 @@ const command = new Command('feed', tags)
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
 							.setCustomId(`feed_startWizard_${authorId}`)
-							.setEmoji('1355128236790644868')
+							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
 						cancelbutton(authorId),
 					),
@@ -580,7 +580,7 @@ const command = new Command('feed', tags)
 							.setStyle(ButtonStyle.Primary),
 						new ButtonBuilder()
 							.setCustomId(`feed_selectEdit_${authorId}`)
-							.setEmoji('1355128236790644868')
+							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
 						finishButton(translator, authorId),
 					),
@@ -669,7 +669,7 @@ const command = new Command('feed', tags)
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
 							.setCustomId(`feed_selectCustomize_${authorId}`)
-							.setEmoji('1355128236790644868')
+							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
 						finishButton(translator, authorId),
 					),
@@ -720,7 +720,7 @@ const command = new Command('feed', tags)
 						new ActionRowBuilder<ButtonBuilder>().addComponents(
 							new ButtonBuilder()
 								.setCustomId(`feed_selectView_${authorId}`)
-								.setEmoji('1355128236790644868')
+								.setEmoji(getBotEmojiResolvable('navBackAccent'))
 								.setStyle(ButtonStyle.Secondary),
 							finishButton(translator, authorId),
 						),
@@ -785,7 +785,7 @@ const command = new Command('feed', tags)
 							.setStyle(ButtonStyle.Danger),
 						new ButtonBuilder()
 							.setCustomId(`feed_selectDelete_${authorId}`)
-							.setEmoji('1355128236790644868')
+							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
 						cancelbutton(authorId),
 					),
@@ -947,7 +947,7 @@ const command = new Command('feed', tags)
 			row.addComponents(
 				new ButtonBuilder()
 					.setCustomId(`feed_selectCustomize_${authorId}`)
-					.setEmoji('1355128236790644868')
+					.setEmoji(getBotEmojiResolvable('navBackAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				cancelbutton(authorId),
 			);
@@ -1581,12 +1581,12 @@ const command = new Command('feed', tags)
 							.setStyle(ButtonStyle.Primary),
 						new ButtonBuilder()
 							.setCustomId('feed_editFollowedTags_ADD')
-							.setEmoji('1086797601925513337')
+							.setEmoji(getBotEmojiResolvable('tagPlus'))
 							.setLabel(translator.getText('feedSetTagsButtonAdd'))
 							.setStyle(ButtonStyle.Success),
 						new ButtonBuilder()
 							.setCustomId('feed_editFollowedTags_REMOVE')
-							.setEmoji('1086797599287296140')
+							.setEmoji(getBotEmojiResolvable('tagMinus'))
 							.setLabel(translator.getText('feedSetTagsButtonRemove'))
 							.setStyle(ButtonStyle.Danger),
 					),

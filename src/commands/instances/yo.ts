@@ -40,7 +40,7 @@ const userNotAvailableText =
 const backToDashboardButton = (compressedAuthorId: string) =>
 	new ButtonBuilder()
 		.setCustomId(`yo_goToDashboard_${compressedAuthorId}`)
-		.setEmoji(getBotEmojiResolvable('backAccent'))
+		.setEmoji(getBotEmojiResolvable('navBackAccent'))
 		.setStyle(ButtonStyle.Secondary);
 
 const cancelButton = (compressedAuthorId: string) =>
@@ -102,7 +102,7 @@ function makeDashboardContainer(
 				.setButtonAccessory(
 					new ButtonBuilder()
 						.setCustomId(`yo_promptSetTimezone_${compressedUserId}`)
-						.setEmoji('1288444896331698241')
+						.setEmoji(getBotEmojiResolvable('pencilWhite'))
 						.setLabel(translator.getText('buttonEdit'))
 						.setStyle(ButtonStyle.Primary),
 				),
@@ -242,7 +242,7 @@ const makeVoiceContainer = (
 				.setButtonAccessory(
 					new ButtonBuilder()
 						.setCustomId(`yo_setVoiceAutoname_${compressedAuthorId}`)
-						.setEmoji('1288444896331698241')
+						.setEmoji(getBotEmojiResolvable('pencilWhite'))
 						.setLabel(translator.getText('buttonEdit'))
 						.setStyle(ButtonStyle.Primary),
 				),
@@ -258,7 +258,7 @@ const makeVoiceContainer = (
 				.setButtonAccessory(
 					new ButtonBuilder()
 						.setCustomId(`yo_setVoiceKillDelay_${compressedAuthorId}`)
-						.setEmoji('1288444896331698241')
+						.setEmoji(getBotEmojiResolvable('pencilWhite'))
 						.setLabel(translator.getText('buttonEdit'))
 						.setStyle(ButtonStyle.Primary),
 				),
@@ -521,19 +521,19 @@ function makeFollowedTagsContainer(
 					.setCustomId(
 						`yo_editFT_${compressedAuthorId}_${compressedChannelId}_ADD${isAlt ? '_ALT' : ''}`,
 					)
-					.setEmoji('1086797601925513337')
+					.setEmoji(getBotEmojiResolvable('tagPlus'))
 					.setLabel(translator.getText('feedSetTagsButtonAdd'))
 					.setStyle(ButtonStyle.Success),
 				new ButtonBuilder()
 					.setCustomId(
 						`yo_editFT_${compressedAuthorId}_${compressedChannelId}_REMOVE${isAlt ? '_ALT' : ''}`,
 					)
-					.setEmoji('1086797599287296140')
+					.setEmoji(getBotEmojiResolvable('tagMinus'))
 					.setLabel(translator.getText('feedSetTagsButtonRemove'))
 					.setStyle(ButtonStyle.Danger),
 				new ButtonBuilder()
 					.setCustomId(`yo_selectFeedTC_${compressedAuthorId}`)
-					.setEmoji('1355128236790644868')
+					.setEmoji(getBotEmojiResolvable('navBackAccent'))
 					.setStyle(ButtonStyle.Secondary)
 					.setDisabled(!!isAlt),
 				cancelButton(compressedAuthorId).setDisabled(!!isAlt),

@@ -12,6 +12,7 @@ import { globalConfigs } from '@/data/globalProps';
 import { compressId, fetchMember, quantityDisplay, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import { ChannelStatsModel, StatsModel } from '@/models/stats';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
@@ -28,11 +29,11 @@ const getPaginationControls = (page, pageCount, requestId) => {
 	return new ActionRowBuilder<ButtonBuilder>().addComponents([
 		new ButtonBuilder()
 			.setCustomId(`info_navigate_${prevPage}_${requestId}_PV`)
-			.setEmoji('934430008343158844')
+			.setEmoji(getBotEmojiResolvable('navPrevAccent'))
 			.setStyle(ButtonStyle.Secondary),
 		new ButtonBuilder()
 			.setCustomId(`info_navigate_${nextPage}_${requestId}_NX`)
-			.setEmoji('934430008250871818')
+			.setEmoji(getBotEmojiResolvable('navNextAccent'))
 			.setStyle(ButtonStyle.Secondary),
 	]);
 };

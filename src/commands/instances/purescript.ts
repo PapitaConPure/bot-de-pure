@@ -2,6 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'disc
 import { tenshiColor } from '@/data/globalProps';
 import type { Tubercle } from '@/systems/ps/common/executeTuber';
 import { CURRENT_PS_VERSION, executeTuber } from '@/systems/ps/common/executeTuber';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchExt } from '@/utils/fetchext';
 import { p_pure } from '@/utils/prefixes';
 import { type CommandOptionSolver, CommandOptions } from '../commons/cmdOpts';
@@ -11,7 +12,7 @@ import { Command } from '../commons/commandBuilder';
 export const psEditorButton = new ButtonBuilder()
 	.setURL('https://papitaconpure.github.io/ps/')
 	.setLabel(`Abrir editor de PuréScript (v${CURRENT_PS_VERSION})`)
-	.setEmoji('1309359188929151098')
+	.setEmoji(getBotEmojiResolvable('psFullColor'))
 	.setStyle(ButtonStyle.Link);
 
 export const psDocsButton = new ButtonBuilder()

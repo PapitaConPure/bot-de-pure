@@ -24,6 +24,7 @@ import { Translator } from '@/i18n';
 import type { AnarchyUserDocument } from '@/models/puretable';
 import { AnarchyUser, PureTable, pureTableAssets } from '@/models/puretable';
 import { createTaskScheduler } from '@/utils/concurrency';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import Ut from '@/utils/general';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
@@ -671,8 +672,8 @@ async function makeSkillSelectReply(
 				new ButtonBuilder()
 					.setCustomId(`anarquia_cancel_${authorId}`)
 					.setLabel(translator.getText('buttonCancel'))
-					.setEmoji('921751138997514290')
-					.setStyle(ButtonStyle.Danger),
+					.setEmoji(getBotEmojiResolvable('xmarkAccent'))
+					.setStyle(ButtonStyle.Secondary),
 			),
 		],
 	});

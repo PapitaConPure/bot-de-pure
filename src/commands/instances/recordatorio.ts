@@ -25,7 +25,7 @@ import {
 	parseTimeFromNaturalLanguage,
 	utcStartOfTzToday,
 } from '@/utils/datetime';
-import { getBotEmoji } from '@/utils/emojis';
+import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { p_pure } from '@/utils/prefixes';
 import { sanitizeTzCode, toUtcOffset } from '@/utils/timezones';
 import {
@@ -75,7 +75,7 @@ async function makeRemindersListContainer(compressedUserId: string, translator: 
 								.setCustomId(
 									`recordar_viewReminder_${reminder._id}_${compressedUserId}`,
 								)
-								.setEmoji('1458474431839076569')
+								.setEmoji(getBotEmojiResolvable('eyeAccent'))
 								.setLabel(translator.getText('buttonView'))
 								.setStyle(ButtonStyle.Secondary),
 						),
@@ -91,13 +91,13 @@ async function makeRemindersListContainer(compressedUserId: string, translator: 
 			actionRow.addComponents(
 				new ButtonBuilder()
 					.setCustomId(`recordar_promptAddReminder_${compressedUserId}`)
-					.setEmoji('1458427425271844958')
+					.setEmoji(getBotEmojiResolvable('plusWhite'))
 					.setLabel(translator.getText('buttonCreate'))
 					.setStyle(ButtonStyle.Success)
 					.setDisabled(reminders.length >= maxReminderCountPerUser),
 				new ButtonBuilder()
 					.setCustomId(`recordar_refreshRemindersList_${compressedUserId}`)
-					.setEmoji('1357001126674825379')
+					.setEmoji(getBotEmojiResolvable('refreshWhite'))
 					.setLabel(translator.getText('buttonRefresh'))
 					.setStyle(ButtonStyle.Primary),
 			),
@@ -149,12 +149,12 @@ function makeReminderContainer(
 			actionRow.addComponents(
 				new ButtonBuilder()
 					.setCustomId(`recordar_promptEditReminder_${reminder._id}_${reminder.userId}`)
-					.setEmoji('1288444896331698241')
+					.setEmoji(getBotEmojiResolvable('pencilWhite'))
 					.setLabel(translator.getText('buttonEdit'))
 					.setStyle(ButtonStyle.Primary),
 				new ButtonBuilder()
 					.setCustomId(`recordar_deleteReminder_${reminder._id}_${reminder.userId}`)
-					.setEmoji('1458130451834081513')
+					.setEmoji(getBotEmojiResolvable('trashWhite'))
 					.setLabel(translator.getText('buttonDelete'))
 					.setStyle(ButtonStyle.Danger),
 			),
@@ -323,7 +323,7 @@ const command = new Command(
 	.addWikiRow(
 		new ButtonBuilder()
 			.setCustomId('ayuda_showCommand_yo')
-			.setEmoji('1369424059871395950')
+			.setEmoji(getBotEmojiResolvable('commandPrimary'))
 			.setLabel('¿Cómo indico mi huso horario?')
 			.setStyle(ButtonStyle.Primary),
 	)

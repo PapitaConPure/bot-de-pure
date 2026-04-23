@@ -479,7 +479,7 @@ const command = new Command(
 					.setStyle(ButtonStyle.Danger),
 				new ButtonBuilder()
 					.setCustomId(`voz_startWizard_${authorId}`)
-					.setEmoji('1355128236790644868')
+					.setEmoji(getBotEmojiResolvable('navBackAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				cancelbutton(authorId),
 			);

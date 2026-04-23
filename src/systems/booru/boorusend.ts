@@ -21,8 +21,8 @@ import {
 	SeparatorSpacingSize,
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
+import { Command } from '@/commands/commons';
 import { CommandOptionSolver } from '@/commands/commons/cmdOpts';
-import rakki from '@/commands/instances/rakkidei';
 import userIds from '@/data/userIds.json';
 import { isNSFWChannel, shortenText } from '@/func';
 import { Translator } from '@/i18n';
@@ -86,9 +86,9 @@ export const SOURCE_STYLES: ReadonlyArray<SourceStyle & { pattern: RegExp }> = [
 	{ color: 0xff9a30, emoji: '1299753011932827749', pattern: /weibo\.com/ },
 	{ color: 0xff6c60, emoji: '919403803114094682', pattern: /nitter\.net/ },
 	{ color: 0xff5c67, emoji: '1298674477470716106', pattern: /booth\.pm/ },
-	{ color: 0xff0000, emoji: '1298671334246715453', pattern: /youtube\.com/ },
+	{ color: 0xff0033, emoji: '1298671334246715453', pattern: /youtube\.com/ },
 	{ color: 0xfda238, emoji: '1334813506599649311', pattern: /www\.newgrounds\.com/ },
-	{ color: 0x1e2327, emoji: '1303457942468690050', pattern: /github\.com/ },
+	{ color: 0x2c424f, emoji: '1303457942468690050', pattern: /github\.com/ },
 	{ color: 0x252525, emoji: '1334123400024817724', pattern: /www\.nicovideo\.jp/ },
 ];
 
@@ -133,7 +133,7 @@ export async function formatBooruPostMessage(
 	//Botón de Post de Booru
 	buttonRow.addComponents(
 		new ButtonBuilder()
-			.setEmoji('919398540172750878')
+			.setEmoji(getBotEmojiResolvable('gelbooruColor'))
 			.setStyle(ButtonStyle.Link)
 			.setURL(`https://gelbooru.com/index.php?page=post&s=view&id=${post.id}`)
 			.setDisabled(disableLinks ?? false),
@@ -360,7 +360,10 @@ export async function formatBooruPostMessage(
 					[
 						maxTags > 0 ? '###' : '',
 						getCategoryFieldString(getBotEmoji('artistTagAccent'), postArtistTags),
-						getCategoryFieldString(getBotEmoji('characterTagAccent'), postCharacterTags),
+						getCategoryFieldString(
+							getBotEmoji('characterTagAccent'),
+							postCharacterTags,
+						),
 						getCategoryFieldString(
 							getBotEmoji('copyrightTagAccent'),
 							postCopyrightTags,
@@ -541,7 +544,7 @@ export async function notifyUsers(
 			postRow.addComponents(
 				new ButtonBuilder()
 					.setURL(sent.url)
-					.setEmoji('1087075525245272104')
+					.setEmoji(getBotEmojiResolvable('eyeAccent'))
 					.setStyle(ButtonStyle.Link),
 			);
 
@@ -600,7 +603,11 @@ export async function searchAndReplyWithPost(
 	debug('poolSize =', poolSize);
 
 	debug('Verificando que la solicitud haya sido aprobada por el Vaticano');
-	if (isUnholy(isnsfw, request, [commandTag ?? '', ...words])) return rakki.execute(request);
+	if (isUnholy(isnsfw, request, [commandTag ?? '', ...words])) {
+		const rakki = await import('@/commands/instances/rakkidei');
+		const rakkiCommand = (rakki instanceof Command ? rakki : rakki.default) as Command<undefined>;
+		return rakkiCommand.execute(request);
+	}
 
 	debug('Comunicando retraso de respuesta a interacción...');
 	await request.deferReply();

@@ -27,30 +27,38 @@ const expectedBotEmojis = {
 	plusWhite: { fallback: '➕' },
 	trashWhite: { fallback: '🗑️' },
 	eyeWhite: { fallback: '👁️' },
+	pencilWhite: { fallback: '✏️' },
+	userWhite: { fallback: '👤' },
 	clockWhite: { fallback: '🕒' },
+	timerWhite: { fallback: '⏱️' },
+	globeWhite: { fallback: '🌐' },
+	freezeWhite: { fallback: '❄️' },
 	handshakeWhite: { fallback: '🤝' },
 	magGlassLeftWhite: { fallback: '🔍' },
 	magGlassRightWhite: { fallback: '🔎' },
 
 	//Secondary Button Icons (accent color)
-	firstAccent: { fallback: '⏮️' },
-	prevAccent: { fallback: '◀️' },
-	nextAccent: { fallback: '▶️' },
-	lastAccent: { fallback: '⏭️' },
-	backAccent: { fallback: '↩️' },
+	navFirstAccent: { fallback: '⏮️' },
+	navPrevAccent: { fallback: '◀️' },
+	navNextAccent: { fallback: '▶️' },
+	navLastAccent: { fallback: '⏭️' },
+	navBackAccent: { fallback: '↩️' },
 	xmarkAccent: { fallback: '❌' },
+	eyeAccent: { fallback: '👁️' },
 	urlAccent: { fallback: '🔗' },
+	replyAccent: { fallback: '↪️' },
 
 	//Common UI (accent color)
 	userAccent: { fallback: '👤' },
 	commentAccent: { fallback: '🗨️' },
-	replyAccent: { fallback: '↪️' },
 	clockAccent: { fallback: '🕒' },
 	bellAccent: { fallback: '🔔' },
 	hashAccent: { fallback: '#️⃣' },
 	globeAccent: { fallback: '🌐' },
 	imageAccent: { fallback: '🖼️' },
 	videoAccent: { fallback: '🎞️' },
+	expandAccent: { fallback: '💻' },
+	ellipsisAccent: { fallback: '💻' },
 	handshakeAccent: { fallback: '🤝' },
 
 	//Language Flags (full color, of course)
@@ -71,6 +79,7 @@ const expectedBotEmojis = {
 	confessionsFullColor: { fallback: '🕊️' },
 
 	//Hero Icons with site-specific theming
+	psFullColor: { fallback: '🥔' },
 	twitterFullColor: { fallback: '𝕏' },
 	pixivFullColor: { fallback: '🇵' },
 
@@ -171,7 +180,11 @@ export async function setupAppEmojis() {
 }
 
 function expectBotEmoji(emojiName: BotEmojiName): BotEmoji {
-	if (!ready) throw new Error(`Emojis were not set up properly before trying to get emoji "${emojiName}". Call setupAppEmojis() first.`, { cause: emojiName });
+	if (!ready)
+		throw new Error(
+			`Emojis were not set up properly before trying to get emoji "${emojiName}". Call setupAppEmojis() first.`,
+			{ cause: emojiName },
+		);
 
 	const botEmoji = botEmojis.get(emojiName);
 
@@ -199,5 +212,5 @@ export function getBotEmojiResult(
 export function getBotEmojiResolvable(emojiName: BotEmojiName): ComponentEmojiResolvable {
 	const botEmoji = expectBotEmoji(emojiName);
 
-	return botEmoji.appEmoji ?? botEmoji.fallback;
+	return botEmoji.appEmoji?.id ?? botEmoji.fallback;
 }

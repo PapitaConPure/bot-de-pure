@@ -1,5 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { discordEmojiRegex } from '@/func';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
 const options = new CommandOptions()
@@ -58,7 +59,7 @@ const command = new Command(
 
 			const button = new ButtonBuilder()
 				.setURL(emoji.url)
-				.setEmoji('922669195521568818')
+				.setEmoji(getBotEmojiResolvable('urlAccent'))
 				.setLabel(emoji.name)
 				.setStyle(ButtonStyle.Link);
 

@@ -17,6 +17,7 @@ import {
 	SERVICES,
 	showQueuePage,
 } from '@/systems/others/musicPlayer';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandTags } from '../commons';
 
@@ -40,7 +41,7 @@ const command = new Command(
 	.addWikiRow(
 		new ButtonBuilder()
 			.setCustomId('ayuda_showCommand_reproducir')
-			.setEmoji('1369424059871395950')
+			.setEmoji(getBotEmojiResolvable('commandPrimary'))
 			.setLabel('¿Cómo puedo reproducir pistas?')
 			.setStyle(ButtonStyle.Secondary),
 	)

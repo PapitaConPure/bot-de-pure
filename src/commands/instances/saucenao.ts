@@ -14,6 +14,7 @@ import type { ComplexCommandRequest } from 'types/commands';
 import { Translator } from '@/i18n';
 import SauceNAOUserModel from '@/models/saucenaoUsers';
 import { pourSauce, testSauceNAOToken } from '@/systems/others/saucenao';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import Logger from '@/utils/logs';
 import { encryptString } from '@/utils/security';
 import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
@@ -176,7 +177,7 @@ function makeRegisterRequestResponse(request: ComplexCommandRequest, translator:
 			new ButtonBuilder()
 				.setCustomId(`saucenao_onButtonRegisterRequest`)
 				.setLabel(translator.getText('buttonRegister'))
-				.setEmoji('1355488586883137697')
+				.setEmoji(getBotEmojiResolvable('globeWhite'))
 				.setStyle(ButtonStyle.Primary),
 		),
 	];

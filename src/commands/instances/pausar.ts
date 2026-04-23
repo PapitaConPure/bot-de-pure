@@ -2,6 +2,7 @@ import { ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
 import { useMainPlayer } from 'discord-player';
 import { Translator } from '@/i18n';
 import { isPlayerUnavailable, makePuréMusicEmbed, SERVICES } from '@/systems/others/musicPlayer';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON', 'MUSIC');
@@ -22,7 +23,7 @@ const command = new Command(
 	.addWikiRow(
 		new ButtonBuilder()
 			.setCustomId('ayuda_showCommand_resumir')
-			.setEmoji('1369424059871395950')
+			.setEmoji(getBotEmojiResolvable('commandPrimary'))
 			.setLabel('¿Cómo resumo una pista pausada?')
 			.setStyle(ButtonStyle.Secondary),
 	)

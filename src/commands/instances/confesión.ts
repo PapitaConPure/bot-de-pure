@@ -90,14 +90,14 @@ const command = new Command(
 						new ButtonBuilder()
 							.setCustomId(`confesión_deleteSystem`)
 							.setLabel('Desmontar Sistema')
-							.setEmoji('1458130451834081513')
+							.setEmoji(getBotEmojiResolvable('trashWhite'))
 							.setStyle(ButtonStyle.Danger),
 					])
 				: new ActionRowBuilder<ButtonBuilder>().addComponents([
 						new ButtonBuilder()
 							.setCustomId(`confesión_installSystem`)
 							.setLabel('Configurar Nuevo Sistema')
-							.setEmoji('1291900911643263008')
+							.setEmoji(getBotEmojiResolvable('plusWhite'))
 							.setStyle(ButtonStyle.Primary),
 					]),
 		];
@@ -379,7 +379,7 @@ const command = new Command(
 				.addSectionComponents(confessionSection);
 			const replyButton = new ButtonBuilder()
 				.setCustomId(`confesión_promptReplyAnon`)
-				.setEmoji('1456639740974600263')
+				.setEmoji(getBotEmojiResolvable('replyAccent'))
 				.setStyle(ButtonStyle.Secondary);
 
 			if (confession.anonymous) {

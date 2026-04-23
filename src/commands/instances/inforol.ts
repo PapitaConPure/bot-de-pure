@@ -9,6 +9,7 @@ import {
 import type { ComplexCommandRequest } from 'types/commands';
 import { compressId } from '@/func';
 import { Translator } from '@/i18n';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
 import { CommandPermissions } from '../commons/cmdPerms';
@@ -148,15 +149,15 @@ function showInforolPage(
 		new ActionRowBuilder<ButtonBuilder>().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`inforol_showPage_0_${requestId}_${authorId}_F`)
-				.setEmoji('1087075525245272104')
+				.setEmoji(getBotEmojiResolvable('eyeWhite'))
 				.setStyle(ButtonStyle.Primary),
 			new ButtonBuilder()
 				.setCustomId(`inforol_showPage_${previousPage}_${requestId}_${authorId}_P`)
-				.setEmoji('934430008343158844')
+				.setEmoji(getBotEmojiResolvable('navPrevAccent'))
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
 				.setCustomId(`inforol_showPage_${nextPage}_${requestId}_${authorId}_N`)
-				.setEmoji('934430008250871818')
+				.setEmoji(getBotEmojiResolvable('navNextAccent'))
 				.setStyle(ButtonStyle.Secondary),
 		),
 	];

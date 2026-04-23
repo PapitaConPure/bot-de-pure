@@ -26,6 +26,7 @@ import { ClientNotFoundError, client } from './core/client';
 import { globalConfigs, tenshiColor } from './data/globalProps';
 import images from './data/images.json';
 import { Translator } from './i18n';
+import { getBotEmojiResolvable } from './utils/emojis';
 import { fetchGuildMembers } from './utils/guildratekeeper';
 import { fetchUserCache } from './utils/usercache';
 
@@ -1089,23 +1090,23 @@ export function navigationRows(commandFilename: string, page: number, lastPage: 
 		new ActionRowBuilder<ButtonBuilder>().addComponents(
 			new ButtonBuilder()
 				.setCustomId(`${commandFilename}_loadPage_0_START`)
-				.setEmoji('934430008586403900')
+				.setEmoji(getBotEmojiResolvable('navFirstAccent'))
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
 				.setCustomId(`${commandFilename}_loadPage_${backward}_BACKWARD`)
-				.setEmoji('934430008343158844')
+				.setEmoji(getBotEmojiResolvable('navPrevAccent'))
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
 				.setCustomId(`${commandFilename}_loadPage_${forward}_FORWARD`)
-				.setEmoji('934430008250871818')
+				.setEmoji(getBotEmojiResolvable('navNextAccent'))
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
 				.setCustomId(`${commandFilename}_loadPage_${lastPage}_END`)
-				.setEmoji('934430008619962428')
+				.setEmoji(getBotEmojiResolvable('navLastAccent'))
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
 				.setCustomId(`${commandFilename}_loadPage_${page}_RELOAD`)
-				.setEmoji('1292310983527632967')
+				.setEmoji(getBotEmojiResolvable('refreshWhite'))
 				.setStyle(ButtonStyle.Primary),
 		),
 		new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(

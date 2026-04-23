@@ -12,6 +12,7 @@ import {
 } from 'discord.js';
 import { Translator } from '@/i18n';
 import ImgurUserModel from '@/models/imgurUsers';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import type { ImgurImagePayload } from '@/utils/imgur';
 import { ImgurClient } from '@/utils/imgur';
 import Logger from '@/utils/logs';
@@ -84,7 +85,7 @@ const command = new Command('imgur', tags)
 					new ButtonBuilder()
 						.setCustomId(`imgur_onButtonRegisterRequest`)
 						.setLabel(translator.getText('buttonRegister'))
-						.setEmoji('1355488586883137697')
+						.setEmoji(getBotEmojiResolvable('globeWhite'))
 						.setStyle(ButtonStyle.Primary),
 				),
 			];

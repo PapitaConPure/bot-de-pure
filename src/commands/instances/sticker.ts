@@ -1,4 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
 const options = new CommandOptions().addParam(
@@ -36,7 +37,7 @@ const command = new Command('sticker', tags)
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 			new ButtonBuilder()
 				.setURL(sticker.url)
-				.setEmoji('922669195521568818')
+				.setEmoji(getBotEmojiResolvable('urlAccent'))
 				.setStyle(ButtonStyle.Link),
 		);
 

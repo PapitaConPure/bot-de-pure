@@ -7,6 +7,7 @@ import {
 } from 'discord.js';
 import { discordEmojiRegex } from '@/func';
 import { Translator } from '@/i18n';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { ContextMenuAction } from '../commons/actionBuilder';
 
 const action = new ContextMenuAction('actionGetEmojis', 'Message').setMessageResponse(
@@ -47,7 +48,7 @@ const action = new ContextMenuAction('actionGetEmojis', 'Message').setMessageRes
 
 			const button = new ButtonBuilder()
 				.setURL(emoji.url)
-				.setEmoji('922669195521568818')
+				.setEmoji(getBotEmojiResolvable('urlAccent'))
 				.setLabel(emoji.name)
 				.setStyle(ButtonStyle.Link);
 

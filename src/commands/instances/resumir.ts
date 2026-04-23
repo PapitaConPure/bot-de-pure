@@ -3,6 +3,7 @@ import { useMainPlayer } from 'discord-player';
 import { Translator } from '@/i18n';
 import { tryRecoverSavedTracksQueue } from '@/models/playerQueue';
 import { isPlayerUnavailable, makePuréMusicEmbed, SERVICES } from '@/systems/others/musicPlayer';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON', 'MUSIC');
@@ -23,7 +24,7 @@ const command = new Command(
 	.addWikiRow(
 		new ButtonBuilder()
 			.setCustomId('ayuda_showCommand_pausar')
-			.setEmoji('1369424059871395950')
+			.setEmoji(getBotEmojiResolvable('commandPrimary'))
 			.setLabel('¿Cómo pauso una pista?')
 			.setStyle(ButtonStyle.Secondary),
 	)

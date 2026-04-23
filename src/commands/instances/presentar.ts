@@ -2,7 +2,7 @@ import { ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags } from 'disc
 import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { Translator } from '@/i18n';
-import { getBotEmoji } from '@/utils/emojis';
+import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { Command, CommandTags, commandFilenames } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
@@ -73,7 +73,7 @@ const command = new Command(
 						.setButtonAccessory(
 							new ButtonBuilder()
 								.setCustomId('estado')
-								.setEmoji('1458474431839076569')
+								.setEmoji(getBotEmojiResolvable('eyeWhite'))
 								.setLabel(translator.getText('buttonView'))
 								.setStyle(ButtonStyle.Primary),
 						),
@@ -88,7 +88,7 @@ const command = new Command(
 						.setButtonAccessory(
 							new ButtonBuilder()
 								.setCustomId('ayuda')
-								.setEmoji('1458474431839076569')
+								.setEmoji(getBotEmojiResolvable('eyeWhite'))
 								.setLabel(translator.getText('buttonView'))
 								.setStyle(ButtonStyle.Primary),
 						),

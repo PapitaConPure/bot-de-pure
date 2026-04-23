@@ -19,6 +19,7 @@ import { isBoosting, stringHexToNumber, subdivideArray } from '@/func';
 import type { SakiSchemaType } from '@/models/saki';
 import SakiModel from '@/models/saki.js';
 import { auditError } from '@/systems/others/auditor.js';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchExt } from '@/utils/fetchext';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandParam, CommandTags } from '../commons';
@@ -83,17 +84,17 @@ const getPaginationControls = (
 	if (rolePool.length < 2) return [];
 
 	const functionName = category.functionName;
-	const nextPage = section > 0 ? section - 1 : rolePool.length - 1;
-	const prevPage = section < rolePool.length - 1 ? section + 1 : 0;
+	const prevPage = section > 0 ? section - 1 : rolePool.length - 1;
+	const nextPage = section < rolePool.length - 1 ? section + 1 : 0;
 	return [
 		new ActionRowBuilder<ButtonBuilder>().addComponents([
 			new ButtonBuilder()
-				.setCustomId(`roles_${functionName}_${nextPage}_1`)
-				.setEmoji('934430008343158844')
+				.setCustomId(`roles_${functionName}_${prevPage}_1`)
+				.setEmoji(getBotEmojiResolvable('navPrevAccent'))
 				.setStyle(ButtonStyle.Secondary),
 			new ButtonBuilder()
-				.setCustomId(`roles_${functionName}_${prevPage}_1`)
-				.setEmoji('934430008250871818')
+				.setCustomId(`roles_${functionName}_${nextPage}_1`)
+				.setEmoji(getBotEmojiResolvable('navNextAccent'))
 				.setStyle(ButtonStyle.Secondary),
 		]),
 	];
@@ -168,7 +169,7 @@ const command = new Command('roles', flags)
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
 							.setCustomId(`roles_addRole_${role.id}__q`)
-							.setEmoji('1291900911643263008')
+							.setEmoji(getBotEmojiResolvable('plusWhite'))
 							.setStyle(ButtonStyle.Success),
 						new ButtonBuilder()
 							.setCustomId(`roles_removeRole_${role.id}_q`)

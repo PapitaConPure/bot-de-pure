@@ -5,6 +5,7 @@ import { compressId, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import { tryRecoverSavedTracksQueue } from '@/models/playerQueue.js';
 import { makePuréMusicEmbed, SERVICES, showQueuePage } from '@/systems/others/musicPlayer';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { Command, CommandTags } from '../commons';
 
 const flags = new CommandTags().add('COMMON', 'MUSIC');
@@ -91,7 +92,7 @@ const command = new Command(
 						new ButtonBuilder()
 							.setCustomId(`sonando_expand_${compressId(request.userId)}`)
 							.setStyle(ButtonStyle.Secondary)
-							.setEmoji('1356977730754842684'),
+							.setEmoji(getBotEmojiResolvable('expandAccent')),
 					),
 				],
 			});

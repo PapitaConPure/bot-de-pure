@@ -1,5 +1,6 @@
 import { ButtonBuilder, ButtonStyle } from 'discord.js';
 import { randRange } from '@/func';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { Command, CommandTags } from '../commons';
 
 const phrases = [
@@ -24,11 +25,11 @@ const command = new Command('rakkidei', flags)
 		new ButtonBuilder()
 			.setStyle(ButtonStyle.Link)
 			.setURL('https://twitter.com/rakkidei')
-			.setEmoji('1232243415165440040'),
+			.setEmoji(getBotEmojiResolvable('pixivColor')),
 		new ButtonBuilder()
 			.setStyle(ButtonStyle.Link)
 			.setURL('https://www.pixiv.net/users/58442175')
-			.setEmoji('1334816111270563880'),
+			.setEmoji(getBotEmojiResolvable('twitterColor')),
 	)
 	.setExecution(async (request) =>
 		request.reply({

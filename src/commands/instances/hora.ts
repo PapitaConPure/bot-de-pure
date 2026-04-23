@@ -4,7 +4,7 @@ import { dateToUTCFormat } from '@/func';
 import { Translator } from '@/i18n';
 import UserConfigModel from '@/models/userconfigs';
 import { addTime, parseDateFromNaturalLanguage, utcStartOfTzToday } from '@/utils/datetime';
-import { getBotEmoji } from '@/utils/emojis';
+import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { sanitizeTzCode, toUtcOffset, utcOffsetDisplay } from '@/utils/timezones';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
@@ -42,7 +42,7 @@ const command = new Command(
 	.addWikiRow(
 		new ButtonBuilder()
 			.setCustomId('ayuda_showCommand_yo')
-			.setEmoji('1369424059871395950')
+			.setEmoji(getBotEmojiResolvable('commandPrimary'))
 			.setLabel('¿Cómo indico mi huso horario?')
 			.setStyle(ButtonStyle.Primary),
 	)
