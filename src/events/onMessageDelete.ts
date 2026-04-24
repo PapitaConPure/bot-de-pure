@@ -1,5 +1,5 @@
 import type { Message, PartialMessage } from 'discord.js';
-import { channelIsBlocked, fetchMessage, isUsageBanned } from '@/func';
+import { channelIsBlocked, fetchMessage, isUsageBanned } from '@/utils/discord';
 import { deleteMessageCascade, getMessageCascade } from '../systems/others/messageCascades';
 
 export async function onMessageDelete(message: Message | PartialMessage) {

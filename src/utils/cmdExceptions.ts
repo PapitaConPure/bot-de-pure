@@ -1,7 +1,6 @@
 import chalk from 'chalk';
 import { EmbedBuilder, type GuildMember, type Interaction, type User } from 'discord.js';
 import type { CommandOptions, CommandTagResolvable } from '@/commands/commons';
-import { isNotModerator } from '@/func';
 import { Command } from '../commands/commons/commandBuilder';
 import { reportFormUrl } from '../data/globalProps';
 import serverIds from '../data/serverIds.json';
@@ -9,6 +8,7 @@ import userIds from '../data/userIds.json';
 import GuildConfig from '../models/guildconfigs';
 import { auditError } from '../systems/others/auditor';
 import type { CommandRequest } from '../types/commands';
+import { isNotModerator } from './discord';
 
 type ExceptionTestFn = (request: CommandRequest) => Promise<boolean>;
 

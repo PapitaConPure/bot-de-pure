@@ -21,14 +21,6 @@ import {
 	TextInputStyle,
 } from 'discord.js';
 import { tenshiAltColor } from '@/data/globalProps';
-import {
-	compressId,
-	isNotModerator,
-	isNSFWChannel,
-	randInArray,
-	shortenText,
-	shortenTextLoose,
-} from '@/func';
 import { Translator } from '@/i18n';
 import FeedConfigModel from '@/models/feeds';
 import { getMainBooruClient } from '@/systems/booru/booruclient';
@@ -40,7 +32,10 @@ import {
 } from '@/systems/booru/boorusend.js';
 import { auditAction, auditError } from '@/systems/others/auditor';
 import type { AnyCommandInteraction } from '@/types/commands';
+import { isNotModerator, isNSFWChannel } from '@/utils/discord';
 import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
+import { compressId } from '@/utils/encoding';
+import { shortenText, shortenTextLoose } from '@/utils/misc';
 import { Command, CommandPermissions, CommandTags } from '../commons';
 
 const wizTitle = (translator: Translator) => translator.getText('feedAuthor');
@@ -734,7 +729,7 @@ const command = new Command('feed', tags)
 					content: translator.getText('missingBooruCredentials'),
 				});
 
-			const post = randInArray(await booru.search(feed.searchTags, { limit: 42 }));
+			const [post] = await booru.search(`${feed.searchTags} sort:random`, { limit: 1 });
 			if (!post)
 				return interaction.editReply({
 					content: 'Las tags del feed no dieron ningún resultado',
@@ -1838,16 +1833,17 @@ const command = new Command('feed', tags)
 		const modal = new ModalBuilder()
 			.setCustomId('feed_sendFeedback')
 			.setTitle(translator.getText('feedFeedbackTitle'))
-			.setComponents(
-				new ActionRowBuilder<TextInputBuilder>().addComponents(
-					new TextInputBuilder()
-						.setCustomId('feedback')
-						.setLabel(translator.getText('feedFeedbackName'))
-						.setMinLength(20)
-						.setMaxLength(250)
-						.setRequired(true)
-						.setStyle(TextInputStyle.Paragraph),
-				),
+			.setLabelComponents((label) =>
+				label
+					.setLabel(translator.getText('feedFeedbackName'))
+					.setTextInputComponent((textInput) =>
+						textInput
+							.setCustomId('feedback')
+							.setMinLength(20)
+							.setMaxLength(250)
+							.setRequired(true)
+							.setStyle(TextInputStyle.Paragraph),
+					),
 			);
 
 		return interaction.showModal(modal);

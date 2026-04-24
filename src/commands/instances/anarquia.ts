@@ -12,21 +12,18 @@ import {
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
 import { globalConfigs } from '@/data/globalProps';
-import type { WeightedDecision } from '@/func';
-import {
-	compressId,
-	decompressId,
-	discordEmojiRegex,
-	improveNumber,
-	makeWeightedDecision,
-} from '@/func';
 import { Translator } from '@/i18n';
 import type { AnarchyUserDocument } from '@/models/puretable';
 import { AnarchyUser, PureTable, pureTableAssets } from '@/models/puretable';
 import { createTaskScheduler } from '@/utils/concurrency';
+import { discordEmojiRegex } from '@/utils/discord';
 import { getBotEmojiResolvable } from '@/utils/emojis';
+import { compressId, decompressId } from '@/utils/encoding';
 import Ut from '@/utils/general';
+import { improveNumber } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
+import type { WeightedDecision } from '@/utils/random';
+import { makeWeightedDecision } from '@/utils/random';
 import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
 
 const ptTaskScheduler = createTaskScheduler();

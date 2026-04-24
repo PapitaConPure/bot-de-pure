@@ -1,7 +1,7 @@
 import { EmbedBuilder } from 'discord.js';
 import { prefixes, tenshiColor } from '@/data/globalProps';
-import { shortenText } from '@/func';
 import PrefixPairModel from '@/models/prefixpair';
+import { shortenText } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandTags } from '../commons';
 import { CommandPermissions } from '../commons/cmdPerms';

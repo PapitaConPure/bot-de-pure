@@ -14,7 +14,6 @@ import {
 } from 'discord.js';
 import type { AnyRequest } from 'types/commands';
 import { tenshiColor } from '@/data/globalProps';
-import { compressId, decompressId, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import ReminderModel, { type ReminderDocument } from '@/models/reminders';
 import UserConfigModel from '@/models/userconfigs';
@@ -26,6 +25,8 @@ import {
 	utcStartOfTzToday,
 } from '@/utils/datetime';
 import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
+import { compressId, decompressId } from '@/utils/encoding';
+import { shortenText } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import { sanitizeTzCode, toUtcOffset } from '@/utils/timezones';
 import {

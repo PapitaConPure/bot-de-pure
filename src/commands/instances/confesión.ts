@@ -14,12 +14,13 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
-import { compressId, decompressId, fetchChannel } from '@/func';
 import ConfessionSystems from '@/models/confessionSystems.js';
 import PendingConfessions from '@/models/pendingConfessions.js';
 import { auditError } from '@/systems/others/auditor';
+import { fetchChannel } from '@/utils/discord';
 import { DiscordAgent } from '@/utils/discordagent';
 import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
+import { compressId, decompressId } from '@/utils/encoding';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import { Command, CommandPermissions, CommandTags } from '../commons';
 

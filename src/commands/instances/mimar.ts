@@ -1,5 +1,5 @@
 import { EmbedBuilder } from 'discord.js';
-import { randRange } from '@/func';
+import { randRange } from '@/utils/random';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
 const loveStats = () =>

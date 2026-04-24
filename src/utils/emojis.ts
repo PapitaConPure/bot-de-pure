@@ -270,3 +270,12 @@ export function getBotEmojiResolvable(emojiName: BotEmojiName): ComponentEmojiRe
 
 	return botEmoji.appEmoji?.id ?? botEmoji.fallback;
 }
+
+/**@description RegExp for Unicode emojis.*/
+export const unicodeEmojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
+
+/**@description Returns the first Unicode emoji in the string.*/
+export function parseUnicodeEmoji(emoji: string): string | null {
+	if (typeof emoji !== 'string') return null;
+	return emoji.match(unicodeEmojiRegex)?.[0] ?? null; //Expresión RegExp cursed
+}

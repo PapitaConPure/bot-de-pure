@@ -1,16 +1,18 @@
 import type { BitFieldResolvable, Guild, Message, MessageFlagsString } from 'discord.js';
 import { ContainerBuilder, MessageFlags, MessageFlagsBitField } from 'discord.js';
 import { Command, CommandOptionSolver, type CommandOptions } from '@/commands/commons';
-import { channelIsBlocked, edlDistance, rand } from '@/func';
 import { sendConvertedBooruPosts } from '@/systems/converters/boorutato';
 import {
 	findFirstException,
 	generateExceptionEmbed,
 	handleAndAuditError,
 } from '@/utils/cmdExceptions';
+import { channelIsBlocked } from '@/utils/discord';
 import { addAgentMessageOwner, updateAgentMessageOwners } from '@/utils/discordagent';
 import Logger from '@/utils/logs';
+import { edlDistance } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
+import { rand } from '@/utils/random';
 import { fetchUserCache, type UserCache } from '@/utils/usercache';
 import puré from '../core/puréRegistry';
 import type { PrefixPair } from '../data/globalProps';

@@ -1,6 +1,5 @@
 import type { Message, Snowflake, User } from 'discord.js';
 import { Collection, EmbedBuilder } from 'discord.js';
-import { paginateRaw } from '@/func';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
 const options = new CommandOptions().addParam(
@@ -103,3 +102,27 @@ const command = new Command('uwus', tags)
 	});
 
 export default command;
+
+function paginateRaw<T>(array: Collection<string, T>, pagemax?: number): [string, T][][];
+function paginateRaw<T>(array: T[], pagemax?: number): T[][];
+function paginateRaw<T>(
+	values: T[] | Collection<string, T>,
+	pagemax: number,
+): T[][] | [string, T][][];
+function paginateRaw<T>(
+	values: T[] | Collection<string, T>,
+	pagemax: number = 10,
+): T[][] | [string, T][][] {
+	if (!Array.isArray(values)) {
+		const intermediate = [...values.entries()];
+		//@ts-expect-error
+		return intermediate
+			.map((_, i) => (i % pagemax === 0 ? intermediate.slice(i, i + pagemax) : null))
+			.filter((item) => item);
+	}
+
+	//@ts-expect-error
+	return values
+		.map((_, i) => (i % pagemax === 0 ? values.slice(i, i + pagemax) : null))
+		.filter((item) => item);
+}

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { shortenText } from '@/func';
 import Logger from '@/utils/logs';
+import { shortenText } from '@/utils/misc';
 import { client } from '../core/client';
 import { auditError } from '../systems/others/auditor';
 

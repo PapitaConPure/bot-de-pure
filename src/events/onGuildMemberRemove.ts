@@ -1,5 +1,5 @@
 import type { GuildMember, PartialGuildMember } from 'discord.js';
-import { sendFarewellMessage } from '@/func';
+import { sendFarewellMessage } from '@/utils/announcements';
 import { announceMemberUpdate, guildIsAvailable } from './guildMemberUpdate';
 
 export async function onGuildMemberRemove(member: GuildMember | PartialGuildMember) {

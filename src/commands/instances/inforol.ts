@@ -7,9 +7,9 @@ import {
 	MessageFlags,
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
-import { compressId } from '@/func';
 import { Translator } from '@/i18n';
 import { getBotEmojiResolvable } from '@/utils/emojis';
+import { compressId } from '@/utils/encoding';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
 import { CommandPermissions } from '../commons/cmdPerms';

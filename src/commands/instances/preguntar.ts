@@ -1,7 +1,8 @@
 import { Groq } from 'groq-sdk';
 import type { ComplexCommandRequest } from 'types/commands';
-import { compressId, fetchChannel, fetchMember, fetchRole } from '@/func';
 import { Translator } from '@/i18n';
+import { fetchChannel, fetchMember, fetchRole } from '@/utils/discord';
+import { compressId } from '@/utils/encoding';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
 const groq = process.env.GROQ_KEY

@@ -1,12 +1,13 @@
 import { EmbedBuilder, MessageFlags } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
 import { globalConfigs, tenshiColor } from '@/data/globalProps';
-import { compressId, improveNumber, sleep } from '@/func';
 import { Translator } from '@/i18n';
 import { defaultLocale } from '@/i18n/locales';
 import UserConfigModel from '@/models/userconfigs';
 import { auditError } from '@/systems/others/auditor';
 import { getBotEmoji } from '@/utils/emojis';
+import { compressId } from '@/utils/encoding';
+import { improveNumber, sleep } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandTags } from '../commons';
 

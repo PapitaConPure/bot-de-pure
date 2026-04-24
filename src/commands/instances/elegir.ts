@@ -1,5 +1,5 @@
 import { Colors, EmbedBuilder, MessageFlags } from 'discord.js';
-import { randRange } from '@/func';
+import { randRange } from '@/utils/random';
 import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
 
 const options = new CommandOptions().addParam(

@@ -14,7 +14,6 @@ import {
 	TextInputStyle,
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
-import { compressId, isNotModerator, parseUnicodeEmoji } from '@/func';
 import { Translator } from '@/i18n';
 import { PureVoiceModel as PureVoice, PureVoiceSessionModel } from '@/models/purevoice.js';
 import {
@@ -22,7 +21,9 @@ import {
 	makePVSessionName,
 	PureVoiceSessionMember,
 } from '@/systems/others/purevoice.js';
-import { getBotEmojiResolvable } from '@/utils/emojis';
+import { isNotModerator } from '@/utils/discord';
+import { getBotEmojiResolvable, parseUnicodeEmoji } from '@/utils/emojis';
+import { compressId } from '@/utils/encoding';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandTags } from '../commons';
 

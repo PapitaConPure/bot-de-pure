@@ -13,16 +13,6 @@ import {
 } from 'discord.js';
 import type { SimpleTypeExpr } from 'types/typeExpr';
 import { UnexpectedValueError } from '@/errors/unexpectedValue';
-import {
-	fetchChannel,
-	fetchGuild,
-	fetchMember,
-	fetchMessage,
-	fetchRole,
-	fetchSentence,
-	fetchUser,
-	regroupText,
-} from '@/func';
 import type { LocaleKey } from '@/i18n';
 import type {
 	BaseParamType,
@@ -46,7 +36,16 @@ import {
 	parseTimeFromNaturalLanguage,
 	relativeDates,
 } from '@/utils/datetime';
+import {
+	fetchChannel,
+	fetchGuild,
+	fetchMember,
+	fetchMessage,
+	fetchRole,
+	fetchUser,
+} from '@/utils/discord';
 import Logger from '@/utils/logs';
+import { regroupText } from '@/utils/misc';
 
 const { warn } = Logger('WARN', 'CmdOpts');
 
@@ -766,7 +765,7 @@ export class CommandOptions {
 	}
 
 	getArgsPrototype(args: string[], whole: boolean) {
-		return (whole ? args.join(' ') : fetchSentence(args, 0)) || undefined;
+		return (whole ? args.join(' ') : regroupArgsByQuotes(args, 0)) || undefined;
 	}
 
 	/**
@@ -1277,7 +1276,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		if (!this.#args.length) return;
 
 		const firstArg = this.#args[0];
-		const rawDateStr = fetchSentence(this.#args, 0);
+		const rawDateStr = regroupArgsByQuotes(this.#args, 0);
 		if (!rawDateStr) return;
 
 		const seps = ['/', '.', '-'];
@@ -1375,7 +1374,7 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		if (!this.#args.length) return;
 
 		const firstArg = this.#args[0].toLowerCase();
-		const rawTimeStr = fetchSentence(this.#args, 0);
+		const rawTimeStr = regroupArgsByQuotes(this.#args, 0);
 
 		if (firstArg.startsWith('"')) return rawTimeStr;
 
@@ -2019,6 +2018,28 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 		);
 	}
 	//#endregion
+}
+
+/**
+ * @param args An array of words, which may contain double-quote groups
+ * @param i Index from which to extract a sentence, be it a single word or a group
+ */
+function regroupArgsByQuotes(args: string[], i: number) {
+	if (i == null || i >= args.length || args[i] == null) return undefined;
+
+	if (!args[i].startsWith('"')) return args.splice(i, 1)[0];
+
+	let last = i;
+	while (last < args.length && !args[last].endsWith('"')) last++;
+
+	const text = args
+		.splice(i, last - i + 1)
+		.join(' ')
+		.slice(1);
+
+	if (text.length === 0 || text === '"') return undefined;
+
+	return text.endsWith('"') ? text.slice(0, -1) : text;
 }
 
 export class InvalidCommandOptionAttributeError extends Error {

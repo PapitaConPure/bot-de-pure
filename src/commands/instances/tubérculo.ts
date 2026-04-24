@@ -12,19 +12,9 @@ import {
 	MessageFlags,
 	ModalBuilder,
 	type StringSelectMenuBuilder,
-	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
 import type { AnyCommandInteraction, ComplexCommandRequest } from 'types/commands';
-import {
-	compressId,
-	decompressId,
-	edlDistance,
-	fetchUserID,
-	isNotModerator,
-	navigationRows,
-	shortenText,
-} from '@/func';
 import { Translator } from '@/i18n';
 import type { GuildConfigDocument, GuildConfigSchemaType } from '@/models/guildconfigs';
 import GuildConfig from '@/models/guildconfigs';
@@ -45,9 +35,12 @@ import {
 	type RuntimeValue,
 	ValueKindTranslationLookups,
 } from '@/systems/ps/v1.1/interpreter/values';
+import { fetchUserID, isNotModerator, navigationRows } from '@/utils/discord';
 import { getBotEmojiResolvable } from '@/utils/emojis';
+import { compressId, decompressId } from '@/utils/encoding';
 import { fetchExt } from '@/utils/fetchext';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
+import { edlDistance, shortenText } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import {
 	Command,
@@ -395,18 +388,21 @@ const command = new Command(
 	.setButtonResponse(async function filterItems(interaction, target) {
 		const filter = filters[target];
 
-		const filterInput = new TextInputBuilder()
-			.setCustomId('filterInput')
-			.setLabel(filter.label)
-			.setPlaceholder(filter.placeholder)
-			.setStyle(TextInputStyle.Short)
-			.setMaxLength(48)
-			.setRequired(true);
-		const row = new ActionRowBuilder<TextInputBuilder>().addComponents(filterInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`tubérculo_filterSubmit_${target}`)
 			.setTitle('Filtro de búsqueda')
-			.addComponents(row);
+			.addLabelComponents((label) =>
+				label
+					.setLabel(filter.label)
+					.setTextInputComponent((textInput) =>
+						textInput
+							.setCustomId('filterInput')
+							.setPlaceholder(filter.placeholder)
+							.setStyle(TextInputStyle.Short)
+							.setMaxLength(48)
+							.setRequired(true),
+					),
+			);
 
 		return interaction.showModal(modal);
 	})
@@ -447,16 +443,19 @@ const command = new Command(
 			});
 		}
 
-		const descInput = new TextInputBuilder()
-			.setCustomId('descInput')
-			.setLabel('Descripción')
-			.setStyle(TextInputStyle.Paragraph)
-			.setMaxLength(512);
-		const row = new ActionRowBuilder<TextInputBuilder>().addComponents(descInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`t_setDesc_${tuberId}`)
 			.setTitle('Describir Tubérculo')
-			.setComponents(row);
+			.setLabelComponents((label) =>
+				label
+					.setLabel('Descripción')
+					.setTextInputComponent((textInput) =>
+						textInput
+							.setCustomId('descInput')
+							.setStyle(TextInputStyle.Paragraph)
+							.setMaxLength(512),
+					),
+			);
 
 		return interaction.showModal(modal);
 	})
@@ -471,23 +470,30 @@ const command = new Command(
 			});
 		}
 
-		const nameInput = new TextInputBuilder()
-			.setCustomId('nameInput')
-			.setLabel('Entrada')
-			.setStyle(TextInputStyle.Short)
-			.setRequired(true)
-			.setPlaceholder('Nombre de la entrada');
-		const descInput = new TextInputBuilder()
-			.setCustomId('descInput')
-			.setLabel('Descripción')
-			.setStyle(TextInputStyle.Paragraph)
-			.setMaxLength(512);
-		const nameRow = new ActionRowBuilder<TextInputBuilder>().addComponents(nameInput);
-		const descRow = new ActionRowBuilder<TextInputBuilder>().addComponents(descInput);
 		const modal = new ModalBuilder()
 			.setCustomId(`t_setIDesc_${tuberId}`)
 			.setTitle('Describir Entrada')
-			.setComponents(nameRow, descRow);
+			.setLabelComponents(
+				(label) =>
+					label
+						.setLabel('Entrada')
+						.setTextInputComponent((textInput) =>
+							textInput
+								.setCustomId('nameInput')
+								.setStyle(TextInputStyle.Short)
+								.setRequired(true)
+								.setPlaceholder('Nombre de la entrada'),
+						),
+				(label) =>
+					label
+						.setLabel('Descripción')
+						.setTextInputComponent((textInput) =>
+							textInput
+								.setCustomId('descInput')
+								.setStyle(TextInputStyle.Paragraph)
+								.setMaxLength(512),
+						),
+			);
 
 		return interaction.showModal(modal);
 	})

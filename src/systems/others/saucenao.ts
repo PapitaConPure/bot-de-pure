@@ -1,8 +1,8 @@
 import { Colors, EmbedBuilder, type GuildBasedChannel } from 'discord.js';
 import sagiri from 'sagiri';
 import type { AnyRequest } from 'types/commands';
-import { isNSFWChannel } from '@/func';
 import { Translator } from '@/i18n';
+import { isNSFWChannel } from '@/utils/discord';
 import { decryptString } from '@/utils/security';
 import { getMainBooruClient } from '../booru/booruclient';
 import { auditError } from './auditor';

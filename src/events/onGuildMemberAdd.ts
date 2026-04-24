@@ -1,5 +1,5 @@
 import type { GuildMember } from 'discord.js';
-import { sendWelcomeMessage } from '@/func';
+import { sendWelcomeMessage } from '@/utils/announcements';
 import Logger from '@/utils/logs.js';
 import { announceMemberUpdate, guildIsAvailable } from './guildMemberUpdate';
 

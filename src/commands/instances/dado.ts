@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
-import { randRange } from '@/func';
 import { p_pure } from '@/utils/prefixes';
+import { randRange } from '@/utils/random';
 import {
 	Command,
 	CommandOptionSolver,

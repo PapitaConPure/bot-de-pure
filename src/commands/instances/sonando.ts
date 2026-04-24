@@ -1,11 +1,12 @@
 import type { ColorResolvable } from 'discord.js';
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
 import { useMainPlayer } from 'discord-player';
-import { compressId, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import { tryRecoverSavedTracksQueue } from '@/models/playerQueue.js';
 import { makePuréMusicEmbed, SERVICES, showQueuePage } from '@/systems/others/musicPlayer';
 import { getBotEmojiResolvable } from '@/utils/emojis';
+import { compressId } from '@/utils/encoding';
+import { shortenText } from '@/utils/misc';
 import { Command, CommandTags } from '../commons';
 
 const flags = new CommandTags().add('COMMON', 'MUSIC');

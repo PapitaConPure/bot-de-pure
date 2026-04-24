@@ -9,11 +9,13 @@ import {
 	SectionBuilder,
 } from 'discord.js';
 import { globalConfigs } from '@/data/globalProps';
-import { compressId, fetchMember, quantityDisplay, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import { ChannelStatsModel, StatsModel } from '@/models/stats';
+import { fetchMember } from '@/utils/discord';
 import { getBotEmojiResolvable } from '@/utils/emojis';
+import { compressId } from '@/utils/encoding';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
+import { quantityDisplay, shortenText } from '@/utils/misc';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
 /**

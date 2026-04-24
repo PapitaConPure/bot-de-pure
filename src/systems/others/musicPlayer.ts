@@ -19,11 +19,12 @@ import {
 import type { GuildQueue, Track } from 'discord-player';
 import { Player, QueueRepeatMode, useMainPlayer } from 'discord-player';
 import type { ComplexCommandRequest, ComponentInteraction } from 'types/commands';
-import { compressId, decompressId, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import { saveTracksQueue, tryRecoverSavedTracksQueue } from '@/models/playerQueue';
 import { getBotEmojiResolvable, getBotEmojiResult } from '@/utils/emojis';
+import { compressId, decompressId } from '@/utils/encoding';
 import Logger from '@/utils/logs';
+import { shortenText } from '@/utils/misc';
 
 const { debug, info, warn, error } = Logger('DEBUG', 'PuréMusic');
 

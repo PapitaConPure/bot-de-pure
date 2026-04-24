@@ -7,8 +7,8 @@ import {
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
 import { tenshiColor } from '@/data/globalProps';
-import { compressId } from '@/func';
 import { Locales, Translator } from '@/i18n';
+import { compressId } from '@/utils/encoding';
 import { Command, CommandPermissions, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('MOD', 'MAINTENANCE');

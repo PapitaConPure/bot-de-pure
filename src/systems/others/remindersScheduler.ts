@@ -2,10 +2,10 @@ import type { GuildTextBasedChannel, User } from 'discord.js';
 import { ContainerBuilder, MessageFlags } from 'discord.js';
 import { ClientNotFoundError, client } from '@/core/client';
 import { tenshiColor } from '@/data/globalProps';
-import { decompressId } from '@/func';
 import { Translator } from '@/i18n';
 import type { ReminderDocument } from '@/models/reminders';
 import ReminderModel from '@/models/reminders';
+import { decompressId } from '@/utils/encoding';
 import { INT32_MAX } from '@/utils/general';
 import Logger from '@/utils/logs';
 

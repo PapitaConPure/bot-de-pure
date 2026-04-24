@@ -1,6 +1,6 @@
 import { ButtonBuilder, ButtonStyle } from 'discord.js';
-import { randRange } from '@/func';
 import { getBotEmojiResolvable } from '@/utils/emojis';
+import { randRange } from '@/utils/random';
 import { Command, CommandTags } from '../commons';
 
 const phrases = [

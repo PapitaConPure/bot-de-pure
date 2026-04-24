@@ -1,9 +1,9 @@
 import { EmbedBuilder, MessageFlags } from 'discord.js';
 import { useMainPlayer } from 'discord-player';
-import { shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import { saveTracksQueue, tryRecoverSavedTracksQueue } from '@/models/playerQueue.js';
 import { isPlayerUnavailable, SERVICES } from '@/systems/others/musicPlayer.js';
+import { shortenText } from '@/utils/misc';
 import { Command, CommandOptions, CommandParam, CommandTags } from '../commons';
 
 const options = new CommandOptions().addOptions(

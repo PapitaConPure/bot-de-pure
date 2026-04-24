@@ -1,6 +1,6 @@
 import { ContainerBuilder, MessageFlags } from 'discord.js';
-import type { WeightedDecision } from '@/func';
-import { makeWeightedDecision, randRange } from '@/func';
+import type { WeightedDecision } from '@/utils/random';
+import { makeWeightedDecision, randRange } from '@/utils/random';
 import { Command, CommandTags } from '../commons';
 
 //Ordenados de común a raro

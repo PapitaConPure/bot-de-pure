@@ -7,12 +7,13 @@ import {
 	MessageFlags,
 } from 'discord.js';
 import type { AnyCommandInteraction } from 'types/commands';
-import { channelIsBlocked, decompressId, isUsageBanned } from '@/func';
 import {
 	findFirstException,
 	generateExceptionEmbed,
 	handleAndAuditError,
 } from '@/utils/cmdExceptions';
+import { channelIsBlocked, isUsageBanned } from '@/utils/discord';
+import { decompressId } from '@/utils/encoding';
 import type { CommandOption, CommandOptions } from '../commands/commons/cmdOpts';
 import { CommandOptionSolver } from '../commands/commons/cmdOpts';
 import {

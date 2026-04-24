@@ -7,8 +7,8 @@ import type {
 	Webhook,
 	WebhookMessageCreateOptions,
 } from 'discord.js';
-import { isThread } from '@/func';
 import WebhookOwnerModel from '@/models/webhookOwners';
+import { isThread } from './discord';
 
 interface OwnerData {
 	userId: string;

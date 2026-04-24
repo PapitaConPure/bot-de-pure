@@ -1,6 +1,6 @@
 import type { ValuesOf } from 'types';
-import { shortenText, toLowerCaseNormalized } from '@/func';
 import Logger from '@/utils/logs';
+import { shortenText, toLowerCaseNormalized } from '@/utils/misc';
 
 const { debug, fatal } = Logger('DEBUG', 'MathReader');
 

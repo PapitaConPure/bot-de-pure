@@ -1,10 +1,11 @@
 import { addDays, getUnixTime, isBefore } from 'date-fns';
 import { EmbedBuilder } from 'discord.js';
 import { tenshiColor } from '@/data/globalProps';
-import { improveNumber, randRange } from '@/func';
 import { Translator } from '@/i18n';
 import UserConfigModel from '@/models/userconfigs';
 import { getBotEmoji } from '@/utils/emojis';
+import { improveNumber } from '@/utils/misc';
+import { randRange } from '@/utils/random';
 import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');

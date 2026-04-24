@@ -1,9 +1,13 @@
 import { addMinutes, getUnixTime, isValid } from 'date-fns';
 import { ButtonBuilder, ButtonStyle, MessageFlags } from 'discord.js';
-import { dateToUTCFormat } from '@/func';
 import { Translator } from '@/i18n';
 import UserConfigModel from '@/models/userconfigs';
-import { addTime, parseDateFromNaturalLanguage, utcStartOfTzToday } from '@/utils/datetime';
+import {
+	addTime,
+	dateToUTCFormat,
+	parseDateFromNaturalLanguage,
+	utcStartOfTzToday,
+} from '@/utils/datetime';
 import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { sanitizeTzCode, toUtcOffset, utcOffsetDisplay } from '@/utils/timezones';
 import { Command, CommandOptions, CommandTags } from '../commons';

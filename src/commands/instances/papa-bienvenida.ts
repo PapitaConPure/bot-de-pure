@@ -1,4 +1,4 @@
-import { sendWelcomeMessage } from '@/func';
+import { sendWelcomeMessage } from '@/utils/announcements';
 import { Command, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('PAPA');

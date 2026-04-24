@@ -15,7 +15,6 @@ import {
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
 import { tenshiAltColor, tenshiColor, tenshiPeachColor } from '@/data/globalProps';
-import { compressId, decompressId, improveNumber, parseUnicodeEmoji, shortenText } from '@/func';
 import type { LocaleIds, LocaleKey } from '@/i18n';
 import { isValidLocaleKey, Locales, Translator } from '@/i18n';
 import type { UserConfigSchemaType } from '@/models/userconfigs';
@@ -29,7 +28,9 @@ import type { AcceptedTwitterConverterKey } from '@/systems/converters/pureet';
 import { acceptedTwitterConverters } from '@/systems/converters/pureet';
 import { auditError } from '@/systems/others/auditor';
 import { makeSessionAutoname } from '@/systems/others/purevoice';
-import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
+import { getBotEmoji, getBotEmojiResolvable, parseUnicodeEmoji } from '@/utils/emojis';
+import { compressId, decompressId } from '@/utils/encoding';
+import { improveNumber, shortenText } from '@/utils/misc';
 import { sanitizeTzCode, toUtcOffset, utcOffsetDisplayFull } from '@/utils/timezones';
 import { recacheUser } from '@/utils/usercache';
 import { Command, CommandFlag, CommandOptions, CommandTags } from '../commons';

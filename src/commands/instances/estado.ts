@@ -11,11 +11,11 @@ import {
 import type { AnyRequest } from 'types/commands';
 import { changelog, note, todo as toDo, version } from '@/data/botStatus.json';
 import { tenshiColor } from '@/data/globalProps';
-import { quantityDisplay } from '@/func';
 import { Translator } from '@/i18n';
 import { StatsModel } from '@/models/stats';
 import { getWikiPageComponentsV2, makeGuideRow, searchCommand } from '@/systems/others/wiki';
 import { getBotEmojiResolvable } from '@/utils/emojis';
+import { quantityDisplay } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandTags, commandFilenames } from '../commons';
 

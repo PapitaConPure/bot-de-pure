@@ -1,7 +1,7 @@
 import { MessageFlags, type User } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
-import { randRange } from '@/func';
 import { p_pure } from '@/utils/prefixes';
+import { randRange } from '@/utils/random';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
 const frase = [

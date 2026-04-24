@@ -4,7 +4,6 @@ import type { AnyRequest, ComplexCommandRequest } from 'types/commands';
 import puré from '@/core/puréRegistry';
 import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
-import { compressId, isNotModerator, shortenText } from '@/func';
 import { Translator } from '@/i18n';
 import {
 	getWikiPageComponentsV2,
@@ -13,6 +12,9 @@ import {
 	searchCommand,
 	searchCommands,
 } from '@/systems/others/wiki';
+import { isNotModerator } from '@/utils/discord';
+import { compressId } from '@/utils/encoding';
+import { shortenText } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import type { CommandTagResolvable } from '../commons';
 import {

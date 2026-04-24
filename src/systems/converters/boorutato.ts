@@ -1,6 +1,6 @@
 import type { ContainerBuilder, Message } from 'discord.js';
 import { ChannelType, MessageFlags, TextDisplayBuilder } from 'discord.js';
-import { isNSFWChannel } from '@/func';
+import { isNSFWChannel } from '@/utils/discord';
 import { getBotEmoji } from '@/utils/emojis';
 import Logger from '@/utils/logs';
 import { getMainBooruClient } from '../booru/booruclient';

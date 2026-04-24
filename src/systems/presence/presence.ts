@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import chalk from 'chalk';
 import { ActivityType } from 'discord.js';
-import { randRange } from '@/func';
 import { getQueueItem } from '@/models/queues';
+import { randRange } from '@/utils/random';
 import { resolveFrom } from '@/utils/runtimeFs';
 
 const txtToArray = (path: string) =>

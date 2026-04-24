@@ -306,3 +306,93 @@ export function addTime(date: Date, time: Date): UTCDate {
 
 	return datetime;
 }
+
+export function fullToShortHour(hour: number) {
+	if (hour < 1) return { value: 12, meridian: 'AM' as const };
+
+	if (hour < 12) return { value: hour, meridian: 'AM' as const };
+
+	return { value: hour - 12, meridian: 'PM' as const };
+}
+
+/**
+ * @param date La fecha a la cual dar formato.
+ * @param template La plantilla de formato para la fecha indicada.
+ *
+ * Ejemplos para la fecha: "Martes, 9 de abril de 2025, 2:48:06.092 PM", con el locale "es-ES"
+ *   - yyyy: 2025
+ *   - yy: 25
+ *   - MMMM: Abril
+ *   - MMM: Ene
+ *   - MM: 04
+ *   - M: 4
+ *   - dddd: Martes
+ *   - ddd: Mar
+ *   - dd: 09
+ *   - d: 9
+ *   - hhhh: 2:48:06 PM
+ *   - hhh: 2:48 PM
+ *   - hh: 02
+ *   - h: 2
+ *   - HH: 14
+ *   - H: 14
+ *   - mm: 48
+ *   - m: 48
+ *   - ss: 06
+ *   - s: 6
+ *   - fff: 092
+ *   - ff: 09
+ *   - f: 1
+ * @param locale Por ejemplo, "en-US" o "es-ES".
+ */
+export function dateToUTCFormat(date: Date, template: string, locale: string = 'en-US'): string {
+	if (!(date instanceof Date)) throw new TypeError('Se esperaba un objeto Date');
+
+	if (typeof template !== 'string' || !template.length)
+		throw new TypeError('Se esperaba un string válido como plantilla de formato');
+
+	const year = date.getUTCFullYear().toString();
+	const month = (date.getUTCMonth() + 1).toString();
+	const day = date.getUTCDate().toString();
+	const hours = date.getUTCHours();
+	const hoursInfo = fullToShortHour(hours);
+	const minutes = date.getUTCMinutes().toString();
+	const seconds = date.getUTCSeconds().toString();
+	const milliseconds = date.getUTCMilliseconds().toString();
+
+	const replacements: Record<string, string> = {
+		yyyy: year,
+		yy: year.slice(-2),
+		MMMM: date.toLocaleDateString(locale, { month: 'long', timeZone: 'UTC' }),
+		MMM: date.toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' }),
+		MM: month.padStart(2, '0'),
+		M: month,
+		dddd: date.toLocaleDateString(locale, { weekday: 'long', timeZone: 'UTC' }),
+		ddd: date.toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' }),
+		dd: day.padStart(2, '0'),
+		d: day,
+		hhhh: `${hoursInfo.value.toString()}:${minutes.padStart(2, '0')}:${seconds.padStart(2, '0')} ${hoursInfo.meridian}`,
+		hhh: `${hoursInfo.value.toString()}:${minutes.padStart(2, '0')} ${hoursInfo.meridian}`,
+		hh: hoursInfo.value.toString().padStart(2, '0'),
+		h: hoursInfo.value.toString(),
+		HH: hours.toString().padStart(2, '0'),
+		H: hours.toString(),
+		mm: minutes.padStart(2, '0'),
+		m: minutes,
+		ss: seconds.padStart(2, '0'),
+		s: seconds,
+		fff: milliseconds.padStart(3, '0'),
+		ff: milliseconds.slice(0, 2).padStart(2, '0'),
+		f: milliseconds.slice(0, 1),
+	};
+
+	let formatted = template;
+
+	for (const key in replacements) {
+		const regex = new RegExp(`\\b${key}\\b`, 'g');
+		const replacement: string = replacements[key];
+		formatted = formatted.replace(regex, replacement);
+	}
+
+	return formatted;
+}

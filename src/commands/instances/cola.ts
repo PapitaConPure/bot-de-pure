@@ -7,7 +7,6 @@ import {
 	TextInputStyle,
 } from 'discord.js';
 import { QueueRepeatMode, useMainPlayer } from 'discord-player';
-import { decompressId, sleep } from '@/func';
 import { Translator } from '@/i18n';
 import { saveTracksQueue, tryRecoverSavedTracksQueue } from '@/models/playerQueue.js';
 import {
@@ -18,6 +17,8 @@ import {
 	showQueuePage,
 } from '@/systems/others/musicPlayer';
 import { getBotEmojiResolvable } from '@/utils/emojis';
+import { decompressId } from '@/utils/encoding';
+import { sleep } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandTags } from '../commons';
 

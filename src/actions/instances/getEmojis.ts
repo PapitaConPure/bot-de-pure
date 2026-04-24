@@ -5,8 +5,8 @@ import {
 	EmbedBuilder,
 	MessageFlags,
 } from 'discord.js';
-import { discordEmojiRegex } from '@/func';
 import { Translator } from '@/i18n';
+import { discordEmojiRegex } from '@/utils/discord';
 import { getBotEmojiResolvable } from '@/utils/emojis';
 import { ContextMenuAction } from '../commons/actionBuilder';
 

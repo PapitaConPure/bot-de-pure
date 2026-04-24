@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Colors, EmbedBuilder } fr
 import sizeof from 'object-sizeof';
 import type { RequireAtLeastOne } from 'types';
 import type { ComplexCommandRequest } from 'types/commands';
-import { shortenText } from '@/func';
+import { shortenText } from '@/utils/misc';
 import type { Input } from '../v1.1';
 import type { EmbedData } from '../v1.1/embedData';
 import type { EvaluationResult } from '../v1.1/interpreter';

@@ -1,6 +1,6 @@
 import type { Guild, GuildMember, PartialGuildMember, User } from 'discord.js';
 import { EmbedBuilder } from 'discord.js';
-import { channelIsBlocked } from '@/func';
+import { channelIsBlocked } from '@/utils/discord';
 import { globalConfigs } from '../data/globalProps';
 import userIds from '../data/userIds.json';
 

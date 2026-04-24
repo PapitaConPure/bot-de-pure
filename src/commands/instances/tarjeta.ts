@@ -1,7 +1,7 @@
 import Canvas from '@napi-rs/canvas';
 import { AttachmentBuilder } from 'discord.js';
-import { improveNumber } from '@/func';
 import { Translator } from '@/i18n';
+import { improveNumber } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandFlag, CommandOptions, CommandParam, CommandTags } from '../commons';
 

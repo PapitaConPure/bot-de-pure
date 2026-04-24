@@ -1,5 +1,5 @@
 import type { ComplexCommandRequest } from 'types/commands';
-import { fetchChannel, fetchMember, fetchRole, isNSFWChannel } from '@/func';
+import { fetchChannel, fetchMember, fetchRole, isNSFWChannel } from '@/utils/discord';
 import type {
 	EnvironmentProvider,
 	PSChannel,

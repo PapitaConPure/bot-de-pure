@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
-import { discordEmojiRegex } from '@/func';
+import { discordEmojiRegex } from '@/utils/discord';
 import { getBotEmojiResolvable } from '@/utils/emojis';
 import { Command, CommandOptions, CommandTags } from '../commons';
 

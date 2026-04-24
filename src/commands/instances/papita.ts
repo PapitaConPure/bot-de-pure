@@ -1,4 +1,5 @@
-import { isNSFWChannel, randRange } from '@/func';
+import { isNSFWChannel } from '@/utils/discord';
+import { randRange } from '@/utils/random';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
 const paputa = [

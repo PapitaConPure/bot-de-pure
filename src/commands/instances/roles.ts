@@ -15,13 +15,14 @@ import { tenshiColor } from '@/data/globalProps';
 import { saki } from '@/data/sakiProps';
 import { colorsRow } from '@/data/sakiProps.js';
 import userIds from '@/data/userIds.json';
-import { isBoosting, subdivideArray } from '@/func';
 import type { SakiSchemaType } from '@/models/saki';
 import SakiModel from '@/models/saki.js';
 import { auditError } from '@/systems/others/auditor.js';
 import { hex2num } from '@/utils/color';
+import { isBoosting } from '@/utils/discord';
 import { getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchExt } from '@/utils/fetchext';
+import { subdivideArray } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandParam, CommandTags } from '../commons';
 

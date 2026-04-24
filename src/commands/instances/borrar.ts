@@ -1,7 +1,8 @@
 import type { GuildTextBasedChannel, Message, User } from 'discord.js';
 import { MessageFlags } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
-import { fetchUser, sleep } from '@/func';
+import { fetchUser } from '@/utils/discord';
+import { sleep } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandTags } from '../commons';
 import { CommandPermissions } from '../commons/cmdPerms.js';

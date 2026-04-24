@@ -22,9 +22,11 @@ import type {
 import { CommandTag, fetchCommandsFromFiles } from '@/commands/commons';
 import { tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
-import { compressId, edlDistance, isNotModerator, toCapitalized } from '@/func';
 import { Translator } from '@/i18n';
+import { isNotModerator } from '@/utils/discord';
 import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
+import { compressId } from '@/utils/encoding';
+import { edlDistance, toCapitalized } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 
 export const makeCategoriesRow = async (

@@ -1,5 +1,4 @@
 import { Colors, ContainerBuilder, MessageFlags } from 'discord.js';
-import { improveNumber } from '@/func';
 import { Translator } from '@/i18n';
 import {
 	calc,
@@ -7,6 +6,7 @@ import {
 	MathLexerError,
 	MathParserError,
 } from '@/systems/others/mathreader';
+import { improveNumber } from '@/utils/misc';
 import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
