@@ -142,6 +142,7 @@ const expectedBotEmojis = {
 	niconicoColor: { fallback: '📺' },
 	patreonColor: { fallback: '🇵' },
 	newgroundsColor: { fallback: '⚔️' },
+	arcaliveColor: { fallback: '🌏' },
 	nitterColor: { fallback: '🐦' },
 
 	//Booru Tag icons (full color)
