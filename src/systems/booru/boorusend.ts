@@ -23,6 +23,7 @@ import {
 import type { ComplexCommandRequest } from 'types/commands';
 import { Command } from '@/commands/commons';
 import { CommandOptionSolver } from '@/commands/commons/cmdOpts';
+import { tenshiPeachColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { isNSFWChannel, shortenText } from '@/func';
 import { Translator } from '@/i18n';
@@ -79,7 +80,7 @@ export const SOURCE_STYLES: ReadonlyArray<SourceStyle & { pattern: RegExp }> = [
 	{ color: 0x23aee5, emoji: 'bilibiliColor', pattern: /t\.bilibili\.com|bilibili\.com\/opus/ },
 	{ color: 0x020814, emoji: 'caraColor', pattern: /cara\.app/ },
 	{ color: 0x36465d, emoji: 'tumblrColor', pattern: /tumblr\.com/ },
-	{ color: 0x252525, emoji: 'niconicoColor', pattern: /seiga\.nicovideo\.jp/ },
+	{ color: 0xff9170, emoji: 'niconicoColor', pattern: /seiga\.nicovideo\.jp|www\.nicovideo\.jp/ },
 	{ color: 0x0b69b7, emoji: 'patreonColor', pattern: /www\.patreon\.com/ },
 	{ color: 0xfcbd00, emoji: 'gdriveColor', pattern: /drive\.google\.com/ },
 	{ color: 0xff4500, emoji: 'redditColor', pattern: /(reddit\.com)|(([iv]\.)?redd\.it)/ },
@@ -89,11 +90,11 @@ export const SOURCE_STYLES: ReadonlyArray<SourceStyle & { pattern: RegExp }> = [
 	{ color: 0xff0033, emoji: 'youtubeColor', pattern: /youtube\.com/ },
 	{ color: 0xfda238, emoji: 'newgroundsColor', pattern: /www\.newgrounds\.com/ },
 	{ color: 0x2c424f, emoji: 'githubColor', pattern: /github\.com/ },
-	{ color: 0x252525, emoji: 'niconicoColor', pattern: /www\.nicovideo\.jp/ },
+	{ color: 0x434753, emoji: 'arcaliveColor', pattern: /arca\.live/ },
 ];
 
 const noSource: SourceStyle = { color: Colors.Aqua, emoji: undefined };
-const unknownSource: SourceStyle = { color: 0x1bb76e, emoji: 'heartAccent' };
+const unknownSource: SourceStyle = { color: tenshiPeachColor, emoji: 'heartAccent' };
 
 const resMappings = {
 	lowres: { order: 0, emote: 'lowRes' },
