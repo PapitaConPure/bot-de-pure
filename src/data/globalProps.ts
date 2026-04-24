@@ -108,19 +108,19 @@ export async function resolveHost(options: ResolveHostOptions = {}) {
 //Constantes varias
 /**
  * @description Color de Tenshi — Celestial.
- * @returns #608cf3
+ * @returns #608cf3 - Sky Blue
  */
 export const tenshiColor = color('#608cf3', 'number') as number;
 
 /**
  * @description Color alternativo de Tenshi — Lavanda.
- * @returns #bf94e4
+ * @returns #bf94e4 - Lavender Pink
  */
 export const tenshiAltColor = color('#bf94e4', 'number') as number;
 
 /**
  * @description Color de resalte de Tenshi — Durazno.
- * @returns #ffe286
+ * @returns #ffe286 - Golden Peach
  */
 export const tenshiPeachColor = color('#ffe286', 'number') as number;
 
