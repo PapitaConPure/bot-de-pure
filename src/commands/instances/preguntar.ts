@@ -56,7 +56,8 @@ const command = new Command(
 			(match, id) => namesMap.get(id) || match,
 		);
 
-		if(!groq) return request.editReply({ content: translator.getText('missingGroqCredentials') });
+		if (!groq)
+			return request.editReply({ content: translator.getText('missingGroqCredentials') });
 
 		const chatCompletion = await groq.chat.completions.create({
 			messages: [

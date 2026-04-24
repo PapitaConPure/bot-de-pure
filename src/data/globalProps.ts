@@ -11,8 +11,7 @@ export const remoteStartup: boolean = process.env.NODE_ENV === 'production';
 
 //Claves
 
-if (!process.env.DISCORD_TOKEN)
-	throw new EnvVarError('DISCORD_TOKEN');
+if (!process.env.DISCORD_TOKEN) throw new EnvVarError('DISCORD_TOKEN');
 
 /**
  * @description

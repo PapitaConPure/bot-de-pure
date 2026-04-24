@@ -42,7 +42,7 @@ export interface FeedChunk {
 
 async function updateBooruFeeds(feedChunk: FeedChunk): Promise<void> {
 	const booru = getMainBooruClient();
-	if(!booru) return;
+	if (!booru) return;
 
 	const startMs = Date.now();
 	debug(`Received a request to update Boorus at ${new Date(startMs)}.`);

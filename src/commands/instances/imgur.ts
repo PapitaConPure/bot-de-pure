@@ -104,7 +104,8 @@ const command = new Command('imgur', tags)
 			|| new ImgurUserModel({ userId: request.userId });
 
 		const clientId = imgurUser.clientId ?? process.env.IMGUR_CLIENT_ID;
-		if (!clientId) return request.editReply({ content: translator.getText('missingImgurCredentials') });
+		if (!clientId)
+			return request.editReply({ content: translator.getText('missingImgurCredentials') });
 
 		const client = new ImgurClient(clientId);
 

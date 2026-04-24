@@ -27,7 +27,9 @@ export const databaseUri = {
 		}
 
 		const hint = getRuntimeEnvHint();
-		throw new EnvVarError({ hint: `Missing MongoDB database environment variable.\n\n${hint}` });
+		throw new EnvVarError({
+			hint: `Missing MongoDB database environment variable.\n\n${hint}`,
+		});
 	},
 };
 
