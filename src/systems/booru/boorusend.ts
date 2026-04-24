@@ -27,6 +27,7 @@ import { tenshiPeachColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { isNSFWChannel, shortenText } from '@/func';
 import { Translator } from '@/i18n';
+import { hex2num } from '@/utils/color';
 import { type BotEmojiName, getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import Logger from '@/utils/logs';
 import { getMainBooruClient } from './booruclient';
@@ -69,28 +70,28 @@ const sourceMappings: ReadonlyArray<{ pattern: RegExp; replacement: string }> = 
 ];
 
 export const SOURCE_STYLES: ReadonlyArray<SourceStyle & { pattern: RegExp }> = [
-	{ color: 0x0096fa, emoji: 'pixivColor', pattern: /pixiv\.net(?!\/fanbox)/ },
-	{ color: 0x040404, emoji: 'twitterColor', pattern: /(twitter|twimg|x)\.com/ },
-	{ color: 0xfaf18a, emoji: 'fanboxColor', pattern: /pixiv\.net\/fanbox|fanbox\.cc/ },
-	{ color: 0xea4c89, emoji: 'fantiaColor', pattern: /fantia\.jp/ },
-	{ color: 0x28837f, emoji: 'skebColor', pattern: /skeb\.jp/ },
-	{ color: 0x0085ff, emoji: 'blueskyColor', pattern: /bsky\.app/ },
-	{ color: 0x00e59b, emoji: 'dvntartColor', pattern: /deviantart\.com/ },
-	{ color: 0x009c94, emoji: 'lofterColor', pattern: /lofter\.com/ },
-	{ color: 0x23aee5, emoji: 'bilibiliColor', pattern: /t\.bilibili\.com|bilibili\.com\/opus/ },
-	{ color: 0x020814, emoji: 'caraColor', pattern: /cara\.app/ },
-	{ color: 0x36465d, emoji: 'tumblrColor', pattern: /tumblr\.com/ },
-	{ color: 0xff9170, emoji: 'niconicoColor', pattern: /seiga\.nicovideo\.jp|www\.nicovideo\.jp/ },
-	{ color: 0x0b69b7, emoji: 'patreonColor', pattern: /www\.patreon\.com/ },
-	{ color: 0xfcbd00, emoji: 'gdriveColor', pattern: /drive\.google\.com/ },
-	{ color: 0xff4500, emoji: 'redditColor', pattern: /(reddit\.com)|(([iv]\.)?redd\.it)/ },
-	{ color: 0xff9a30, emoji: 'weiboColor', pattern: /weibo\.com/ },
-	{ color: 0xff6c60, emoji: 'nitterColor', pattern: /nitter\.net/ },
-	{ color: 0xff5c67, emoji: 'boothColor', pattern: /booth\.pm/ },
-	{ color: 0xff0033, emoji: 'youtubeColor', pattern: /youtube\.com/ },
-	{ color: 0xfda238, emoji: 'newgroundsColor', pattern: /www\.newgrounds\.com/ },
-	{ color: 0x2c424f, emoji: 'githubColor', pattern: /github\.com/ },
-	{ color: 0x434753, emoji: 'arcaliveColor', pattern: /arca\.live/ },
+	{ color: hex2num('#0096fa'), emoji: 'pixivColor', pattern: /pixiv\.net(?!\/fanbox)/ },
+	{ color: hex2num('#040404'), emoji: 'twitterColor', pattern: /(twitter|twimg|x)\.com/ },
+	{ color: hex2num('#faf18a'), emoji: 'fanboxColor', pattern: /pixiv\.net\/fanbox|fanbox\.cc/ },
+	{ color: hex2num('#ea4c89'), emoji: 'fantiaColor', pattern: /fantia\.jp/ },
+	{ color: hex2num('#28837f'), emoji: 'skebColor', pattern: /skeb\.jp/ },
+	{ color: hex2num('#0085ff'), emoji: 'blueskyColor', pattern: /bsky\.app/ },
+	{ color: hex2num('#00e59b'), emoji: 'dvntartColor', pattern: /deviantart\.com/ },
+	{ color: hex2num('#009c94'), emoji: 'lofterColor', pattern: /lofter\.com/ },
+	{ color: hex2num('#23aee5'), emoji: 'bilibiliColor', pattern: /bilibili\.com/ },
+	{ color: hex2num('#020814'), emoji: 'caraColor', pattern: /cara\.app/ },
+	{ color: hex2num('#36465d'), emoji: 'tumblrColor', pattern: /tumblr\.com/ },
+	{ color: hex2num('#ff9170'), emoji: 'niconicoColor', pattern: /nicovideo\.jp/ },
+	{ color: hex2num('#0b69b7'), emoji: 'patreonColor', pattern: /www\.patreon\.com/ },
+	{ color: hex2num('#fcbd00'), emoji: 'gdriveColor', pattern: /drive\.google\.com/ },
+	{ color: hex2num('#ff4500'), emoji: 'redditColor', pattern: /reddit\.com|(([iv]\.)?redd\.it)/ },
+	{ color: hex2num('#ff9a30'), emoji: 'weiboColor', pattern: /weibo\.com/ },
+	{ color: hex2num('#ff6c60'), emoji: 'nitterColor', pattern: /nitter\.net/ },
+	{ color: hex2num('#ff5c67'), emoji: 'boothColor', pattern: /booth\.pm/ },
+	{ color: hex2num('#ff0033'), emoji: 'youtubeColor', pattern: /youtube\.com/ },
+	{ color: hex2num('#fda238'), emoji: 'newgroundsColor', pattern: /www\.newgrounds\.com/ },
+	{ color: hex2num('#2c424f'), emoji: 'githubColor', pattern: /github\.com/ },
+	{ color: hex2num('#434753'), emoji: 'arcaliveColor', pattern: /arca\.live/ },
 ];
 
 const noSource: SourceStyle = { color: Colors.Aqua, emoji: undefined };
