@@ -76,7 +76,7 @@ export const SOURCE_STYLES: ReadonlyArray<SourceStyle & { pattern: RegExp }> = [
 	{ color: 0x0085ff, emoji: 'blueskyColor', pattern: /bsky\.app/ },
 	{ color: 0x00e59b, emoji: 'dvntartColor', pattern: /deviantart\.com/ },
 	{ color: 0x009c94, emoji: 'lofterColor', pattern: /lofter\.com/ },
-	{ color: 0x23aee5, emoji: 'bilibiliColor', pattern: /t\.bilibili\.com/ },
+	{ color: 0x23aee5, emoji: 'bilibiliColor', pattern: /t\.bilibili\.com|bilibili\.com\/opus/ },
 	{ color: 0x020814, emoji: 'caraColor', pattern: /cara\.app/ },
 	{ color: 0x36465d, emoji: 'tumblrColor', pattern: /tumblr\.com/ },
 	{ color: 0x252525, emoji: 'niconicoColor', pattern: /seiga\.nicovideo\.jp/ },
