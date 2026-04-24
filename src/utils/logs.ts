@@ -181,7 +181,11 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
 	 */
 	function catastrophic(err: Error, ...data: unknown[]) {
 		console.error(logLevelPrefix('CATAS'), prefix, logLevelOutput('CATAS', err, ...data));
-		process.exit(1);
+		try {
+			throw err;
+		} finally {
+			process.exit(1);
+		}
 	}
 
 	return { debug, info, warn, error, fatal, catastrophic };
