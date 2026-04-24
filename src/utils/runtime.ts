@@ -1,12 +1,17 @@
 const runtime = (() => {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// biome-ignore lint/suspicious/noTsIgnore: Comprobación de runtime
+	//@ts-ignore Comprobación de runtime
 	if (typeof Bun !== 'undefined') return 'bun';
-
+	
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	//@ts-expect-error Comprobación de runtime
+	// biome-ignore lint/suspicious/noTsIgnore: Comprobación de runtime
+	//@ts-ignore Comprobación de runtime
 	if (typeof Deno !== 'undefined') return 'deno';
-
+	
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// biome-ignore lint/suspicious/noTsIgnore: Comprobación de runtime
+	//@ts-ignore Comprobación de runtime
 	if (typeof process !== 'undefined' && process.versions?.node) return 'node';
 
 	return 'unknown';
