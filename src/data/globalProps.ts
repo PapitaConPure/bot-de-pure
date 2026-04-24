@@ -1,9 +1,9 @@
 import { lookupService } from 'node:dns';
 import { promisify } from 'node:util';
-import { color } from 'bun';
 import type { Guild, GuildTextBasedChannel } from 'discord.js';
 import { EnvVarError } from '@/errors/envVar';
 import type { FeedChunk } from '@/systems/booru/boorufeed';
+import { hex2num } from '@/utils/color';
 
 //Entorno
 /**@description Si se está en un entorno de producción (`true`) o de desarrollo (`false`, por defecto).*/
@@ -110,19 +110,19 @@ export async function resolveHost(options: ResolveHostOptions = {}) {
  * @description Color de Tenshi — Celestial.
  * @returns #608cf3 - Sky Blue
  */
-export const tenshiColor = color('#608cf3', 'number') as number;
+export const tenshiColor = hex2num('#608cf3');
 
 /**
  * @description Color alternativo de Tenshi — Lavanda.
  * @returns #bf94e4 - Lavender Pink
  */
-export const tenshiAltColor = color('#bf94e4', 'number') as number;
+export const tenshiAltColor = hex2num('#bf94e4');
 
 /**
  * @description Color de resalte de Tenshi — Durazno.
  * @returns #ffe286 - Golden Peach
  */
-export const tenshiPeachColor = color('#ffe286', 'number') as number;
+export const tenshiPeachColor = hex2num('#ffe286');
 
 /**
  * @description
