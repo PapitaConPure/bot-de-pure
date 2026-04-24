@@ -20,21 +20,10 @@ import type { GuildConfigDocument, GuildConfigSchemaType } from '@/models/guildc
 import GuildConfig from '@/models/guildconfigs';
 import type { TuberDocument, TuberSchemaType } from '@/models/tubers';
 import { getWikiPageComponentsV2 } from '@/systems/others/wiki';
-import type { Tubercle, TuberExecutionOptions } from '@/systems/ps/common/executeTuber';
-import {
-	CURRENT_PS_VERSION,
-	executeTuber as executeTuberPS2,
-} from '@/systems/ps/common/executeTuber';
-import { RuntimeToLanguageType } from '@/systems/ps/v1.0/commons';
-import {
-	executeTuber as executeTuberPS1,
-	type TuberExecutionInputs,
-} from '@/systems/ps/v1.0/purescript';
+import type { AdvancedTubercle, Tubercle } from '@/systems/ps/common/executeTuber';
+import { CURRENT_PS_VERSION, executeTuber } from '@/systems/ps/common/executeTuber';
 import { Input, type InputJSONData } from '@/systems/ps/v1.1/interpreter/inputReader';
-import {
-	type RuntimeValue,
-	ValueKindTranslationLookups,
-} from '@/systems/ps/v1.1/interpreter/values';
+import type { RuntimeValue } from '@/systems/ps/v1.1/interpreter/values';
 import { fetchUserID, isNotModerator, navigationRows } from '@/utils/discord';
 import { getBotEmojiResolvable } from '@/utils/emojis';
 import { compressId, decompressId } from '@/utils/encoding';
@@ -571,52 +560,28 @@ const command = new Command(
 		const name = interaction.fields.getTextInputValue('nameInput');
 		const desc = interaction.fields.getTextInputValue('descInput');
 
-		if (gcfg.tubers.get(tuberId)?.psVersion == null) {
-			const inputIndex =
-				gcfg.tubers
-					.get(tuberId)
-					?.inputs.findIndex(
-						(input) =>
-							('identifier' in input
-								? input.identifier
-								: 'name' in input
-									? input.name
-									: null) === name,
-					) ?? -1;
-			if (inputIndex < 0)
-				return interaction.editReply({
-					content: `⚠️ La entrada "${shortenText(name, 128)}" no existe para el Tubérculo **${shortenText(tuberId, 256)}**`,
-				});
-
-			const input = gcfg.tubers.get(tuberId)?.inputs as unknown as TuberExecutionInputs;
-			if (input) {
-				input.desc = desc;
-				gcfg.markModified(`tubers.${tuberId}.inputs.${inputIndex}.desc`);
-			}
-		} else {
-			const variants = gcfg.tubers.get(tuberId)?.inputs as unknown as InputJSONData[][];
-			let found = false;
-			variants?.forEach((variant, variantIndex) =>
-				variant.forEach((input, inputIndex) => {
-					if (Input.from(input).name === name) {
-						const input = gcfg.tubers.get(tuberId)?.inputs[variantIndex][inputIndex];
-						if (input) {
-							input.desc = desc;
-							gcfg.markModified(
-								`tubers.${tuberId}.inputs.${variantIndex}.${inputIndex}.desc`,
-							);
-						}
-
-						found = true;
+		const variants = gcfg.tubers.get(tuberId)?.inputs as unknown as InputJSONData[][];
+		let found = false;
+		variants?.forEach((variant, variantIndex) =>
+			variant.forEach((input, inputIndex) => {
+				if (Input.from(input).name === name) {
+					const input = gcfg.tubers.get(tuberId)?.inputs[variantIndex][inputIndex];
+					if (input) {
+						input.desc = desc;
+						gcfg.markModified(
+							`tubers.${tuberId}.inputs.${variantIndex}.${inputIndex}.desc`,
+						);
 					}
-				}),
-			);
 
-			if (!found)
-				return interaction.editReply({
-					content: `⚠️ El nombre de Entrada \`${shortenText(name, 128)}\` no existe en ninguna variante del Tubérculo **${shortenText(tuberId, 256)}**`,
-				});
-		}
+					found = true;
+				}
+			}),
+		);
+
+		if (!found)
+			return interaction.editReply({
+				content: `⚠️ El nombre de Entrada \`${shortenText(name, 128)}\` no existe en ninguna variante del Tubérculo **${shortenText(tuberId, 256)}**`,
+			});
 
 		gcfg.markModified(`tubers.${tuberId}`);
 		await gcfg.save();
@@ -741,7 +706,7 @@ async function createTuber(
 
 		await request.deferReply();
 		await fetchGuildMembers(request.guild);
-		await executeTuberPS2(request, tuberContent as Tubercle, { isTestDrive: true });
+		await executeTuber(request, tuberContent as Tubercle, { isTestDrive: true });
 
 		if (tuberContent.advanced) {
 			tuberContent.inputs = tuberContent.inputs?.map((variant) =>
@@ -823,26 +788,15 @@ function viewTuber(
 		const pageCount = item.inputs.length;
 
 		if (item.inputs?.length) {
-			let inputTitle: string;
 			let inputStrings: string | undefined;
 			let actuallyValid = true;
 
-			if (!item.psVersion) {
-				inputTitle = 'Entradas';
-				inputStrings = item.inputs
-					.map(
-						(i) =>
-							`**(${RuntimeToLanguageType.get(i.type) ?? ValueKindTranslationLookups.get(i.kind) ?? 'Nada'})** \`${i.name ?? 'desconocido'}\`: ${i.desc ?? 'Sin descripción'}`,
-					)
+			const inputTitle = `Entradas (variante ${inputVariant + 1} de ${pageCount})`;
+			if (item.inputs[inputVariant].length === 0) actuallyValid = false;
+			else
+				inputStrings = item.inputs[inputVariant]
+					.map((i) => Input.from(i).toString())
 					.join('\n');
-			} else {
-				inputTitle = `Entradas (variante ${inputVariant + 1} de ${pageCount})`;
-				if (item.inputs[inputVariant].length === 0) actuallyValid = false;
-				else
-					inputStrings = item.inputs[inputVariant]
-						.map((i) => Input.from(i).toString())
-						.join('\n');
-			}
 
 			if (actuallyValid) {
 				embed.addFields({
@@ -1003,19 +957,11 @@ async function opExecuteTuber(
 		args.parsePolyParamSync('entradas', { regroupMethod: 'DOUBLE-QUOTES' }),
 	).filter((input) => input);
 	await request.deferReply();
-	let executeFn: (
-		request: ComplexCommandRequest,
-		tuber: unknown,
-		options: TuberExecutionOptions,
-	) => Promise<unknown>;
-
-	if (gcfg.tubers.get(tid)?.psVersion == null) executeFn = executeTuberPS1;
-	else executeFn = executeTuberPS2;
 
 	const savedData =
 		gcfg.tubers.get(tid)?.saved && new Map([...(gcfg.tubers.get(tid)?.saved?.entries() ?? [])]);
 	await fetchGuildMembers(request.guild);
-	await executeFn(request, gcfg.tubers.get(tid), {
+	await executeTuber(request, gcfg.tubers.get(tid) as unknown as AdvancedTubercle, {
 		args: tuberArgs,
 		isTestDrive: false,
 		overwrite: false,
