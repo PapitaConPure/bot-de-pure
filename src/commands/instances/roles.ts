@@ -719,7 +719,7 @@ const command = new Command('roles', flags)
 				flags: MessageFlags.Ephemeral,
 			});
 		const roleName = interaction.fields.getTextInputValue('nameInput');
-		const roleColor = interaction.fields.getTextInputValue('colorInput') as `#${number}` | `${number}`;
+		const roleColor = interaction.fields.getTextInputValue('colorInput');
 		let roleEmoteUrl = interaction.fields.getTextInputValue('emoteUrlInput');
 		const editStack: Promise<unknown>[] = [];
 		const replyStack: string[] = [];

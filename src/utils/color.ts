@@ -59,13 +59,13 @@ export function rgb2hex(red: number, green: number, blue: number): HexColorCode 
 	return `#${channelHex(red)}${channelHex(green)}${channelHex(blue)}`;
 }
 
-export function hex2num(str: `#${number}` | `${number}`): number {
+export function hex2num(str: string): number {
 	if (typeof str !== 'string')
 		throw TypeError('Se esperaba un string de hexadecimal para convertir a número');
 
 	if (!str.length) return 0;
 
-	if (str.startsWith('#')) str = str.slice(1) as `${number}`;
+	if (str.startsWith('#')) str = str.slice(1);
 
 	return parseInt(`0x${str}`, 10);
 }
