@@ -181,7 +181,7 @@ const localesObject = {
 		ja: '❌ あなたにはそれをする許可がありません',
 	},
 	invalidEmptyCommandName: {
-		es: '❌ Debes escribir un comando después del prefijo (por ejemplo: p!help)',
+		es: '❌ Debes escribir un comando después del prefijo (por ejemplo: p!ayuda)',
 		en: '❌ You need to type a command after the prefix (for example: p!help)',
 		ja: '❌ プレフィックスの後にコマンドを入力してください（例: p!help）',
 	},
