@@ -4,7 +4,6 @@
 import Canvas from '@napi-rs/canvas';
 import { EmbedBuilder } from 'discord.js';
 import * as GlobalProps from '@/data/globalProps';
-import * as func from '@/func';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
@@ -21,7 +20,6 @@ const command = new Command('papa-eval', tags)
 		'Evalúa una función de JavaScript en el contexto de la función `execute` de un módulo de comando.',
 		'```ts',
 		'GlobalProps //Propiedades comunes en caché',
-		'func //Funciones comunes en caché',
 		'Discord //Librería discord.js',
 		'Canvas //Librería Node Canvas',
 		'p_pure: () => {',
