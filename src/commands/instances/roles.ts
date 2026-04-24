@@ -15,10 +15,11 @@ import { tenshiColor } from '@/data/globalProps';
 import { saki } from '@/data/sakiProps';
 import { colorsRow } from '@/data/sakiProps.js';
 import userIds from '@/data/userIds.json';
-import { isBoosting, stringHexToNumber, subdivideArray } from '@/func';
+import { isBoosting, subdivideArray } from '@/func';
 import type { SakiSchemaType } from '@/models/saki';
 import SakiModel from '@/models/saki.js';
 import { auditError } from '@/systems/others/auditor.js';
+import { hex2num } from '@/utils/color';
 import { getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchExt } from '@/utils/fetchext';
 import { p_pure } from '@/utils/prefixes';
@@ -718,7 +719,7 @@ const command = new Command('roles', flags)
 				flags: MessageFlags.Ephemeral,
 			});
 		const roleName = interaction.fields.getTextInputValue('nameInput');
-		const roleColor = interaction.fields.getTextInputValue('colorInput');
+		const roleColor = interaction.fields.getTextInputValue('colorInput') as `#${number}` | `${number}`;
 		let roleEmoteUrl = interaction.fields.getTextInputValue('emoteUrlInput');
 		const editStack: Promise<unknown>[] = [];
 		const replyStack: string[] = [];
@@ -731,7 +732,7 @@ const command = new Command('roles', flags)
 			);
 
 		if (roleColor.length) {
-			const roleColorNumber = stringHexToNumber(roleColor);
+			const roleColorNumber = hex2num(roleColor);
 			editStack.push(
 				customRole
 					.edit({ colors: { primaryColor: roleColorNumber } })

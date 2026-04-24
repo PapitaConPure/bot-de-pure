@@ -1697,17 +1697,6 @@ export function decompressId(id: string): string {
 	return decomp.join('');
 }
 
-export function stringHexToNumber(str: string): number {
-	if (typeof str !== 'string')
-		throw TypeError('Se esperaba un string de hexadecimal para convertir a número');
-
-	if (!str.length) return 0;
-
-	if (str.startsWith('#')) str = str.slice(1);
-
-	return parseInt(`0x${str}`, 10);
-}
-
 /**
  * @description
  * Reduce la presición de un número a solo los dígitos especificados.

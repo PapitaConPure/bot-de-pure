@@ -58,3 +58,14 @@ export function rgb2hex(red: number, green: number, blue: number): HexColorCode 
 		Math.round(component).toString(16).padStart(2, '0');
 	return `#${channelHex(red)}${channelHex(green)}${channelHex(blue)}`;
 }
+
+export function hex2num(str: `#${number}` | `${number}`): number {
+	if (typeof str !== 'string')
+		throw TypeError('Se esperaba un string de hexadecimal para convertir a número');
+
+	if (!str.length) return 0;
+
+	if (str.startsWith('#')) str = str.slice(1) as `${number}`;
+
+	return parseInt(`0x${str}`, 10);
+}
