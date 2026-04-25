@@ -749,7 +749,7 @@ const command = new Command(
 			if (utcOffset == null)
 				return interaction.reply({
 					flags: MessageFlags.Ephemeral,
-					content: translator.getText('yoTimezoneInvalidTimezone'),
+					content: translator.getText('invalidTimezone'),
 				});
 
 			userConfigs.tzCode = sanitizedTzCode || 'UTC';

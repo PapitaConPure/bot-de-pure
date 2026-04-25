@@ -341,6 +341,11 @@ const localesObject = {
 		en: '⚠️️ Invalid time',
 		ja: '⚠️️ 無効な時刻',
 	},
+	invalidTimezone: {
+		es: '⚠️ Huso horario inválido',
+		en: '⚠️ Invalid timezone',
+		ja: '⚠️ 無効なタイムゾーン',
+	},
 	invalidEmoji: {
 		es: '⚠️️ Emoji inválido',
 		en: '⚠️️ Invalid emoji',
@@ -2932,11 +2937,6 @@ const localesObject = {
 		es: 'America/Buenos_Aires, UTC+3, JST, -3, GMT+5, UTC-4, etc.',
 		en: 'America/New_York, UTC+3, JST, -3, GMT+5, UTC-4, etc.',
 		ja: 'Asia/Tokyo, UTC+3、JST、-3、GMT+5、UTC-4など',
-	},
-	yoTimezoneInvalidTimezone: {
-		es: '⚠️ El huso horario especificado tiene un formato inválido',
-		en: '⚠️ The specified timezone has an invalid format',
-		ja: '⚠️ 指定されたタイムゾーンは無効な形式です',
 	},
 	yoFeedEmptyError: {
 		es: paragraph(
