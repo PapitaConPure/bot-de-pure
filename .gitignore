@@ -30,14 +30,14 @@ PS Docs/*.txt
 #Assets that are either not safely redistributable or not worth the risk (sorry, you'll have to remake these emojis yourself)
 assets/fonts/*.ttf
 assets/fonts/*.otf
-assets/icons/sites/siteFg/twitterColor.*
-assets/icons/sites/siteFg/gdriveColor.*
-assets/icons/sites/siteFg/redditColor.*
-assets/icons/sites/siteFg/patreonColor.*
-assets/icons/sites/siteFg/youtubeColor.*
-assets/icons/sites/siteFg/instagramColor.*
-assets/icons/sites/siteFg/nitterColor.*
-assets/icons/sites/whiteFg
-assets/icons/sites/pixivWhiteOld.*
-assets/icons/sites/twitterWhiteOld.*
-assets/icons/hero/commandTags
+assets/emojis/sites/siteFg/twitterColor.*
+assets/emojis/sites/siteFg/gdriveColor.*
+assets/emojis/sites/siteFg/redditColor.*
+assets/emojis/sites/siteFg/patreonColor.*
+assets/emojis/sites/siteFg/youtubeColor.*
+assets/emojis/sites/siteFg/instagramColor.*
+assets/emojis/sites/siteFg/nitterColor.*
+assets/emojis/sites/whiteFg
+assets/emojis/sites/pixivWhiteOld.*
+assets/emojis/sites/twitterWhiteOld.*
+assets/emojis/hero/commandTags
