@@ -242,10 +242,10 @@ export async function onStartup(client: Client) {
 	confirm();
 
 	console.log(chalk.rgb(158, 114, 214)('Registrando fuentes'));
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'Alice-Regular.ttf'), 'headline');
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'cuyabra.otf'), 'cuyabra');
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'teen bd.ttf'), 'cardname');
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'fonts', 'kirsty rg.otf'), 'cardclass');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'assets', 'fonts', 'Alice-Regular.ttf'), 'headline');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'assets', 'fonts', 'cuyabra.otf'), 'cuyabra');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'assets', 'fonts', 'teen bd.ttf'), 'cardname');
+	GlobalFonts.registerFromPath(join(__dirname, '..', 'assets', 'fonts', 'kirsty rg.otf'), 'cardclass');
 	GlobalFonts.registerFromPath(
 		join(__dirname, '..', 'fonts', 'asap-condensed.semichalk.bold.ttf'),
 		'cardbody',

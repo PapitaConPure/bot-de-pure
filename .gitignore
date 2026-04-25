@@ -9,15 +9,11 @@ node_modules
 .env.development
 .env.production
 
-#ENVs artificiales
-localenv.json
-remoteenv.json
-
 #Dev
 images
 tests
 
-#Binarios
+#Binaries
 Command Makefile
 b4a.exe
 mkf.exe
@@ -31,5 +27,17 @@ PS Docs/*.txt
 #VSCode
 .vscode/launch.json
 
-#FUENTES porque quizá no querés problemas legales
-fonts
+#Assets that are either not safely redistributable or not worth the risk (sorry, you'll have to remake these emojis yourself)
+assets/fonts/*.ttf
+assets/fonts/*.otf
+assets/icons/sites/siteFg/twitterColor.*
+assets/icons/sites/siteFg/gdriveColor.*
+assets/icons/sites/siteFg/redditColor.*
+assets/icons/sites/siteFg/patreonColor.*
+assets/icons/sites/siteFg/youtubeColor.*
+assets/icons/sites/siteFg/instagramColor.*
+assets/icons/sites/siteFg/nitterColor.*
+assets/icons/sites/whiteFg
+assets/icons/sites/pixivWhiteOld.*
+assets/icons/sites/twitterWhiteOld.*
+assets/icons/hero/commandTags
