@@ -15,7 +15,7 @@ export function getMainBooruClient() {
 				storeChain: [new MemoryTagStore(), new MongooseTagStore(BooruTags)],
 				cleanOnStartup: true,
 				maxBatchingGraceWindowMs: 40,
-				resolutionTimeoutMs: 20_000,
+				resolutionTimeoutMs: 60_000,
 			},
 		});
 
