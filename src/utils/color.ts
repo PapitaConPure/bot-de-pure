@@ -67,5 +67,5 @@ export function hex2num(str: string): number {
 
 	if (str.startsWith('#')) str = str.slice(1);
 
-	return parseInt(`0x${str}`, 10);
+	return parseInt(`0x${str}`, 16);
 }
