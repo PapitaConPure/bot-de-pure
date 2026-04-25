@@ -61,6 +61,12 @@ const command = new Command(
 		const sanitizedTzCode = sanitizeTzCode(tzCode);
 		const utcOffset = toUtcOffset(sanitizedTzCode) ?? 0;
 
+		if (Number.isNaN(+utcOffset))
+			return request.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('invalidTimezone'),
+			});
+
 		const dateStr = args.parseFlagExpr('fecha');
 		const date = dateStr
 			? parseDateFromNaturalLanguage(dateStr, translator.locale, sanitizedTzCode)
