@@ -144,6 +144,9 @@ const expectedBotEmojis = {
 	newgroundsColor: { fallback: '⚔️' },
 	arcaliveColor: { fallback: '🌏' },
 	nitterColor: { fallback: '🐦' },
+	misskeyColor: { fallback: '🌐' },
+	instagramColor: { fallback: '📸' },
+	artstationColor: { fallback: '📸' },
 
 	//Booru Tag icons (full color)
 	boy: { fallback: '♂️' },
