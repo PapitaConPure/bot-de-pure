@@ -26,7 +26,6 @@ import { CommandOptionSolver } from '@/commands/commons/cmdOpts';
 import { tenshiPeachColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { Translator } from '@/i18n';
-import { hex2num } from '@/utils/color';
 import { isNSFWChannel } from '@/utils/discord';
 import { type BotEmojiName, getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import Logger from '@/utils/logs';
@@ -35,6 +34,7 @@ import { getMainBooruClient } from './booruclient';
 import type { FeedOptions } from './boorufeed';
 import type { tagMaps } from './booruprops';
 import { getBaseTags, getSearchTags } from './booruprops';
+import { type BooruSourceStyle, BooruSourceStyles } from './boorusources';
 
 const { debug, info, warn, error } = Logger('WARN', 'BooruSend');
 
@@ -45,11 +45,6 @@ export interface PostFormatData {
 	disableLinks?: boolean | null;
 	disableActions?: boolean | null;
 	componentKey?: number | string;
-}
-
-export interface SourceStyle {
-	emoji?: BotEmojiName;
-	color: number;
 }
 
 /**
@@ -70,33 +65,8 @@ const sourceMappings: ReadonlyArray<{ pattern: RegExp; replacement: string }> = 
 	},
 ];
 
-export const SOURCE_STYLES: ReadonlyArray<SourceStyle & { pattern: RegExp }> = [
-	{ color: hex2num('#0096fa'), emoji: 'pixivColor', pattern: /pixiv\.net(?!\/fanbox)/ },
-	{ color: hex2num('#040404'), emoji: 'twitterColor', pattern: /(twitter|twimg|x)\.com/ },
-	{ color: hex2num('#faf18a'), emoji: 'fanboxColor', pattern: /pixiv\.net\/fanbox|fanbox\.cc/ },
-	{ color: hex2num('#ea4c89'), emoji: 'fantiaColor', pattern: /fantia\.jp/ },
-	{ color: hex2num('#28837f'), emoji: 'skebColor', pattern: /skeb\.jp/ },
-	{ color: hex2num('#0085ff'), emoji: 'blueskyColor', pattern: /bsky\.app/ },
-	{ color: hex2num('#00e59b'), emoji: 'dvntartColor', pattern: /deviantart\.com/ },
-	{ color: hex2num('#009c94'), emoji: 'lofterColor', pattern: /lofter\.com/ },
-	{ color: hex2num('#23aee5'), emoji: 'bilibiliColor', pattern: /bilibili\.com/ },
-	{ color: hex2num('#020814'), emoji: 'caraColor', pattern: /cara\.app/ },
-	{ color: hex2num('#36465d'), emoji: 'tumblrColor', pattern: /tumblr\.com/ },
-	{ color: hex2num('#ff9170'), emoji: 'niconicoColor', pattern: /nicovideo\.jp/ },
-	{ color: hex2num('#0b69b7'), emoji: 'patreonColor', pattern: /www\.patreon\.com/ },
-	{ color: hex2num('#fcbd00'), emoji: 'gdriveColor', pattern: /drive\.google\.com/ },
-	{ color: hex2num('#ff4500'), emoji: 'redditColor', pattern: /reddit\.com|(([iv]\.)?redd\.it)/ },
-	{ color: hex2num('#ff9a30'), emoji: 'weiboColor', pattern: /weibo\.com/ },
-	{ color: hex2num('#ff6c60'), emoji: 'nitterColor', pattern: /nitter\.net/ },
-	{ color: hex2num('#ff5c67'), emoji: 'boothColor', pattern: /booth\.pm/ },
-	{ color: hex2num('#ff0033'), emoji: 'youtubeColor', pattern: /youtube\.com/ },
-	{ color: hex2num('#fda238'), emoji: 'newgroundsColor', pattern: /www\.newgrounds\.com/ },
-	{ color: hex2num('#2c424f'), emoji: 'githubColor', pattern: /github\.com/ },
-	{ color: hex2num('#434753'), emoji: 'arcaliveColor', pattern: /arca\.live/ },
-];
-
-const noSource: SourceStyle = { color: Colors.Aqua, emoji: undefined };
-const unknownSource: SourceStyle = { color: tenshiPeachColor, emoji: 'heartAccent' };
+const noSource: BooruSourceStyle = { color: Colors.Aqua, emoji: undefined };
+const unknownSource: BooruSourceStyle = { color: tenshiPeachColor, emoji: 'heartAccent' };
 
 const resMappings = {
 	lowres: { order: 0, emote: 'lowRes' },
@@ -452,7 +422,7 @@ function getSourceButtonAndColor(
 	debug('Después de mapeos de fuente:', source);
 
 	//Dar estilo a Embed según fuente de la imagen
-	const sourceStyle = SOURCE_STYLES.find((s) => s.pattern.test(source)) ?? unknownSource;
+	const sourceStyle = BooruSourceStyles.find((s) => s.pattern.test(source)) ?? unknownSource;
 	const buttonEmoji = sourceStyle.emoji;
 	const containerColor = sourceStyle.color;
 	const sourceTooLong = source.length > 512;
