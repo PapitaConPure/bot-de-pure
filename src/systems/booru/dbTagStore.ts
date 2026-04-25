@@ -25,14 +25,22 @@ export class MongooseTagStore implements TagStore {
 	}
 
 	async getMany(names: Iterable<string>): Promise<Tag[]> {
-		const tagDocuments = await this.#model.find({ name: { $in: [...names] } });
-		return tagDocuments.map((doc) => this.#mapper.fromDocument(doc));
+		try {
+			const tagDocuments = await this.#model.find({ name: { $in: [...names] } });
+			return tagDocuments.map((doc) => this.#mapper.fromDocument(doc));
+		} catch {
+			return [];
+		}
 	}
 
 	async getOne(name: string): Promise<Tag | undefined> {
-		const tagDocument = await this.#model.findOne({ name: name }).lean();
-		if (!tagDocument) return undefined;
-		return this.#mapper.fromDocument(tagDocument);
+		try {
+			const tagDocument = await this.#model.findOne({ name: name }).lean();
+			if (!tagDocument) return undefined;
+			return this.#mapper.fromDocument(tagDocument);
+		} catch {
+			return undefined;
+		}
 	}
 
 	async setMany(tags: Iterable<Tag>): Promise<void> {
@@ -44,22 +52,37 @@ export class MongooseTagStore implements TagStore {
 			},
 		}));
 
-		await this.#model.bulkWrite(bulkOps);
+		await attemptManyTimes(() => this.#model.bulkWrite(bulkOps), 4);
 	}
 
 	async setOne(tag: Tag): Promise<void> {
-		await this.#model.updateOne(
-			{ name: tag.name },
-			{ $set: this.#mapper.toDocument(tag) },
-			{ upsert: true },
+		await attemptManyTimes(
+			() =>
+				this.#model.updateOne(
+					{ name: tag.name },
+					{ $set: this.#mapper.toDocument(tag) },
+					{ upsert: true },
+				),
+			3,
 		);
 	}
 
 	async cleanup?(): Promise<void> {
-		await this.#model.deleteMany({
+		const query = {
 			fetchTimestamp: {
 				$lt: new Date(Date.now() - this.#ttl),
 			},
-		});
+		};
+
+		await attemptManyTimes(() => this.#model.deleteMany(query), 2);
+	}
+}
+
+async function attemptManyTimes(fn: () => Promise<unknown>, times: number): Promise<void> {
+	try {
+		times--;
+		await fn();
+	} catch (err) {
+		if (times < 0) throw err;
 	}
 }
