@@ -1653,7 +1653,7 @@ const command = new Command('feed', tags)
 	.setGlobalButtonResponse(async function deletePost(interaction, manageableBy, isNotFeed) {
 		const translator = await Translator.from(interaction.user.id);
 
-		if (!interaction.inCachedGuild() || (manageableBy !== interaction.user.id && isNotModerator(interaction.member)))
+		if (interaction.inCachedGuild() && manageableBy !== interaction.user.id && isNotModerator(interaction.member))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
 				flags: MessageFlags.Ephemeral,
