@@ -33,7 +33,6 @@
     "@date-fns/utc": "^2.1.1",
     "@napi-rs/canvas": "^0.1.100",
     "@papitaconpure/booru-client": "^2.0.6",
-    "biome": "^0.3.3",
     "chalk": "^5.6.2",
     "date-fns": "^4.1.0",
     "discord-player": "^7.2.0",
@@ -46,7 +45,7 @@
     "sagiri": "^4.3.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.12",
+    "@biomejs/biome": "2.4.13",
     "@types/bun": "latest",
     "globals": "^17.5.0"
   },
