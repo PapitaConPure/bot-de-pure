@@ -73,5 +73,11 @@ export function resolveUserCacheId(data: UserCacheResolvable): string | undefine
 		return data.member.user.id;
 	}
 
+	if ('user' in data) {
+		if (!data.user) throw new Error('Malformed id');
+
+		return data.user.id;
+	}
+
 	return data.id;
 }
