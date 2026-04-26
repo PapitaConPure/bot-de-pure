@@ -10,7 +10,7 @@ import type {
 } from 'discord.js';
 import { REST } from 'discord.js';
 import { Routes } from 'discord-api-types/v9';
-import { connect, set } from 'mongoose';
+import { connect as mongooseConnect, set as mongooseSet } from 'mongoose';
 import { databaseUri } from '@/core/db';
 import { initializeWebhookMessageOwners } from '@/utils/discordagent';
 import { setupAppEmojis } from '@/utils/emojis';
@@ -150,8 +150,8 @@ export async function onStartup(client: Client) {
 	console.log(chalk.gray('Conectando a Cluster en la nube...'));
 	const mongoUri: string = databaseUri.resolve();
 	databaseUri.redact();
-	set('strictQuery', false);
-	connect(mongoUri);
+	mongooseSet('strictQuery', false);
+	mongooseConnect(mongoUri);
 
 	console.log(chalk.gray('Obteniendo documentos...'));
 	const [prefixPairs, userConfigs] = await Promise.all([
@@ -230,10 +230,22 @@ export async function onStartup(client: Client) {
 	modifyPresence(client);
 
 	console.log(chalk.rgb(158, 114, 214)('Registrando fuentes'));
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'assets', 'fonts', 'Alice-Regular.ttf'), 'headline');
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'assets', 'fonts', 'cuyabra.otf'), 'cuyabra');
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'assets', 'fonts', 'teen bd.ttf'), 'cardname');
-	GlobalFonts.registerFromPath(join(__dirname, '..', 'assets', 'fonts', 'kirsty rg.otf'), 'cardclass');
+	GlobalFonts.registerFromPath(
+		join(__dirname, '..', 'assets', 'fonts', 'Alice-Regular.ttf'),
+		'headline',
+	);
+	GlobalFonts.registerFromPath(
+		join(__dirname, '..', 'assets', 'fonts', 'cuyabra.otf'),
+		'cuyabra',
+	);
+	GlobalFonts.registerFromPath(
+		join(__dirname, '..', 'assets', 'fonts', 'teen bd.ttf'),
+		'cardname',
+	);
+	GlobalFonts.registerFromPath(
+		join(__dirname, '..', 'assets', 'fonts', 'kirsty rg.otf'),
+		'cardclass',
+	);
 	GlobalFonts.registerFromPath(
 		join(__dirname, '..', 'fonts', 'asap-condensed.semichalk.bold.ttf'),
 		'cardbody',
