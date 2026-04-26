@@ -227,7 +227,7 @@ const options = new CommandOptions()
 		'para usar PuréScript (junto a `-c`); reemplaza la función de `<mensaje>`',
 	);
 
-const flags = new CommandTags().add('COMMON', 'MAINTENANCE');
+const flags = new CommandTags().add('COMMON');
 
 const command = new Command(
 	{
