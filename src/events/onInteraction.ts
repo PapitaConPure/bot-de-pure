@@ -27,7 +27,7 @@ import { type StatsDocument, StatsModel } from '../models/stats';
 import { auditRequest } from '../systems/others/auditor';
 
 export async function onInteraction(interaction: Interaction) {
-	if (interaction.isMessageComponent()) {
+	if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
 		if (await isUsageBanned(interaction.user))
 			return handleBlockedInteraction(interaction).catch(console.error);
 
@@ -190,6 +190,7 @@ async function handleAction(
 }
 
 async function handleComponent(interaction: AnyCommandInteraction) {
+	console.log({ customId: interaction.customId });
 	if (!interaction.customId) return handleUnknownInteraction(interaction);
 
 	try {
@@ -199,6 +200,7 @@ async function handleComponent(interaction: AnyCommandInteraction) {
 
 		console.log(commandName, commandFnName, funcStream);
 
+		console.log({ commandName, commandFnName });
 		if (!commandName || !commandFnName) return handleUnknownInteraction(interaction);
 
 		const command: Command | undefined =
