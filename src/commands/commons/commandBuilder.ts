@@ -164,6 +164,11 @@ type ButtonResponseFunction = (
 	...args: string[]
 ) => Promise<unknown>;
 
+type GlobalButtonResponseFunction = (
+	interaction: ButtonInteraction,
+	...args: string[]
+) => Promise<unknown>;
+
 type SelectMenuResponseFunction = (
 	interaction: AnySelectMenuInteraction<'cached'>,
 	...args: string[]
@@ -346,6 +351,17 @@ export class Command<TOptions extends CommandOptions | undefined = undefined> {
 	 */
 	setButtonResponse(
 		responseFn: ButtonResponseFunction,
+		options: InteractionResponseOptions = {},
+	) {
+		return this.setFunction(responseFn as AnyCommandComponentResponseFunction, options);
+	}
+
+	/**
+	 * @param responseFn Una función NO anónima a ejecutar al recibir una interacción
+	 * @param options Opciones adicionales para controlar las respuestas de interacción
+	 */
+	setGlobalButtonResponse(
+		responseFn: GlobalButtonResponseFunction,
 		options: InteractionResponseOptions = {},
 	) {
 		return this.setFunction(responseFn as AnyCommandComponentResponseFunction, options);
