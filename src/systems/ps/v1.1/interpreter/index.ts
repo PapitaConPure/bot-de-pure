@@ -1026,10 +1026,14 @@ export class Interpreter {
 		const { test, consequent, alternate } = node;
 
 		const testValue = this.evaluateAs(test, scope, ValueKinds.BOOLEAN, false);
-		const consequentValue = this.evaluate(consequent, scope, mustBeDeclared);
-		const alternateValue = this.evaluate(alternate, scope, mustBeDeclared);
 
-		return testValue.value ? consequentValue : alternateValue;
+		if (testValue.value) {
+			const consequentValue = this.evaluate(consequent, scope, mustBeDeclared);
+			return consequentValue;
+		} else {
+			const alternateValue = this.evaluate(alternate, scope, mustBeDeclared);
+			return alternateValue;
+		}
 	}
 
 	/**@description Evalúa una expresión binaria "luego" y devuelve el valor resultante de la operación.*/
