@@ -2,7 +2,7 @@ import type { ApplicationEmoji, ComponentEmojiResolvable } from 'discord.js';
 import { ClientNotFoundError, client } from '@/core/client';
 import Logger from '@/utils/logs';
 
-const { debug, info, warn } = Logger('DEBUG', 'Emojis');
+const { debug, info, warn } = Logger('INFO', 'Emojis');
 
 export interface StaticBotEmoji {
 	fallback: string;
