@@ -27,7 +27,10 @@ const TuberInputSchema = new Mongoose.Schema({
 export const TuberSchema = new Mongoose.Schema({
 	id: {
 		type: String,
-		default: 'tid',
+		required: true,
+	},
+	guildId: {
+		type: String,
 	},
 	author: {
 		type: String,
