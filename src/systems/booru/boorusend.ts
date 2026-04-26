@@ -507,14 +507,15 @@ export async function notifyUsers(
 			if (post.previewUrl) userEmbed.setThumbnail(post.previewUrl.toString());
 
 			const postRow = new ActionRowBuilder<ButtonBuilder>();
+			const dangerButtonBuilders: ButtonBuilder[] = [];
 
-			for (const button of containerButtonRow.components)
-				if (
-					button.style === ButtonStyle.Link
-					|| button.style === ButtonStyle.Primary
-					|| button.style === ButtonStyle.Danger
-				)
+			for (const button of containerButtonRow.components) {
+				if (button.style === ButtonStyle.Link)
 					postRow.addComponents(ButtonBuilder.from(button));
+
+				if (button.style === ButtonStyle.Danger)
+					dangerButtonBuilders.push(ButtonBuilder.from(button));
+			}
 
 			postRow.addComponents(
 				new ButtonBuilder()
@@ -522,6 +523,8 @@ export async function notifyUsers(
 					.setEmoji(getBotEmojiResolvable('eyeAccent'))
 					.setStyle(ButtonStyle.Link),
 			);
+
+			for (const buttonBuilder of dangerButtonBuilders) postRow.addComponents(buttonBuilder);
 
 			return member
 				.send({
