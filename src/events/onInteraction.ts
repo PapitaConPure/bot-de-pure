@@ -190,7 +190,6 @@ async function handleAction(
 }
 
 async function handleComponent(interaction: AnyCommandInteraction) {
-	console.log({ customId: interaction.customId });
 	if (!interaction.customId) return handleUnknownInteraction(interaction);
 
 	try {
@@ -198,9 +197,6 @@ async function handleComponent(interaction: AnyCommandInteraction) {
 		const commandName = funcStream.shift();
 		const commandFnName = funcStream.shift();
 
-		console.log(commandName, commandFnName, funcStream);
-
-		console.log({ commandName, commandFnName });
 		if (!commandName || !commandFnName) return handleUnknownInteraction(interaction);
 
 		const command: Command | undefined =
