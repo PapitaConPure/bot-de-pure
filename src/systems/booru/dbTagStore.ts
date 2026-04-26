@@ -26,7 +26,11 @@ export class MongooseTagStore implements TagStore {
 
 	async getMany(names: Iterable<string>): Promise<Tag[]> {
 		try {
-			const tagDocuments = await this.#model.find({ name: { $in: [...names] } });
+			const tagDocuments = await Promise.race([
+				this.#model.find({ name: { $in: [...names] } }),
+				makeTimeoutRejectionPromise(),
+			]);
+
 			return tagDocuments.map((doc) => this.#mapper.fromDocument(doc));
 		} catch {
 			return [];
@@ -35,7 +39,11 @@ export class MongooseTagStore implements TagStore {
 
 	async getOne(name: string): Promise<Tag | undefined> {
 		try {
-			const tagDocument = await this.#model.findOne({ name: name }).lean();
+			const tagDocument = await Promise.race([
+				this.#model.findOne({ name: name }).lean(),
+				makeTimeoutRejectionPromise(),
+			]);
+
 			if (!tagDocument) return undefined;
 			return this.#mapper.fromDocument(tagDocument);
 		} catch {
@@ -76,6 +84,12 @@ export class MongooseTagStore implements TagStore {
 
 		await attemptManyTimes(() => this.#model.deleteMany(query), 2);
 	}
+}
+
+function makeTimeoutRejectionPromise(ms: number = 20_000) {
+	return new Promise<never>((_, reject) =>
+		setTimeout(() => reject(new Error('DB took too long')), ms),
+	);
 }
 
 async function attemptManyTimes(fn: () => Promise<unknown>, times: number): Promise<void> {
