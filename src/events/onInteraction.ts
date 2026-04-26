@@ -27,6 +27,13 @@ import { type StatsDocument, StatsModel } from '../models/stats';
 import { auditRequest } from '../systems/others/auditor';
 
 export async function onInteraction(interaction: Interaction) {
+	if (interaction.isMessageComponent()) {
+		if (await isUsageBanned(interaction.user))
+			return handleBlockedInteraction(interaction).catch(console.error);
+
+		return handleComponent(interaction as AnyCommandInteraction);
+	}
+
 	if (!interaction.inCachedGuild())
 		return handleBlockedInteraction(interaction).catch(console.error);
 
@@ -44,9 +51,6 @@ export async function onInteraction(interaction: Interaction) {
 	if (interaction.isChatInputCommand()) return handleCommand(interaction, stats);
 
 	if (interaction.isContextMenuCommand()) return handleAction(interaction, stats);
-
-	if (interaction.isButton() || interaction.isStringSelectMenu() || interaction.isModalSubmit())
-		return handleComponent(interaction);
 
 	return handleUnknownInteraction(interaction);
 }
@@ -288,7 +292,7 @@ async function handleBlockedInteraction(interaction: Interaction) {
 			flags: MessageFlags.Ephemeral,
 		});
 	} else {
-		interaction.respond([]);
+		return interaction.respond([]);
 	}
 }
 
@@ -300,7 +304,7 @@ async function handleUnknownInteraction(interaction: Interaction) {
 			flags: MessageFlags.Ephemeral,
 		});
 	} else {
-		interaction.respond([]);
+		return interaction.respond([]);
 	}
 }
 
@@ -312,7 +316,7 @@ async function handleHuskInteraction(interaction: Interaction) {
 			flags: MessageFlags.Ephemeral,
 		});
 	} else {
-		interaction.respond([]);
+		return interaction.respond([]);
 	}
 }
 //#endregion
