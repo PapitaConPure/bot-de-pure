@@ -1650,10 +1650,10 @@ const command = new Command('feed', tags)
 
 		return interaction.showModal(modal).catch(auditError);
 	})
-	.setButtonResponse(async function deletePost(interaction, manageableBy, isNotFeed) {
+	.setGlobalButtonResponse(async function deletePost(interaction, manageableBy, isNotFeed) {
 		const translator = await Translator.from(interaction.user.id);
 
-		if (manageableBy !== interaction.user.id && isNotModerator(interaction.member))
+		if (!interaction.inCachedGuild() || (manageableBy !== interaction.user.id && isNotModerator(interaction.member)))
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
 				flags: MessageFlags.Ephemeral,
