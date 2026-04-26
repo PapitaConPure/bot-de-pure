@@ -259,7 +259,7 @@ export async function executeTuber(
 	if (replyStacks.content.length) replyObject.content = replyStacks.content.join('\n');
 
 	if (overwrite) {
-		tuber.inputs = [newInputVariant.map(v => v.json)];
+		tuber.inputs = [newInputVariant.map((v) => v.json)];
 	} else {
 		tuber.inputs ??= [];
 		const savedVariants = tuber.inputs.map((variant) => variant.map((i) => Input.from(i)));
