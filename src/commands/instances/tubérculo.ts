@@ -16,11 +16,7 @@ import {
 } from 'discord.js';
 import type { AnyCommandInteraction, ComplexCommandRequest } from 'types/commands';
 import { Translator } from '@/i18n';
-import type {
-	TuberDocument,
-	TuberInputVariantDocument,
-	TuberSchemaType,
-} from '@/models/tubers';
+import type { TuberDocument, TuberInputVariantDocument, TuberSchemaType } from '@/models/tubers';
 import TuberModel from '@/models/tubers';
 import { getWikiPageComponentsV2 } from '@/systems/others/wiki';
 import type { AdvancedTubercle, Tubercle } from '@/systems/ps/common/executeTuber';
@@ -791,8 +787,8 @@ async function viewTuber(
 
 			const inputTitle = `Entradas (variante ${inputVariant + 1} de ${pageCount})`;
 			const variant = item.inputs[inputVariant];
-			if (variant.length === 0) actuallyValid = false;
-			else inputStrings = variant.map((i) => Input.from(i).toString()).join('\n');
+			if (variant == null || variant.length === 0) actuallyValid = false;
+			else inputStrings = variant?.map((i) => Input.from(i).toString()).join('\n');
 
 			if (actuallyValid) {
 				embed.addFields({
