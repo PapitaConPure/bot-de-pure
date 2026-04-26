@@ -52,7 +52,7 @@ export interface InputJSONData {
 	kind: ValueKind;
 	optional: boolean;
 	spread: boolean;
-	desc: string;
+	desc?: string | null;
 }
 
 export class Input {

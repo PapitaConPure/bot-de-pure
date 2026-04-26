@@ -259,8 +259,7 @@ export async function executeTuber(
 	if (replyStacks.content.length) replyObject.content = replyStacks.content.join('\n');
 
 	if (overwrite) {
-		//@ts-expect-error Hack para guardar
-		tuber.inputs = [newInputVariant];
+		tuber.inputs = [newInputVariant.map(v => v.json)];
 	} else {
 		tuber.inputs ??= [];
 		const savedVariants = tuber.inputs.map((variant) => variant.map((i) => Input.from(i)));
@@ -292,20 +291,48 @@ export async function executeTuber(
 
 			savedVariants.push(newInputVariant);
 
-			//@ts-expect-error Hack para guardar
 			tuber.inputs = savedVariants;
-			//@ts-expect-error Hack para guardar
 			tuber.inputs.sort((a, b) => a.length - b.length);
 		}
 	}
 
 	let mergedSaveData: Map<string, RuntimeValue>;
-	if (typeof tuber.saved === 'object') mergedSaveData = new Map(Object.entries(tuber.saved));
-	else mergedSaveData = new Map();
+	if (typeof tuber.saved === 'object')
+		mergedSaveData = new Map(
+			([...tuber.saved.entries()] as [string, RuntimeValue][]).map(([key, value]) => [
+				key,
+				{
+					kind: value.kind,
+					...('value' in value ? { value: value.value } : {}),
+					...(value.kind === ValueKinds.LIST ? { elements: value.elements } : {}),
+					...(value.kind === ValueKinds.REGISTRY ? { entries: value.entries } : {}),
+					...(value.kind === ValueKinds.FUNCTION
+						? {
+								name: value.name,
+								args: value.args,
+								self: value.self,
+								lambda: value.lambda,
+								...(value.lambda
+									? { expression: value.expression }
+									: { body: value.body, scope: value.scope }),
+							}
+						: {}),
+					...(value.kind === ValueKinds.NATIVE_FN
+						? {
+								self: value.self,
+								call: value.call,
+							}
+						: {}),
+				} as RuntimeValue,
+			]),
+		);
+	else mergedSaveData = new Map<string, RuntimeValue>();
 
-	for (const [id, value] of saveTable)
+	for (const [id, value] of saveTable) {
+		const { compareTo, equals, ...actualValue } = value;
 		if (value.kind === ValueKinds.NADA) mergedSaveData.delete(id);
-		else mergedSaveData.set(id, value);
+		else mergedSaveData.set(id, actualValue as RuntimeValue);
+	}
 
 	const maxKiBytes = 128;
 	const savedBytes = sizeof(mergedSaveData);
