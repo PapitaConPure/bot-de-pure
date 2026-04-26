@@ -48,15 +48,12 @@ const logOptions = {
 	feedSuscriptions: false,
 };
 
-const confirm = () => console.log(chalk.green('Hecho.'));
-
 export async function onStartup(client: Client) {
 	globalConfigs.maintenance = '1';
 
 	console.log(chalk.cyan('Obteniendo nombre de host...'));
 	await resolveHost({
 		fallback: 'Desconocido',
-		onSuccess: confirm,
 		onFailure: () =>
 			console.log(
 				chalk.yellowBright(
@@ -73,7 +70,6 @@ export async function onStartup(client: Client) {
 			name: 'loading',
 			state: `⏳ Despertando...`,
 		});
-		confirm();
 	} catch (error) {
 		console.log(
 			chalk.bold.redBright(
@@ -85,21 +81,17 @@ export async function onStartup(client: Client) {
 
 	console.log(chalk.magenta('Preparando definiciones de emojis...'));
 	await setupAppEmojis();
-	confirm();
 
 	console.log(chalk.magenta('Obteniendo miembros de servidores de Discord...'));
 	await fetchAllGuildMembers();
-	confirm();
 
 	console.log(chalk.bold.magentaBright('Compilando comandos...'));
 	const commands = await fetchCommandsFromFiles();
 	registerCommands(commands, false);
-	confirm();
 
 	console.log(chalk.bold.magentaBright('Compilando acciones...'));
 	const actions = await fetchActionsFromFiles();
 	registerActions(actions, false);
-	confirm();
 
 	if (remoteStartup)
 		console.log(chalk.redBright.bold('Se inicializará para un entorno de producción.'));
@@ -120,7 +112,6 @@ export async function onStartup(client: Client) {
 		});
 
 		logOptions.slash && console.log(`Comandos registrados:`, restGlobal);
-		confirm();
 	} catch (error) {
 		console.log(
 			chalk.bold.redBright(
@@ -150,11 +141,9 @@ export async function onStartup(client: Client) {
 	globalConfigs.logch = globalConfigs.slots.slot1.channels.resolve(
 		'870347940181471242',
 	) as GuildTextBasedChannel;
-	confirm();
 
 	console.log(chalk.rgb(255, 0, 0)('Preparando Reproductor de YouTube...'));
 	await prepareTracksPlayer(client);
-	confirm();
 
 	//Cargado de datos de base de datos
 	console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));
@@ -239,7 +228,6 @@ export async function onStartup(client: Client) {
 
 	console.log(chalk.gray('Iniciando cambios de presencia periódicos'));
 	modifyPresence(client);
-	confirm();
 
 	console.log(chalk.rgb(158, 114, 214)('Registrando fuentes'));
 	GlobalFonts.registerFromPath(join(__dirname, '..', 'assets', 'fonts', 'Alice-Regular.ttf'), 'headline');
