@@ -151,7 +151,6 @@ export default function Logger(logLevel: LogLevelKey, prefix: string = '') {
 				prefix,
 				logLevelOutput('ERROR', err, ...data),
 			);
-		console.error(err);
 	}
 
 	/**
