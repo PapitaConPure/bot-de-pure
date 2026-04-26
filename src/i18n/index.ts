@@ -165,14 +165,14 @@ const localesObject = {
 		en: paragraph(
 			'⛔ You probably used a command while I was restarting. Use the command again in a few seconds and it should work',
 			'If the command keeps getting rejected, I may be in maintenance or not have enough permissions in this channel',
-			'It may also be because you were banned from using Bot de Puré',
+			"It could also be the case that you've been banned from using Bot de Puré",
 			`If you're not sure, you can tell my creator about the problem: <@${subl(0)}>`,
 		),
 		ja: paragraph(
-			'⛔ You probably used a command while I was restarting. Use the command again in a few seconds and it should work',
-			'If the command keeps getting rejected, I may be in maintenance or not have enough permissions in this channel',
-			'It may also be because you were banned from using Bot de Puré',
-			`If you're not sure, you can tell my creator about the problem: <@${subl(0)}>`,
+			'⛔ 再起動中にコマンドが実行された可能性があります。数秒待ってからもう一度お試しください',
+			'それでもコマンドが拒否される場合は、メンテナンス中か、このチャンネルでの権限が不足している可能性があります',
+			'また、Bot de Puréの使用が禁止されている可能性もあります',
+			`原因が分からない場合は、作成者に報告してください：<@${subl(0)}>`,
 		),
 	},
 	insufficientPermissions: {
@@ -204,7 +204,7 @@ const localesObject = {
 	expiredWizardData: {
 		es: '❌ Este asistente hace uso de memoria de sesión, pero no se encontró ninguna sesión. Vuelve a usar el comando para crear una nueva sesión de este asistente',
 		en: '❌ This Wizard uses session memory, but no session was found. Use the command again to start a new session of this Wizard',
-		ja: '❌ This Wizard uses session memory, but no session was found. Use the command again to start a new session of this Wizard',
+		ja: '❌ このウィザードはセッションデータを使用しますが、セッションが見つかりませんでした。コマンドを再度実行して新しいセッションを開始してください',
 	},
 
 	missingMemberChannelPermissionsTitle: {
@@ -228,12 +228,12 @@ const localesObject = {
 			'Soy una niña educada, así que no haré nada hasta que me den permiso. Puedes comentarle el asunto a algún moderador del server para que lo revise',
 		),
 		en: paragraph(
-			'I don\t have the required permissions to execute the command or action that you requested in this channel',
+			"I don't have the required permissions to execute the command or action that you requested in this channel",
 			"I'm a well educated girl, so I won't do anything until I'm given permission to do so. You can ask a mod to review and address the issue",
 		),
 		ja: paragraph(
-			'I don\t have the required permissions to execute the command or action that you requested in this channel',
-			"I'm a well educated girl, so I won't do anything until I'm given permission to do so. You can ask a mod to review and address the issue",
+			'このチャンネルでは、リクエストされたコマンドや操作を実行するための権限がありません',
+			'お行儀のいい子なので、許可がもらえるまで何もしません。モデレーターに相談して確認してもらってください',
 		),
 	},
 
@@ -530,11 +530,13 @@ const localesObject = {
 		ja: `${subl(0)}`,
 	},
 
+	//Special entry for number formatting
 	genericNumberOfPrefix: {
 		es: '',
 		en: '',
 		ja: '',
 	},
+	//Special entry for number formatting
 	genericNumberOfSuffix: {
 		es: ' de',
 		en: ' of',
@@ -596,7 +598,7 @@ const localesObject = {
 	cancelledStepName: {
 		es: 'Asistente cancelado',
 		en: 'Wizard cancelled',
-		ja: 'Wizard cancelled',
+		ja: 'ウィザードがキャンセルされました',
 	},
 	welcomeStepFooterName: {
 		es: 'Bienvenida',
@@ -920,27 +922,27 @@ const localesObject = {
 	aislarNoTimeProvided: {
 		es: '⚠️ Debes indicar la duración del castigo en minutos',
 		en: '⚠️ You need to indicate the timeout duration in minutes',
-		ja: '⚠️ You need to indicate the timeout duration in minutes',
+		ja: '⚠️ タイムアウトの時間（分）を指定してください',
 	},
 	aislarInvalidTime: {
 		es: '⚠️ Debes indicar la duración del castigo en minutos. Ingresa 0 para revocarlo',
 		en: '⚠️ You need to indicate the timeout duration in minutes. Use 0 to revoke a timeout',
-		ja: '⚠️ You need to indicate the timeout duration in minutes. Use 0 to revoke a timeout',
+		ja: '⚠️ タイムアウトの時間（分）を指定してください。0を入力すると解除されます',
 	},
 	aislarNoMembersMentioned: {
 		es: '⚠️ Debes mencionar al menos un miembro a aislar',
 		en: '⚠️ You need to mention at least one member to timeout',
-		ja: '⚠️ You need to mention at least one member to timeout',
+		ja: '⚠️ 少なくとも1人のメンバーをメンションしてください',
 	},
 	aislarSomeMembersWereInvalid: {
 		es: 'Algunos de los miebros que se intentó aislar fueron inválidos',
 		en: 'Some of the members you tried to timeout were invalid',
-		ja: 'Some of the members you tried to timeout were invalid',
+		ja: '指定されたメンバーの一部は無効でした',
 	},
 	aislarNoUpdatedMembers: {
 		es: '⚠️ No pude actualizar ninguno de los miembros mencionados. Revisa que tenga permisos para administrar miembros',
 		en: "⚠️ None of the mentioned members were updated. It could be that I don't have permission to manage members",
-		ja: "⚠️ None of the mentioned members were updated. It could be that I don't have permission to manage members",
+		ja: '⚠️ メンションされたメンバーを更新できませんでした。メンバー管理の権限があるか確認してください',
 	},
 
 	anarquiaCouldNotLoadEmoji: {
@@ -1016,18 +1018,18 @@ const localesObject = {
 
 	cultivarUnauthorized: {
 		es: `¡Solo puedes cultivar una vez por día! Podrás volver a cultivar <t:${subl(0)}:R>`,
-		en: `You can only cultivate once per day! You'll be able to cultivate again <t:${subl(0)}:R>`,
-		ja: `You can only cultivate once per day! You'll be able to cultivate again <t:${subl(0)}:R>`,
+		en: `You can only farm once per day! You'll be able to farm again <t:${subl(0)}:R>`,
+		ja: `栽培は1日に1回しかできません！次に栽培できるのは<t:${subl(0)}:R>です。`,
 	},
 	cultivarTitle: {
 		es: '¡Cultivaste papas!',
 		en: 'You grew potatoes!',
-		ja: 'You grew potatoes!',
+		ja: 'じゃがいもを収穫しました！',
 	},
 	cultivarDescription: {
 		es: () => `Ahora tienes ${getBotEmoji('prc')} ${subl(0)}`,
 		en: () => `You now have ${getBotEmoji('prc')} ${subl(0)}`,
-		ja: () => `You now have ${getBotEmoji('prc')} ${subl(0)}`,
+		ja: () => `現在の所持数：${getBotEmoji('prc')} ${subl(0)}`,
 	},
 
 	transferAmountExpected: {
@@ -1071,12 +1073,12 @@ const localesObject = {
 	transferTitle: {
 		es: 'Transferencia completada',
 		en: 'Transfer completed',
-		ja: 'Transfer completed',
+		ja: '送金が完了しました',
 	},
 	transferAuthorName: {
 		es: 'Comprobante de pago',
 		en: 'Receipt of payment',
-		ja: 'Receipt of payment',
+		ja: '支払い明細',
 	},
 	transferFromName: {
 		es: 'De',
@@ -1442,8 +1444,8 @@ const localesObject = {
 	},
 	imgurUploadErrorDesc: {
 		es: 'Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global',
-		en: 'Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global',
-		ja: 'Si es un problema de frecuencia de subida, prueba registrar tu propia aplicación para subir imágenes sin restricción global',
+		en: 'If this is an upload rate limit issue, try registering your own application to upload images without global restrictions',
+		ja: 'アップロード頻度の制限が原因の場合は、自分のアプリを登録してグローバル制限なしで画像をアップロードしてみてください',
 	},
 
 	saucenaoRegisterTitle: {
@@ -1553,302 +1555,116 @@ const localesObject = {
 		ja: `画像#${subl(0)}の部分結果`,
 	},
 
-	poll: {
-		es: 'Encuesta',
-		en: 'Poll',
-		ja: 'ポール',
-	},
-	pollWizardAuthor: {
-		es: 'Asistente de configuración de Encuestas',
-		en: 'Poll Configuration Wizard',
-		ja: 'Poll Configuration Wizard',
-	},
-	pollResultsAuthor: {
-		es: 'Resultados de encuesta',
-		en: 'Poll results',
-		ja: 'Poll results',
-	},
-	pollCancelledStep: {
-		es: 'Se canceló la configuración de Encuesta',
-		en: 'The Polls Wizard has been terminated',
-		ja: 'The Polls Wizard has been terminated',
-	},
-	pollFinishedStep: {
-		es: 'Se finalizó la configuración de Encuesta',
-		en: 'The Polls Wizard has been closed',
-		ja: 'The Polls Wizard has been closed',
-	},
-	pollOngoingStepFooterName: {
-		es: 'Encuesta en progreso',
-		en: 'Poll in progress',
-		ja: 'Poll in progress',
-	},
-	pollConcludedStepFooterName: {
-		es: 'Encuesta finalizada',
-		en: 'Poll concluded',
-		ja: 'Poll concluded',
-	},
-	pollWelcomeValue: {
-		es: 'Este asistente te guiará para realizar una encuesta al server. Comienza cuando gustes',
-		en: 'This Wizard will guide you through making a server poll. Start whenever you want',
-		ja: 'This Wizard will guide you through making a server poll. Start whenever you want',
-	},
-	pollQuestionPromptTitle: {
-		es: 'Haz una Pregunta',
-		en: 'Ask a question',
-		ja: 'Ask a question',
-	},
-	pollQuestion: {
-		es: 'Pregunta',
-		en: 'Question',
-		ja: 'Question',
-	},
-	pollAnswersName: {
-		es: 'Lista de Respuestas',
-		en: 'Answers List',
-		ja: 'Answers List',
-	},
-	pollAnswersValueEmpty: {
-		es: 'No has añadido respuestas todavía',
-		en: "You haven't added any answers yet",
-		ja: "You haven't added any answers yet",
-	},
-	pollAnswerPromptInput: {
-		es: 'Respuesta',
-		en: 'Answer',
-		ja: 'Answer',
-	},
-	pollAnswersFooterName: {
-		es: 'Respuestas',
-		en: 'Answers',
-		ja: 'Answers',
-	},
-	pollFinishTitle: {
-		es: 'Finalizar creación',
-		en: 'Finish configuration',
-		ja: 'Finish configuration',
-	},
-	pollFinishTimeName: {
-		es: 'Duración de Encuesta',
-		en: 'Poll Duration',
-		ja: 'Poll Duration',
-	},
-	pollFinishFooterName: {
-		es: 'Finalizar',
-		en: 'Finish',
-		ja: 'Finish',
-	},
-	pollFinishButtonBegin: {
-		es: 'Iniciar en...',
-		en: 'Begin in...',
-		ja: 'Begin in...',
-	},
-	pollFinishButtonReset: {
-		es: 'Reestablecer',
-		en: 'Reset',
-		ja: 'Reset',
-	},
-	pollAnswerPromptTitleAdd: {
-		es: 'Añadir Respuesta',
-		en: 'Add Answer',
-		ja: 'Add Answer',
-	},
-	pollAnswerPromptTitleRemove: {
-		es: 'Quitar Respuesta',
-		en: 'Remove Answer',
-		ja: 'Remove Answer',
-	},
-	pollChannelPromptTitle: {
-		es: 'Enviar Encuesta',
-		en: 'Send Poll',
-		ja: 'Send Poll',
-	},
-	pollChannelPollLabel: {
-		es: 'Canal de encuesta',
-		en: 'Poll Channel',
-		ja: 'Poll Channel',
-	},
-	pollChannelPollPlaceholder: {
-		es: 'Nombre, #nombre o ID',
-		en: 'Name, #name or ID',
-		ja: 'Name, #name or ID',
-	},
-	pollChannelResultsLabel: {
-		es: 'Canal de resultados',
-		en: 'Results Channel',
-		ja: 'Results Channel',
-	},
-	pollChannelResultsPlaceholder: {
-		es: 'Nombre, #nombre, ID o nada',
-		en: 'Name, #name, ID or nothing',
-		ja: 'Name, #name, ID or nothing',
-	},
-	pollTimePromptTitle: {
-		es: 'Modificar tiempo',
-		en: 'Modify time',
-		ja: 'Modify time',
-	},
-	pollResultsName: {
-		es: 'Respuestas de encuesta',
-		en: 'Poll Answers',
-		ja: 'Poll Answers',
-	},
-	pollEndTimeName: {
-		es: 'Finalización',
-		en: 'Conclusion',
-		ja: 'Conclusion',
-	},
-	pollVoteReportAuthor: {
-		es: 'Voto recibido',
-		en: 'Vote received',
-		ja: 'Vote received',
-	},
-	pollVoteReportDeleted: {
-		es: '_<Eliminó su voto>_',
-		en: '_<Removed their vote>_',
-		ja: '_<Removed their vote>_',
-	},
-	pollVoteSuccess: {
-		es: '✅ ¡Voto registrado!',
-		en: '✅ Vote registered!',
-		ja: '✅ Vote registered!',
-	},
-	pollVoteSwapSuccess: {
-		es: '✅ ¡Voto cambiado!',
-		en: '✅ Vote swapped!',
-		ja: '✅ Vote swapped!',
-	},
-	pollVoteRemoveSuccess: {
-		es: '✅ Voto eliminado',
-		en: '✅ Vote deleted',
-		ja: '✅ Vote deleted',
-	},
-	pollVoteError: {
-		es: '⚠️ ¡Parece que la encuesta ya terminó!',
-		en: '⚠️ Seems like the poll has ended!',
-		ja: '⚠️ Seems like the poll has ended!',
-	},
-	pollButtonToggleAnon: {
-		es: 'Voto anónimo',
-		en: 'Anonymous vote',
-		ja: 'Anonymous vote',
-	},
-	pollInsufficientTime: {
-		es: '⚠️ ¡Tiempo insuficiente! Pon al menos 10 segundos',
-		en: '⚠️ Insufficient time! Set at least 10 seconds',
-		ja: '⚠️ Insufficient time! Set at least 10 seconds',
-	},
-
 	booruNotifTitle: {
 		es: 'Notificación de Feed Suscripto',
 		en: 'Subscribed Feed Notification',
-		ja: 'Subscribed Feed Notification',
+		ja: '購読フィードの通知',
 	},
 	booruNotifDescription: {
 		es: '¡Esta publicación podría interesarte!',
 		en: 'This post could catch your eye!',
-		ja: 'This post could catch your eye!',
+		ja: 'この投稿はあなたの興味に合うかもしれません！',
 	},
 	booruNotifTagsName: {
 		es: 'Tags de Interés',
 		en: 'Tags of Interest',
-		ja: 'Tags of Interest',
+		ja: '興味のあるタグ',
 	},
 
 	feedAuthor: {
 		es: 'Asistente de configuración de Feed de imágenes',
 		en: 'Imageboard Feed Configuration Wizard',
-		ja: 'Imageboard Feed Configuration Wizard',
+		ja: '画像フィード設定ウィザード',
 	},
 	feedCancelledStep: {
 		es: 'Se canceló la configuración de Feeds',
 		en: 'The Feeds Wizard has been terminated',
-		ja: 'The Feeds Wizard has been terminated',
+		ja: 'フィード設定ウィザードがキャンセルされました',
 	},
 	feedFinishedStep: {
 		es: 'Se finalizó la configuración de Feeds',
 		en: 'The Feeds Wizard has been closed',
-		ja: 'The Feeds Wizard has been closed',
+		ja: 'フィード設定ウィザードが完了しました',
 	},
 	feedSelectFeed: {
 		es: 'Selecciona un Feed...',
 		en: 'Select a Feed...',
-		ja: 'Select a Feed...',
+		ja: 'フィードを選択してください...',
 	},
 	feedViewUrlsName: {
 		es: 'Enlaces',
 		en: 'Links',
-		ja: 'Links',
+		ja: 'リンク',
 	},
 	feedViewTagsLinkName: {
 		es: 'Seguir Tags',
 		en: 'Follow Tags',
-		ja: 'Follow Tags',
+		ja: 'タグをフォロー',
 	},
 	feedSetTagsAdd: {
 		es: `Se comenzaron a seguir las tags: ${subl(0)}`,
 		en: `Started following the tags: ${subl(0)}`,
-		ja: `Started following the tags: ${subl(0)}`,
+		ja: `次のタグをフォローしました：${subl(0)}`,
 	},
 	feedSetTagsRemove: {
 		es: `Se dejaron de seguir las tags: ${subl(0)}`,
 		en: `Stopped following the tags: ${subl(0)}`,
-		ja: `Stopped following the tags: ${subl(0)}`,
+		ja: `次のタグのフォローを解除しました：${subl(0)}`,
 	},
 	feedSetTagsUnchanged: {
 		es: '⚠️ No se modificaron las tags seguidas. Asegúrate de estar siguiendo 6 tags o menos',
 		en: '⚠️ Followed tags were not modified. Make sure not to be following more than 6 tags',
-		ja: '⚠️ Followed tags were not modified. Make sure not to be following more than 6 tags',
+		ja: '⚠️ フォロー中のタグは変更されませんでした。タグは6個以下にしてください',
 	},
 	feedSetTagsButtonView: {
 		es: 'Ver Tags Seguidas',
 		en: 'View Followed Tags',
-		ja: 'View Followed Tags',
+		ja: 'フォロー中のタグを見る',
 	},
 	feedSetTagsButtonAdd: {
 		es: 'Seguir Tags',
 		en: 'Follow Tags',
-		ja: 'Follow Tags',
+		ja: 'タグをフォロー',
 	},
 	feedSetTagsButtonRemove: {
 		es: 'Dejar de Seguir Tags',
 		en: 'Unfollow Tags',
-		ja: 'Unfollow Tags',
+		ja: 'タグのフォローを解除',
 	},
 	feedEditTagsTitleAdd: {
 		es: 'Seguir Tags...',
 		en: 'Follow Tags...',
-		ja: 'Follow Tags...',
+		ja: 'タグをフォロー...',
 	},
 	feedEditTagsTitleRemove: {
 		es: 'Dejar de Seguir Tags...',
 		en: 'Unfollow Tags...',
-		ja: 'Unfollow Tags...',
+		ja: 'タグのフォローを解除...',
 	},
 	feedEditTagsInputAdd: {
 		es: 'Tags que quieres seguir, sin comas',
 		en: 'Tags you wanna follow, without commas',
-		ja: 'Tags you wanna follow, without commas',
+		ja: 'フォローしたいタグ（カンマなし）',
 	},
 	feedEditTagsInputRemove: {
 		es: 'Tags a dejar de seguir, sin comas',
 		en: 'Tags you wanna unfollow, without commas',
-		ja: 'Tags you wanna unfollow, without commas',
+		ja: 'フォローを解除したいタグ（カンマなし）',
 	},
 	feedDeletePostTitle: {
 		es: 'Post Eliminado',
 		en: 'Post Deleted',
-		ja: 'Post Deleted',
+		ja: '投稿が削除されました',
 	},
 	feedDeletePostAdvice: {
 		es: 'Puedes blacklistear tags si colocas un "-" delante',
 		en: 'You can blacklist a tag if you put a "-" in front',
-		ja: 'You can blacklist a tag if you put a "-" in front',
+		ja: 'タグの前に「-」を付けるとブラックリストに追加できます',
 	},
 	feedDeletePostTagsName: {
 		es: 'Tags Rescatadas',
 		en: 'Recovered Tags',
-		ja: 'Recovered Tags',
+		ja: '復元されたタグ',
 	},
 	feedDeletePostLinkName: {
 		es: 'Enlace',
