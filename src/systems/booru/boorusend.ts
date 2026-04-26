@@ -3,7 +3,6 @@ import type {
 	ActionRow,
 	ButtonComponent,
 	Collection,
-	ContainerComponent,
 	GuildMember,
 	Message,
 	Snowflake,
@@ -461,8 +460,12 @@ export async function notifyUsers(
 
 	if (!sent) throw 'Se esperaba un mensaje para el cuál notificar';
 
-	const container = sent.components?.[0] as ContainerComponent;
-	if (!container) throw 'Se esperaba un mensaje de Feed válido';
+	if (!sent.components) throw new Error('Se esperaba un mensaje de Feed válido');
+
+	debug('Obtaining container and buttons row from message...');
+	const container = sent.components.find((c) => c.type === ComponentType.Container);
+	const containerButtonRow = getPostButtonsFromComponents(sent.components);
+	if (!container || !containerButtonRow) throw new Error('Se esperaba un mensaje de Feed válido');
 
 	const channel = sent.channel;
 	if (!channel) throw 'No se encontró un canal para el mensaje enviado';
@@ -476,12 +479,6 @@ export async function notifyUsers(
 	}
 
 	info('Se encontraron suscripciones aplicables, intentando enviar notificaciones...');
-	const containerSize = container.components.length;
-	const containerButtonRow = container.components[
-		containerSize - 1
-	] as ActionRow<ButtonComponent>;
-
-	debug('Intentando enviar notificaciones...');
 	return Promise.all(
 		matchingSuscriptions.map(async ({ userId, followedTags }) => {
 			const member = members.get(userId);
@@ -509,11 +506,16 @@ export async function notifyUsers(
 				);
 			if (post.previewUrl) userEmbed.setThumbnail(post.previewUrl.toString());
 
-			const postRow = new ActionRowBuilder<ButtonBuilder>(containerButtonRow);
-			const spliceIndex = postRow.components.findLastIndex(
-				(component) => component.data.style === ButtonStyle.Link,
-			);
-			postRow.components.splice(spliceIndex + 1);
+			const postRow = new ActionRowBuilder<ButtonBuilder>();
+
+			for (const button of containerButtonRow.components)
+				if (
+					button.style === ButtonStyle.Link
+					|| button.style === ButtonStyle.Primary
+					|| button.style === ButtonStyle.Danger
+				)
+					postRow.addComponents(ButtonBuilder.from(button));
+
 			postRow.addComponents(
 				new ButtonBuilder()
 					.setURL(sent.url)
@@ -710,14 +712,18 @@ export function formatTagNameListNew(tagNames: string[], sep: string) {
 		.join(sep);
 }
 
-export function getPostUrlFromComponents(containers: TopLevelComponent[]) {
-	const container = containers.find((c) => c.type === ComponentType.Container);
+export function getPostButtonsFromComponents(topLevelComponents: TopLevelComponent[]) {
+	const container = topLevelComponents.find((c) => c.type === ComponentType.Container);
 
 	if (!container) return undefined;
 
-	const containerButtonRow = container.components.find(
+	return container.components.find(
 		(c) => c.type === ComponentType.ActionRow && c.components[0].type === ComponentType.Button,
 	) as ActionRow<ButtonComponent>;
+}
 
+export function getPostUrlFromComponents(topLevelComponents: TopLevelComponent[]) {
+	const containerButtonRow = getPostButtonsFromComponents(topLevelComponents);
+	if (!containerButtonRow) return undefined;
 	return containerButtonRow.components[0].url;
 }
