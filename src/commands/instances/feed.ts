@@ -27,7 +27,7 @@ import { getMainBooruClient } from '@/systems/booru/booruclient';
 import { addFeedToUpdateStack } from '@/systems/booru/boorufeed';
 import {
 	formatBooruPostMessage,
-	formatTagNameListNew,
+	formatTagNameList,
 	getPostUrlFromComponents,
 } from '@/systems/booru/boorusend.js';
 import { auditAction, auditError } from '@/systems/others/auditor';
@@ -1511,13 +1511,13 @@ const command = new Command('feed', tags)
 				.map((t) => t.name);
 
 			const tagEmoji = getBotEmoji('tagAccent');
-			const tagsContent = formatTagNameListNew(postOtherTags, ' ');
+			const tagsContent = formatTagNameList(postOtherTags, ' ');
 
 			const source = post.source;
 			const tagsContainer = new ContainerBuilder().setAccentColor(tenshiAltColor);
 
 			if (postArtistTags.length > 0) {
-				const artistTagsContent = formatTagNameListNew(postArtistTags, ' ');
+				const artistTagsContent = formatTagNameList(postArtistTags, ' ');
 				tagsContainer
 					.addTextDisplayComponents((textDisplay) =>
 						textDisplay.setContent(
@@ -1527,7 +1527,7 @@ const command = new Command('feed', tags)
 					.addSeparatorComponents((separator) => separator.setDivider(false));
 			}
 			if (postCharacterTags.length > 0) {
-				const characterTagsContent = formatTagNameListNew(postCharacterTags, ' ');
+				const characterTagsContent = formatTagNameList(postCharacterTags, ' ');
 				tagsContainer
 					.addTextDisplayComponents((textDisplay) =>
 						textDisplay.setContent(
@@ -1537,7 +1537,7 @@ const command = new Command('feed', tags)
 					.addSeparatorComponents((separator) => separator.setDivider(false));
 			}
 			if (postCopyrightTags.length > 0) {
-				const copyrightTagsContent = formatTagNameListNew(postCopyrightTags, ' ');
+				const copyrightTagsContent = formatTagNameList(postCopyrightTags, ' ');
 				tagsContainer
 					.addTextDisplayComponents((textDisplay) =>
 						textDisplay.setContent(
@@ -1769,7 +1769,7 @@ const command = new Command('feed', tags)
 				.setDescription(translator.getText('feedContributeDescription'))
 				.addFields({
 					name: translator.getText('feedContributeTagsName'),
-					value: formatTagNameListNew(requestTags, ' '),
+					value: formatTagNameList(requestTags, ' '),
 				});
 
 			const danbooruCreatorId = '6498';

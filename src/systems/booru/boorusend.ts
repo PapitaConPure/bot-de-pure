@@ -67,12 +67,12 @@ const sourceMappings: ReadonlyArray<{ pattern: RegExp; replacement: string }> = 
 const noSource: BooruSourceStyle = { color: Colors.Aqua, emoji: undefined };
 const unknownSource: BooruSourceStyle = { color: tenshiPeachColor, emoji: 'heartAccent' };
 
-const resMappings = {
+const resMappings: Partial<Record<string, { order: number; emote: BotEmojiName }>> = {
 	lowres: { order: 0, emote: 'lowRes' },
 	highres: { order: 1, emote: 'highRes' },
 	absurdres: { order: 2, emote: 'absurdRes' },
 	incredibly_absurdres: { order: 3, emote: 'incrediblyAbsurdRes' },
-} as const satisfies Record<string, { order: number; emote: BotEmojiName }>;
+} as const;
 
 const sexEmotes = {
 	girl: 'girl',
@@ -141,51 +141,25 @@ export async function formatBooruPostMessage(
 
 	//Filtrar tags con estilos especiales
 	debug('A punto de procesar tags especiales');
-	let maxResOrder = -1;
-	let resTag = '';
-	const sexTags: string[] = [];
 	let hasTagMe = false;
 	let hasRequestTags = false;
-	let processedPostTags = post.tags.filter((t) => {
+	const processedPostTags = post.tags.filter((t) => {
 		if (t === 'tagme') {
 			hasTagMe = true;
 			return false;
 		}
 
 		if (t.endsWith('_request')) {
-			//"commentary_request" suele venir de Danbooru y el contexto de artista se ignora en Gelbooru
+			//"commentary_request" tends to come from Danbooru, and artist context is ignored on Gelbooru
 			hasRequestTags = t !== 'commentary_request';
-			return false;
-		}
-
-		const resMapping = resMappings[t] as { order: number; emote: BotEmojiName } | undefined;
-		if (resMapping) {
-			const { order: resOrder, emote: resEmote } = resMapping;
-			if (resOrder > maxResOrder) {
-				resTag = getBotEmoji(resEmote);
-				maxResOrder = resOrder;
-			}
-			return false;
-		}
-
-		const sexTag = t.match(/([0-9]\+?)(girl|boy|futa)s?/);
-		if (sexTag) {
-			sexTags.push(`${getBotEmoji(sexEmotes[sexTag[2]])}${sexTag[1]}`);
 			return false;
 		}
 
 		return true;
 	});
 
-	debug('resTag =', resTag);
-	debug('sexTags =', sexTags);
-
-	if (sexTags.length)
-		processedPostTags = processedPostTags.filter((t) => !ignoredTagsIfSexCount.has(t));
-
-	const specialTags = [...sexTags, ...(resTag ? [resTag] : [])];
-
-	debug('specialTags =', specialTags);
+	debug('hasTagMe =', hasTagMe);
+	debug('hasRequestTags =', hasRequestTags);
 	debug('postTags =', processedPostTags);
 
 	debug('Aplicando botones adicionales...');
@@ -257,8 +231,7 @@ export async function formatBooruPostMessage(
 	//Tags
 	debug('A punto de intentar procesar las tags del Post');
 	const maxTags = data.maxGeneralTags ?? 20;
-	const actualMaxTags = Math.max(0, maxTags - specialTags.length);
-	const actualTotalTags = processedPostTags.length + specialTags.length;
+	const actualTotalTags = processedPostTags.length;
 	try {
 		let thumbnailUrl: string | undefined;
 		debug('Obteniendo información adicional de tags...');
@@ -295,16 +268,34 @@ export async function formatBooruPostMessage(
 			}
 		});
 
-		debug('artistas =', postArtistTags);
-		debug('personajes =', postCharacterTags);
-		debug('copyright =', postCopyrightTags);
-		debug('restantes =', postOtherTags);
+		const { highestResTag, sexTags, remainingTags } = extractSpecialTags(postOtherTags);
 
-		const otherTags = postOtherTags.slice(0, actualMaxTags);
-		const displayedTagsCount = Math.min(otherTags.length + specialTags.length, maxTags);
+		if (sexTags.size)
+			for (const ignoredTagIfSexCount of ignoredTagsIfSexCount)
+				remainingTags.delete(ignoredTagIfSexCount);
+
+		debug('- - - - - - - - - - - - - - - - - -');
+		debug('artistTags =', postArtistTags);
+		debug('characterTags =', postCharacterTags);
+		debug('copyrightTags =', postCopyrightTags);
+		debug('otherTags =', postOtherTags);
+		debug('- - - - - - - - - - - - - - - - - -');
+		debug('highestResTag =', highestResTag);
+		debug('sexTags =', sexTags);
+		debug('remainingTags =', remainingTags);
+		debug('- - - - - - - - - - - - - - - - - -');
+
+		const specialTags = [
+			...sexTags,
+			...(highestResTag ? [getBotEmoji(highestResTag.emote)] : []),
+		];
+		const allDisplayedTags = [...specialTags, [...remainingTags].map(formatTagName)].slice(
+			0,
+			maxTags,
+		);
+		const displayedTagsCount = allDisplayedTags.length;
 		const generalTagsTitle = `${getBotEmoji('tagAccent')} (${displayedTagsCount}/${actualTotalTags})`;
-		const generalTagsContent =
-			`${specialTags.join(' ')} ${formatTagNameListNew(otherTags, ' ')}`.trim();
+		const generalTagsContent = allDisplayedTags.join(' ').trim();
 		const postGeneralTags = shortenText(`-# ${generalTagsTitle} ${generalTagsContent}`, 1020);
 
 		const getCategoryFieldString = (fieldName: string, arr: string[]) => {
@@ -317,7 +308,7 @@ export async function formatBooruPostMessage(
 				partialCount = 3;
 			}
 
-			const content = formatTagNameListNew(arr, ' ');
+			const content = formatTagNameList(arr, ' ');
 			if (!content.length) return;
 
 			const infoSuffix = partialCount < totalCount ? ` (${partialCount}/${totalCount})` : '';
@@ -373,16 +364,15 @@ export async function formatBooruPostMessage(
 		info('Intentando formatear tags con método alternativo sin categorías');
 
 		const postTags = processedPostTags;
-		const filteredTags = postTags.slice(0, actualMaxTags);
-		const displayedTagsCount = Math.min(filteredTags.length + specialTags.length, maxTags);
+		const displayedTags = postTags.slice(0, maxTags);
+		const displayedTagsCount = Math.min(displayedTags.length, maxTags);
 
 		debug('Comprobando si se debe insertar un campo de tags');
 		debug('displayedTagsCount =', displayedTagsCount);
 		if (displayedTagsCount > 0) {
 			debug('A punto de insertar un campo de tags');
 			const generalTagsTitle = `${getBotEmoji('tagAccent')} (${displayedTagsCount}/${actualTotalTags})`;
-			const generalTagsContent =
-				`${specialTags.join(' ')} ${formatTagNameListNew(filteredTags, ' ')}`.trim();
+			const generalTagsContent = `${formatTagNameList(displayedTags, ' ')}`.trim();
 			const postGeneralTags = shortenText(
 				`-# ${generalTagsTitle} ${generalTagsContent}`,
 				1020,
@@ -405,6 +395,46 @@ export async function formatBooruPostMessage(
 	info('Se terminó de formatear un contenedor a de acuerdo a un Post de Booru');
 
 	return container;
+}
+
+function extractSpecialTags(tags: Iterable<string>) {
+	let highestResTag: { order: number; emote: BotEmojiName } | undefined;
+	let hasTagMe = false;
+	let hasRequestTags = false;
+	const sexTags = new Set<string>();
+	const remainingTags = new Set<string>();
+
+	for (const tag of tags) {
+		if (tag === 'tagme') {
+			hasTagMe = true;
+			continue;
+		}
+
+		if (tag.endsWith('_request')) {
+			//"commentary_request" tends to come from Danbooru, and artist context is ignored on Gelbooru
+			hasRequestTags = tag !== 'commentary_request';
+			continue;
+		}
+
+		//Set this tag as specially displayed if it's the highest resolution tag
+		const resMapping = resMappings[tag];
+		if (resMapping) {
+			if (highestResTag == null || resMapping.order > highestResTag.order)
+				highestResTag = resMapping;
+			continue;
+		}
+
+		//Set this tag as specially displayed if it's a "1girl/1boy/1futa"-type tag
+		const sexTag = tag.match(/([0-9]\+?)(girl|boy|futa)s?/);
+		if (sexTag) {
+			sexTags.add(`${getBotEmoji(sexEmotes[sexTag[2]])}${sexTag[1]}`);
+			continue;
+		}
+
+		remainingTags.add(tag);
+	}
+
+	return { hasTagMe, hasRequestTags, sexTags, highestResTag, remainingTags };
 }
 
 /**@description Devuelve un botón y color de contenedor para la fuente especificada (si está disponible).*/
@@ -686,33 +716,14 @@ export async function searchAndReplyWithPost(
 	}
 }
 
-export function formatTagName(tag: string) {
-	return tag
-		.replace(/\\/g, '\\\\')
-		.replace(/\*/g, '\\*')
-		.replace(/_/g, '\\_')
-		.replace(/\|/g, '\\|');
+export function formatTagName(tagName: string) {
+	if (tagName === '(...)') return '…';
+	if (!tagName.includes('`')) return `\`${tagName}\``;
+	return `\`\`${tagName.replace(/`$/g, '` ')}\`\``;
 }
 
-export function formatTagNameNew(tag: string) {
-	if (!tag.includes('`')) return `\`${tag}\``;
-
-	return `\`\`${tag.replace(/`$/g, '` ')}\`\``;
-}
-
-export function formatTagNameList(
-	tagNames: string[],
-	sep: string,
-	options: { leftStr?: string; rightStr?: string } = {},
-) {
-	const { leftStr = '', rightStr = '' } = options;
-	return tagNames.map((tagName) => `${leftStr}${formatTagName(tagName)}${rightStr}`).join(sep);
-}
-
-export function formatTagNameListNew(tagNames: string[], sep: string) {
-	return tagNames
-		.map((tagName) => (tagName === '(...)' ? '…' : formatTagNameNew(tagName)))
-		.join(sep);
+export function formatTagNameList(tagNames: string[], sep: string) {
+	return tagNames.map(formatTagName).join(sep);
 }
 
 export function getPostButtonsFromComponents(topLevelComponents: TopLevelComponent[]) {
