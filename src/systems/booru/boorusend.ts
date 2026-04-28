@@ -289,7 +289,7 @@ export async function formatBooruPostMessage(
 			...sexTags,
 			...(highestResTag ? [getBotEmoji(highestResTag.emote)] : []),
 		];
-		const allDisplayedTags = [...specialTags, [...remainingTags].map(formatTagName)].slice(
+		const allDisplayedTags = [...specialTags, ...[...remainingTags].map(formatTagName)].slice(
 			0,
 			maxTags,
 		);
