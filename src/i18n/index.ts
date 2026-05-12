@@ -148,7 +148,7 @@ const localesObject = {
 	dmDisclaimer: {
 		es: 'Nota: Bot de Puré no opera con mensajes privados',
 		en: 'Note: Bot de Puré does not reply to DMs',
-		ja: '注: ピューレボットは DM に返信しません',
+		ja: '注: Bot de Puré は DM に返信しません',
 	},
 	dmInteraction: {
 		es: '❌ Solo respondo a comandos en servidores',
