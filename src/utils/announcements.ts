@@ -72,16 +72,17 @@ export async function sendWelcomeMessage(member: GuildMember) {
 		};
 
 		//Nombre del miembro
-		drawText(ctx, canvas.width / 2, vmargin, `${displayName}`, {
+		drawText(ctx, canvas.width / 2, vmargin + 12, `${displayName}`, {
 			area: { halign: 'center', valign: 'top', maxSize },
 			stroke: defaultStroke,
 			font: defaultFont,
 		});
 
 		//Complemento encima del Nombre de Servidor
-		drawText(ctx, canvas.width / 2, canvas.height - 105 - vmargin, '¡Bienvenid@ a', {
+		drawText(ctx, canvas.width / 2, canvas.height - vmargin - 112, '¡Bienvenid@ a', {
 			area: { halign: 'center', valign: 'bottom', maxSize },
-			stroke: { ...defaultStroke, width: 56 * strokeFactor },
+			stroke: defaultStroke,
+			fill: { color: '#c0c0c0' },
 			font: { ...defaultFont, size: 56 },
 		});
 
