@@ -64,7 +64,6 @@ export async function sendConvertedTwitterPosts(
 	const configProp = twitterConversionServices[converterKey];
 	if (configProp == null) return ConverterEmptyPayload;
 
-	let warnAboutUnsupportedTranslationUrls = false;
 	const service = configProp.service;
 	const formattedTweetUrls = tweetUrls.map((u) => {
 		const [match, /*url*/ , artist, id, ls] = u;
@@ -72,15 +71,11 @@ export async function sendConvertedTwitterPosts(
 		let langSuffix = '';
 		if (ls && ls.length <= 2) {
 			langSuffix = `/${ls}`;
-			warnAboutUnsupportedTranslationUrls ||= !!ls && converterKey === 'vx';
 		}
 		return `${spoiler}${getBotEmoji('twitterColor')}[\`${artist}/${id}\`](${service}/${artist}/status/${id}${langSuffix})${spoiler}`;
 	});
 
-	let content = formattedTweetUrls.join(' ');
-	if (warnAboutUnsupportedTranslationUrls)
-		content +=
-			'\n-# ⚠️️ El conversor de vxTwitter todavía no tiene una característica de traducción';
+	const content = formattedTweetUrls.join(' ');
 
 	return {
 		contentful: true,
