@@ -121,7 +121,7 @@ const command = new Command(
 
 		const { channelId: voiceId, roleId, nameChanged } = session;
 		const now = new Date(Date.now());
-		const renameUnblockDate = addMinutes(nameChanged ?? new Date(), 20);
+		const renameUnblockDate = addMinutes(nameChanged ?? new Date(0), 20);
 
 		if (isBefore(now, renameUnblockDate))
 			return request.reply({
