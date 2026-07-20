@@ -8,7 +8,7 @@ import { ClientNotFoundError, client } from '@/core/client';
 import { globalConfigs } from '@/data/globalProps';
 import { FeedConfigModel, type FeedDocument, type FeedSchemaType } from '@/models/feeds';
 import type { PostFormatData, Suscription } from '@/systems/booru/boorusend';
-import { formatBooruPostMessage, notifyUsers } from '@/systems/booru/boorusend';
+import { cleanPostAttachmentRecords, formatBooruPostMessage, notifyUsers } from '@/systems/booru/boorusend';
 import { auditAction, auditError } from '@/systems/others/auditor';
 import { isNSFWChannel } from '@/utils/discord';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
@@ -45,13 +45,16 @@ async function updateBooruFeeds(feedChunk: FeedChunk): Promise<void> {
 	if (!booru) return;
 
 	const startMs = Date.now();
-	debug(`Received a request to update Boorus at ${new Date(startMs)}.`);
+	debug(`Received a request to update Booru Feeds at ${new Date(startMs)}.`);
 
 	feedChunk = await refreshFeedChunk(feedChunk);
-	debug('Refreshed the feed chunk');
+	debug('Refreshed the Booru Feed chunk.');
+
+	cleanPostAttachmentRecords();
+	debug('Cleaned expired Booru Post attachments.');
 
 	try {
-		debug('About to update Boorus.');
+		debug('About to update Booru Feeds.');
 		await processFeeds(booru, feedChunk).catch(console.error);
 	} catch (err) {
 		const now = new Date(Date.now());
@@ -63,15 +66,15 @@ async function updateBooruFeeds(feedChunk: FeedChunk): Promise<void> {
 			ping: true,
 		});
 
-		error(err, 'Feed update crash:', now);
+		error(err, 'Booru Feeds update request crashed:', now);
 	}
 
 	const delayMs = Date.now() - startMs;
-	info(`Concluded a request to update Boorus in ${delayMs}ms (${delayMs / 1000}s).`);
+	info(`Concluded a request to update Booru Feeds in ${delayMs}ms (${delayMs / 1000}s).`);
 
 	const nextMs = Math.max(10_000, FEED_UPDATE_INTERVAL - delayMs);
 	setTimeout(updateBooruFeeds, nextMs, feedChunk);
-	debug(`Next update request should have been programmed at ${new Date(Date.now() + nextMs)}.`);
+	debug(`Next Booru Feed update request should have been programmed at ${new Date(Date.now() + nextMs)}.`);
 
 	auditAction('Feeds procesados', {
 		name: 'Feeds',
@@ -112,7 +115,7 @@ async function processFeeds(booru: BooruClient<Gelbooru>, feedChunk: FeedChunk) 
 			if (!channel) return;
 
 			debug(
-				`Identified Feed #${feed.channelId} as belonging to channel "#${channel.name}" in guild "${guild.name}" (${guild.id})`,
+				`Identified Booru Feed #${feed.channelId} as belonging to channel "#${channel.name}" in guild "${guild.name}" (${guild.id})`,
 			);
 
 			const booruFeed = new BooruFeed(booru, feed);
@@ -125,17 +128,17 @@ async function processFeeds(booru: BooruClient<Gelbooru>, feedChunk: FeedChunk) 
 
 			const { success, posts, newPosts } = await booruFeed.fetchPosts();
 			debug(
-				`Feed #${channel.name} (#${feed.channelId}) tried to fetch posts and was ${success ? 'SUCCESSFUL' : 'UNSUCCESSFUL'}.`,
+				`Booru Feed #${channel.name} (#${feed.channelId}) tried to fetch Posts and was ${success ? 'SUCCESSFUL' : 'UNSUCCESSFUL'}.`,
 			);
 
 			if (!success) return;
 			debug(
-				`Feed #${channel.name} (#${feed.channelId}) retrieved ${posts.length} posts, of which ${newPosts.length} were new.`,
+				`Booru Feed #${channel.name} (#${feed.channelId}) retrieved ${posts.length} Posts, of which ${newPosts.length} were new.`,
 			);
 
 			if (!posts.length) {
 				debug(
-					`Because, no posts were retrieved for Feed #${channel.name} (#${feed.channelId}), it's processing will conclude as FAULTY for now.`,
+					`Because, no Posts were retrieved for Booru Feed #${channel.name} (#${feed.channelId}), it's processing will conclude as FAULTY for now.`,
 				);
 				const write = booruFeed.addFault();
 				if (write) bulkOps.push(write);
@@ -144,7 +147,7 @@ async function processFeeds(booru: BooruClient<Gelbooru>, feedChunk: FeedChunk) 
 
 			if (!newPosts.length) {
 				debug(
-					`Because, no new posts were retrieved for Feed #${channel.name} (#${feed.channelId}), it's processing will conclude for now.`,
+					`Because no new Posts were retrieved for Booru Feed #${channel.name} (#${feed.channelId}), it's processing will conclude for now.`,
 				);
 				bulkOps.push(booruFeed.reduceFaults());
 				return;
@@ -153,7 +156,7 @@ async function processFeeds(booru: BooruClient<Gelbooru>, feedChunk: FeedChunk) 
 			const feedSubscriptions: Suscription[] = [];
 
 			debug(
-				`Preparing candidate user Feed tag subscriptions for Feed #${channel.name} (#${feed.channelId}).`,
+				`Preparing candidate user Feed tag subscriptions for Booru Feed #${channel.name} (#${feed.channelId}).`,
 			);
 			for (const [userId, feedMap] of feedTagSubscriptionsCache) {
 				const tags = feedMap.get(feed.channelId);
@@ -163,36 +166,37 @@ async function processFeeds(booru: BooruClient<Gelbooru>, feedChunk: FeedChunk) 
 			let faultedDuringSend = false;
 
 			debug(
-				`Feed #${channel.name} (#${feed.channelId}) is about to send Booru posts ${newPosts.map((post) => post.id).join(', ')} to Discord.`,
+				`Feed #${channel.name} (#${feed.channelId}) is about to send Booru Posts ${newPosts.map((post) => post.id).join(', ')} to Discord.`,
 			);
 			for (const post of newPosts) {
 				try {
-					const container = await formatBooruPostMessage(booru, post, booruFeed);
+					const { container, attachment } = await formatBooruPostMessage(booru, post, booruFeed);
 
 					const sent = await channel.send({
 						flags: MessageFlags.IsComponentsV2,
+						files: attachment != null ? [attachment] : undefined,
 						components: [container],
 					});
 
 					const members = guild.members.cache;
 					await notifyUsers(post, sent, members, feedSubscriptions);
 					debug(
-						`Feed #${channel.name} (#${feed.channelId}) formatted a post and notified users: ${post.id}`,
+						`Booru Feed #${channel.name} (#${feed.channelId}) formatted a Post and notified users: ${post.id}`,
 					);
 				} catch (err) {
 					faultedDuringSend = true;
-					warn(`Error sending post ${post.id} in ${channel.name}`);
+					warn(`Error sending Booru Post ${post.id} in ${channel.name}`);
 					error(err);
 
 					auditError(err, {
-						brief: 'Error enviando post de Feed',
+						brief: 'Error enviando Post de Feed',
 						details: `Post ${post.id} in ${channel.id}`,
 					});
 				}
 			}
 
 			debug(
-				`Feed #${channel.name} (#${feed.channelId}) ${faultedDuringSend ? 'FAILED TO SEND' : 'SUCCESSFULLY SENT'} posts to Discord.`,
+				`Booru Feed #${channel.name} (#${feed.channelId}) ${faultedDuringSend ? 'FAILED TO SEND' : 'SUCCESSFULLY SENT'} Posts to Discord.`,
 			);
 
 			if (faultedDuringSend) {
@@ -257,7 +261,7 @@ export async function setupFeedUpdateStack() {
 	const chunkCount = feedChunks.length;
 
 	if (!shortestUpdateDelayMs) {
-		const err = new Error("Couldn't set up Feed chunks.");
+		const err = new Error("Couldn't set up Booru Feed chunks.");
 		fatal(err);
 		throw err;
 	}
