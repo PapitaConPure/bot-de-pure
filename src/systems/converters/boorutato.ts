@@ -72,7 +72,8 @@ export async function sendConvertedBooruPosts(
 		const spoiler = st.includes('||') && ed.includes('||') ? '||' : '';
 		const formattedGelbooruUrl = `${spoiler}${getBotEmoji('gelbooruColor')}[\`${id}\`](${original})${spoiler}`;
 
-		const container = await formatBooruPostMessage(booru, post, {
+		//TODO: apply workaround for thumbnails
+		const { container } = await formatBooruPostMessage(booru, post, {
 			maxGeneralTags: 0,
 			manageableBy: message.author.id,
 			allowNSFW: isNSFWChannel(message.channel),

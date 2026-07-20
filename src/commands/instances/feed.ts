@@ -735,13 +735,14 @@ const command = new Command('feed', tags)
 					content: 'Las tags del feed no dieron ningún resultado',
 				});
 
-			const preview = await formatBooruPostMessage(booru, post, {
+			const { container: preview, attachment: previewImage } = await formatBooruPostMessage(booru, post, {
 				...feed,
 				allowNSFW,
 				disableActions: true,
 			});
 			return interaction.editReply({
 				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
+				files: previewImage != null ? [previewImage] : undefined,
 				components: [
 					preview.addTextDisplayComponents((textDisplay) =>
 						textDisplay.setContent(

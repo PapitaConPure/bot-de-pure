@@ -1,4 +1,5 @@
 import { type BooruClient, type Post, TagTypes } from '@papitaconpure/booru-client';
+import { addMinutes, isPast } from 'date-fns';
 import type {
 	ActionRow,
 	ButtonComponent,
@@ -10,6 +11,7 @@ import type {
 } from 'discord.js';
 import {
 	ActionRowBuilder,
+	AttachmentBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	Colors,
@@ -18,6 +20,7 @@ import {
 	EmbedBuilder,
 	MessageFlags,
 	SeparatorSpacingSize,
+	TextDisplayBuilder,
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
 import { Command } from '@/commands/commons';
@@ -27,6 +30,7 @@ import userIds from '@/data/userIds.json';
 import { Translator } from '@/i18n';
 import { isNSFWChannel } from '@/utils/discord';
 import { type BotEmojiName, getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
+import { fetchExt } from '@/utils/fetchext';
 import Logger from '@/utils/logs';
 import { shortenText } from '@/utils/misc';
 import { getMainBooruClient } from './booruclient';
@@ -92,7 +96,7 @@ export async function formatBooruPostMessage(
 	booru: BooruClient,
 	post: Post,
 	data: Omit<FeedOptions, 'lastFetchedAt' | 'faults'> & PostFormatData = {},
-): Promise<ContainerBuilder> {
+): Promise<{ container: ContainerBuilder; attachment: AttachmentBuilder | null }> {
 	info('Se recibió una solicitud de formato de mensaje con Post de Booru');
 
 	const { allowNSFW = false, disableLinks = false, disableActions = false, componentKey } = data;
@@ -211,8 +215,10 @@ export async function formatBooruPostMessage(
 	const shouldBlock =
 		(post.rating === 'explicit' || post.rating === 'questionable') && !allowNSFW;
 
+	let previewImage: AttachmentBuilder | null = null;
+
 	if (!shouldBlock) {
-		let previewUrl: URL;
+		/*let previewUrl: URL;
 		debug('El contenido no fue bloqueado. Se agregará al mensaje a continuación');
 		if (/\.(mp4|webm|webp|gif)/.test(post.fileUrl.toString())) {
 			debug('El contenido es un video o GIF');
@@ -220,10 +226,14 @@ export async function formatBooruPostMessage(
 		} else {
 			debug('El contenido es probablemente una imagen estática');
 			previewUrl = post.previewUrl || post.sampleUrl || post.fileUrl || 'https://google.com'; //Revertir a `post.sampleUrl || post.fileUrl || post.previewUrl` cuando se solucione el problema
-		}
+		}*/
+
+		if (post.previewUrl != null) previewImage = await getPostAttachment(post.previewUrl);
+
 		container.addMediaGalleryComponents((mediaGallery) =>
 			mediaGallery.addItems((mediaGalleryItem) =>
-				mediaGalleryItem.setURL(previewUrl.toString()),
+				//mediaGalleryItem.setURL(previewUrl.toString()),
+				mediaGalleryItem.setURL('attachment://preview.webp'),
 			),
 		);
 	}
@@ -394,7 +404,7 @@ export async function formatBooruPostMessage(
 
 	info('Se terminó de formatear un contenedor a de acuerdo a un Post de Booru');
 
-	return container;
+	return { container, attachment: previewImage };
 }
 
 function extractSpecialTags(tags: Iterable<string>) {
@@ -517,24 +527,54 @@ export async function notifyUsers(
 			const translator = await Translator.from(member);
 			const matchingTags = followedTags.filter((tag) => post.tags.includes(tag));
 
-			const userEmbed = new EmbedBuilder()
-				.setColor(container.accentColor ?? 0x0)
-				.setTitle(translator.getText('booruNotifTitle'))
-				.setDescription(translator.getText('booruNotifDescription'))
-				.setFooter({ text: translator.getText('dmDisclaimer') })
-				.addFields(
-					{
-						name: 'Feed',
-						value: `${channel}`,
-						inline: true,
-					},
-					{
-						name: translator.getText('booruNotifTagsName'),
-						value: `\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
-						inline: true,
-					},
+			const userContainer = new ContainerBuilder().setAccentColor(
+				container.accentColor ?? 0x0,
+			);
+
+			const titleTextDisplay = new TextDisplayBuilder().setContent(
+				`## ${translator.getText('booruNotifTitle')}`,
+			);
+			const descTextDisplay = new TextDisplayBuilder().setContent(
+				`${translator.getText('booruNotifDescription')}`,
+			);
+			const originalAttachment = post.previewUrl ? sent.attachments.first() : undefined;
+
+			if (originalAttachment != null) {
+				userContainer.addSectionComponents((section) =>
+					section
+						.addTextDisplayComponents(titleTextDisplay, descTextDisplay)
+						.setThumbnailAccessory((accessory) =>
+							accessory.setURL(originalAttachment.url),
+						),
 				);
-			if (post.previewUrl) userEmbed.setThumbnail(post.previewUrl.toString());
+			} else {
+				userContainer.addTextDisplayComponents(titleTextDisplay, descTextDisplay);
+			}
+
+			userContainer.addSeparatorComponents((separator) => separator.setDivider(true));
+
+			userContainer.addSectionComponents((section) =>
+				section
+					.addTextDisplayComponents(
+						(textDisplay) =>
+							textDisplay.setContent([`### -# Feed`, `${channel}`].join('\n')),
+						(textDisplay) =>
+							textDisplay.setContent(
+								[
+									`### -# ${translator.getText('booruNotifTagsName')}`,
+									`\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
+								].join('\n'),
+							),
+						(textDisplay) =>
+							textDisplay.setContent(`-# ${translator.getText('dmDisclaimer')}`),
+					)
+					.setButtonAccessory(
+						new ButtonBuilder()
+							.setURL(sent.url)
+							.setEmoji(getBotEmojiResolvable('eyeAccent'))
+							.setStyle(ButtonStyle.Link),
+					),
+			);
 
 			const postRow = new ActionRowBuilder<ButtonBuilder>();
 			const dangerButtonBuilders: ButtonBuilder[] = [];
@@ -547,19 +587,14 @@ export async function notifyUsers(
 					dangerButtonBuilders.push(ButtonBuilder.from(button));
 			}
 
-			postRow.addComponents(
-				new ButtonBuilder()
-					.setURL(sent.url)
-					.setEmoji(getBotEmojiResolvable('eyeAccent'))
-					.setStyle(ButtonStyle.Link),
-			);
-
 			for (const buttonBuilder of dangerButtonBuilders) postRow.addComponents(buttonBuilder);
+
+			userContainer.addActionRowComponents(postRow);
 
 			return member
 				.send({
-					embeds: [userEmbed],
-					components: [postRow],
+					flags: MessageFlags.IsComponentsV2,
+					components: [userContainer],
 				})
 				.catch(error);
 		}),
@@ -666,7 +701,7 @@ export async function searchAndReplyWithPost(
 
 		//Crear presentaciones
 		info('Preparando mensaje(s) de respuesta de búsqueda...');
-		const containers = await Promise.all(
+		const postMessages = await Promise.all(
 			posts.map((post, i) =>
 				formatBooruPostMessage(booru, post, {
 					maxGeneralTags: 20,
@@ -681,15 +716,20 @@ export async function searchAndReplyWithPost(
 
 		//Enviar mensajes
 		info('Enviando mensaje(s) de respuesta de búsqueda...');
-		const firstContainer = containers.shift() as ContainerBuilder;
+		const firstPostMessage = postMessages.shift() as {
+			container: ContainerBuilder;
+			attachment: AttachmentBuilder;
+		};
 		await request.editReply({
 			flags: MessageFlags.IsComponentsV2,
-			components: [firstContainer],
+			files: firstPostMessage.attachment ? [firstPostMessage.attachment] : undefined,
+			components: [firstPostMessage.container],
 		});
 		return Promise.all(
-			containers.map((container) =>
+			postMessages.map(({ container, attachment }) =>
 				request.channel.send({
 					flags: MessageFlags.IsComponentsV2,
+					files: attachment ? [attachment] : undefined,
 					components: [container],
 				}),
 			),
@@ -714,6 +754,52 @@ export async function searchAndReplyWithPost(
 
 		return request.editReply({ embeds: [errorEmbed] }) as Promise<Message<true>>;
 	}
+}
+
+interface PostAttachmentRecord {
+	builder: AttachmentBuilder;
+	validUntil: Date;
+}
+
+const postAttachmentTTLMinutes = 31;
+const postAttachments = new Map<string, PostAttachmentRecord>();
+
+export function cleanPostAttachmentRecords() {
+	for (const [key, record] of postAttachments.entries())
+		if (isPast(record.validUntil)) postAttachments.delete(key);
+}
+
+async function getPostAttachment(url: string | URL): Promise<AttachmentBuilder | null> {
+	const postAttachmentRecord = postAttachments[`${url}`];
+
+	if (postAttachmentRecord == null || isPast(postAttachmentRecord.validUntil)) {
+		const record = await fetchAndSavePostAttachment(url);
+		return record?.builder ?? null;
+	}
+
+	return postAttachmentRecord.builder;
+}
+
+async function fetchAndSavePostAttachment(url: string | URL): Promise<PostAttachmentRecord | null> {
+	const fetchRes = await fetchExt(url, {
+		type: 'buffer',
+		init: {
+			headers: {
+				'Access-Control-Allow-Origin': '*',
+				Referer: 'https://gelbooru.com/',
+			},
+		},
+	});
+
+	if (!fetchRes.success) return null;
+
+	const record: PostAttachmentRecord = {
+		builder: new AttachmentBuilder(fetchRes.data, { name: 'preview.webp' }),
+		validUntil: addMinutes(new Date(), postAttachmentTTLMinutes),
+	};
+
+	postAttachments[`${url}`] = record;
+	return record;
 }
 
 export function formatTagName(tagName: string) {
