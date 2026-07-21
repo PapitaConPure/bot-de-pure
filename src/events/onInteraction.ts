@@ -14,6 +14,7 @@ import {
 } from '@/utils/cmdExceptions';
 import { channelIsBlocked, isUsageBanned } from '@/utils/discord';
 import { decompressId } from '@/utils/encoding';
+import Logger from '@/utils/logs';
 import type { CommandOption, CommandOptions } from '../commands/commons/cmdOpts';
 import { CommandOptionSolver } from '../commands/commons/cmdOpts';
 import {
@@ -25,6 +26,8 @@ import userIds from '../data/userIds.json';
 import { Translator } from '../i18n';
 import { type StatsDocument, StatsModel } from '../models/stats';
 import { auditRequest } from '../systems/others/auditor';
+
+const { debug, fatal } = Logger('DEBUG', 'Interaction');
 
 export async function onInteraction(interaction: Interaction) {
 	if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
@@ -68,7 +71,9 @@ async function handleCommand(
 			puré.commands.get(commandName);
 
 		if (!command)
-			throw Error(`Command '${commandName}' was not registered before command handling.`);
+			return fatal(
+				new Error(`Command '${commandName}' was not registered before command handling.`),
+			);
 
 		if (!interaction.channel) {
 			const translator = await Translator.from(interaction.user);
@@ -77,9 +82,16 @@ async function handleCommand(
 			});
 		}
 
-		//Detectar problemas con el comando basado en flags y permisos
+		debug(
+			`Received a genuine Slash Command interaction for "${interaction.commandName}" under the ID: "${interaction.id}".`,
+		);
+
 		if (command.permissions) {
 			if (!command.permissions.isAllowedIn(interaction.member, interaction.channel)) {
+				debug(
+					`The Slash Command interaction "${interaction.id}" is not allowed for the requesting member in the source channel.`,
+				);
+
 				const translator = await Translator.from(interaction.member);
 				return interaction.channel?.send({
 					embeds: [
@@ -107,6 +119,10 @@ async function handleCommand(
 			}
 
 			if (!command.permissions.amAllowedIn(interaction.channel)) {
+				debug(
+					`The Slash Command interaction "${interaction.id}" is not allowed in the source channel.`,
+				);
+
 				const translator = await Translator.from(interaction.member);
 				return interaction.channel.send({
 					embeds: [
@@ -135,12 +151,19 @@ async function handleCommand(
 		}
 
 		const exception = await findFirstException(command, interaction);
-		if (exception)
+		if (exception) {
+			debug(
+				`The Slash Command interaction "${interaction.id}" is not authorized in the current context.`,
+			);
 			return interaction.reply({
 				embeds: [generateExceptionEmbed(exception, { cmdString: `/${commandName}` })],
 				flags: MessageFlags.Ephemeral,
 			});
+		}
 
+		debug(
+			`The Slash Command interaction "${interaction.id}" is authorized and the associated Command will execute promptly.`,
+		);
 		const request = Command.requestize(interaction);
 		if (command.hasOptions()) {
 			const solver = new CommandOptionSolver(request, interaction.options, command.options);
@@ -173,7 +196,13 @@ async function handleAction(
 		const action = puré.actions.get(commandName);
 
 		if (!action)
-			throw Error(`Action '${commandName}' was not registered before action handling.`);
+			return fatal(
+				new Error(`Action '${commandName}' was not registered before action handling.`),
+			);
+
+		debug(
+			`Received a genuine context menu interaction for "${interaction.commandName}" under the ID: "${interaction.id}". The associated Action will execute promptly.`,
+		);
 
 		await action.execute(interaction);
 		stats.commands.succeeded++;
@@ -199,6 +228,11 @@ async function handleComponent(interaction: AnyCommandInteraction) {
 
 		if (!commandName || !commandFnName) return handleUnknownInteraction(interaction);
 
+		debug(
+			`Received a genuine Component interaction for Command "${commandName}", function "${commandFnName}", under the ID: "${interaction.id}".`,
+		);
+		debug(`The Component interaction "${interaction.id}" has the following arguments: [ ${funcStream.join(', ')} ]`);
+
 		const command: Command | undefined =
 			puré.commands.get(commandName)
 			|| puré.commands.find((cmd) => cmd.aliases?.includes(commandName));
@@ -211,17 +245,24 @@ async function handleComponent(interaction: AnyCommandInteraction) {
 		const userFilterIndex = commandFn.userFilterIndex;
 		if (userFilterIndex != null) {
 			if (typeof userFilterIndex !== 'number')
-				throw new TypeError(
-					`Se esperaba un valor numérico como índice de parámetro de interacción para filtro de ID de usuario, pero se recibió: ${userFilterIndex} (${typeof userFilterIndex})`,
+				return fatal(
+					new TypeError(
+						`Se esperaba un valor numérico como índice de parámetro de interacción para filtro de ID de usuario, pero se recibió: ${userFilterIndex} (${typeof userFilterIndex})`,
+					),
 				);
 
 			const authorId = funcStream[userFilterIndex];
 			if (typeof authorId !== 'string')
-				throw new RangeError(
-					`Se esperaba una ID de usuario en el parámetro de interacción ${userFilterIndex}. Sin embargo, ninguna ID fue recibida en la posición`,
+				return fatal(
+					new RangeError(
+						`Se esperaba una ID de usuario en el parámetro de interacción ${userFilterIndex}. Sin embargo, ninguna ID fue recibida en la posición`,
+					),
 				);
 
 			if (interaction.user.id !== decompressId(authorId)) {
+				debug(
+					`The Component interaction "${interaction.id}" is not authorized for the requesting user.`,
+				);
 				const translator = await Translator.from(interaction.user.id);
 				return interaction.reply({
 					content: translator.getText('unauthorizedInteraction'),
@@ -229,6 +270,10 @@ async function handleComponent(interaction: AnyCommandInteraction) {
 				});
 			}
 		}
+
+		debug(
+			`The Component interaction "${interaction.id}" is authorized and the associated function will execute promptly.`,
+		);
 
 		return commandFn(interaction, ...funcStream);
 	} catch (error) {
