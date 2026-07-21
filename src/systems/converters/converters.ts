@@ -1,4 +1,5 @@
 import type {
+	AttachmentBuilder,
 	BitFieldResolvable,
 	ContainerBuilder,
 	MessageFlags,
@@ -21,6 +22,7 @@ export interface ContentfulConverterPayloadData {
 		| MessageFlags.IsComponentsV2
 	>;
 	components?: (TextDisplayBuilder | ContainerBuilder)[];
+	files?: AttachmentBuilder[];
 }
 
 export type ContentfulConverterPayload = ConverterBasePayload<true> &
