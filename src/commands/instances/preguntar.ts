@@ -28,7 +28,7 @@ const command = new Command(
 	tags,
 )
 	.setAliases('pregunta', 'question', 'ia', 'ai', 'prompt', 'ask')
-	.setLongDescription('Muestra el tiempo de respuesta del Bot y la API')
+	.setLongDescription('Genera una respuesta tonta utilizando inteligencia artificial generativa.')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const [translator] = await Promise.all([
@@ -110,9 +110,9 @@ The User's Discord name is: "${request.member.displayName || request.user.userna
 					content: userPrompt,
 				},
 			],
-			model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-			temperature: 1.42,
+			model: 'llama-3.3-70b-versatile',
 			max_completion_tokens: 2000,
+			temperature: 1.12,
 			top_p: 0.9,
 			user: compressId(request.userId),
 			stream: true,
