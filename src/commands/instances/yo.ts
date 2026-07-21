@@ -10,6 +10,7 @@ import {
 	SeparatorSpacingSize,
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
+	TextDisplayBuilder,
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
@@ -1226,7 +1227,7 @@ const command = new Command(
 				.split(/[ \n]+/)
 				.filter((t) => t.length);
 
-			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+			!isAlt && (await interaction.deferReply({ flags: MessageFlags.Ephemeral }));
 
 			const userQuery = { userId };
 			const userConfigs =
@@ -1251,6 +1252,8 @@ const command = new Command(
 				});
 			}
 
+			isAlt && (await interaction.deferUpdate());
+
 			if (newTags.length) userConfigs.feedTagSuscriptions.set(channelId, newTags);
 			else userConfigs.feedTagSuscriptions.delete(channelId);
 			userConfigs.markModified('feedTagSuscriptions');
@@ -1259,20 +1262,24 @@ const command = new Command(
 
 			updateFollowedFeedTagsCache(userId, channelId, newTags);
 
+			const payload = {
+				components: [
+					new TextDisplayBuilder({
+						content: translator.getText(setTagsResponse, editedTags.join(' ')),
+					}),
+					makeFollowedTagsContainer(
+						compressId(userId),
+						channelId,
+						userConfigs,
+						translator,
+						!!isAlt,
+					),
+				],
+			};
+
 			return Promise.all([
-				interaction.message.edit({
-					content: translator.getText(setTagsResponse, editedTags.join(' ')),
-					components: [
-						makeFollowedTagsContainer(
-							compressId(userId),
-							channelId,
-							userConfigs,
-							translator,
-							!!isAlt,
-						),
-					],
-				}),
-				interaction.deleteReply(),
+				isAlt ? interaction.editReply(payload) : interaction.message.edit(payload),
+				isAlt ? Promise.resolve() : interaction.deleteReply(),
 			]);
 		},
 	)
