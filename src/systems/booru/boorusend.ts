@@ -217,7 +217,13 @@ export async function formatBooruPostMessage(
 
 	let previewImage: AttachmentBuilder | null = null;
 
-	if (!shouldBlock) {
+	if (shouldBlock) {
+		container.addMediaGalleryComponents((mediaGallery) =>
+			mediaGallery.addItems((mediaGalleryItem) =>
+				mediaGalleryItem.setURL('https://files.catbox.moe/m5gvo4.jpg'),
+			),
+		);
+	} else {
 		/*let previewUrl: URL;
 		debug('El contenido no fue bloqueado. Se agregará al mensaje a continuación');
 		if (/\.(mp4|webm|webp|gif)/.test(post.fileUrl.toString())) {
