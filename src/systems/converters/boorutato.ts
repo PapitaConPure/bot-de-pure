@@ -1,4 +1,4 @@
-import type { ContainerBuilder, Message } from 'discord.js';
+import type { AttachmentBuilder, ContainerBuilder, Message } from 'discord.js';
 import { ChannelType, MessageFlags, TextDisplayBuilder } from 'discord.js';
 import { isNSFWChannel } from '@/utils/discord';
 import { getBotEmoji } from '@/utils/emojis';
@@ -62,6 +62,7 @@ export async function sendConvertedBooruPosts(
 
 	const formattedGelbooruUrls: string[] = [];
 	const containers: ContainerBuilder[] = [];
+	const files: AttachmentBuilder[] = [];
 
 	for (const gelbooruMatch of gelbooruUrls) {
 		const { st = '', original = '', id, ed = '' } = gelbooruMatch.groups ?? {};
@@ -72,8 +73,7 @@ export async function sendConvertedBooruPosts(
 		const spoiler = st.includes('||') && ed.includes('||') ? '||' : '';
 		const formattedGelbooruUrl = `${spoiler}${getBotEmoji('gelbooruColor')}[\`${id}\`](${original})${spoiler}`;
 
-		//TODO: apply workaround for thumbnails
-		const { container } = await formatBooruPostMessage(booru, post, {
+		const { container, attachment } = await formatBooruPostMessage(booru, post, {
 			maxGeneralTags: 0,
 			manageableBy: message.author.id,
 			allowNSFW: isNSFWChannel(message.channel),
@@ -82,6 +82,7 @@ export async function sendConvertedBooruPosts(
 
 		formattedGelbooruUrls.push(formattedGelbooruUrl);
 		containers.push(container);
+		if (attachment) files.push(attachment);
 	}
 
 	const content = formattedGelbooruUrls.join(' ');
@@ -90,5 +91,6 @@ export async function sendConvertedBooruPosts(
 		contentful: true,
 		flags: MessageFlags.IsComponentsV2,
 		components: [new TextDisplayBuilder().setContent(content), ...containers],
+		files: files.length ? files : undefined,
 	};
 }
