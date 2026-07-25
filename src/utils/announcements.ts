@@ -133,11 +133,9 @@ export async function sendFarewellMessage(member: GuildMember) {
 	const { guild } = member;
 	const channel = guild.systemChannel;
 
-	if (!channel)
-		return;
+	if (!channel) return;
 
-	if (!guild.members.me?.permissionsIn(channel).has(['SendMessages', 'ViewChannel']))
-		return;
+	if (!guild.members.me?.permissionsIn(channel).has(['SendMessages', 'ViewChannel'])) return;
 
 	await channel.sendTyping();
 

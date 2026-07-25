@@ -331,7 +331,10 @@ async function processLinkConverters(message: Message<true>, userCache: UserCach
 				flags: mergedFlags as BitFieldResolvable<
 					Extract<
 						MessageFlagsString,
-						'SuppressEmbeds' | 'SuppressNotifications' | 'IsComponentsV2' | 'IsVoiceMessage'
+						| 'SuppressEmbeds'
+						| 'SuppressNotifications'
+						| 'IsComponentsV2'
+						| 'IsVoiceMessage'
 					>,
 					| MessageFlags.SuppressEmbeds
 					| MessageFlags.SuppressNotifications
