@@ -55,6 +55,7 @@ export async function onInteraction(interaction: Interaction) {
 
 	if (interaction.isContextMenuCommand()) return handleAction(interaction, stats);
 
+	debug(`Interaction of type «${interaction.type}» is not yet supported.`);
 	return handleUnknownInteraction(interaction);
 }
 
@@ -219,24 +220,81 @@ async function handleAction(
 }
 
 async function handleComponent(interaction: AnyCommandInteraction) {
-	if (!interaction.customId) return handleUnknownInteraction(interaction);
+	if (!interaction.customId) {
+		debug(
+			`Interaction under the ID: "${interaction.id}" didn't have a custom ID, which is a requirement for a valid Component interaction. Exiting.`,
+		);
+		return handleUnknownInteraction(interaction);
+	}
+
+	if (interaction.customId.startsWith('/')) {
+		const stream = interaction.customId.slice(1).split('_');
+		const commandName = stream.shift();
+		const authorId = stream.shift();
+
+		if (!commandName || !authorId) {
+			debug(
+				`Component Interaction under the ID: "${interaction.id}" had a malformed custom ID: "${interaction.customId}".`,
+			);
+			return handleUnknownInteraction(interaction);
+		}
+
+		if (interaction.user.id !== decompressId(authorId)) {
+			debug(
+				`The Component interaction "${interaction.id}" is not authorized for the requesting user.`,
+			);
+			const translator = await Translator.from(interaction.user.id);
+			return interaction.reply({
+				content: translator.getText('unauthorizedInteraction'),
+				flags: MessageFlags.Ephemeral,
+			});
+		}
+
+		const command: Command<CommandOptions | undefined> | undefined =
+			puré.commands.get(commandName)
+			|| puré.commands.find((cmd) => cmd.aliases?.includes(commandName));
+
+		if (command == null)
+			return fatal(new ReferenceError(`Command "${commandName}" does not exist.`));
+
+		const request = Command.requestize(interaction);
+		if (command.hasOptions()) {
+			const solver = new CommandOptionSolver(
+				request,
+				stream,
+				command.options,
+				stream.join(' '),
+			);
+			return command.execute(request, solver);
+		} else if (command.hasNoOptions()) return command.execute(request);
+	}
 
 	try {
 		const funcStream: string[] = interaction.customId.split('_');
 		const commandName = funcStream.shift();
 		const commandFnName = funcStream.shift();
 
-		if (!commandName || !commandFnName) return handleUnknownInteraction(interaction);
+		if (!commandName || !commandFnName) {
+			debug(
+				`Component Interaction under the ID: "${interaction.id}" had a malformed custom ID: "${interaction.customId}".`,
+			);
+			return handleUnknownInteraction(interaction);
+		}
 
 		debug(
 			`Received a genuine Component interaction for Command "${commandName}", function "${commandFnName}", under the ID: "${interaction.id}".`,
 		);
-		debug(`The Component interaction "${interaction.id}" has the following arguments: [ ${funcStream.join(', ')} ]`);
+		debug(
+			`The Component interaction "${interaction.id}" has the following arguments: [ ${funcStream.join(', ')} ]`,
+		);
 
-		const command: Command | undefined =
+		const command =
 			puré.commands.get(commandName)
 			|| puré.commands.find((cmd) => cmd.aliases?.includes(commandName));
-		if (command == null) throw new ReferenceError(`El comando ${commandName} no existe`);
+
+		if (command == null)
+			return fatal(new ReferenceError(`Command "${commandName}" does not exist.`));
+
 		if (typeof command[commandFnName] !== 'function') return handleHuskInteraction(interaction);
 
 		const commandFn: AnyCommandComponentResponseFunction = command[commandFnName];
