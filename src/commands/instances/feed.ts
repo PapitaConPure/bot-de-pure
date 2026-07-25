@@ -735,11 +735,15 @@ const command = new Command('feed', tags)
 					content: 'Las tags del feed no dieron ningún resultado',
 				});
 
-			const { container: preview, attachment: previewImage } = await formatBooruPostMessage(booru, post, {
-				...feed,
-				allowNSFW,
-				disableActions: true,
-			});
+			const { container: preview, attachment: previewImage } = await formatBooruPostMessage(
+				booru,
+				post,
+				{
+					...feed,
+					allowNSFW,
+					disableActions: true,
+				},
+			);
 			return interaction.editReply({
 				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 				files: previewImage != null ? [previewImage] : undefined,
@@ -1654,7 +1658,11 @@ const command = new Command('feed', tags)
 	.setGlobalButtonResponse(async function deletePost(interaction, manageableBy, isNotFeed) {
 		const translator = await Translator.from(interaction.user.id);
 
-		if (interaction.inCachedGuild() && manageableBy !== interaction.user.id && isNotModerator(interaction.member))
+		if (
+			interaction.inCachedGuild()
+			&& manageableBy !== interaction.user.id
+			&& isNotModerator(interaction.member)
+		)
 			return interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
 				flags: MessageFlags.Ephemeral,
