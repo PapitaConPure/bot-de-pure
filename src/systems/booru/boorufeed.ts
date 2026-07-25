@@ -8,7 +8,11 @@ import { ClientNotFoundError, client } from '@/core/client';
 import { globalConfigs } from '@/data/globalProps';
 import { FeedConfigModel, type FeedDocument, type FeedSchemaType } from '@/models/feeds';
 import type { PostFormatData, Suscription } from '@/systems/booru/boorusend';
-import { cleanPostAttachmentRecords, formatBooruPostMessage, notifyUsers } from '@/systems/booru/boorusend';
+import {
+	cleanPostAttachmentRecords,
+	formatBooruPostMessage,
+	notifyUsers,
+} from '@/systems/booru/boorusend';
 import { auditAction, auditError } from '@/systems/others/auditor';
 import { isNSFWChannel } from '@/utils/discord';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
@@ -74,7 +78,9 @@ async function updateBooruFeeds(feedChunk: FeedChunk): Promise<void> {
 
 	const nextMs = Math.max(10_000, FEED_UPDATE_INTERVAL - delayMs);
 	setTimeout(updateBooruFeeds, nextMs, feedChunk);
-	debug(`Next Booru Feed update request should have been programmed at ${new Date(Date.now() + nextMs)}.`);
+	debug(
+		`Next Booru Feed update request should have been programmed at ${new Date(Date.now() + nextMs)}.`,
+	);
 
 	auditAction('Feeds procesados', {
 		name: 'Feeds',
@@ -170,7 +176,11 @@ async function processFeeds(booru: BooruClient<Gelbooru>, feedChunk: FeedChunk) 
 			);
 			for (const post of newPosts) {
 				try {
-					const { container, attachment } = await formatBooruPostMessage(booru, post, booruFeed);
+					const { container, attachment } = await formatBooruPostMessage(
+						booru,
+						post,
+						booruFeed,
+					);
 
 					const sent = await channel.send({
 						flags: MessageFlags.IsComponentsV2,
