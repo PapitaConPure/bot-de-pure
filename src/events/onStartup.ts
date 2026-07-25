@@ -37,7 +37,6 @@ import UserConfigModel from '../models/userconfigs';
 import { feedTagSubscriptionsCache, setupFeedUpdateStack } from '../systems/booru/boorufeed';
 import { auditSystem } from '../systems/others/auditor';
 import { initializeMessageCascades } from '../systems/others/messageCascades';
-import { prepareTracksPlayer } from '../systems/others/musicPlayer';
 import { processReminders } from '../systems/others/remindersScheduler';
 import { modifyPresence } from '../systems/presence/presence';
 
@@ -141,9 +140,6 @@ export async function onStartup(client: Client) {
 	globalConfigs.logch = globalConfigs.slots.slot1.channels.resolve(
 		'870347940181471242',
 	) as GuildTextBasedChannel;
-
-	console.log(chalk.rgb(255, 0, 0)('Preparando Reproductor de YouTube...'));
-	await prepareTracksPlayer(client);
 
 	//Cargado de datos de base de datos
 	console.log(chalk.yellowBright.italic('Cargando datos de base de datos...'));

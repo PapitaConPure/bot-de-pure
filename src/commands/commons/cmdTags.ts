@@ -17,7 +17,6 @@ export const CommandTag = {
 	GUIDE: bigIntField(8),
 	PAPA: bigIntField(9),
 	SAKI: bigIntField(10),
-	MUSIC: bigIntField(11),
 } as const;
 
 export type CommandTagStringField = keyof typeof CommandTag;

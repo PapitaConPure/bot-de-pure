@@ -92,12 +92,6 @@ export const makeCategoriesRow = async (
 
 	categoriesMenu.addOptions(
 		new StringSelectMenuOptionBuilder()
-			.setValue('MUSIC')
-			.setEmoji(getBotEmojiResolvable('cmdMusic'))
-			.setLabel(translator.getText('wikiCommandCategoriesMenuOptionMusicLabel'))
-			.setDescription(translator.getText('wikiCommandCategoriesMenuOptionMusicDescription'))
-			.setDefault(getDefault('MUSIC')),
-		new StringSelectMenuOptionBuilder()
 			.setValue('MEME')
 			.setEmoji(getBotEmojiResolvable('cmdMeme'))
 			.setLabel(translator.getText('wikiCommandCategoriesMenuOptionMemeLabel'))
@@ -238,7 +232,6 @@ const displayTagMappings = {
 	OUTDATED: (translator) => translator.getText('commandTagLabelOutdated'),
 	MAINTENANCE: (translator) => translator.getText('commandTagLabelMaintenance'),
 	SAKI: () => 'Saki Scans',
-	MUSIC: (translator) => translator.getText('commandTagLabelMusic'),
 	MEME: (translator) => translator.getText('commandTagLabelMeme'),
 	GAME: (translator) => translator.getText('commandTagLabelGame'),
 	CHAOS: (translator) => translator.getText('commandTagLabelChaos'),

@@ -196,8 +196,6 @@ Luego, reemplaza los markdowns y las IDs de emojis personalizados en el código.
   - Corrección automática de previsualizaciones de enlaces de **Twitter/X** (Puréet) y pixiv (Purépix)
   - Edita tus suscripciones a tags de Feeds de imágenes (Boorutato)
   - Soporte de español, inglés y (parcialmente) japonés
-* Fácil reproducción de música con sencilla gestión de colas de reproducción<br>
-  ![puremusic](https://github.com/user-attachments/assets/9168f6fd-2c8c-409b-8745-b8f64cab3258)
 * Soporte de **comandos personalizados** de servidor
   - Se los llama "Tubérculos", contienen una TuberID y una respuesta que ejecutan al ser invocados<br>
     ![tubers](https://github.com/user-attachments/assets/90d67499-5002-4b56-9d4e-530cbf78869c)
