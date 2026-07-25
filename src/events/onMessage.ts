@@ -331,7 +331,7 @@ async function processLinkConverters(message: Message<true>, userCache: UserCach
 				flags: mergedFlags as BitFieldResolvable<
 					Extract<
 						MessageFlagsString,
-						'SuppressEmbeds' | 'SuppressNotifications' | 'IsComponentsV2'
+						'SuppressEmbeds' | 'SuppressNotifications' | 'IsComponentsV2' | 'IsVoiceMessage'
 					>,
 					| MessageFlags.SuppressEmbeds
 					| MessageFlags.SuppressNotifications
@@ -341,8 +341,8 @@ async function processLinkConverters(message: Message<true>, userCache: UserCach
 				files: mergedFiles,
 			}
 		: {
-			content: `-# ${mergedContent.join(' ')}`,
-		};
+				content: `-# ${mergedContent.join(' ')}`,
+			};
 
 	const [sent] = await Promise.all([message.reply(messageResult), message.suppressEmbeds(true)]);
 
