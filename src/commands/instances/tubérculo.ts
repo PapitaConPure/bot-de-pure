@@ -100,7 +100,7 @@ async function getItemsList(guild: Guild, content?: string) {
 }
 
 async function loadPageNumber(
-	interaction: AnyCommandInteraction,
+	interaction: AnyCommandInteraction<'cached'>,
 	page: number,
 	setFilter?: string,
 ) {

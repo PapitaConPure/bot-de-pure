@@ -22,7 +22,6 @@ import type {
 	CommandReplyOptions,
 	CommandRequest,
 	ComplexCommandRequest,
-	ComponentInteraction,
 	ExtendedCommandRequest,
 } from 'types/commands';
 import type { Translation, Translator } from '@/i18n';
@@ -66,7 +65,7 @@ const extendedCommandRequestBlank: ExtendedCommandRequest = {
 	wasReplied: undefined as unknown as () => boolean,
 };
 
-function extendRequest(request: CommandRequest | ComponentInteraction): ComplexCommandRequest {
+function extendRequest(request: CommandRequest | AnyCommandInteraction): ComplexCommandRequest {
 	const extension: ExtendedCommandRequest = Object.assign({}, extendedCommandRequestBlank);
 
 	if (Command.requestIsMessage(request)) {
@@ -412,7 +411,7 @@ export class Command<TOptions extends CommandOptions | undefined = undefined> {
 		return interactionTypes.some((interactionType) => request.type === interactionType);
 	}
 
-	static requestize(request: CommandRequest | ComponentInteraction) {
+	static requestize(request: CommandRequest | AnyCommandInteraction) {
 		return extendRequest(request);
 	}
 }

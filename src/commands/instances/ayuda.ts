@@ -174,7 +174,7 @@ const command = new Command(
 
 			const components = getWikiPageComponentsV2(
 				foundCommand,
-				Command.requestize(interaction as AnyRequest),
+				Command.requestize(interaction),
 				translator,
 			);
 			return interaction.reply({

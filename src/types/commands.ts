@@ -3,6 +3,7 @@ import type {
 	Attachment,
 	AutocompleteInteraction,
 	ButtonInteraction,
+	CacheType,
 	ChatInputCommandInteraction,
 	Collection,
 	CommandInteractionOptionResolver,
@@ -108,10 +109,10 @@ export type ComponentInteraction =
 /**@description Representa los tipos de petición de comando o manejos de interacciones de componentes.*/
 export type AnyRequest = ComplexCommandRequest | ComponentInteraction;
 
-export type AnyCommandInteraction =
-	| ButtonInteraction<'cached'>
-	| AnySelectMenuInteraction<'cached'>
-	| ModalSubmitInteraction<'cached'>;
+export type AnyCommandInteraction<Cached extends CacheType = CacheType> =
+	| ButtonInteraction<Cached>
+	| AnySelectMenuInteraction<Cached>
+	| ModalSubmitInteraction<Cached>;
 
 export interface ParamTypeStrict {
 	name: string;
