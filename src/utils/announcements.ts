@@ -12,11 +12,6 @@ import { tenshiColor } from '@/data/globalProps';
 import images from '@/data/images.json';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 
-const concol = {
-	orange: chalk.rgb(255, 140, 70),
-	purple: chalk.rgb(158, 114, 214),
-};
-
 export async function sendWelcomeMessage(member: GuildMember) {
 	if (member == null || typeof member !== 'object')
 		throw ReferenceError('Se esperaba un miembro a cual dar la bienvenida.');
@@ -39,8 +34,6 @@ export async function sendWelcomeMessage(member: GuildMember) {
 	const channel = guild.systemChannel;
 
 	if (!guild.members.me?.permissionsIn(channel).has(['SendMessages', 'ViewChannel'])) return;
-
-	console.log(concol.purple`Un usuario ha entrado a ${guild.name}...`);
 
 	await channel.sendTyping();
 
@@ -140,16 +133,11 @@ export async function sendFarewellMessage(member: GuildMember) {
 	const { guild } = member;
 	const channel = guild.systemChannel;
 
-	if (!channel) {
-		console.log('El servidor no tiene canal de mensajes de sistema.');
+	if (!channel)
 		return;
-	}
 
-	console.log(`Un usuario ha salido de ${guild.name}...`);
-	if (!guild.members.me?.permissionsIn(channel).has(['SendMessages', 'ViewChannel'])) {
-		console.log('No se puede enviar un mensaje de despedida en este canal.');
+	if (!guild.members.me?.permissionsIn(channel).has(['SendMessages', 'ViewChannel']))
 		return;
-	}
 
 	await channel.sendTyping();
 
@@ -209,8 +197,6 @@ export async function sendFarewellMessage(member: GuildMember) {
 			components: [container],
 			files: [attachment],
 		});
-
-		console.log('Despedida finalizada.');
 	} catch (err) {
 		console.log(chalk.redBright.bold('Error de despedida'));
 		console.error(err);
