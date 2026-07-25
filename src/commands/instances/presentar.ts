@@ -3,6 +3,7 @@ import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { Translator } from '@/i18n';
 import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
+import { compressId } from '@/utils/encoding';
 import { Command, CommandTags, commandFilenames } from '../commons';
 
 const tags = new CommandTags().add('COMMON');
@@ -24,6 +25,7 @@ const command = new Command(
 			commands: commandFilenames.length,
 			guilds: request.client.guilds.cache.size,
 		};
+		const compressedAuthorId = compressId(request.userId);
 
 		const components = [
 			new ContainerBuilder()
@@ -72,7 +74,7 @@ const command = new Command(
 						)
 						.setButtonAccessory(
 							new ButtonBuilder()
-								.setCustomId('estado')
+								.setCustomId(`/estado_${compressedAuthorId}`)
 								.setEmoji(getBotEmojiResolvable('eyeWhite'))
 								.setLabel(translator.getText('buttonView'))
 								.setStyle(ButtonStyle.Primary),
@@ -87,7 +89,7 @@ const command = new Command(
 						)
 						.setButtonAccessory(
 							new ButtonBuilder()
-								.setCustomId('ayuda')
+								.setCustomId(`/ayuda_${compressedAuthorId}`)
 								.setEmoji(getBotEmojiResolvable('eyeWhite'))
 								.setLabel(translator.getText('buttonView'))
 								.setStyle(ButtonStyle.Primary),
