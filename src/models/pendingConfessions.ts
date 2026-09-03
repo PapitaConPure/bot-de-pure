@@ -9,6 +9,9 @@ const PendingConfessionSchema = new Mongoose.Schema({
 		type: String,
 		required: true,
 	},
+	pseudonym: {
+		type: String,
+	},
 	content: {
 		type: String,
 		required: true,

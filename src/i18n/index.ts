@@ -2610,6 +2610,37 @@ const localesObject = {
 		ja: `⚠️ これを行うにはセッションに参加する必要があります。\n 詳細については、\`${subl(0)}help voice\`を使用してください`,
 	},
 
+	confessionAnonReplyModalTitle: {
+		es: 'Responder a confesión',
+		en: 'Reply to confession',
+		ja: '告白に返信する',
+	},
+	confessionAnonReplyModalUsernameName: {
+		es: 'Pseudónimo',
+		en: 'Pseudonym',
+		ja: '仮名',
+	},
+	confessionAnonReplyModalUsernameDefault: {
+		es: `Anónimo #${subl(0)}`,
+		en: `Anonymous #${subl(0)}`,
+		ja: `匿名 #${subl(0)}`,
+	},
+	confessionAnonReplyModalResponseName: {
+		es: 'Respuesta',
+		en: 'Response',
+		ja: '応答',
+	},
+	confessionAnonReplyModalResponsePlaceholder: {
+		es: 'Contenido de tu respuesta',
+		en: 'Response content',
+		ja: '応答内容',
+	},
+	confessionAnonReplyModalResponseNotice: {
+		es: '-# Esta ventana permite escribir respuestas anónimas a una confesión. Si la confesión tiene un hilo, el mensaje se enviará en ese hilo. De lo contrario, se creará un nuevo hilo automáticamente.',
+		en: '-# This window allows you to reply anonymously to a confession. If there\'s already a thread for the confession, the response will be sent there. Otherwise, a new thread will be automatically created.',
+		ja: '-# このウィンドウでは、告白に対して匿名で返信できます。既にその告白に関するスレッドが存在する場合は、返信はそのスレッドに送信されます。存在しない場合は、新しいスレッドが自動的に作成されます。',
+	},
+
 	yoCancelledStep: {
 		es: 'Se canceló la configuración de Preferencias de usuario',
 		en: 'The User Preferences configuration was cancelled',

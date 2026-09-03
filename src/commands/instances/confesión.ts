@@ -14,6 +14,7 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
+import { Translator } from '@/i18n';
 import ConfessionSystems from '@/models/confessionSystems.js';
 import PendingConfessions from '@/models/pendingConfessions.js';
 import { auditError } from '@/systems/others/auditor';
@@ -369,7 +370,7 @@ const command = new Command(
 			agent.setUser(interaction.client.user);
 
 			await agent.sendAsUser({
-				username: 'Respuesta anónima',
+				username: confession.pseudonym ?? 'Respuesta anónima',
 				content: `${confession.content}`,
 			});
 		} else {
@@ -586,21 +587,50 @@ const command = new Command(
 		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	})
 	.setButtonResponse(async function promptReplyAnon(interaction) {
+		const translator = await Translator.from(interaction.user);
+
 		const modal = new ModalBuilder()
 			.setCustomId('confesión_replyAnon')
-			.setTitle('Responder a confesión')
-			.addLabelComponents((label) =>
-				label
-					.setLabel('Respuesta')
-					.setTextInputComponent((textInput) =>
-						textInput
-							.setCustomId('content')
-							.setPlaceholder('Contenido de tu respuesta')
-							.setStyle(TextInputStyle.Paragraph)
-							.setRequired(true)
-							.setMinLength(1)
-							.setMaxLength(1000),
-					),
+			.setTitle(translator.getText('confessionAnonReplyModalTitle'))
+			.addLabelComponents(
+				(label) =>
+					label
+						.setLabel(translator.getText('confessionAnonReplyModalUsernameName'))
+						.setTextInputComponent((textInput) =>
+							textInput
+								.setCustomId('pseudonym')
+								.setValue(
+									translator.getText(
+										'confessionAnonReplyModalUsernameDefault',
+										(Date.now() % 65535).toString(16),
+									),
+								)
+								.setStyle(TextInputStyle.Short)
+								.setRequired(true)
+								.setMinLength(1)
+								.setMaxLength(32),
+						),
+				(label) =>
+					label
+						.setLabel(translator.getText('confessionAnonReplyModalResponseName'))
+						.setTextInputComponent((textInput) =>
+							textInput
+								.setCustomId('content')
+								.setPlaceholder(
+									translator.getText(
+										'confessionAnonReplyModalResponsePlaceholder',
+									),
+								)
+								.setStyle(TextInputStyle.Paragraph)
+								.setRequired(true)
+								.setMinLength(1)
+								.setMaxLength(1000),
+						),
+			)
+			.addTextDisplayComponents((textDisplay) =>
+				textDisplay.setContent(
+					translator.getText('confessionAnonReplyModalResponseNotice'),
+				),
 			);
 
 		return interaction.showModal(modal);
@@ -616,10 +646,12 @@ const command = new Command(
 		const userId = compressId(interaction.user.id);
 		const responseId = compressId(interaction.id);
 		const messageId = compressId(message.id);
+		const responsePseudonym = interaction.fields.getTextInputValue('pseudonym');
 		const responseContent = interaction.fields.getTextInputValue('content');
 		const pendingConf = new PendingConfessions({
 			id: responseId,
 			channelId: confSystem.confessionsChannelId,
+			pseudonym: responsePseudonym,
 			content: responseContent,
 			anonymous: true,
 		});
@@ -631,6 +663,7 @@ const command = new Command(
 			.setColor(0x8334eb)
 			.addFields(
 				{ name: 'Destino', value: `${message.url}` },
+				{ name: 'Pseudónimo', value: responsePseudonym },
 				{ name: 'Respuesta', value: responseContent },
 			);
 
