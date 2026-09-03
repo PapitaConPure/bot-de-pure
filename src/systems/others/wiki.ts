@@ -36,24 +36,17 @@ export const makeCategoriesRow = async (
 	const translator = await Translator.from(request);
 	const getDefault = (d: CommandTagResolvable) => !!selections.includes(d);
 
-	const categoriesMenu = new StringSelectMenuBuilder()
-		.setCustomId(`ayuda_viewCategory_${compressId(request.user.id)}`)
-		.setPlaceholder(translator.getText('wikiCommandCategoriesMenuPlaceholder'))
-		.setMinValues(0)
-		.setMaxValues(6)
-		.addOptions(
-			new StringSelectMenuOptionBuilder()
-				.setValue('COMMON')
-				.setEmoji(getBotEmojiResolvable('bot'))
-				.setLabel(translator.getText('wikiCommandCategoriesMenuOptionCommonLabel'))
-				.setDescription(
-					translator.getText('wikiCommandCategoriesMenuOptionCommonDescription'),
-				)
-				.setDefault(getDefault('COMMON')),
-		);
+	const categoryOptions: StringSelectMenuOptionBuilder[] = [
+		new StringSelectMenuOptionBuilder()
+			.setValue('COMMON')
+			.setEmoji(getBotEmojiResolvable('bot'))
+			.setLabel(translator.getText('wikiCommandCategoriesMenuOptionCommonLabel'))
+			.setDescription(translator.getText('wikiCommandCategoriesMenuOptionCommonDescription'))
+			.setDefault(getDefault('COMMON')),
+	];
 
 	!isNotModerator(request.member)
-		&& categoriesMenu.addOptions(
+		&& categoryOptions.push(
 			new StringSelectMenuOptionBuilder()
 				.setValue('MOD')
 				.setEmoji(getBotEmojiResolvable('cmdMod'))
@@ -63,7 +56,7 @@ export const makeCategoriesRow = async (
 		);
 
 	request.user.id === userIds.papita
-		&& categoriesMenu.addOptions(
+		&& categoryOptions.push(
 			new StringSelectMenuOptionBuilder()
 				.setValue('PAPA')
 				.setEmoji(getBotEmojiResolvable('cmdPapa'))
@@ -90,7 +83,7 @@ export const makeCategoriesRow = async (
 				.setDefault(getDefault('MAINTENANCE')),
 		);
 
-	categoriesMenu.addOptions(
+	categoryOptions.push(
 		new StringSelectMenuOptionBuilder()
 			.setValue('MEME')
 			.setEmoji(getBotEmojiResolvable('cmdMeme'))
@@ -110,6 +103,13 @@ export const makeCategoriesRow = async (
 			.setDescription(translator.getText('wikiCommandCategoriesMenuOptionChaosDescription'))
 			.setDefault(getDefault('CHAOS')),
 	);
+
+	const categoriesMenu = new StringSelectMenuBuilder()
+		.setCustomId(`ayuda_viewCategory_${compressId(request.user.id)}`)
+		.setPlaceholder(translator.getText('wikiCommandCategoriesMenuPlaceholder'))
+		.setMinValues(0)
+		.setMaxValues(categoryOptions.length)
+		.addOptions(categoryOptions);
 
 	return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(categoriesMenu);
 };
