@@ -1470,10 +1470,6 @@ const command = new Command('feed', tags)
 		},
 		{ userFilterIndex: 0 },
 	)
-	.setButtonResponse(async function showFeedImageUrl(interaction) {
-		//Función en desuso. Permanece por compatibilidad
-		return this.showFeedImageTags(interaction);
-	})
 	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
 		const translator = await Translator.from(interaction.user.id);
 
