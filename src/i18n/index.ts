@@ -2054,6 +2054,12 @@ const localesObject = {
 		ja: 'あなたのタイムゾーンに合わせて',
 	},
 
+	preguntarModelUnavailable: {
+		es: '⚠️️ El modelo de inteligencia artificial generativa (genAI) que utiliza este comando no está disponible. ¡El problema fue reportado automáticamente a mi creador!',
+		en: '⚠️️ The generative AI (genAI) model used by this command is unavailable. The problem has been automatically reported to my creator!',
+		ja: '⚠️️ このコマンドで使用している生成AI（genAI）モデルは利用できません。問題は自動的に作成者に報告されました！',
+	},
+
 	recordarRemindersListTitle: {
 		es: '## Recordatorios',
 		en: '## Reminders',
@@ -2637,7 +2643,7 @@ const localesObject = {
 	},
 	confessionAnonReplyModalResponseNotice: {
 		es: '-# Esta ventana permite escribir respuestas anónimas a una confesión. Si la confesión tiene un hilo, el mensaje se enviará en ese hilo. De lo contrario, se creará un nuevo hilo automáticamente.',
-		en: '-# This window allows you to reply anonymously to a confession. If there\'s already a thread for the confession, the response will be sent there. Otherwise, a new thread will be automatically created.',
+		en: "-# This window allows you to reply anonymously to a confession. If there's already a thread for the confession, the response will be sent there. Otherwise, a new thread will be automatically created.",
 		ja: '-# このウィンドウでは、告白に対して匿名で返信できます。既にその告白に関するスレッドが存在する場合は、返信はそのスレッドに送信されます。存在しない場合は、新しいスレッドが自動的に作成されます。',
 	},
 
