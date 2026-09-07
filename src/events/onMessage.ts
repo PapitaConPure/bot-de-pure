@@ -1,14 +1,8 @@
-import type {
-	AttachmentBuilder,
-	BitFieldResolvable,
-	Guild,
-	Message,
-	MessageFlagsString,
-	TextDisplayBuilder,
-} from 'discord.js';
-import { ContainerBuilder, MessageFlags, MessageFlagsBitField } from 'discord.js';
+import type { Guild, Message } from 'discord.js';
+import { ContainerBuilder, MessageFlags } from 'discord.js';
 import { Command, CommandOptionSolver, type CommandOptions } from '@/commands/commons';
-import { sendConvertedBooruPosts } from '@/systems/converters/boorutato';
+import { gelbooruConverter } from '@/systems/converters/boorutato';
+import { mergeConverterPayloads, processConverter } from '@/systems/converters/pipeline';
 import {
 	findFirstException,
 	generateExceptionEmbed,
@@ -28,8 +22,8 @@ import unknownCommandReplies from '../data/unknownCommandReplies.json';
 import { Translator } from '../i18n/index';
 import { ChannelStatsModel, StatsModel } from '../models/stats';
 import UserConfigModel from '../models/userconfigs';
-import { sendConvertedTwitterPosts } from '../systems/converters/pureet';
-import { sendConvertedPixivPosts } from '../systems/converters/purepix';
+import { twitterConverter } from '../systems/converters/pureet';
+import { pixivConverter } from '../systems/converters/purepix';
 import { auditRequest } from '../systems/others/auditor';
 import globalGuildFunctions from '../systems/others/guildFunctions';
 import { addMessageCascade } from '../systems/others/messageCascades';
@@ -304,55 +298,21 @@ async function gainPRC(guild: Guild, userId: string) {
 }
 
 async function processLinkConverters(message: Message<true>, userCache: UserCache) {
-	const converterPayloads = await Promise.all([
-		sendConvertedPixivPosts(message, userCache.pixivConverter),
-		sendConvertedTwitterPosts(message, userCache.twitterPrefix),
-		sendConvertedBooruPosts(message, userCache.booruConverters),
+	const convertersPayload = await mergeConverterPayloads([
+		processConverter(pixivConverter, message, userCache.pixivConverter),
+		processConverter(twitterConverter, message, userCache.twitterPrefix),
+		processConverter(gelbooruConverter, message, userCache.gelbooruConverter),
 	]);
 
-	const contentfulPayloads = converterPayloads.filter((r) => r.contentful === true);
+	if (!convertersPayload.contentful) return;
 
-	if (!contentfulPayloads.length) return;
-
-	const mergedFlags = new MessageFlagsBitField(0);
-	const mergedComponents: (TextDisplayBuilder | ContainerBuilder)[] = [];
-	const mergedFiles: AttachmentBuilder[] = [];
-	const mergedContent: string[] = [];
-
-	for (const payload of contentfulPayloads) {
-		if (payload.flags != null) mergedFlags.add(new MessageFlagsBitField(+payload.flags));
-		if (payload.components?.length) mergedComponents.push(...payload.components);
-		if (payload.files?.length) mergedFiles.push(...payload.files);
-		if (payload.content) mergedContent.push(payload.content);
-	}
-
-	const messageResult = mergedFlags.has(MessageFlags.IsComponentsV2)
-		? {
-				flags: mergedFlags as BitFieldResolvable<
-					Extract<
-						MessageFlagsString,
-						| 'SuppressEmbeds'
-						| 'SuppressNotifications'
-						| 'IsComponentsV2'
-						| 'IsVoiceMessage'
-					>,
-					| MessageFlags.SuppressEmbeds
-					| MessageFlags.SuppressNotifications
-					| MessageFlags.IsComponentsV2
-				>,
-				components: mergedComponents,
-				files: mergedFiles,
-			}
-		: {
-				content: `-# ${mergedContent.join(' ')}`,
-			};
-
-	const [sent] = await Promise.all([message.reply(messageResult), message.suppressEmbeds(true)]);
-
-	setTimeout(() => {
+	const suppressEmbeds = async (n: number) => {
 		if (!message?.embeds.length) return;
-		message.suppressEmbeds(true).catch(() => undefined);
-	}, 3000);
+		await message.suppressEmbeds(true).catch(() => undefined);
+		if (n > 0) setTimeout(suppressEmbeds, 1500, n - 1);
+	};
+
+	const [sent] = await Promise.all([message.reply(convertersPayload), suppressEmbeds(5)]);
 
 	await Promise.all([
 		addAgentMessageOwner(sent, message.author.id),

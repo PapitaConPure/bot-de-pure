@@ -1,5 +1,4 @@
 import type { GuildMember, Interaction, User } from 'discord.js';
-import type { AcceptedBoorutatoConverterKey } from '@/systems/converters/boorutato';
 import type { LocaleKey } from '../i18n';
 import UserConfigModel from '../models/userconfigs';
 import type { AcceptedTwitterConverterKey } from '../systems/converters/pureet';
@@ -9,7 +8,7 @@ export interface UserCache {
 	language: LocaleKey;
 	pixivConverter: 'phixiv' | '';
 	twitterPrefix: AcceptedTwitterConverterKey | '';
-	booruConverters: Set<AcceptedBoorutatoConverterKey>;
+	gelbooruConverter: 'boorutato' | '';
 	banned: boolean;
 }
 
@@ -23,7 +22,7 @@ const userCache = new Map<string, UserCache>();
  */
 export async function cacheUser(user: UserCacheResolvable) {
 	const userId = resolveUserCacheId(user);
-	if (!userId) throw ReferenceError('Se esperaba una ID de usuario');
+	if (!userId) throw new ReferenceError('Se esperaba una ID de usuario');
 
 	const userQuery = { userId };
 	let userConfigs = await UserConfigModel.findOne(userQuery);
@@ -37,7 +36,7 @@ export async function cacheUser(user: UserCacheResolvable) {
 		language: userConfigs.language,
 		pixivConverter: userConfigs.pixivConverter || '',
 		twitterPrefix: userConfigs.twitterPrefix || '',
-		booruConverters: new Set(userConfigs.booruConverters || ['gelbooru']),
+		gelbooruConverter: userConfigs.gelbooruConverter || '',
 		banned: userConfigs.banned ?? false,
 	});
 }
@@ -57,7 +56,7 @@ export async function recacheUser(user: UserCacheResolvable) {
  */
 export async function fetchUserCache(user: UserCacheResolvable): Promise<UserCache | undefined> {
 	const userId = resolveUserCacheId(user);
-	if (!userId) throw ReferenceError('Se esperaba una ID de usuario al recolectar caché');
+	if (!userId) throw new ReferenceError('User ID expected.');
 
 	if (!userCache.has(userId)) await cacheUser(userId);
 
@@ -68,13 +67,13 @@ export function resolveUserCacheId(data: UserCacheResolvable): string | undefine
 	if (typeof data === 'string') return data;
 
 	if ('member' in data) {
-		if (!data.member) throw new Error('Malformed id');
+		if (!data.member) throw new Error('Malformed data.');
 
 		return data.member.user.id;
 	}
 
 	if ('user' in data) {
-		if (!data.user) throw new Error('Malformed id');
+		if (!data.user) throw new Error('Malformed data.');
 
 		return data.user.id;
 	}

@@ -1,5 +1,5 @@
 import Mongoose, { type InferSchemaType } from 'mongoose';
-import { acceptedBoorutatoConverters } from '@/systems/converters/boorutato';
+import { acceptedGelbooruConverters } from '@/systems/converters/boorutato';
 import { acceptedPixivConverters } from '@/systems/converters/purepix';
 import Locales from '../i18n/locales';
 import { acceptedTwitterConverters } from '../systems/converters/pureet';
@@ -99,14 +99,10 @@ const UserConfigSchema = new Mongoose.Schema({
 		enum: acceptedTwitterConverters,
 		default: 'vx',
 	},
-	booruConverters: {
-		type: [
-			{
-				type: String,
-				enum: acceptedBoorutatoConverters,
-			},
-		],
-		default: ['gelbooru'],
+	gelbooruConverter: {
+		type: String,
+		enum: acceptedGelbooruConverters,
+		default: 'boorutato',
 	},
 	showLevelUp: {
 		type: Boolean,

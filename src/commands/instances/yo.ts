@@ -22,8 +22,8 @@ import type { UserConfigSchemaType } from '@/models/userconfigs';
 import UserConfigModel from '@/models/userconfigs';
 import { updateFollowedFeedTagsCache } from '@/systems/booru/boorufeed';
 import {
-	type AcceptedBoorutatoConverterKey,
-	acceptedBoorutatoConverters,
+	type AcceptedGelbooruConverterKey,
+	acceptedGelbooruConverters,
 } from '@/systems/converters/boorutato';
 import type { AcceptedTwitterConverterKey } from '@/systems/converters/pureet';
 import { acceptedTwitterConverters } from '@/systems/converters/pureet';
@@ -398,10 +398,10 @@ const makePixivServicePickerContainer = (
 
 const makeBoorutatoServicePickerContainer = (
 	compressedAuthorId: string,
-	services: Set<AcceptedBoorutatoConverterKey>,
+	services: { gelbooru: AcceptedGelbooruConverterKey },
 	translator: Translator,
 ) => {
-	const hasGelbooru = services.has('gelbooru');
+	const hasGelbooru = services.gelbooru !== '';
 
 	const container = new ContainerBuilder()
 		.setAccentColor(tenshiPeachColor)
@@ -420,19 +420,17 @@ const makeBoorutatoServicePickerContainer = (
 		.addActionRowComponents((actionRow) =>
 			actionRow.addComponents(
 				new StringSelectMenuBuilder()
-					.setCustomId(
-						`yo_setBooruConvert_${compressedAuthorId}_${'gelbooru' as AcceptedBoorutatoConverterKey}`,
-					)
+					.setCustomId(`yo_setBooruConvert_${compressedAuthorId}_gelbooru`)
 					.setPlaceholder(translator.getText('yoConversionServiceMenuService'))
 					.setOptions(
 						{
-							value: 'off',
+							value: 'none',
 							label: translator.getText('disabled'),
 							description: translator.getText('yoBoorutatoMenuServiceDisabledDesc'),
 							default: !hasGelbooru,
 						},
 						{
-							value: 'on',
+							value: 'boorutato',
 							label: translator.getText('enabled'),
 							description: translator.getText('yoBoorutatoMenuServiceEnabledDesc'),
 							default: hasGelbooru,
@@ -822,7 +820,7 @@ const command = new Command(
 					components: [
 						makeBoorutatoServicePickerContainer(
 							compressedAuthorId,
-							new Set(userConfigs.booruConverters),
+							{ gelbooru: userConfigs.gelbooruConverter },
 							translator,
 						),
 					],
@@ -1087,11 +1085,7 @@ const command = new Command(
 		{ userFilterIndex: 0 },
 	)
 	.setSelectMenuResponse(
-		async function setBooruConvert(
-			interaction,
-			compressedAuthorId,
-			service: AcceptedBoorutatoConverterKey,
-		) {
+		async function setBooruConvert(interaction, compressedAuthorId, service: 'gelbooru') {
 			const { user } = interaction;
 
 			const [userConfigs] = await Promise.all([
@@ -1102,17 +1096,22 @@ const command = new Command(
 
 			const translator = new Translator(userConfigs.language);
 
-			const enabled = interaction.values[0] as 'on' | 'off';
+			switch (service) {
+				case 'gelbooru': {
+					let converterKey = interaction.values[0] as
+						| AcceptedGelbooruConverterKey
+						| 'none'
+						| '';
+					if (converterKey === 'none') converterKey = '';
 
-			if (!acceptedBoorutatoConverters.includes(service))
-				throw 'Resultado de servicio de conversión de Twitter inesperado';
+					if (!acceptedGelbooruConverters.includes(converterKey))
+						throw new Error(
+							`Resultado de servicio de conversión de Booru inesperado: ${converterKey}`,
+						);
 
-			const resultingServices = new Set(userConfigs.booruConverters);
-
-			if (enabled === 'on') resultingServices.add(service);
-			else resultingServices.delete(service);
-
-			userConfigs.booruConverters = [...resultingServices];
+					userConfigs.gelbooruConverter = converterKey;
+				}
+			}
 
 			return Promise.all([
 				userConfigs.save().then(() => recacheUser(user.id)),
@@ -1120,7 +1119,7 @@ const command = new Command(
 					components: [
 						makeBoorutatoServicePickerContainer(
 							compressedAuthorId,
-							resultingServices,
+							{ gelbooru: userConfigs.gelbooruConverter },
 							translator,
 						),
 					],

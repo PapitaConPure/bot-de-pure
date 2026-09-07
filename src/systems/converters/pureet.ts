@@ -1,11 +1,5 @@
-import type { Message } from 'discord.js';
-import { ChannelType } from 'discord.js';
+import type { ConverterDefinition, ConverterService } from 'types/converters';
 import { getBotEmoji } from '@/utils/emojis';
-import Logger from '@/utils/logs';
-import type { ConverterPayload } from './converters';
-import { ConverterEmptyPayload } from './converters';
-
-const { error } = Logger('WARN', 'Puréet');
 
 export const acceptedTwitterConvertersWithoutNone = ['vx', 'fx', 'girlcockx', 'cunnyx'] as const;
 export const acceptedTwitterConverters = ['', ...acceptedTwitterConvertersWithoutNone] as const;
@@ -15,70 +9,33 @@ export const tweetRegex =
 export type AcceptedTwitterConverterKey = (typeof acceptedTwitterConvertersWithoutNone)[number];
 
 const twitterConversionServices = {
-	vx: { name: 'vxTwitter', service: 'https://fixvx.com' },
-	fx: { name: 'fixTwitter', service: 'https://fxtwitter.com' },
-	girlcockx: { name: 'girlcockx', service: 'https://girlcockx.com' },
-	cunnyx: { name: 'cunnyx', service: 'https://cunnyx.com' },
-} as const satisfies Record<AcceptedTwitterConverterKey, { name: string; service: string }>;
+	vx: { name: 'vxTwitter', link: 'https://fixvx.com' },
+	fx: { name: 'fixTwitter', link: 'https://fxtwitter.com' },
+	girlcockx: { name: 'girlcockx', link: 'https://girlcockx.com' },
+	cunnyx: { name: 'cunnyx', link: 'https://cunnyx.com' },
+} as const satisfies Record<AcceptedTwitterConverterKey, ConverterService>;
 
-/**
- * @description Detecta enlaces de Twitter en un mensaje y los reenvía con un Embed corregido, a través de una respuesta.
- * @param message El mensaje a analizar
- * @param converterKey El identificador de servicio de conversión a utilizar
- */
-export async function sendConvertedTwitterPosts(
-	message: Message<true>,
-	converterKey: AcceptedTwitterConverterKey | '',
-): Promise<ConverterPayload> {
-	if (converterKey === '') return ConverterEmptyPayload;
-
-	const { content: messageContent, channel } = message;
-
-	if (
-		!message.guild.members.me
-			?.permissionsIn(channel)
-			.has(['SendMessages', 'ManageMessages', 'AttachFiles'])
-	)
-		return ConverterEmptyPayload;
-
-	if (channel.type === ChannelType.PublicThread) {
-		try {
-			const { parent } = channel;
-			if (
-				parent?.type === ChannelType.GuildForum
-				&& (await channel.fetchStarterMessage())?.id === message.id
-			)
-				return ConverterEmptyPayload;
-		} catch (err) {
-			error(err);
-			return ConverterEmptyPayload;
-		}
-	}
-
-	const tweetUrls = [...messageContent.matchAll(tweetRegex)]
-		.filter((u) => !(u[0].startsWith('<') && u[0].endsWith('>')))
-		.slice(0, 16);
-
-	if (!tweetUrls.length) return ConverterEmptyPayload;
-
-	const configProp = twitterConversionServices[converterKey];
-	if (configProp == null) return ConverterEmptyPayload;
-
-	const service = configProp.service;
-	const formattedTweetUrls = tweetUrls.map((u) => {
-		const [match, /*url*/ , artist, id, ls] = u;
-		const spoiler = match.startsWith('||') && match.endsWith('||') ? '||' : '';
-		let langSuffix = '';
-		if (ls && ls.length <= 2) {
-			langSuffix = `/${ls}`;
-		}
-		return `${spoiler}${getBotEmoji('twitterColor')}[\`${artist}/${id}\`](${service}/${artist}/status/${id}${langSuffix})${spoiler}`;
-	});
-
-	const content = formattedTweetUrls.join(' ');
-
-	return {
-		contentful: true,
-		content,
-	};
-}
+export const twitterConverter = {
+	name: 'Puréet',
+	regex: tweetRegex,
+	external: {
+		services: twitterConversionServices,
+		convert(matchedLinks, { serviceLink }) {
+			if (!serviceLink) return {};
+	
+			const formattedTweetUrls = matchedLinks.map((u) => {
+				const [match, /*url*/ , artist, id, ls] = u;
+				const spoiler = match.startsWith('||') && match.endsWith('||') ? '||' : '';
+				let langSuffix = '';
+				if (ls && ls.length <= 2) {
+					langSuffix = `/${ls}`;
+				}
+				return `${spoiler}${getBotEmoji('twitterColor')}[\`${artist}/${id}\`](${serviceLink}/${artist}/status/${id}${langSuffix})${spoiler}`;
+			});
+	
+			const content = formattedTweetUrls.join(' ');
+	
+			return { content };
+		},
+	},
+} satisfies ConverterDefinition;
