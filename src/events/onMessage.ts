@@ -312,7 +312,12 @@ async function processLinkConverters(message: Message<true>, userCache: UserCach
 		if (n > 0) setTimeout(suppressEmbeds, 1500, n - 1);
 	};
 
-	const [sent] = await Promise.all([message.reply(convertersPayload), suppressEmbeds(5)]);
+	const [sent] = await Promise.all([
+		message.reply(convertersPayload),
+		message.suppressEmbeds(true).catch(() => undefined),
+	]);
+
+	setTimeout(suppressEmbeds, 3000, 3);
 
 	await Promise.all([
 		addAgentMessageOwner(sent, message.author.id),
