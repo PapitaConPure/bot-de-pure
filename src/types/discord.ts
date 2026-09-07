@@ -1,9 +1,12 @@
 import type {
 	ActionRowData,
 	APIMessageTopLevelComponent,
+	BitFieldResolvable,
 	JSONEncodable,
 	MessageActionRowComponentBuilder,
 	MessageActionRowComponentData,
+	MessageFlags,
+	MessageFlagsString,
 	SlashCommandAttachmentOption,
 	SlashCommandBooleanOption,
 	SlashCommandBuilder,
@@ -36,3 +39,11 @@ export type MessageComponentDataResolvable =
 	| TopLevelComponentData
 	| ActionRowData<MessageActionRowComponentData | MessageActionRowComponentBuilder>
 	| APIMessageTopLevelComponent;
+
+export type FixedBitFieldResolvable = BitFieldResolvable<
+	Extract<
+		MessageFlagsString,
+		'SuppressEmbeds' | 'SuppressNotifications' | 'IsComponentsV2' | 'IsVoiceMessage'
+	>,
+	MessageFlags.SuppressEmbeds | MessageFlags.SuppressNotifications | MessageFlags.IsComponentsV2
+>;
