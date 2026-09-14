@@ -1024,7 +1024,7 @@ const command = new Command(
 			if (service === 'none') service = '';
 
 			if (service !== '' && service !== 'phixiv')
-				throw 'Resultado de servicio de conversión de pixiv inesperado';
+				throw new Error('Resultado de servicio de conversión de pixiv inesperado');
 
 			userConfigs.pixivConverter = service;
 
@@ -1062,7 +1062,7 @@ const command = new Command(
 			if (service === 'none') service = '';
 
 			if (!acceptedTwitterConverters.includes(service))
-				throw 'Resultado de servicio de conversión de Twitter inesperado';
+				throw new Error('Resultado de servicio de conversión de Twitter inesperado');
 
 			userConfigs.twitterPrefix = service;
 

@@ -683,7 +683,7 @@ const command = new Command('feed', tags)
 			const feedChannel = interaction.guild.channels.cache.get(
 				interaction.values[0] || interaction.channelId,
 			);
-			if (!feedChannel)
+			if (!interaction.channel || !feedChannel)
 				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
 			const allowNSFW = isNSFWChannel(feedChannel);
@@ -740,7 +740,7 @@ const command = new Command('feed', tags)
 				post,
 				{
 					...feed,
-					allowNSFW,
+					allowNSFW: isNSFWChannel(interaction.channel),
 					disableActions: true,
 				},
 			);

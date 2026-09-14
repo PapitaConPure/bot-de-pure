@@ -7,7 +7,7 @@ import type { AnyBulkWriteOperation } from 'mongoose';
 import { ClientNotFoundError, client } from '@/core/client';
 import { globalConfigs } from '@/data/globalProps';
 import { FeedConfigModel, type FeedDocument, type FeedSchemaType } from '@/models/feeds';
-import type { PostFormatData, Suscription } from '@/systems/booru/boorusend';
+import type { PostFormatData, Subscription } from '@/systems/booru/boorusend';
 import {
 	cleanPostAttachmentRecords,
 	formatBooruPostMessage,
@@ -159,7 +159,7 @@ async function processFeeds(booru: BooruClient<Gelbooru>, feedChunk: FeedChunk) 
 				return;
 			}
 
-			const feedSubscriptions: Suscription[] = [];
+			const feedSubscriptions: Subscription[] = [];
 
 			debug(
 				`Preparing candidate user Feed tag subscriptions for Booru Feed #${channel.name} (#${feed.channelId}).`,

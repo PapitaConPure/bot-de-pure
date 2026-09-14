@@ -23,8 +23,7 @@ import {
 	TextDisplayBuilder,
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
-import { Command } from '@/commands/commons';
-import { CommandOptionSolver } from '@/commands/commons/cmdOpts';
+import { Command, type CommandOptionSolver } from '@/commands/commons';
 import { tenshiPeachColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { Translator } from '@/i18n';
@@ -58,7 +57,7 @@ export interface PostFormatData {
 const sourceMappings: ReadonlyArray<{ pattern: RegExp; replacement: string }> = [
 	{
 		pattern:
-			/https:\/\/i.pximg.net\/img-original\/img\/[0-9/]{19}\/([0-9]+)_p[0-9]+\.[A-Za-z]{2,4}/,
+			/https:\/\/i\.pximg\.net\/img-original\/img\/[0-9/]{19}\/([0-9]+)_p[0-9]+\.[A-Za-z]{2,4}/,
 		replacement: 'https://www.pixiv.net/artworks/$1',
 	},
 	{
@@ -71,12 +70,13 @@ const sourceMappings: ReadonlyArray<{ pattern: RegExp; replacement: string }> = 
 const noSource: BooruSourceStyle = { color: Colors.Aqua, emoji: undefined };
 const unknownSource: BooruSourceStyle = { color: tenshiPeachColor, emoji: 'heartAccent' };
 
-const resMappings: Partial<Record<string, { order: number; emote: BotEmojiName }>> = {
+/**Solo se debe mostrar la tag de resolución más alta por Post.*/
+const resMappings = {
 	lowres: { order: 0, emote: 'lowRes' },
 	highres: { order: 1, emote: 'highRes' },
 	absurdres: { order: 2, emote: 'absurdRes' },
 	incredibly_absurdres: { order: 3, emote: 'incrediblyAbsurdRes' },
-} as const;
+} as const satisfies Record<string, { order: number; emote: BotEmojiName }>;
 
 const sexEmotes = {
 	girl: 'girl',
@@ -224,22 +224,11 @@ export async function formatBooruPostMessage(
 			),
 		);
 	} else {
-		/*let previewUrl: URL;
-		debug('El contenido no fue bloqueado. Se agregará al mensaje a continuación');
-		if (/\.(mp4|webm|webp|gif)/.test(post.fileUrl.toString())) {
-			debug('El contenido es un video o GIF');
-			previewUrl = post.previewUrl || post.fileUrl || post.sampleUrl || 'https://google.com'; //Revertir a `post.fileUrl || post.previewUrl || post.sampleUrl` cuando se solucione el problema
-		} else {
-			debug('El contenido es probablemente una imagen estática');
-			previewUrl = post.previewUrl || post.sampleUrl || post.fileUrl || 'https://google.com'; //Revertir a `post.sampleUrl || post.fileUrl || post.previewUrl` cuando se solucione el problema
-		}*/
-
 		if (post.previewUrl != null) previewImage = await getPostAttachment(post.previewUrl);
 
 		container.addMediaGalleryComponents((mediaGallery) =>
 			mediaGallery.addItems((mediaGalleryItem) =>
-				//mediaGalleryItem.setURL(previewUrl.toString()),
-				mediaGalleryItem.setURL('attachment://preview.webp'),
+				mediaGalleryItem.setURL(`attachment://bdp_thumb_${post.id}.webp`),
 			),
 		);
 	}
@@ -381,7 +370,7 @@ export async function formatBooruPostMessage(
 
 		const postTags = processedPostTags;
 		const displayedTags = postTags.slice(0, maxTags);
-		const displayedTagsCount = Math.min(displayedTags.length, maxTags);
+		const displayedTagsCount = displayedTags.length;
 
 		debug('Comprobando si se debe insertar un campo de tags');
 		debug('displayedTagsCount =', displayedTagsCount);
@@ -415,23 +404,10 @@ export async function formatBooruPostMessage(
 
 function extractSpecialTags(tags: Iterable<string>) {
 	let highestResTag: { order: number; emote: BotEmojiName } | undefined;
-	let hasTagMe = false;
-	let hasRequestTags = false;
 	const sexTags = new Set<string>();
 	const remainingTags = new Set<string>();
 
 	for (const tag of tags) {
-		if (tag === 'tagme') {
-			hasTagMe = true;
-			continue;
-		}
-
-		if (tag.endsWith('_request')) {
-			//"commentary_request" tends to come from Danbooru, and artist context is ignored on Gelbooru
-			hasRequestTags = tag !== 'commentary_request';
-			continue;
-		}
-
 		//Set this tag as specially displayed if it's the highest resolution tag
 		const resMapping = resMappings[tag];
 		if (resMapping) {
@@ -441,7 +417,7 @@ function extractSpecialTags(tags: Iterable<string>) {
 		}
 
 		//Set this tag as specially displayed if it's a "1girl/1boy/1futa"-type tag
-		const sexTag = tag.match(/([0-9]\+?)(girl|boy|futa)s?/);
+		const sexTag = tag.match(/([1-9]\+?)(girl|boy|futa)s?/);
 		if (sexTag) {
 			sexTags.add(`${getBotEmoji(sexEmotes[sexTag[2]])}${sexTag[1]}`);
 			continue;
@@ -450,7 +426,7 @@ function extractSpecialTags(tags: Iterable<string>) {
 		remainingTags.add(tag);
 	}
 
-	return { hasTagMe, hasRequestTags, sexTags, highestResTag, remainingTags };
+	return { sexTags, highestResTag, remainingTags };
 }
 
 /**@description Devuelve un botón y color de contenedor para la fuente especificada (si está disponible).*/
@@ -486,7 +462,7 @@ function getSourceButtonAndColor(
 	return { sourceButton, containerColor };
 }
 
-export interface Suscription {
+export interface Subscription {
 	userId: Snowflake;
 	followedTags: string[];
 }
@@ -496,7 +472,7 @@ export async function notifyUsers(
 	post: Post,
 	sent: Message<true>,
 	members: Collection<Snowflake, GuildMember>,
-	feedSuscriptions: Suscription[],
+	feedSuscriptions: Subscription[],
 ) {
 	info(
 		'Se recibió una orden para notificar sobre un nuevo Post a usuarios suscriptos aplicables',
@@ -504,7 +480,7 @@ export async function notifyUsers(
 
 	//No sé qué habré estado pensando cuando escribí esto, pero no pienso volver a tocarlo
 
-	if (!sent) throw 'Se esperaba un mensaje para el cuál notificar';
+	if (!sent) throw new Error('Se esperaba un mensaje para el cuál notificar');
 
 	if (!sent.components) throw new Error('Se esperaba un mensaje de Feed válido');
 
@@ -514,7 +490,7 @@ export async function notifyUsers(
 	if (!container || !containerButtonRow) throw new Error('Se esperaba un mensaje de Feed válido');
 
 	const channel = sent.channel;
-	if (!channel) throw 'No se encontró un canal para el mensaje enviado';
+	if (!channel) throw new Error('No se encontró un canal para el mensaje enviado');
 
 	const matchingSuscriptions = feedSuscriptions.filter((suscription) =>
 		suscription.followedTags.some((tag) => post.tags.includes(tag)),
@@ -612,9 +588,9 @@ export async function notifyUsers(
  * De naturaleza memética.
  * Comprueba si la búsqueda de tags de {@linkcode Booru} no es aprobada por Dios.
  */
-function isUnholy(isNsfw: boolean, request: ComplexCommandRequest, terms: string[]): boolean {
+function isUnholy(request: ComplexCommandRequest, terms: string[]): boolean {
 	return (
-		isNsfw
+		isNSFWChannel(request.channel)
 		&& request.userId !== userIds.papita
 		&& (terms.includes('holo') || terms.includes('megumin'))
 	);
@@ -640,19 +616,18 @@ export async function searchAndReplyWithPost(
 		sfwtitle: sfwTitle = 'Búsqueda',
 	} = options;
 
-	const isnsfw = isNSFWChannel(request.channel);
+	const isNSFW = isNSFWChannel(request.channel);
 
 	const clampPoolSize = (x: number) => Math.max(2, Math.min(x, 10));
 	const poolSize = args.flagExprIf(
 		'bomba',
-		(x) => clampPoolSize(CommandOptionSolver.asNumber(x ? +x : 1)),
+		(x) => clampPoolSize(x ? +x : 1),
 		1,
 	);
 	const words = (args.getString('etiquetas', true) ?? '').split(/\s+/);
-	debug('poolSize =', poolSize);
 
 	debug('Verificando que la solicitud haya sido aprobada por el Vaticano');
-	if (isUnholy(isnsfw, request, [commandTag ?? '', ...words])) {
+	if (isUnholy(request, [commandTag ?? '', ...words])) {
 		const rakki = await import('@/commands/instances/rakkidei');
 		const rakkiCommand = (
 			rakki instanceof Command ? rakki : rakki.default
@@ -664,7 +639,7 @@ export async function searchAndReplyWithPost(
 	await request.deferReply();
 
 	debug('Se están por obtener tags de búsqueda a partir de la consulta del usuario');
-	const baseTags = getBaseTags('gelbooru', isnsfw);
+	const baseTags = getBaseTags('gelbooru', isNSFW);
 	const searchTags = [commandTag ?? '', baseTags].join(' ').trim();
 	const userTags = getSearchTags(words, 'gelbooru', commandTag || 'general');
 	const composedTags = [searchTags, userTags];
@@ -695,7 +670,7 @@ export async function searchAndReplyWithPost(
 		if (!posts.length) {
 			warn('La respuesta de búsqueda no tiene resultados');
 			const replyOptions = {
-				content: `⚠️ No hay resultados en **Gelbooru** para las tags **"${userTags}"** en canales **${isnsfw ? 'NSFW' : 'SFW'}**`,
+				content: `⚠️ No hay resultados en **Gelbooru** para las tags **"${userTags}"** en canales **${isNSFW ? 'NSFW' : 'SFW'}**`,
 			};
 			return request.editReply(replyOptions) as Promise<Message<true>>;
 		}
@@ -711,9 +686,9 @@ export async function searchAndReplyWithPost(
 			posts.map((post, i) =>
 				formatBooruPostMessage(booru, post, {
 					maxGeneralTags: 20,
-					title: isnsfw ? nsfwTitle : sfwTitle,
+					title: isNSFW ? nsfwTitle : sfwTitle,
 					manageableBy: author.id,
-					allowNSFW: isnsfw,
+					allowNSFW: isNSFW,
 					isNotFeed: true,
 					componentKey: i,
 				}),
@@ -776,7 +751,7 @@ export function cleanPostAttachmentRecords() {
 }
 
 async function getPostAttachment(url: string | URL): Promise<AttachmentBuilder | null> {
-	const postAttachmentRecord = postAttachments[`${url}`];
+	const postAttachmentRecord = postAttachments.get(`${url}`);
 
 	if (postAttachmentRecord == null || isPast(postAttachmentRecord.validUntil)) {
 		const record = await fetchAndSavePostAttachment(url);
@@ -804,7 +779,7 @@ async function fetchAndSavePostAttachment(url: string | URL): Promise<PostAttach
 		validUntil: addMinutes(new Date(), postAttachmentTTLMinutes),
 	};
 
-	postAttachments[`${url}`] = record;
+	postAttachments.set(`${url}`, record);
 	return record;
 }
 
