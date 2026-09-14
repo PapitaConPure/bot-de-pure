@@ -2,6 +2,7 @@ import type { Tag, TagStore } from '@papitaconpure/booru-client';
 import type { AnyBulkWriteOperation, AnyKeys } from 'mongoose';
 import type BooruTags from '@/models/boorutags';
 import type { TagSchemaType } from '@/models/boorutags';
+import { attemptManyTimes, makeTimeoutRejectionPromise } from '@/utils/promises';
 import type { TagPersistenceMapper } from './mapper/tagPersistenceMapper';
 import { TagPersistenceMapperImpl } from './mapper/tagPersistenceMapperImpl';
 
@@ -83,20 +84,5 @@ export class MongooseTagStore implements TagStore {
 		};
 
 		await attemptManyTimes(() => this.#model.deleteMany(query), 2);
-	}
-}
-
-function makeTimeoutRejectionPromise(ms: number = 20_000) {
-	return new Promise<never>((_, reject) =>
-		setTimeout(() => reject(new Error('DB took too long')), ms),
-	);
-}
-
-async function attemptManyTimes(fn: () => Promise<unknown>, times: number): Promise<void> {
-	try {
-		times--;
-		await fn();
-	} catch (err) {
-		if (times < 0) throw err;
 	}
 }
