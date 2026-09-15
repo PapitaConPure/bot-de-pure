@@ -2739,6 +2739,11 @@ const localesObject = {
 		en: 'Fixes imageboard embeds automatically',
 		ja: '画像掲示板の埋め込みを自動的に修正します',
 	},
+	yoDashboardMenuConfigInstagramDesc: {
+		es: 'Corrige enlaces de Instagram que envíes',
+		en: 'Fixes Instagram embeds automatically',
+		ja: 'Instagram の埋め込みを自動的に修正します',
+	},
 	yoDashboardTimezone: {
 		es: 'Huso Horario...',
 		en: 'Time Zone...',
@@ -3014,6 +3019,51 @@ const localesObject = {
 		es: 'No convertir enlaces de Boorus automáticamente.',
 		en: 'Do not convert imageboard links automatically.',
 		ja: '画像掲示板リンクを自動的に変換しない。',
+	},
+	yoInstagramStep: {
+		es: 'Conversor de enlaces de Instagram',
+		en: 'Instagram links converter',
+		ja: 'Instagram リンクコンバーター',
+	},
+	yoInstagramTitle: {
+		es: () => `## ${getBotEmoji('instagramColor')} Preferencias de Puréstagram`,
+		en: () => `## ${getBotEmoji('instagramColor')} Puréstagram preferences`,
+		ja: () => `## ${getBotEmoji('instagramColor')} Puréstagram の個人設定`,
+	},
+	yoInstagramDesc: {
+		es: '-# Configura la conversión de enlaces de Instagram.',
+		en: '-# Configure the conversion of Instagram links.',
+		ja: '-# Instagram リンクの変換サービスを設定する。',
+	},
+	yoInstagramMenuServiceDdinstagramDesc: {
+		es: 'Servicio recomendado. Previsualización completa.',
+		en: 'Recommended service. Full embed.',
+		ja: '推奨されるサービス。完全な埋め込みを生成する',
+	},
+	yoInstagramMenuServiceDddinstagramDesc: {
+		es: 'Servicio recomendado. Solo multimedia.',
+		en: 'Recommended service. Media only.',
+		ja: '推奨されるサービス。メディアのみ。',
+	},
+	yoInstagramMenuServiceGddinstagramDesc: {
+		es: 'Servicio recomendado. Autor y multimedia sin descripción.',
+		en: 'Recommended service. Author and media without any caption.',
+		ja: '推奨されるサービス。メディアのみ。キャプションなしの著者およびメディア。',
+	},
+	yoInstagramMenuServiceWebhookLabel: {
+		es: 'Webhook de Agente Puré.',
+		en: 'Puré Agent Webhook.',
+		ja: 'エージェント Puréウェブフック。',
+	},
+	yoInstagramMenuServiceWebhookDesc: {
+		es: 'Alternativa estéticamente agradable, pero menos compatible.',
+		en: 'Aesthetically pleasing alternative, but less compatible.',
+		ja: '見た目も美しい代替品だが、互換性は低い。',
+	},
+	yoInstagramMenuServiceNoneDesc: {
+		es: 'No convertir enlaces de Instagram automáticamente.',
+		en: 'Do not convert Instagram links automatically.',
+		ja: 'Instagram リンクを自動的に変換しない。',
 	},
 	yoSelectTagsChannelTitle: {
 		es: 'Selecciona uno de tus Feeds seguidos.',
