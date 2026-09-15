@@ -36,7 +36,7 @@ import { getMainBooruClient } from './booruclient';
 import type { FeedOptions } from './boorufeed';
 import type { tagMaps } from './booruprops';
 import { getBaseTags, getSearchTags } from './booruprops';
-import { type BooruSourceStyle, BooruSourceStyles } from './boorusources';
+import { type BooruSourceStyle, BooruSourceStylesList } from './boorusources';
 
 const { debug, info, warn, error } = Logger('WARN', 'BooruSend');
 
@@ -224,11 +224,11 @@ export async function formatBooruPostMessage(
 			),
 		);
 	} else {
-		if (post.previewUrl != null) previewImage = await getPostAttachment(post.previewUrl);
+		if (post.previewUrl != null) previewImage = await getPostAttachment(post, 'previewUrl');
 
 		container.addMediaGalleryComponents((mediaGallery) =>
 			mediaGallery.addItems((mediaGalleryItem) =>
-				mediaGalleryItem.setURL(`attachment://bdp_thumb_${post.id}.webp`),
+				mediaGalleryItem.setURL(`attachment://${previewImage?.name}`),
 			),
 		);
 	}
@@ -443,7 +443,7 @@ function getSourceButtonAndColor(
 	debug('Después de mapeos de fuente:', source);
 
 	//Dar estilo a Embed según fuente de la imagen
-	const sourceStyle = BooruSourceStyles.find((s) => s.pattern.test(source)) ?? unknownSource;
+	const sourceStyle = BooruSourceStylesList.find((s) => s.pattern.test(source)) ?? unknownSource;
 	const buttonEmoji = sourceStyle.emoji;
 	const containerColor = sourceStyle.color;
 	const sourceTooLong = source.length > 512;
@@ -619,11 +619,7 @@ export async function searchAndReplyWithPost(
 	const isNSFW = isNSFWChannel(request.channel);
 
 	const clampPoolSize = (x: number) => Math.max(2, Math.min(x, 10));
-	const poolSize = args.flagExprIf(
-		'bomba',
-		(x) => clampPoolSize(x ? +x : 1),
-		1,
-	);
+	const poolSize = args.flagExprIf('bomba', (x) => clampPoolSize(x ? +x : 1), 1);
 	const words = (args.getString('etiquetas', true) ?? '').split(/\s+/);
 
 	debug('Verificando que la solicitud haya sido aprobada por el Vaticano');
@@ -750,18 +746,27 @@ export function cleanPostAttachmentRecords() {
 		if (isPast(record.validUntil)) postAttachments.delete(key);
 }
 
-async function getPostAttachment(url: string | URL): Promise<AttachmentBuilder | null> {
+async function getPostAttachment(
+	post: Post,
+	attachmentName: 'previewUrl' | 'fileUrl' | 'sampleUrl',
+): Promise<AttachmentBuilder | null> {
+	const url = post[attachmentName];
+	if (!url) return null;
+
 	const postAttachmentRecord = postAttachments.get(`${url}`);
 
 	if (postAttachmentRecord == null || isPast(postAttachmentRecord.validUntil)) {
-		const record = await fetchAndSavePostAttachment(url);
+		const record = await fetchAndSavePostAttachment(post.id, url);
 		return record?.builder ?? null;
 	}
 
 	return postAttachmentRecord.builder;
 }
 
-async function fetchAndSavePostAttachment(url: string | URL): Promise<PostAttachmentRecord | null> {
+async function fetchAndSavePostAttachment(
+	postId: string,
+	url: string | URL,
+): Promise<PostAttachmentRecord | null> {
 	const fetchRes = await fetchExt(url, {
 		type: 'buffer',
 		init: {
@@ -775,7 +780,7 @@ async function fetchAndSavePostAttachment(url: string | URL): Promise<PostAttach
 	if (!fetchRes.success) return null;
 
 	const record: PostAttachmentRecord = {
-		builder: new AttachmentBuilder(fetchRes.data, { name: 'preview.webp' }),
+		builder: new AttachmentBuilder(fetchRes.data, { name: `bdp_thumb_${postId}.webp` }),
 		validUntil: addMinutes(new Date(), postAttachmentTTLMinutes),
 	};
 
