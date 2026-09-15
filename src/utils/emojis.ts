@@ -258,6 +258,12 @@ export function getBotEmoji(emojiName: BotEmojiName): string {
 	return botEmoji.appEmoji?.toString() ?? botEmoji.fallback;
 }
 
+export function getBotEmojiIdOrUnicode(emojiName: BotEmojiName): string {
+	const botEmoji = expectBotEmoji(emojiName);
+
+	return botEmoji.appEmoji?.id ?? botEmoji.fallback;
+}
+
 export function getBotEmojiResult(
 	emojiName: BotEmojiName,
 ): { app: true; emoji: ApplicationEmoji } | { app: false; emoji: string } {
