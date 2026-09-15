@@ -11,11 +11,28 @@ export function makeTimeoutRejectionPromise(ms: number = 20_000): Promise<never>
 	);
 }
 
-export async function attemptManyTimes(fn: () => Promise<unknown>, times: number): Promise<void> {
-	try {
-		times--;
-		await fn();
-	} catch (err) {
-		if (times < 0) throw err;
+export async function attemptManyTimes<T>(
+	fn: () => Promise<T>,
+	times: number,
+	options: {
+		onEachCatch?: (remaining: number) => void;
+		onReattempt?: (remaining: number) => void;
+	} = {},
+): Promise<T> {
+	if (times < 1) throw new RangeError('Invalid repetitions.');
+
+	const { onEachCatch, onReattempt } = options;
+
+	while (times-- > 0) {
+		try {
+			const result = await fn();
+			return result;
+		} catch (err) {
+			onEachCatch?.(times);
+			if (times <= 0) throw err;
+			onReattempt?.(times);
+		}
 	}
+
+	return undefined as never;
 }
