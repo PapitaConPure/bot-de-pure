@@ -1,4 +1,5 @@
-import type { Interaction, MessageComponentInteraction } from 'discord.js';
+import { hoursToMilliseconds } from 'date-fns';
+import type { Interaction, MessageComponentInteraction, User } from 'discord.js';
 import {
 	ButtonBuilder,
 	ButtonStyle,
@@ -14,24 +15,41 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
-import type { ComplexCommandRequest } from 'types/commands';
+import type { AnyCommandInteraction, ComplexCommandRequest } from 'types/commands';
 import { tenshiAltColor, tenshiColor, tenshiPeachColor } from '@/data/globalProps';
-import type { LocaleIds, LocaleKey } from '@/i18n';
+import type { LocaleIds } from '@/i18n';
 import { isValidLocaleKey, Locales, Translator } from '@/i18n';
-import type { UserConfigSchemaType } from '@/models/userconfigs';
+import type { UserConfigDocument, UserConfigSchemaType } from '@/models/userconfigs';
 import UserConfigModel from '@/models/userconfigs';
 import { updateFollowedFeedTagsCache } from '@/systems/booru/boorufeed';
+import { BooruSourceStyles } from '@/systems/booru/boorusources';
 import {
 	type AcceptedGelbooruConverterKey,
 	acceptedGelbooruConverters,
 } from '@/systems/converters/boorutato';
 import type { AcceptedTwitterConverterKey } from '@/systems/converters/pureet';
 import { acceptedTwitterConverters } from '@/systems/converters/pureet';
+import {
+	type AcceptedPixivConverterKey,
+	acceptedPixivConverters,
+} from '@/systems/converters/purepix';
+import {
+	type AcceptedInstagramConverterKey,
+	acceptedInstagramConverters,
+	instagramConversionServices,
+} from '@/systems/converters/purestagram';
 import { auditError } from '@/systems/others/auditor';
 import { makeSessionAutoname } from '@/systems/others/purevoice';
-import { getBotEmoji, getBotEmojiResolvable, parseUnicodeEmoji } from '@/utils/emojis';
+import {
+	getBotEmoji,
+	getBotEmojiIdOrUnicode,
+	getBotEmojiResolvable,
+	parseUnicodeEmoji,
+} from '@/utils/emojis';
 import { compressId, decompressId } from '@/utils/encoding';
+import { millisecondsToDuration } from '@/utils/formatting';
 import { improveNumber, shortenText } from '@/utils/misc';
+import { parseDuration } from '@/utils/parsing';
 import { sanitizeTzCode, toUtcOffset, utcOffsetDisplayFull } from '@/utils/timezones';
 import { recacheUser } from '@/utils/usercache';
 import { Command, CommandFlag, CommandOptions, CommandTags } from '../commons';
@@ -50,6 +68,39 @@ const cancelButton = (compressedAuthorId: string) =>
 		.setCustomId(`yo_cancelWizard_${compressedAuthorId}`)
 		.setEmoji(getBotEmojiResolvable('xmarkAccent'))
 		.setStyle(ButtonStyle.Secondary);
+
+async function getWizardContext(
+	request: AnyCommandInteraction,
+	options: {
+		notEphemeral?: boolean;
+		editReply?: boolean;
+	} = {},
+): Promise<
+	| {
+			success: true;
+			context: { user: User; userConfigs: UserConfigDocument; translator: Translator };
+	  }
+	| { success: false; context: null }
+> {
+	const { notEphemeral = false, editReply = false } = options;
+	const { user } = request;
+
+	const userConfigs = await UserConfigModel.findOne({ userId: request.user.id });
+	if (!userConfigs) {
+		if (editReply) await request.editReply({ content: userNotAvailableText });
+		else
+			await request.reply({
+				content: userNotAvailableText,
+				flags: notEphemeral ? undefined : MessageFlags.Ephemeral,
+			});
+
+		return { success: false, context: null };
+	}
+
+	const translator = new Translator(userConfigs.language);
+
+	return { success: true, context: { user, userConfigs, translator } };
+}
 
 function makeDashboardContainer(
 	request: Interaction | ComplexCommandRequest,
@@ -143,25 +194,25 @@ function makeDashboardContainer(
 							{
 								label: 'Boorutato',
 								description: translator.getText('yoDashboardMenuConfigFeedDesc'),
-								emoji: '1460145550119669912',
+								emoji: getBotEmojiIdOrUnicode('boorutatoFullColor'),
 								value: 'feed',
 							},
 							{
 								label: 'PuréVoice',
 								description: translator.getText('yoDashboardMenuConfigVoiceDesc'),
-								emoji: '1460145551847723132',
+								emoji: getBotEmojiIdOrUnicode('purevoiceFullColor'),
 								value: 'voice',
 							},
 							{
 								label: 'PuréPix',
 								description: translator.getText('yoDashboardMenuConfigPixixDesc'),
-								emoji: '1460135891841585385',
+								emoji: getBotEmojiIdOrUnicode('pixivFullColor'),
 								value: 'pixiv',
 							},
 							{
 								label: 'Puréet',
 								description: translator.getText('yoDashboardMenuConfigTwitterDesc'),
-								emoji: '1460135894404305019',
+								emoji: getBotEmojiIdOrUnicode('twitterFullColor'),
 								value: 'twitter',
 							},
 							{
@@ -169,8 +220,16 @@ function makeDashboardContainer(
 								description: translator.getText(
 									'yoDashboardMenuConfigBoorutatoDesc',
 								),
-								emoji: '1460145550119669912',
+								emoji: getBotEmojiIdOrUnicode('boorutatoFullColor'),
 								value: 'booru',
+							},
+							{
+								label: 'Puréstagram',
+								description: translator.getText(
+									'yoDashboardMenuConfigInstagramDesc',
+								),
+								emoji: getBotEmojiIdOrUnicode('instagramColor'),
+								value: 'instagram',
 							},
 						]),
 				),
@@ -254,7 +313,12 @@ const makeVoiceContainer = (
 			textDisplay
 				.addTextDisplayComponents((textDisplay) =>
 					textDisplay.setContent(
-						[translator.getText('yoVoiceKillDelayName'), '4m 45s'].join('\n'),
+						[
+							translator.getText('yoVoiceKillDelayName'),
+							userConfigs.voice.killDelay
+								? millisecondsToDuration(userConfigs.voice.killDelay)
+								: `_${translator.getText('disabled')}_`,
+						].join('\n'),
 					),
 				)
 				.setButtonAccessory(
@@ -278,18 +342,130 @@ const makeVoiceContainer = (
 	return container;
 };
 
-const makeTwitterServicePickerContainer = (
+interface ConverterWizardServiceOption<TConverterKey extends string> {
+	value: TConverterKey;
+	label: string;
+	description?: string;
+}
+
+interface ConverterWizard<TConverterKey extends string> {
+	title: LocaleIds;
+	description: LocaleIds;
+	serviceColor: number;
+	serviceNoneDescription: LocaleIds;
+	services: ReadonlyArray<TConverterKey | ''>;
+	getServiceOptions: (translator: Translator) => ConverterWizardServiceOption<TConverterKey>[];
+	getKey: (userConfigs: UserConfigDocument) => TConverterKey | '';
+	setKey: (userConfigs: UserConfigDocument, key: TConverterKey | '') => void;
+}
+
+const converterWizards = {
+	twitter: {
+		title: 'yoTwitterTitle',
+		description: 'yoTwitterDesc',
+		serviceColor: BooruSourceStyles.twitter.color,
+		serviceNoneDescription: 'yoTwitterMenuServiceNoneDesc',
+		services: acceptedTwitterConverters,
+		getServiceOptions: (translator) => [
+			{
+				value: 'vx',
+				label: 'vxTwitter / fixvx',
+				description: translator.getText('yoTwitterMenuServiceVxDesc'),
+			},
+			{
+				value: 'fx',
+				label: 'FxTwitter / FixupX',
+				description: translator.getText('yoTwitterMenuServiceFxDesc'),
+			},
+			{
+				value: 'girlcockx',
+				label: 'girlcockx.com',
+			},
+			{
+				value: 'cunnyx',
+				label: 'cunnyx.com',
+			},
+		],
+		getKey: (userConfigs) => userConfigs.twitterPrefix,
+		setKey: (userConfigs, key) => (userConfigs.twitterPrefix = key),
+	} as ConverterWizard<AcceptedTwitterConverterKey>,
+	pixiv: {
+		title: 'yoPixivTitle',
+		description: 'yoPixivDesc',
+		serviceColor: BooruSourceStyles.pixiv.color,
+		serviceNoneDescription: 'yoPixivMenuServiceNoneDesc',
+		services: acceptedPixivConverters,
+		getServiceOptions: (translator) => [
+			{
+				value: 'phixiv',
+				label: 'phixiv',
+				description: translator.getText('yoPixivMenuServicePhixivDesc'),
+			},
+		],
+		getKey: (userConfigs) => userConfigs.pixivConverter,
+		setKey: (userConfigs, key) => (userConfigs.pixivConverter = key),
+	} as ConverterWizard<AcceptedPixivConverterKey>,
+	instagram: {
+		title: 'yoInstagramTitle',
+		description: 'yoInstagramDesc',
+		serviceColor: BooruSourceStyles.instagram.color,
+		serviceNoneDescription: 'yoInstagramMenuServiceNoneDesc',
+		services: acceptedInstagramConverters,
+		getServiceOptions: (translator) => [
+			{
+				value: 'dd',
+				label: instagramConversionServices.dd.name,
+				description: translator.getText('yoInstagramMenuServiceDdinstagramDesc'),
+			},
+			{
+				value: 'ddd',
+				label: instagramConversionServices.ddd.name,
+				description: translator.getText('yoInstagramMenuServiceDddinstagramDesc'),
+			},
+			{
+				value: 'gdd',
+				label: instagramConversionServices.gdd.name,
+				description: translator.getText('yoInstagramMenuServiceGddinstagramDesc'),
+			},
+			{
+				value: 'kk',
+				label: instagramConversionServices.kk.name,
+			},
+			{
+				value: 'ez',
+				label: instagramConversionServices.ez.name,
+			},
+			{
+				value: 'dogin',
+				label: instagramConversionServices.dogin.name,
+			},
+		],
+		getKey: (userConfigs) => userConfigs.instagramConverter,
+		setKey: (userConfigs, key) => (userConfigs.instagramConverter = key),
+	} as ConverterWizard<AcceptedInstagramConverterKey>,
+} satisfies Record<string, ConverterWizard<string>>;
+type ConverterWizardKey = keyof typeof converterWizards;
+
+function makeConverterServicePickerContainer<
+	TConverterWizardKey extends ConverterWizardKey,
+	TConverterKey extends string = ReturnType<
+		(typeof converterWizards)[TConverterWizardKey]['getKey']
+	>,
+>(
+	converterWizardKey: TConverterWizardKey,
 	compressedAuthorId: string,
-	service: string,
+	service: TConverterKey | 'none' | '',
 	translator: Translator,
-) => {
+) {
+	const converterWizard = converterWizards[converterWizardKey];
 	const container = new ContainerBuilder()
-		.setAccentColor(0x040404) //Tema de twitter/X
+		.setAccentColor(converterWizard.serviceColor)
 		.addTextDisplayComponents((textDisplay) =>
 			textDisplay.setContent(
-				[translator.getText('yoTwitterTitle'), translator.getText('yoTwitterDesc')].join(
-					'\n',
-				),
+				[
+					translator.getText(converterWizard.title),
+					translator.getText(converterWizard.description),
+				].join('\n'),
 			),
 		)
 		.addSeparatorComponents((separator) => separator.setDivider(true))
@@ -299,38 +475,22 @@ const makeTwitterServicePickerContainer = (
 		.addActionRowComponents((actionRow) =>
 			actionRow.addComponents(
 				new StringSelectMenuBuilder()
-					.setCustomId(`yo_setTwitterConvert_${compressedAuthorId}`)
+					.setCustomId(`yo_setConvert_${compressedAuthorId}_${converterWizardKey}`)
 					.setPlaceholder(translator.getText('yoConversionServiceMenuService'))
-					.setOptions(
+					.setOptions([
 						{
 							value: 'none',
 							label: translator.getText('yoConversionServiceMenuServiceNoneLabel'),
-							description: translator.getText('yoTwitterMenuServiceNoneDesc'),
+							description: translator.getText(converterWizard.serviceNoneDescription),
 							default: service === 'none' || !service,
 						},
-						{
-							value: 'vx',
-							label: 'vxTwitter / fixvx',
-							description: translator.getText('yoTwitterMenuServiceVxDesc'),
-							default: service === 'vx',
-						},
-						{
-							value: 'fx',
-							label: 'FxTwitter / FixupX',
-							description: translator.getText('yoTwitterMenuServiceFxDesc'),
-							default: service === 'fx',
-						},
-						{
-							value: 'girlcockx',
-							label: 'girlcockx.com',
-							default: service === 'girlcockx',
-						},
-						{
-							value: 'cunnyx',
-							label: 'cunnyx.com',
-							default: service === 'cunnyx',
-						},
-					),
+						...converterWizard
+							.getServiceOptions(translator)
+							.map((s: ConverterWizardServiceOption<string>) => ({
+								...s,
+								default: service === s.value,
+							})),
+					]),
 			),
 		)
 		.addSeparatorComponents((separator) =>
@@ -344,57 +504,7 @@ const makeTwitterServicePickerContainer = (
 		);
 
 	return container;
-};
-
-const makePixivServicePickerContainer = (
-	compressedAuthorId: string,
-	service: string,
-	translator: Translator,
-) => {
-	const container = new ContainerBuilder()
-		.setAccentColor(0x0096fa) //Tema de pixiv
-		.addTextDisplayComponents((textDisplay) =>
-			textDisplay.setContent(
-				[translator.getText('yoPixivTitle'), translator.getText('yoPixivDesc')].join('\n'),
-			),
-		)
-		.addSeparatorComponents((separator) => separator.setDivider(true))
-		.addTextDisplayComponents((textDisplay) =>
-			textDisplay.setContent(translator.getText('yoConversionServiceName')),
-		)
-		.addActionRowComponents((actionRow) =>
-			actionRow.addComponents(
-				new StringSelectMenuBuilder()
-					.setCustomId(`yo_setPixivConvert_${compressedAuthorId}`)
-					.setPlaceholder(translator.getText('yoConversionServiceMenuService'))
-					.setOptions(
-						{
-							value: 'none',
-							label: translator.getText('yoConversionServiceMenuServiceNoneLabel'),
-							description: translator.getText('yoPixivMenuServiceNoneDesc'),
-							default: service === 'none' || !service,
-						},
-						{
-							value: 'phixiv',
-							label: 'phixiv',
-							description: translator.getText('yoPixivMenuServicePhixivDesc'),
-							default: service === 'phixiv',
-						},
-					),
-			),
-		)
-		.addSeparatorComponents((separator) =>
-			separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
-		)
-		.addActionRowComponents((actionRow) =>
-			actionRow.addComponents(
-				backToDashboardButton(compressedAuthorId),
-				cancelButton(compressedAuthorId),
-			),
-		);
-
-	return container;
-};
+}
 
 const makeBoorutatoServicePickerContainer = (
 	compressedAuthorId: string,
@@ -640,16 +750,9 @@ const command = new Command(
 		});
 	})
 	.setButtonResponse(async function goToDashboard(interaction, authorId) {
-		const { user } = interaction;
-
-		const userConfigs = await UserConfigModel.findOne({ userId: user.id });
-		if (!userConfigs)
-			return interaction.reply({
-				content: userNotAvailableText,
-				flags: MessageFlags.Ephemeral,
-			});
-
-		const translator = new Translator(userConfigs.language);
+		const { success, context } = await getWizardContext(interaction);
+		if (!success) return;
+		const { user, userConfigs, translator } = context;
 
 		if (compressId(user.id) !== authorId)
 			return interaction.reply({
@@ -663,22 +766,15 @@ const command = new Command(
 	})
 	.setSelectMenuResponse(
 		async function selectLanguage(interaction) {
-			const { user } = interaction;
-
-			const userConfigs = await UserConfigModel.findOne({ userId: user.id });
-			if (!userConfigs)
-				return interaction.reply({
-					content: userNotAvailableText,
-					flags: MessageFlags.Ephemeral,
-				});
-
-			let translator = new Translator(userConfigs.language);
+			const { success, context } = await getWizardContext(interaction);
+			if (!success) return;
+			const { user, userConfigs } = context;
 
 			const newLanguage = interaction.values[0];
 			if (!newLanguage || !isValidLocaleKey(newLanguage)) return interaction.deleteReply();
 
 			userConfigs.language = newLanguage;
-			translator = new Translator(newLanguage);
+			const translator = new Translator(newLanguage);
 
 			await userConfigs.save().then(() => recacheUser(user.id));
 
@@ -690,16 +786,9 @@ const command = new Command(
 	)
 	.setButtonResponse(
 		async function promptSetTimezone(interaction) {
-			const { user } = interaction;
-
-			const userConfigs = await UserConfigModel.findOne({ userId: user.id });
-			if (!userConfigs)
-				return interaction.reply({
-					content: userNotAvailableText,
-					flags: MessageFlags.Ephemeral,
-				});
-
-			const translator = new Translator(userConfigs.language);
+			const { success, context } = await getWizardContext(interaction);
+			if (!success) return;
+			const { userConfigs, translator } = context;
 
 			const modal = new ModalBuilder()
 				.setCustomId('yo_setTimezone')
@@ -729,16 +818,9 @@ const command = new Command(
 		{ userFilterIndex: 0 },
 	)
 	.setModalResponse(async function setTimezone(interaction) {
-		const { user } = interaction;
-
-		const userConfigs = await UserConfigModel.findOne({ userId: user.id });
-		if (!userConfigs)
-			return interaction.reply({
-				content: userNotAvailableText,
-				flags: MessageFlags.Ephemeral,
-			});
-
-		const translator = new Translator(userConfigs.language);
+		const { success, context } = await getWizardContext(interaction);
+		if (!success) return;
+		const { user, userConfigs, translator } = context;
 
 		const tzCode = interaction.fields.getTextInputValue('inputTimezone');
 		if (tzCode?.length) {
@@ -763,82 +845,60 @@ const command = new Command(
 			}),
 		]);
 	})
-	.setSelectMenuResponse(async function selectConfig(interaction, compressedAuthorId) {
-		const selected = interaction.values[0];
+	.setSelectMenuResponse(
+		async function selectConfig(interaction, compressedAuthorId) {
+			const selected = interaction.values[0];
 
-		const { user } = interaction;
+			if (selected === 'feed')
+				return makeSelectFeedTCResponse(interaction, compressedAuthorId);
 
-		if (selected === 'feed') return makeSelectFeedTCResponse(interaction, compressedAuthorId);
+			const { success, context } = await getWizardContext(interaction);
+			if (!success) return;
+			const { userConfigs, translator } = context;
 
-		const userConfigs = await UserConfigModel.findOne({ userId: user.id });
-		if (!userConfigs)
-			return interaction.reply({
-				content: userNotAvailableText,
-				flags: MessageFlags.Ephemeral,
-			});
+			userConfigs.voice.ping ??= 'always';
 
-		const translator = new Translator(userConfigs.language);
+			switch (selected) {
+				case 'voice':
+					return interaction.update({
+						components: [
+							makeVoiceContainer(compressedAuthorId, userConfigs, translator),
+						],
+					});
 
-		if (user.id !== decompressId(compressedAuthorId))
-			return interaction.reply({
-				content: translator.getText('unauthorizedInteraction'),
-				flags: MessageFlags.Ephemeral,
-			});
+				case 'pixiv':
+				case 'twitter':
+				case 'instagram':
+					return interaction.update({
+						components: [
+							makeConverterServicePickerContainer(
+								selected,
+								compressedAuthorId,
+								converterWizards[selected].getKey(userConfigs),
+								translator,
+							),
+						],
+					});
 
-		userConfigs.voice.ping ??= 'always';
-
-		switch (selected) {
-			case 'voice':
-				return interaction.update({
-					components: [makeVoiceContainer(compressedAuthorId, userConfigs, translator)],
-				});
-
-			case 'pixiv':
-				return interaction.update({
-					components: [
-						makePixivServicePickerContainer(
-							compressedAuthorId,
-							userConfigs.pixivConverter,
-							translator,
-						),
-					],
-				});
-
-			case 'twitter':
-				return interaction.update({
-					components: [
-						makeTwitterServicePickerContainer(
-							compressedAuthorId,
-							userConfigs.twitterPrefix,
-							translator,
-						),
-					],
-				});
-
-			case 'booru':
-				return interaction.update({
-					components: [
-						makeBoorutatoServicePickerContainer(
-							compressedAuthorId,
-							{ gelbooru: userConfigs.gelbooruConverter },
-							translator,
-						),
-					],
-				});
-		}
-	})
+				case 'booru':
+					return interaction.update({
+						components: [
+							makeBoorutatoServicePickerContainer(
+								compressedAuthorId,
+								{ gelbooru: userConfigs.gelbooruConverter },
+								translator,
+							),
+						],
+					});
+			}
+		},
+		{ userFilterIndex: 0 },
+	)
 	.setSelectMenuResponse(
 		async function setVoicePing(interaction, compressedAuthorId) {
-			const { user } = interaction;
-
-			const userConfigs = await UserConfigModel.findOne({ userId: user.id });
-			if (!userConfigs)
-				return interaction.reply({
-					content: userNotAvailableText,
-					flags: MessageFlags.Ephemeral,
-				});
-
-			const translator = new Translator(userConfigs.language as LocaleKey);
+			const { success, context } = await getWizardContext(interaction);
+			if (!success) return;
+			const { userConfigs, translator } = context;
 
 			const pingMode = interaction.values[0] as 'always' | 'onCreate' | 'never';
 			userConfigs.voice.ping = pingMode;
@@ -855,16 +915,9 @@ const command = new Command(
 	)
 	.setButtonResponse(
 		async function setVoiceAutoname(interaction) {
-			const { user } = interaction;
-
-			const userConfigs = await UserConfigModel.findOne({ userId: user.id });
-			if (!userConfigs)
-				return interaction.reply({
-					content: userNotAvailableText,
-					flags: MessageFlags.Ephemeral,
-				});
-
-			const translator = new Translator(userConfigs.language);
+			const { success, context } = await getWizardContext(interaction);
+			if (!success) return;
+			const { userConfigs, translator } = context;
 
 			const modal = new ModalBuilder()
 				.setCustomId('yo_applyVoiceAutoname')
@@ -909,12 +962,9 @@ const command = new Command(
 	.setModalResponse(async function applyVoiceAutoname(interaction) {
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-		const { user } = interaction;
-
-		const userConfigs = await UserConfigModel.findOne({ userId: user.id });
-		if (!userConfigs) return interaction.editReply({ content: userNotAvailableText });
-
-		const translator = new Translator(userConfigs.language);
+		const { success, context } = await getWizardContext(interaction, { editReply: true });
+		if (!success) return;
+		const { userConfigs, translator } = context;
 
 		const name = interaction.fields.getTextInputValue('inputName');
 		const emoji = interaction.fields.getTextInputValue('inputEmoji');
@@ -943,16 +993,9 @@ const command = new Command(
 	})
 	.setButtonResponse(
 		async function setVoiceKillDelay(interaction) {
-			const { user } = interaction;
-
-			const userConfigs = await UserConfigModel.findOne({ userId: user.id });
-			if (!userConfigs)
-				return interaction.reply({
-					content: userNotAvailableText,
-					flags: MessageFlags.Ephemeral,
-				});
-
-			const translator = new Translator(userConfigs.language as LocaleKey);
+			const { success, context } = await getWizardContext(interaction);
+			if (!success) return;
+			const { userConfigs, translator } = context;
 
 			const modal = new ModalBuilder()
 				.setCustomId('yo_applyVoiceKillDelay')
@@ -971,7 +1014,7 @@ const command = new Command(
 								.setRequired(false)
 								.setValue(
 									userConfigs.voice?.killDelay
-										? `${userConfigs.voice.killDelay}`
+										? millisecondsToDuration(userConfigs.voice.killDelay)
 										: '',
 								)
 								.setStyle(TextInputStyle.Short),
@@ -982,21 +1025,20 @@ const command = new Command(
 		},
 		{ userFilterIndex: 0 },
 	)
-	.setModalResponse(async function applyVoiceKillDelay_PENDING(interaction) {
+	.setModalResponse(async function applyVoiceKillDelay(interaction) {
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-		const { user } = interaction;
+		const { success, context } = await getWizardContext(interaction, { editReply: true });
+		if (!success) return;
+		const { userConfigs, translator } = context;
 
-		const userConfigs = await UserConfigModel.findOne({ userId: user.id });
-		if (!userConfigs) return interaction.editReply({ content: userNotAvailableText });
-
-		//FIXME: esto está completamente mal. Parsear formato XXm XXs luego
-		const killDelay = +interaction.fields.getTextInputValue('inputDuration');
-		userConfigs.voice.killDelay = Number.isNaN(+killDelay) ? 0 : killDelay;
+		const killDelay = parseDuration(interaction.fields.getTextInputValue('inputDuration'));
+		userConfigs.voice.killDelay =
+			Number.isNaN(killDelay) || killDelay <= 0
+				? undefined
+				: Math.min(killDelay, hoursToMilliseconds(12));
 
 		await userConfigs.save();
-
-		const translator = new Translator(userConfigs.language as LocaleKey);
 
 		await interaction.message
 			.edit({
@@ -1009,70 +1051,33 @@ const command = new Command(
 		return interaction.editReply({ content: translator.getText('yoVoiceKillDelaySuccess') });
 	})
 	.setSelectMenuResponse(
-		async function setPixivConvert(interaction, compressedAuthorId) {
-			const { user } = interaction;
+		async function setConvert(interaction, compressedAuthorId, converterWizardKey) {
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-			const [userConfigs] = await Promise.all([
-				UserConfigModel.findOne({ userId: user.id }),
-				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
-			]);
-			if (!userConfigs) return interaction.editReply({ content: userNotAvailableText });
+			const { success, context } = await getWizardContext(interaction, { editReply: true });
+			if (!success) return;
+			const { user, userConfigs, translator } = context;
 
-			const translator = new Translator(userConfigs.language);
+			if (!(converterWizardKey in converterWizards))
+				throw new Error('Clave de asistente de conversión inesperada.');
 
-			let service = interaction.values[0];
-			if (service === 'none') service = '';
+			const converterWizard = converterWizards[converterWizardKey as ConverterWizardKey];
+			let converterKey = interaction.values[0] as 'none' | '';
+			if (converterKey === 'none') converterKey = '';
 
-			if (service !== '' && service !== 'phixiv')
-				throw new Error('Resultado de servicio de conversión de pixiv inesperado');
+			if (!converterWizard.services.includes(converterKey))
+				throw new Error('Resultado de servicio de conversión inesperado.');
 
-			userConfigs.pixivConverter = service;
-
-			return Promise.all([
-				userConfigs.save().then(() => recacheUser(user.id)),
-				interaction.message.edit({
-					components: [
-						makePixivServicePickerContainer(
-							compressedAuthorId,
-							userConfigs.pixivConverter,
-							translator,
-						),
-					],
-				}),
-				interaction.editReply({
-					content: translator.getText('yoConversionServiceSuccess'),
-				}),
-			]);
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setSelectMenuResponse(
-		async function setTwitterConvert(interaction, compressedAuthorId) {
-			const { user } = interaction;
-
-			const [userConfigs] = await Promise.all([
-				UserConfigModel.findOne({ userId: user.id }),
-				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
-			]);
-			if (!userConfigs) return interaction.editReply({ content: userNotAvailableText });
-
-			const translator = new Translator(userConfigs.language);
-
-			let service = interaction.values[0] as AcceptedTwitterConverterKey | 'none' | '';
-			if (service === 'none') service = '';
-
-			if (!acceptedTwitterConverters.includes(service))
-				throw new Error('Resultado de servicio de conversión de Twitter inesperado');
-
-			userConfigs.twitterPrefix = service;
+			converterWizard.setKey(userConfigs, converterKey);
 
 			return Promise.all([
 				userConfigs.save().then(() => recacheUser(user.id)),
 				interaction.message.edit({
 					components: [
-						makeTwitterServicePickerContainer(
+						makeConverterServicePickerContainer(
+							converterWizardKey as ConverterWizardKey,
 							compressedAuthorId,
-							userConfigs.twitterPrefix,
+							converterWizard.getKey(userConfigs),
 							translator,
 						),
 					],
@@ -1086,15 +1091,11 @@ const command = new Command(
 	)
 	.setSelectMenuResponse(
 		async function setBooruConvert(interaction, compressedAuthorId, service: 'gelbooru') {
-			const { user } = interaction;
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-			const [userConfigs] = await Promise.all([
-				UserConfigModel.findOne({ userId: user.id }),
-				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
-			]);
-			if (!userConfigs) return interaction.editReply({ content: userNotAvailableText });
-
-			const translator = new Translator(userConfigs.language);
+			const { success, context } = await getWizardContext(interaction, { editReply: true });
+			if (!success) return;
+			const { user, userConfigs, translator } = context;
 
 			switch (service) {
 				case 'gelbooru': {
@@ -1136,17 +1137,11 @@ const command = new Command(
 	})
 	.setSelectMenuResponse(
 		async function modifyFollowedTags(interaction, compressedAuthorId, isAlt) {
-			const { user } = interaction;
 			const channelId = isAlt ? interaction.channelId : interaction.values[0];
 
-			const userConfigs = await UserConfigModel.findOne({ userId: user.id });
-			if (!userConfigs)
-				return interaction.reply({
-					content: userNotAvailableText,
-					flags: MessageFlags.Ephemeral,
-				});
-
-			const translator = new Translator(userConfigs.language);
+			const { success, context } = await getWizardContext(interaction);
+			if (!success) return;
+			const { user, userConfigs, translator } = context;
 
 			if (!channelId || channelId.startsWith('!'))
 				return interaction.reply({
@@ -1179,7 +1174,7 @@ const command = new Command(
 	.setButtonResponse(async function editFT(interaction, authorId, channelId, operation, isAlt) {
 		channelId = decompressId(channelId);
 		const { user } = interaction;
-		const translator = await Translator.from(user.id);
+		const translator = await Translator.from(user);
 
 		if (compressId(user.id) !== authorId)
 			return interaction.reply({
