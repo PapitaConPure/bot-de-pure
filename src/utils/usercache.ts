@@ -1,4 +1,7 @@
 import type { GuildMember, Interaction, User } from 'discord.js';
+import type { AcceptedGelbooruConverterKey } from '@/systems/converters/boorutato';
+import type { AcceptedPixivConverterKey } from '@/systems/converters/purepix';
+import type { AcceptedInstagramConverterKey } from '@/systems/converters/purestagram';
 import type { LocaleKey } from '../i18n';
 import UserConfigModel from '../models/userconfigs';
 import type { AcceptedTwitterConverterKey } from '../systems/converters/pureet';
@@ -6,9 +9,10 @@ import type { AnyRequest } from '../types/commands';
 
 export interface UserCache {
 	language: LocaleKey;
-	pixivConverter: 'phixiv' | '';
+	pixivConverter: AcceptedPixivConverterKey | '';
 	twitterPrefix: AcceptedTwitterConverterKey | '';
-	gelbooruConverter: 'boorutato' | '';
+	gelbooruConverter: AcceptedGelbooruConverterKey | '';
+	instagramConverter: AcceptedInstagramConverterKey | '';
 	banned: boolean;
 }
 
@@ -37,6 +41,7 @@ export async function cacheUser(user: UserCacheResolvable) {
 		pixivConverter: userConfigs.pixivConverter || '',
 		twitterPrefix: userConfigs.twitterPrefix || '',
 		gelbooruConverter: userConfigs.gelbooruConverter || '',
+		instagramConverter: userConfigs.instagramConverter || '',
 		banned: userConfigs.banned ?? false,
 	});
 }

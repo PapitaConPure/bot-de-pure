@@ -1,6 +1,7 @@
 import Mongoose, { type InferSchemaType } from 'mongoose';
 import { acceptedGelbooruConverters } from '@/systems/converters/boorutato';
 import { acceptedPixivConverters } from '@/systems/converters/purepix';
+import { acceptedInstagramConverters } from '@/systems/converters/purestagram';
 import Locales from '../i18n/locales';
 import { acceptedTwitterConverters } from '../systems/converters/pureet';
 
@@ -103,6 +104,11 @@ const UserConfigSchema = new Mongoose.Schema({
 		type: String,
 		enum: acceptedGelbooruConverters,
 		default: 'boorutato',
+	},
+	instagramConverter: {
+		type: String,
+		enum: acceptedInstagramConverters,
+		default: 'dd',
 	},
 	showLevelUp: {
 		type: Boolean,

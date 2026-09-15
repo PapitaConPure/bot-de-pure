@@ -4,12 +4,12 @@ import { getBotEmoji } from '@/utils/emojis';
 export const acceptedPixivConvertersWithoutNone = ['phixiv'] as const;
 export const acceptedPixivConverters = ['', ...acceptedPixivConvertersWithoutNone] as const;
 export const pixivRegex =
-	/(?<st>(?:<|\|\|){0,2}) ?(?:(?:http:\/\/|https:\/\/)(?:www\.))?(?:pixiv.net(?<lang>\/en)?)\/artworks\/(?<id>[0-9]{6,9})(?:\/(?<page>[0-9]{1,4}))? ?(?<ed>(?:>|\|\|){0,2})/g;
+	/(?<st>(?:<|\|\|){0,2}) ?(?:http:\/\/|https:\/\/)(?:www\.)?(?:pixiv.net(?<lang>\/en)?)\/artworks\/(?<id>[0-9]{6,9})(?:\/(?<page>[0-9]{1,4}))? ?(?<ed>(?:>|\|\|){0,2})/g;
 
 export type AcceptedPixivConverterKey = (typeof acceptedPixivConvertersWithoutNone)[number];
 
 const pixivConversionServices = {
-	phixiv: { name: 'phixiv', link: 'https://www.phixiv.net' },
+	phixiv: { name: 'phixiv', link: 'https://phixiv.net' },
 } as const satisfies Record<AcceptedPixivConverterKey, ConverterService>;
 
 export const pixivConverter = {
