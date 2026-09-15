@@ -3,6 +3,7 @@ import { ContainerBuilder, MessageFlags } from 'discord.js';
 import { Command, CommandOptionSolver, type CommandOptions } from '@/commands/commons';
 import { gelbooruConverter } from '@/systems/converters/boorutato';
 import { mergeConverterPayloads, processConverter } from '@/systems/converters/pipeline';
+import { instagramConverter } from '@/systems/converters/purestagram';
 import {
 	findFirstException,
 	generateExceptionEmbed,
@@ -302,6 +303,7 @@ async function processLinkConverters(message: Message<true>, userCache: UserCach
 		processConverter(pixivConverter, message, userCache.pixivConverter),
 		processConverter(twitterConverter, message, userCache.twitterPrefix),
 		processConverter(gelbooruConverter, message, userCache.gelbooruConverter),
+		processConverter(instagramConverter, message, userCache.instagramConverter),
 	]);
 
 	if (!convertersPayload.contentful) return;
