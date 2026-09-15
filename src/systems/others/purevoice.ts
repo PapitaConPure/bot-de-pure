@@ -28,6 +28,7 @@ import UserConfigModel from '@/models/userconfigs.js';
 import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import Logger from '@/utils/logs.js';
 import { p_pure } from '@/utils/prefixes';
+import { attemptManyTimes } from '@/utils/promises';
 
 const { debug, info, warn, error } = Logger('WARN', 'PV');
 
@@ -146,25 +147,23 @@ export class PureVoiceUpdateHandler {
 		const pvDocument = this.#documentHandler.document;
 
 		if (!oldChannel) {
-			debug(
-				'No hubo un canal anterior en proceso de desconexión. Se trata de una conexión pura. Descartando',
-			);
+			debug('Disconnection event had no previous channel. Discarding.');
 			return;
 		}
 
-		info(`Desconexión de canal de voz detectada para #${oldChannel.name} (${oldChannel.id})`);
+		info(`Voice channel disconnection detected: #${oldChannel.name} (${oldChannel.id})`);
 
 		try {
 			const sessionId = pvDocument.sessions.find((sid) => sid === oldChannel.id);
 			if (!sessionId) {
-				debug('El canal no forma parte del sistema PuréVoice del servidor. Ignorando');
+				debug("The channel is not part of this guild's PuréVoice system. Ignoring.");
 				return;
 			}
 
 			const session = await PureVoiceSessionModel.findOne({ channelId: sessionId });
 			if (!session) {
 				warn(
-					`Se encontró la ID de sesión "${sessionId}" en el servidor, pero no se encontró un documento PureVoiceSessionModel acorde a la misma`,
+					`Found session ID "${sessionId}" within guild document, but couldn't find the related PureVoiceSessionModel document.`,
 				);
 				return;
 			}
@@ -191,10 +190,11 @@ export class PureVoiceUpdateHandler {
 				member.roles
 					.remove(sessionRole, 'Desconexión de miembro de sesión PuréVoice')
 					.catch(this.prematureError);
-				info('La desconexión no es fatal. Se adaptó el panel de control acordemente');
+				info('Disconnection was not fatal. Control panel was updated accordingly.');
 				return;
 			}
 
+			//La desconexión es "fatal". El canal de la sesión se programará para borrarse.
 			const controlPanel = guild.channels.cache.get(pvDocument.controlPanelId) as TextChannel;
 
 			const pvChannelToRemove = guild.channels.cache.get(session.channelId);
@@ -202,16 +202,13 @@ export class PureVoiceUpdateHandler {
 				? `#${pvChannelToRemove.name} (${session.channelId})`
 				: session.channelId;
 			const deletionMessage = 'Eliminar componentes de sesión PuréVoice';
-			debug(`A punto de eliminar componentes de sesión PuréVoice: ${pvSessionName}...`);
+
+			debug(`About to remove components for session: ${pvSessionName}...`);
 
 			let success = true;
 			const results = await Promise.all([
 				pvChannelToRemove?.delete(deletionMessage)?.catch((err) => {
-					error(
-						new Error(
-							`La eliminación del canal de Sesión PuréVoice falló para la sesión: ${pvSessionName}`,
-						),
-					);
+					error(new Error(`Couldn't remove voice channel for session: ${pvSessionName}`));
 					error(err);
 					success = false;
 				}),
@@ -220,34 +217,26 @@ export class PureVoiceUpdateHandler {
 					?.catch((err) => {
 						error(
 							new Error(
-								`La eliminación de permisos en el Panel de Control PuréVoice falló para la sesión: ${pvSessionName}`,
+								`Couldn't remove control panel member permissions for session: ${pvSessionName}`,
 							),
 						);
 						error(err);
 						success = false;
 					}),
 				sessionRole?.delete(deletionMessage)?.catch((err) => {
-					error(
-						new Error(
-							`La eliminación del rol de Sesión PuréVoice falló para la sesión: ${pvSessionName}`,
-						),
-					);
+					error(new Error(`Couldn't remove role for session: ${pvSessionName}`));
 					error(err);
 					success = false;
 				}),
 			]);
 
 			if (!success) {
-				warn(
-					`No se pudieron eliminar los componentes de la sesión PuréVoice, por lo que los registros permaneceran vivos`,
-				);
+				warn(`Couldn't remove session components. Session entry will remain alive.`);
 				return results;
 			}
 
-			info(`Se eliminaron los componentes de la sesión PuréVoice: ${pvSessionName}`);
-			debug(
-				`A punto de eliminar registros restantes de sesión PuréVoice: ${pvSessionName}...`,
-			);
+			info(`Removed components for session: ${pvSessionName}`);
+			debug(`About to remove leftover data for session: ${pvSessionName}...`);
 
 			const indexToDelete = pvDocument.sessions.indexOf(oldChannel.id);
 			if (indexToDelete >= 0) {
@@ -255,59 +244,43 @@ export class PureVoiceUpdateHandler {
 				pvDocument.markModified('sessions');
 			}
 
-			let removed: boolean;
-			let reattempts = 3;
-			do {
-				removed = true;
-				await session.deleteOne().catch((err) => {
-					removed = false;
+			let removed: boolean = false;
+			await attemptManyTimes(
+				async () => {
+					removed = true;
+					await session.deleteOne().catch((err) => {
+						removed = false;
 
-					error(
-						new Error(
-							`La eliminación del registro de Sesión PuréVoice falló para la sesión: #${pvSessionName}`,
-						),
-					);
-					error(err);
+						error(new Error(`Failed to remove session entry: #${pvSessionName}`));
+						error(err);
+					});
+				},
+				3,
+				{
+					onReattempt: (remaining) =>
+						info(`Retrying removal of session entry (${remaining} attempts left)...`),
+				},
+			);
 
-					if (reattempts > 0)
-						info(`Reintentando eliminación (${reattempts} intentos restantes)...`);
-				});
-			} while (!removed && reattempts-- > 0);
-
-			if (removed)
-				info(
-					`Se eliminaron los registros restantes de la sesión PuréVoice: #${pvSessionName}`,
-				);
-			else
-				warn(
-					`No se pudieron eliminar los registros restantes de la sesión PuréVoice: #${pvSessionName}`,
-				);
+			if (removed) info(`Removed session entry: #${pvSessionName}`);
+			else warn(`Couldn't remove session entry: #${pvSessionName}`);
 
 			return results;
 		} catch (err) {
 			error(err);
-			if (!guild.systemChannelId)
-				return guild.fetchOwner().then((owner) =>
-					owner
-						.send({
-							content: [
-								`⚠️ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice de tu servidor **${guild.name}**.`,
-								'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
-								'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje.',
-							].join('\n'),
-						})
-						.catch(error),
-				);
 
-			return guild.systemChannel
-				?.send({
-					content: [
-						'⚠️ Ocurrió un problema en un intento de remover una sesión del Sistema PuréVoice del servidor.',
-						'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
-						'Si el par de canales relacionales de la sesión fueron eliminados, puedes ignorar este mensaje',
-					].join('\n'),
-				})
-				.catch(error);
+			const errReply = {
+				content: [
+					`⚠️ Ocurrió un problema al procesar una desconexión de sesión del Sistema PuréVoice en **${guild.name}**.`,
+					'Esto puede deberse a una conexión en una sesión PuréVoice que estaba siendo eliminada.',
+					'Si no notas canales de sesión muertos, puedes ignorar este mensaje.',
+				].join('\n'),
+			};
+
+			if (!guild.systemChannelId)
+				return guild.fetchOwner().then((owner) => owner.send(errReply).catch(error));
+
+			return guild.systemChannel?.send(errReply).catch(error);
 		}
 	}
 
