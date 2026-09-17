@@ -5,7 +5,6 @@ import {
 	ButtonStyle,
 	ChannelType,
 	type Collection,
-	type Client as DiscordClient,
 	type Guild,
 	type GuildBasedChannel,
 	type GuildMember,
@@ -134,9 +133,9 @@ export function fetchMember(
 
 	if (typeof query !== 'string') return query.user?.username ? query : undefined;
 
-	const { guild: thisGuild, client } = context ?? {};
-	if (!thisGuild || !client)
-		throw new Error('Se requieren la guild actual y el cliente en búsqueda de miembro');
+	const { guild: thisGuild } = context ?? {};
+	if (!client) throw new ClientNotFoundError();
+	if (!thisGuild) throw new Error('Se requiere la guild actual.');
 
 	//Prioridad 1: Intentar encontrar por ID
 	const allGuilds = client.guilds.cache;
@@ -177,7 +176,6 @@ export function fetchMember(
 
 interface FetchUserContext {
 	guild?: Guild;
-	client?: DiscordClient;
 }
 
 /**
@@ -195,9 +193,9 @@ export function fetchUser(query: User | string, context?: FetchUserContext): Use
 
 	if (typeof query !== 'string') return query.username ? query : undefined;
 
-	const { guild: thisGuild, client } = context ?? {};
-	if (!query || !thisGuild || !client)
-		throw new Error('Se requieren la guild actual y el cliente en búsqueda de usuario');
+	const { guild: thisGuild } = context ?? {};
+	if (!client) throw new ClientNotFoundError();
+	if (!thisGuild) throw new Error('Se requiere la guild actual.');
 
 	//Prioridad 1: Intentar encontrar por ID
 	const usersCache = client.users.cache;

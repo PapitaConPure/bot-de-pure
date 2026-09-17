@@ -385,12 +385,12 @@ const command = new Command(
 		return interaction.showModal(modal);
 	})
 	.setModalResponse(async function filterSubmit(interaction, target) {
-		const { guild, client } = interaction;
+		const { guild } = interaction;
 
 		let filter = interaction.fields.getTextInputValue('filterInput');
 		if (target === 'AUTHOR') {
 			if (filter.startsWith('@')) filter = filter.slice(1);
-			const userId = await fetchUserID(filter, { guild, client });
+			const userId = await fetchUserID(filter, { guild });
 			if (!userId)
 				return interaction.reply({
 					content: '⚠️ Usuario no encontrado',
