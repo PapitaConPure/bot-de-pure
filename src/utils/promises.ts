@@ -17,11 +17,12 @@ export async function attemptManyTimes<T>(
 	options: {
 		onEachCatch?: (remaining: number) => void;
 		onReattempt?: (remaining: number) => void;
+		getFallback?: () => T;
 	} = {},
 ): Promise<T> {
 	if (times < 1) throw new RangeError('Invalid repetitions.');
 
-	const { onEachCatch, onReattempt } = options;
+	const { onEachCatch, onReattempt, getFallback } = options;
 
 	while (times-- > 0) {
 		try {
@@ -29,7 +30,10 @@ export async function attemptManyTimes<T>(
 			return result;
 		} catch (err) {
 			onEachCatch?.(times);
-			if (times <= 0) throw err;
+			if (times <= 0) {
+				if (getFallback) return getFallback();
+				throw err;
+			}
 			onReattempt?.(times);
 		}
 	}
