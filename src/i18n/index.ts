@@ -2575,6 +2575,11 @@ const localesObject = {
 		en: '✅ Name applied',
 		ja: '✅ 名前が申請されました',
 	},
+	voiceSessionKillDelaySuccess: {
+		es: '✅ Retardo de muerte actualizado',
+		en: '✅ Kill delay updated',
+		ja: '✅ キル遅延が更新されました',
+	},
 	voiceSessionFreezeSuccess: {
 		es: `❄️ La sesión "${subl(0)}" fue **${subif(1, '=', true, 'congelada', 'descongelada')}**`,
 		en: `❄️ Session "${subl(0)}" was **${subif(1, '=', true, 'freezed', 'unfreezed')}**`,
