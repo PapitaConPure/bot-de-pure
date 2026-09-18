@@ -20,7 +20,7 @@ export const instagramConversionServices = {
 	dd: { name: 'ddinstagram', link: 'https://ddinstagram.com' },
 	ddd: { name: 'd.ddinstagram', link: 'https://d.ddinstagram.com' },
 	gdd: { name: 'g.ddinstagram', link: 'https://g.ddinstagram.com' },
-	kirk: { name: 'instagramkk', link: 'https://kirkstagram.com' },
+	kirk: { name: 'kirkstagram', link: 'https://kirkstagram.com' },
 	kk: { name: 'instagramkk', link: 'https://instagramkk.com' },
 	ez: { name: 'instagramez', link: 'https://instagramez.com' },
 	dogin: { name: 'd.oginstagram', link: 'https://d.oginstagram.com' },
