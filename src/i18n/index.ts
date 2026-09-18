@@ -2413,6 +2413,36 @@ const localesObject = {
 			`<t:${subl(0)}:R>にもう一度お試しいただくか、新しいセッションに接続してください`,
 		),
 	},
+	voiceControlPanelTitle: {
+		es: () => `# ${getBotEmoji('purevoiceFullColor')} Configuración de sesión`,
+		en: () => `# ${getBotEmoji('purevoiceFullColor')} Session Settings`,
+		ja: () => `# ${getBotEmoji('purevoiceFullColor')} セッション設定`,
+	},
+	voiceControlPanelSubtitle: {
+		es: '-# Panel de Control de PuréVoice',
+		en: '-# PuréVoice Control Panel',
+		ja: '-# PuréVoice コントロールパネル',
+	},
+	voiceControlPanelButtonRename: {
+		es: 'Cambiar nombre y emoji',
+		en: 'Change Name and Emoji',
+		ja: '名前と絵文字を変更する',
+	},
+	voiceControlPanelButtonMembersList: {
+		es: 'Editar miembros de sesión',
+		en: 'Edit Session Members',
+		ja: 'セッションメンバーの編集',
+	},
+	voiceControlPanelButtonKillDelay: {
+		es: 'Establecer retraso de muerte',
+		en: 'Set Kill Delay',
+		ja: '終了遅延の設定',
+	},
+	voiceControlPanelButtonFreeze: {
+		es: 'Congelar o descongelar',
+		en: 'Freeze / Unfreeze',
+		ja: '凍結／凍結解除',
+	},
 	voiceReasonCategoryCreate: {
 		es: 'Preparar categoría recipiente de PuréVoice',
 		en: 'Prepare PuréVoice container category',

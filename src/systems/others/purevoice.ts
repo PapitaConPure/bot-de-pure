@@ -21,6 +21,7 @@ import {
 	Guild,
 	MessageFlags,
 	OverwriteType,
+	SeparatorSpacingSize,
 } from 'discord.js';
 import type { ValuesOf } from 'types';
 import { ClientNotFoundError, client } from '@/core/client';
@@ -31,7 +32,7 @@ import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice.js';
 import type { UserConfigSchemaType } from '@/models/userconfigs.js';
 import UserConfigModel from '@/models/userconfigs.js';
 import { fetchGuild, fetchMember } from '@/utils/discord';
-import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
+import { getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import Logger from '@/utils/logs.js';
 import { p_pure } from '@/utils/prefixes';
@@ -281,7 +282,7 @@ export class PureVoiceUpdateHandler {
 							(textDisplay) =>
 								textDisplay.setContent(
 									[
-										`Esta sesión está vacía y será eliminada en <t:${getUnixTime(killAt)}:R> (<t:${getUnixTime(killAt)}:F>) a obediencia de la configuración de su administrador (${adminMention}).`,
+										`Esta sesión está vacía y será eliminada <t:${getUnixTime(killAt)}:R> (<t:${getUnixTime(killAt)}:F>) a obediencia de la configuración de su administrador (${adminMention}).`,
 										'La eliminación será cancelada si alguien permitido entra a la sesión.',
 									].join('\n'),
 								),
@@ -415,16 +416,23 @@ export class PureVoiceUpdateHandler {
 				});
 			}
 
-			const controlPanel = guild.channels.cache.get(pvDocument.controlPanelId) as TextChannel;
-
 			await Promise.all([
 				member.roles
 					.add(sessionRole, translator.getText('voiceSessionReasonMemberAdd'))
 					.catch(prematureError),
 				!sessionMember.isGuest()
-					&& controlPanel?.permissionOverwrites
-						.edit(member, { ViewChannel: true })
-						.catch(prematureError),
+					&& (async () => {
+						const pvcpResult = await requestPVControlPanel(
+							guild,
+							pvDocument.categoryId,
+							pvDocument.controlPanelId,
+						);
+						if (!pvcpResult.success) return;
+
+						return pvcpResult.controlPanel.permissionOverwrites.edit(member, {
+							ViewChannel: true,
+						});
+					})().catch(prematureError),
 			]);
 
 			if (dbMember) return;
@@ -950,6 +958,67 @@ export class PureVoiceOrchestrator {
 		this.orchestrateAction(handler);
 	}
 
+	async checkMemberPermissions(
+		member: GuildMember,
+		sessionMember: PureVoiceSessionMember,
+		voiceChannel: VoiceBasedChannel,
+	) {
+		const guild = member.guild;
+
+		const actionHandler = new PureVoiceActionHandler(guild, async (documentHandler) => {
+			const pvDocument = documentHandler.document;
+			const result = await requestPVControlPanel(
+				guild,
+				pvDocument.categoryId,
+				pvDocument.controlPanelId,
+			);
+
+			if (!result.success) return;
+
+			const { status, controlPanel } = result;
+
+			if (status === PVCPSuccess.Created) pvDocument.controlPanelId = controlPanel.id;
+
+			const isBanned = sessionMember.isBanned();
+			await Promise.all([
+				isBanned || sessionMember.isGuest()
+					? controlPanel.permissionOverwrites
+							.delete(
+								member,
+								'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_VIEWCHANNEL_DISABLE',
+							)
+							.catch(console.error)
+					: controlPanel.permissionOverwrites
+							.edit(
+								member,
+								{ ViewChannel: true },
+								{
+									reason: 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_VIEWCHANNEL_ENABLE',
+								},
+							)
+							.catch(console.error),
+				isBanned
+					? voiceChannel.permissionOverwrites
+							.edit(
+								member,
+								{ Connect: false },
+								{ reason: 'PLACEHOLDER_PV_REASON_BAN_CONNECT_DISABLE' },
+							)
+							.catch(console.error)
+					: voiceChannel.permissionOverwrites
+							.delete(member, 'PLACEHOLDER_PV_REASON_UNBAN_CONNECT_ENABLE')
+							.catch(console.error),
+				isBanned
+					&& voiceChannel.id === member.voice?.channel?.id
+					&& member.voice
+						?.disconnect('PLACEHOLDER_PV_REASON_BAN_MEMBER_DISCONNECT')
+						.catch(console.error),
+			]);
+		});
+
+		this.orchestrateAction(actionHandler);
+	}
+
 	/**
 	 * @description
 	 * Pone en cola de espera la ejecución de una acción en una sesión de voz.
@@ -1136,12 +1205,16 @@ export class PureVoiceSessionMember {
 		this.#banned = !!(data?.banned ?? false);
 	}
 
-	exchangeAdmin(other: PureVoiceSessionMember) {
+	/**
+	 * If applicable, gives the other member the ADMIN role and demotes this member to a MOD role.
+	 * @param other The member that will receive the ADMIN role.
+	 * @returns Whether the exchange could be made (`true`) or not (`false`).
+	 */
+	transferAdmin(other: PureVoiceSessionMember) {
 		if (this.role === other.role || !this.isAdmin()) return false;
 
-		const tempRole = other.role;
-		other.role = this.role;
-		this.role = tempRole;
+		other.role = PureVoiceSessionMemberRoles.ADMIN;
+		this.role = PureVoiceSessionMemberRoles.MOD;
 
 		return true;
 	}
@@ -1203,6 +1276,10 @@ export class PureVoiceSessionMember {
 			banned: this.#banned,
 			whitelisted: this.#whitelisted,
 		};
+	}
+
+	static fromSession(session: PureVoiceSessionDocument): PureVoiceSessionMember[] {
+		return [...session.members.values()].map((m) => new PureVoiceSessionMember(m));
 	}
 }
 
@@ -1273,8 +1350,9 @@ export async function createPVControlPanelChannel(
 	debug('Fetching category channel.');
 	categoryChannel = await categoryChannel.fetch(true);
 
+	const translator = await Translator.fromGuild(guild);
+
 	debug('Attempting to create new control panel channel...');
-	/**@type {TextChannel}*/
 	let controlPanelChannel: TextChannel;
 	try {
 		controlPanelChannel = await guild.channels.create({
@@ -1296,51 +1374,56 @@ export async function createPVControlPanelChannel(
 		};
 	}
 
-	const controlPanelEmbed = new EmbedBuilder()
-		.setColor(tenshiColor)
-		.setAuthor({ name: 'Bot de Puré • PuréVoice', url: 'https://i.imgur.com/P9eeVWC.png' })
-		.addFields(
-			{
-				name: `${getBotEmoji('langEs')} Panel de Control`,
-				value: 'Configura una sesión aquí',
-				inline: true,
-			},
-			{
-				name: `${getBotEmoji('langEn')} Control Panel`,
-				value: 'Configure a session here',
-				inline: true,
-			},
-			{
-				name: `${getBotEmoji('langJa')} コントロールパネル`,
-				value: 'ここでセッションを設定',
-				inline: true,
-			},
+	const controlPanelContainer = new ContainerBuilder()
+		.setAccentColor(tenshiColor)
+		.addTextDisplayComponents(
+			(textDisplay) =>
+				textDisplay.setContent(translator.getText('voiceControlPanelSubtitle')),
+			(textDisplay) => textDisplay.setContent(translator.getText('voiceControlPanelTitle')),
+		)
+		.addSeparatorComponents((separator) =>
+			separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
+		)
+		.addActionRowComponents(
+			(actionRow) =>
+				actionRow.addComponents(
+					new ButtonBuilder()
+						.setCustomId('voz_setSessionName')
+						.setEmoji(getBotEmojiResolvable('pencilWhite'))
+						.setLabel(translator.getText('voiceControlPanelButtonRename'))
+						.setStyle(ButtonStyle.Primary),
+				),
+			(actionRow) =>
+				actionRow.addComponents(
+					new ButtonBuilder()
+						.setCustomId('voz_editSessionMembers')
+						.setEmoji(getBotEmojiResolvable('userWhite'))
+						.setLabel(translator.getText('voiceControlPanelButtonMembersList'))
+						.setStyle(ButtonStyle.Primary),
+				),
+			(actionRow) =>
+				actionRow.addComponents(
+					new ButtonBuilder()
+						.setCustomId('voz_editSessionKillDelay')
+						.setEmoji(getBotEmojiResolvable('timerWhite'))
+						.setLabel(translator.getText('voiceControlPanelButtonKillDelay'))
+						.setStyle(ButtonStyle.Primary),
+				),
+			(actionRow) =>
+				actionRow.addComponents(
+					new ButtonBuilder()
+						.setCustomId('voz_freezeSession')
+						.setEmoji(getBotEmojiResolvable('freezeWhite'))
+						.setLabel(translator.getText('voiceControlPanelButtonFreeze'))
+						.setStyle(ButtonStyle.Danger),
+				),
 		);
-
-	const controlPanelButtons = new ActionRowBuilder<ButtonBuilder>().addComponents(
-		new ButtonBuilder()
-			.setCustomId('voz_setSessionName')
-			.setEmoji(getBotEmojiResolvable('pencilWhite'))
-			.setStyle(ButtonStyle.Primary),
-		new ButtonBuilder()
-			.setCustomId('voz_editSessionMembers')
-			.setEmoji(getBotEmojiResolvable('userWhite'))
-			.setStyle(ButtonStyle.Primary),
-		new ButtonBuilder()
-			.setCustomId('voz_editSessionKillDelay')
-			.setEmoji(getBotEmojiResolvable('timerWhite'))
-			.setStyle(ButtonStyle.Primary),
-		new ButtonBuilder()
-			.setCustomId('voz_freezeSession')
-			.setEmoji(getBotEmojiResolvable('freezeWhite'))
-			.setStyle(ButtonStyle.Danger),
-	);
 
 	debug('Sending menu to control panel.');
 	try {
 		await controlPanelChannel.send({
-			embeds: [controlPanelEmbed],
-			components: [controlPanelButtons],
+			flags: MessageFlags.IsComponentsV2,
+			components: [controlPanelContainer],
 		});
 	} catch (err) {
 		error(err);

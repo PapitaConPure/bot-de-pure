@@ -3,10 +3,7 @@ import { Translator } from '@/i18n';
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice';
 import {
 	getOrchestrator,
-	PureVoiceActionHandler,
 	PureVoiceSessionMember,
-	PVCPSuccess,
-	requestPVControlPanel,
 } from '@/systems/others/purevoice';
 import { ContextMenuAction } from '../commons/actionBuilder';
 
@@ -28,7 +25,7 @@ const action = new ContextMenuAction('actionPVGiveMod', 'User').setUserResponse(
 				content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
 			});
 
-		const { guild, guildId } = voiceChannel;
+		const { guildId } = voiceChannel;
 
 		const pv = await PureVoiceModel.findOne({ guildId });
 		if (!pv)
@@ -62,33 +59,9 @@ const action = new ContextMenuAction('actionPVGiveMod', 'User').setUserResponse(
 		session.members.set(other.id, sessionOther.toJSON());
 		session.markModified('members');
 
-		const result = await requestPVControlPanel(guild, pv.categoryId, pv.controlPanelId);
-
-		if (!result.success)
-			return interaction.editReply({ content: 'PLACEHOLDER_PV_CONTROL_PANEL_REQUEST_FAIL' });
-
-		const controlPanel = result.controlPanel;
-
-		if (result.status === PVCPSuccess.Created) {
-			const actionHandler = new PureVoiceActionHandler(guild, async (documentHandler) => {
-				documentHandler.document.controlPanelId = result.controlPanel.id;
-			});
-			const orchestrator = getOrchestrator(guildId);
-			orchestrator.orchestrateAction(actionHandler);
-		}
-
 		await Promise.all([
-			controlPanel.permissionOverwrites
-				.edit(
-					other,
-					{ ViewChannel: true },
-					{ reason: 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_VIEWCHANNEL_ENABLE' },
-				)
-				.catch(console.error),
-			voiceChannel.permissionOverwrites
-				.delete(other, 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_CONNECT_ENABLE')
-				.catch(console.error),
 			session.save(),
+			getOrchestrator(guildId).checkMemberPermissions(other, sessionOther, voiceChannel),
 		]);
 
 		return interaction.editReply({

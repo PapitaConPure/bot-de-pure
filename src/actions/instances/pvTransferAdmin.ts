@@ -1,13 +1,7 @@
 import { MessageFlags } from 'discord.js';
 import { Translator } from '@/i18n';
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice';
-import {
-	getOrchestrator,
-	PureVoiceActionHandler,
-	PureVoiceSessionMember,
-	PVCPSuccess,
-	requestPVControlPanel,
-} from '@/systems/others/purevoice';
+import { getOrchestrator, PureVoiceSessionMember } from '@/systems/others/purevoice';
 import { ContextMenuAction } from '../commons/actionBuilder';
 
 const action = new ContextMenuAction('actionPVTransferAdmin', 'User').setUserResponse(
@@ -25,21 +19,21 @@ const action = new ContextMenuAction('actionPVTransferAdmin', 'User').setUserRes
 
 		if (!voiceChannel)
 			return interaction.editReply({
-				content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+				content: translator.getText('voiceSessionJoinExpected'),
 			});
 
-		const { guild, guildId } = voiceChannel;
+		const { guildId } = voiceChannel;
 
-		const pv = await PureVoiceModel.findOne({ guildId });
-		if (!pv)
+		const pvDocument = await PureVoiceModel.findOne({ guildId });
+		if (!pvDocument)
 			return interaction.editReply({
-				content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+				content: translator.getText('voiceSessionJoinExpected'),
 			});
 
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if (!session)
 			return interaction.editReply({
-				content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+				content: translator.getText('voiceSessionJoinExpected'),
 			});
 
 		const dbOther = other.voice?.channelId === voiceChannel.id && session.members.get(other.id);
@@ -52,55 +46,24 @@ const action = new ContextMenuAction('actionPVTransferAdmin', 'User').setUserRes
 		const schemaMember = session.members.get(member.id);
 		if (!schemaMember)
 			return interaction.editReply({
-				content: '⚠️ Debes entrar a una sesión PuréVoice para realizar esta acción',
+				content: translator.getText('voiceSessionJoinExpected'),
 			});
 
 		const sessionSelf = new PureVoiceSessionMember(schemaMember);
 		const sessionOther = new PureVoiceSessionMember(dbOther);
-		if (!sessionSelf.exchangeAdmin(sessionOther))
+		if (!sessionSelf.transferAdmin(sessionOther))
 			return interaction.editReply({
-				content: '❌ Debes ser administrador de la sesión para transferir tu posición',
+				content: translator.getText('voiceSessionAdminExpected'),
 			});
 
 		session.members.set(member.id, sessionSelf.toJSON());
 		session.members.set(other.id, sessionOther.toJSON());
 		session.markModified('members');
 
-		const tweakControlPanelPerms = async () => {
-			const result = await requestPVControlPanel(guild, pv.categoryId, pv.controlPanelId);
-
-			if (!result.success) return;
-
-			const controlPanel = result.controlPanel;
-
-			if (result.status === PVCPSuccess.Created) {
-				const actionHandler = new PureVoiceActionHandler(guild, async (documentHandler) => {
-					documentHandler.document.controlPanelId = result.controlPanel.id;
-				});
-				const orchestrator = getOrchestrator(guildId);
-				orchestrator.orchestrateAction(actionHandler);
-			}
-
-			if (sessionSelf.isGuest())
-				await controlPanel.permissionOverwrites
-					.delete(member, 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_VIEWCHANNEL_DISABLE')
-					.catch(console.error);
-
-			await Promise.all([
-				controlPanel.permissionOverwrites
-					.edit(
-						other,
-						{ ViewChannel: true },
-						{ reason: 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_VIEWCHANNEL_ENABLE' },
-					)
-					.catch(console.error),
-				voiceChannel.permissionOverwrites
-					.delete(other, 'PLACEHOLDER_PV_REASON_MEMBERSCHANGED_CONNECT_ENABLE')
-					.catch(console.error),
-			]);
-		};
-
-		await Promise.all([session.save(), tweakControlPanelPerms()]);
+		await Promise.all([
+			session.save(),
+			getOrchestrator(guildId).checkMemberPermissions(other, sessionOther, voiceChannel),
+		]);
 
 		return interaction.editReply({
 			content: `**${translator.getText('feedDeletePostTitle')}**`,

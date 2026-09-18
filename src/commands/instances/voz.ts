@@ -26,6 +26,7 @@ import { Translator } from '@/i18n';
 import { PureVoiceModel as PureVoice, PureVoiceSessionModel } from '@/models/purevoice.js';
 import {
 	getFrozenSessionAllowedMembers,
+	getOrchestrator,
 	makePVSessionName,
 	PureVoiceSessionMember,
 	PureVoiceSessionMemberRoles,
@@ -63,6 +64,8 @@ function makeMembersListContainer(
 	translator: Translator,
 	page: number = 0,
 ): ContainerBuilder {
+	if (Number.isNaN(+page)) page = 0;
+
 	const pageSize = 5;
 	const pageCount = Math.ceil(sessionMembers.length / pageSize);
 	const finalPage = pageCount - 1;
@@ -107,13 +110,14 @@ function makeMembersListContainer(
 					.addTextDisplayComponents(
 						(textDisplay) =>
 							textDisplay.setContent(
-								`### -# ${getBotEmoji('userAccent')} ${getMemberTypeDisplay(sessionMember)}`,
+								`### -# ${getBotEmoji('userAccent')} ${member.displayName} ${getBotEmoji('hashAccent')} \`${member.user.username}\``,
 							),
-						(textDisplay) => textDisplay.setContent(member.displayName),
+						(textDisplay) =>
+							textDisplay.setContent(getMemberTypeDisplay(sessionMember)),
 					)
 					.setButtonAccessory(
 						new ButtonBuilder()
-							.setCustomId(`voz_editSessionMember_${compressId(member.id)}`)
+							.setCustomId(`voz_editSessionMember_${compressId(member.id)}_${page}`)
 							.setEmoji(getBotEmojiIdOrUnicode('pencilWhite'))
 							.setStyle(ButtonStyle.Primary),
 					),
@@ -131,7 +135,7 @@ function makeMembersListContainer(
 					.setEmoji(getBotEmojiIdOrUnicode('navFirstAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
-					.setCustomId(`voz_sessionMembersNav_${page - 1}`)
+					.setCustomId(`voz_sessionMembersNav_${page - 1}_PV`)
 					.setEmoji(getBotEmojiIdOrUnicode('navPrevAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
@@ -140,7 +144,7 @@ function makeMembersListContainer(
 					.setDisabled(true)
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
-					.setCustomId(`voz_sessionMembersNav_${page + 1}`)
+					.setCustomId(`voz_sessionMembersNav_${page + 1}_NX`)
 					.setEmoji(getBotEmojiIdOrUnicode('navNextAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
@@ -801,7 +805,7 @@ const command = new Command(
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if (!session) return warnNotInSession(interaction, translator);
 
-		const members = [...session.members.values()].map((m) => new PureVoiceSessionMember(m));
+		const members = PureVoiceSessionMember.fromSession(session);
 
 		return interaction.reply({
 			flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
@@ -818,97 +822,99 @@ const command = new Command(
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
 		if (!session) return warnNotInSession(interaction, translator);
 
-		const members = [...session.members.values()].map((m) => new PureVoiceSessionMember(m));
+		const members = PureVoiceSessionMember.fromSession(session);
 
 		return interaction.update({
-			flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
 			components: [makeMembersListContainer(voiceChannel, members, translator, +page)],
 		});
 	})
-	.setButtonResponse(async function editSessionMember(interaction, compressedSessionMemberId) {
-		const translator = await Translator.from(interaction);
+	.setButtonResponse(
+		async function editSessionMember(interaction, compressedSessionMemberId, page) {
+			const translator = await Translator.from(interaction);
 
-		const voiceChannel = interaction.member.voice?.channel;
-		if (!voiceChannel?.id) return warnNotInSession(interaction, translator);
+			const voiceChannel = interaction.member.voice?.channel;
+			if (!voiceChannel?.id) return warnNotInSession(interaction, translator);
 
-		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
-		if (!session) return warnNotInSession(interaction, translator);
+			const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
+			if (!session) return warnNotInSession(interaction, translator);
 
-		const thisSessionMemberId = interaction.member.id;
-		const thisSchemaMember = session.members.get(thisSessionMemberId);
-		if (!thisSchemaMember)
-			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
-				content: translator.getText('voiceSessionJoinExpected'),
-			});
+			const thisSessionMemberId = interaction.member.id;
+			const thisSchemaMember = session.members.get(thisSessionMemberId);
+			if (!thisSchemaMember)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('voiceSessionJoinExpected'),
+				});
 
-		const thisSessionMember = new PureVoiceSessionMember(thisSchemaMember);
-		if (thisSessionMember.isGuest())
-			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
-				content: translator.getText('voiceSessionAdminOrModExpected'),
-			});
+			const thisSessionMember = new PureVoiceSessionMember(thisSchemaMember);
+			if (thisSessionMember.isGuest())
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('voiceSessionAdminOrModExpected'),
+				});
 
-		const otherSessionMemberId = decompressId(compressedSessionMemberId);
-		const otherSchemaMember = session.members.get(otherSessionMemberId);
-		if (!otherSchemaMember)
-			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
-				content: translator.getText('invalidMember'),
-			});
+			const otherSessionMemberId = decompressId(compressedSessionMemberId);
+			const otherSchemaMember = session.members.get(otherSessionMemberId);
+			if (!otherSchemaMember)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('invalidMember'),
+				});
 
-		const otherSessionMember = new PureVoiceSessionMember(otherSchemaMember);
-		if (thisSessionMember.isAdmin() && thisSessionMemberId === otherSessionMemberId) {
+			const otherSessionMember = new PureVoiceSessionMember(otherSchemaMember);
+			if (thisSessionMember.isAdmin() && thisSessionMemberId === otherSessionMemberId) {
+				const modal = new ModalBuilder()
+					.setCustomId(`voz_transferSessionAdmin_${page}`)
+					.setTitle(translator.getText('voiceSessionMemberEditTransferAdminTitle'))
+					.addLabelComponents((label) =>
+						label
+							.setLabel(
+								translator.getText(
+									'voiceSessionMemberEditTransferAdminMemberLabel',
+								),
+							)
+							.setUserSelectMenuComponent((select) =>
+								select
+									.setCustomId('inputMember')
+									.addDefaultUsers(
+										[...session.members.values()]
+											.map((m) => new PureVoiceSessionMember(m))
+											.filter((m) => !m.isAdmin() && !m.isBanned())
+											.map((m) => m.id),
+									)
+									.setRequired(true),
+							),
+					)
+					.addTextDisplayComponents(
+						(textDisplay) =>
+							textDisplay.setContent(
+								translator.getText('voiceSessionMemberEditTransferAdminMemberDesc'),
+							),
+						(textDisplay) =>
+							textDisplay.setContent(
+								translator.getText('voiceSessionMemberEditTransferAdminDisclaimer'),
+							),
+					);
+
+				return interaction.showModal(modal);
+			}
+
+			const otherIsBanned = otherSessionMember.isBanned();
+			const otherIsGuest = otherSessionMember.isGuest();
+			const otherIsFreezeImmune = otherSessionMember.isAllowedEvenWhenFreezed();
+
+			if (!otherIsGuest && thisSessionMember.isMod())
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('voiceSessionAdminExpected'),
+				});
+
 			const modal = new ModalBuilder()
-				.setCustomId(`voz_transferSessionMember_${compressedSessionMemberId}`)
-				.setTitle(translator.getText('voiceSessionMemberEditTransferAdminTitle'))
-				.addLabelComponents((label) =>
-					label
-						.setLabel(
-							translator.getText('voiceSessionMemberEditTransferAdminMemberLabel'),
-						)
-						.setUserSelectMenuComponent((select) =>
-							select
-								.setCustomId('inputMember')
-								.addDefaultUsers(
-									[...session.members.values()]
-										.map((m) => new PureVoiceSessionMember(m))
-										.filter((m) => !m.isAdmin() && !m.isBanned())
-										.map((m) => m.id),
-								)
-								.setRequired(true),
-						),
-				)
-				.addTextDisplayComponents(
-					(textDisplay) =>
-						textDisplay.setContent(
-							translator.getText('voiceSessionMemberEditTransferAdminMemberDesc'),
-						),
-					(textDisplay) =>
-						textDisplay.setContent(
-							translator.getText('voiceSessionMemberEditTransferAdminDisclaimer'),
-						),
-				);
+				.setCustomId(`voz_applyEditSessionMember_${compressedSessionMemberId}_${page}`)
+				.setTitle(translator.getText('voiceSessionMemberEditTitle'));
 
-			return interaction.showModal(modal);
-		}
+			const radioGroup = new RadioGroupBuilder().setCustomId('inputRole');
 
-		if (otherSessionMember.isAdmin())
-			return interaction.reply({
-				flags: MessageFlags.Ephemeral,
-				content: translator.getText('voiceSessionAdminExpected'),
-			});
-
-		const modal = new ModalBuilder()
-			.setCustomId(`voz_applySessionMember_${compressedSessionMemberId}`)
-			.setTitle(translator.getText('voiceSessionMemberEditTitle'));
-
-		const otherIsBanned = otherSessionMember.isBanned();
-		const otherIsGuest = otherSessionMember.isGuest();
-		const otherIsFreezeImmune = otherSessionMember.isAllowedEvenWhenFreezed();
-
-		const radioGroup = new RadioGroupBuilder().setCustomId('inputRole');
-		if (thisSessionMember.isAdmin()) {
 			radioGroup.addOptions(
 				{
 					value: 'guest',
@@ -922,36 +928,201 @@ const command = new Command(
 					description: translator.getText('voiceSessionMemberEditWhitelistedDesc'),
 					default: otherIsGuest && otherIsFreezeImmune,
 				},
-				{
+			);
+
+			if (thisSessionMember.isAdmin()) {
+				radioGroup.addOptions({
 					value: 'mod',
 					label: translator.getText('voiceSessionMemberEditModLabel'),
 					description: translator.getText('voiceSessionMemberEditModDesc'),
 					default: !otherIsBanned && otherSessionMember.isMod(),
-				},
-			);
-		}
+				});
+			}
 
-		radioGroup.addOptions({
-			value: 'banned',
-			label: translator.getText('voiceSessionMemberEditBannedLabel'),
-			description: translator.getText('voiceSessionMemberEditBannedDesc'),
-			default: otherIsBanned,
+			radioGroup.addOptions({
+				value: 'banned',
+				label: translator.getText('voiceSessionMemberEditBannedLabel'),
+				description: translator.getText('voiceSessionMemberEditBannedDesc'),
+				default: otherIsBanned,
+			});
+
+			modal
+				.addLabelComponents((label) =>
+					label
+						.setLabel(translator.getText('voiceSessionMemberEditRoleGroupLabel'))
+						.setRadioGroupComponent(radioGroup),
+				)
+				.addTextDisplayComponents((textDisplay) =>
+					textDisplay.setContent(
+						`${translator.getText('voiceSessionMemberEditFooter')}<@${otherSessionMemberId}>`,
+					),
+				);
+
+			return interaction.showModal(modal);
+		},
+	)
+	.setModalResponse(async function transferSessionAdmin(interaction, page) {
+		const { member: thisMember, guildId } = interaction;
+
+		const translator = await Translator.from(interaction);
+
+		const voiceChannel = thisMember.voice?.channel;
+		if (!voiceChannel?.id) return warnNotInSession(interaction, translator);
+
+		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
+		if (!session) return warnNotInSession(interaction, translator);
+
+		const thisMemberId = thisMember.id;
+		const thisSchemaMember = session.members.get(thisMemberId);
+		if (!thisSchemaMember)
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('voiceSessionJoinExpected'),
+			});
+
+		const thisSessionMember = new PureVoiceSessionMember(thisSchemaMember);
+		if (thisSessionMember.isGuest())
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('voiceSessionAdminOrModExpected'),
+			});
+
+		const otherMembers = interaction.fields.getSelectedMembers('inputMember');
+		const otherMember = otherMembers?.first();
+		if (otherMember == null)
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('invalidInput'),
+			});
+
+		const otherMemberId = otherMember.id;
+		const otherSchemaMember = session.members.get(otherMemberId);
+		if (!otherSchemaMember)
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('invalidMember'),
+			});
+
+		const otherSessionMember = new PureVoiceSessionMember(otherSchemaMember);
+
+		if (!thisSessionMember.transferAdmin(otherSessionMember))
+			return interaction.editReply({
+				content: translator.getText('voiceSessionAdminExpected'),
+			});
+
+		session.members.set(thisMemberId, thisSessionMember.toJSON());
+		session.members.set(otherMemberId, otherSessionMember.toJSON());
+		session.markModified('members');
+
+		const sequentiallyUpdatePerms = async () => {
+			await getOrchestrator(guildId).checkMemberPermissions(
+				thisMember,
+				thisSessionMember,
+				voiceChannel,
+			);
+			await getOrchestrator(guildId).checkMemberPermissions(
+				otherMember,
+				otherSessionMember,
+				voiceChannel,
+			);
+		};
+
+		await Promise.all([session.save(), sequentiallyUpdatePerms()]);
+
+		const members = PureVoiceSessionMember.fromSession(session);
+
+		return interaction.update({
+			components: [makeMembersListContainer(voiceChannel, members, translator, +page)],
 		});
-
-		modal
-			.addLabelComponents((label) =>
-				label
-					.setLabel(translator.getText('voiceSessionMemberEditRoleGroupLabel'))
-					.setRadioGroupComponent(radioGroup),
-			)
-			.addTextDisplayComponents((textDisplay) =>
-				textDisplay.setContent(
-					`${translator.getText('voiceSessionMemberEditFooter')}<@${otherSessionMemberId}>`,
-				),
-			);
-
-		return interaction.showModal(modal);
 	})
+	.setModalResponse(
+		async function applyEditSessionMember(interaction, compressedSessionMemberId, page) {
+			const { member: thisMember, guildId } = interaction;
+
+			const translator = await Translator.from(interaction);
+
+			const voiceChannel = interaction.member.voice?.channel;
+			if (!voiceChannel?.id) return warnNotInSession(interaction, translator);
+
+			const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
+			if (!session) return warnNotInSession(interaction, translator);
+
+			const thisSessionMemberId = interaction.member.id;
+			const thisSchemaMember = session.members.get(thisSessionMemberId);
+			if (!thisSchemaMember)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('voiceSessionJoinExpected'),
+				});
+
+			const thisSessionMember = new PureVoiceSessionMember(thisSchemaMember);
+			if (thisSessionMember.isGuest())
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('voiceSessionAdminOrModExpected'),
+				});
+
+			const otherRole = interaction.fields.getRadioGroup('inputRole');
+
+			if (otherRole === 'mod' && !thisSessionMember.isAdmin())
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('voiceSessionAdminExpected'),
+				});
+
+			const otherSessionMemberId = decompressId(compressedSessionMemberId);
+			const otherSchemaMember = session.members.get(otherSessionMemberId);
+			if (!otherSchemaMember)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('invalidMember'),
+				});
+
+			const otherSessionMember = new PureVoiceSessionMember(otherSchemaMember);
+
+			otherSessionMember.setWhitelisted(otherRole === 'whitelist');
+			otherSessionMember.setBanned(otherRole === 'banned');
+
+			if (
+				(otherRole === 'guest' || otherRole === 'whitelist')
+				&& otherSessionMember.isMod()
+				&& !thisSessionMember.revokeMod(otherSessionMember)
+			)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('voiceSessionAdminExpected'),
+				});
+
+			if (
+				otherRole === 'mod'
+				&& !otherSessionMember.isMod()
+				&& !thisSessionMember.giveMod(otherSessionMember)
+			)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('voiceSessionAdminExpected'),
+				});
+
+			session.members.set(thisSessionMemberId, thisSessionMember.toJSON());
+			session.members.set(otherSessionMemberId, otherSessionMember.toJSON());
+			session.markModified('members');
+
+			await Promise.all([
+				session.save(),
+				getOrchestrator(guildId).checkMemberPermissions(
+					thisMember,
+					thisSessionMember,
+					voiceChannel,
+				),
+			]);
+
+			const members = PureVoiceSessionMember.fromSession(session);
+
+			return interaction.update({
+				components: [makeMembersListContainer(voiceChannel, members, translator, +page)],
+			});
+		},
+	)
 	.setButtonResponse(async function editSessionKillDelay(interaction) {
 		const { member } = interaction;
 		const translator = await Translator.from(member);

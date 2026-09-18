@@ -93,7 +93,7 @@ const action = new ContextMenuAction('actionPVBanMember', 'User').setUserRespons
 				.edit(
 					other,
 					{ Connect: false },
-					{ reason: 'PLACEHOLDER_PV_REASON_UNBAN_CONNECT_DISABLE' },
+					{ reason: 'PLACEHOLDER_PV_REASON_BAN_CONNECT_DISABLE' },
 				)
 				.catch(console.error),
 			other.voice
