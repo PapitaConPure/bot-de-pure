@@ -100,19 +100,21 @@ export type SlashArguments =
 export type CommandArguments = MessageArguments | SlashArguments;
 
 /**@description Representa los tipos de interacciones sobre mensajes.*/
-export type ComponentInteraction =
-	| ButtonInteraction<'cached'>
-	| AnySelectMenuInteraction<'cached'>
-	| AutocompleteInteraction<'cached'>
-	| MessageContextMenuCommandInteraction<'cached'>;
+export type ComponentInteraction<Cached extends CacheType = CacheType> =
+	| ButtonInteraction<Cached>
+	| AnySelectMenuInteraction<Cached>
+	| AutocompleteInteraction<Cached>
+	| MessageContextMenuCommandInteraction<Cached>;
 
 /**@description Representa los tipos de petición de comando o manejos de interacciones de componentes.*/
-export type AnyRequest = ComplexCommandRequest | ComponentInteraction;
+export type AnyRequest<Cached extends CacheType = CacheType> = ComplexCommandRequest | ComponentInteraction<Cached>;
 
 export type AnyCommandInteraction<Cached extends CacheType = CacheType> =
 	| ButtonInteraction<Cached>
 	| AnySelectMenuInteraction<Cached>
 	| ModalSubmitInteraction<Cached>;
+
+export type AnyCommandRequest<Cached extends CacheType = CacheType> = ComplexCommandRequest | AnyCommandInteraction<Cached>;
 
 export interface ParamTypeStrict {
 	name: string;

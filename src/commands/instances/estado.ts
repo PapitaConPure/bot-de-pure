@@ -21,7 +21,7 @@ import { Command, CommandTags, commandFilenames } from '../commons';
 
 const COMMAND_REGEX = new RegExp(`(${p_pure().raw})([a-záéíóúñ0-9_.-]+)`, 'gi');
 
-function listFormat(str: string, request: AnyRequest) {
+function listFormat(str: string, request: AnyRequest<'cached'>) {
 	return str.replace(COMMAND_REGEX, `\`${p_pure(request.guildId).raw}$2\``);
 }
 

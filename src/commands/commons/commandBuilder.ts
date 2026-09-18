@@ -17,7 +17,7 @@ import type {
 import { Collection, InteractionType, Message, PermissionsBitField } from 'discord.js';
 import type {
 	AnyCommandInteraction,
-	AnyRequest,
+	AnyCommandRequest,
 	CommandEditReplyOptions,
 	CommandReplyOptions,
 	CommandRequest,
@@ -185,7 +185,7 @@ export type AnyCommandComponentResponseFunction = ((
 	InteractionResponseOptions;
 
 export type WikiComponentEvaluator = (
-	request: AnyRequest,
+	request: AnyCommandRequest,
 	translator: Translator,
 ) => MessageActionRowComponentBuilder;
 
@@ -253,6 +253,7 @@ export class Command<TOptions extends CommandOptions | undefined = undefined> {
 			rows: [],
 		};
 		this.execute = (request) => request.reply(this.reply);
+		this.options = undefined as TOptions;
 	}
 
 	/**Alias de `<Command>.flags`.*/

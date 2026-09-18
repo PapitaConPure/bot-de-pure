@@ -11,7 +11,12 @@ import {
 	StringSelectMenuOptionBuilder,
 	TextDisplayBuilder,
 } from 'discord.js';
-import type { AnyRequest, ComplexCommandRequest, ComponentInteraction } from 'types/commands';
+import type {
+	AnyCommandRequest,
+	AnyRequest,
+	ComplexCommandRequest,
+	ComponentInteraction,
+} from 'types/commands';
 import type { MessageComponentDataResolvable } from 'types/discord';
 import type {
 	Command,
@@ -30,7 +35,7 @@ import { edlDistance, toCapitalized } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 
 export const makeCategoriesRow = async (
-	request: ComplexCommandRequest | ComponentInteraction,
+	request: ComplexCommandRequest | ComponentInteraction<'cached'>,
 	selections: CommandTagResolvable[],
 ) => {
 	const translator = await Translator.from(request);
@@ -114,7 +119,7 @@ export const makeCategoriesRow = async (
 	return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(categoriesMenu);
 };
 
-export const makeGuideMenu = (request: AnyRequest, translator: Translator) =>
+export const makeGuideMenu = (request: AnyCommandRequest, translator: Translator) =>
 	new StringSelectMenuBuilder()
 		.setCustomId(`ayuda_viewGuideWiki_${compressId(request.user.id)}`)
 		.setPlaceholder(translator.getText('wikiGuideMenuPlaceholder'))
@@ -141,7 +146,7 @@ export const makeGuideMenu = (request: AnyRequest, translator: Translator) =>
 				.setDescription(translator.getText('wikiGuideMenuOptionParamTypesDescription')),
 		);
 
-export const makeGuideRow = (request: AnyRequest, translator: Translator) =>
+export const makeGuideRow = (request: AnyCommandRequest, translator: Translator) =>
 	new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 		makeGuideMenu(request, translator),
 	);
@@ -153,7 +158,7 @@ export const makeGuideRow = (request: AnyRequest, translator: Translator) =>
  * Si no se encuentran resultados, se devuelve `null`
  */
 export async function searchCommand(
-	request: AnyRequest,
+	request: AnyRequest<'cached'>,
 	nameOrAlias: string,
 	translator: Translator,
 ) {
@@ -184,7 +189,7 @@ export async function searchCommand(
  *
  * Si no se encuentran resultados, se devuelve `null`.
  */
-export async function searchCommands(request: AnyRequest, query: string, translator: Translator) {
+export async function searchCommands(request: AnyRequest<'cached'>, query: string, translator: Translator) {
 	const commandsWithDistance: { command: Command; distance: number }[] = [];
 
 	const commands = await fetchCommandsFromFiles({

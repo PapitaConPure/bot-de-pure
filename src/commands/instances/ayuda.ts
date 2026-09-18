@@ -1,6 +1,6 @@
 import type { AnySelectMenuInteraction, GuildChannelResolvable, GuildMember } from 'discord.js';
 import { ButtonBuilder, ButtonStyle, ContainerBuilder, MessageFlags } from 'discord.js';
-import type { AnyRequest, ComplexCommandRequest } from 'types/commands';
+import type { AnyCommandRequest, AnyRequest, ComplexCommandRequest } from 'types/commands';
 import puré from '@/core/puréRegistry';
 import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
@@ -159,7 +159,7 @@ const command = new Command(
 			}
 
 			const foundCommand = await searchCommand(
-				interaction as AnyRequest,
+				interaction as AnyRequest<'cached'>,
 				search ?? '',
 				translator,
 			);
@@ -168,7 +168,7 @@ const command = new Command(
 				return interaction.reply({
 					flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
 					components: [
-						makeCommandNotFoundContainer(interaction as AnyRequest, translator),
+						makeCommandNotFoundContainer(interaction, translator),
 					],
 				});
 
@@ -188,7 +188,7 @@ const command = new Command(
 export default command;
 
 function makeCommandNotFoundContainer(
-	request: AnyRequest,
+	request: AnyCommandRequest,
 	translator: Translator,
 ): ContainerBuilder {
 	const helpCommand = `${p_pure(request).raw}${command.localizedNames[translator.locale]}`;
