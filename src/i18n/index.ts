@@ -3264,6 +3264,12 @@ export class Translator {
 		return new Translator(userCache?.language ?? defaultLocale);
 	}
 
+	//TODO: Implementar idioma y caché de configuración de Guild
+	static async fromGuild(_guild: unknown /*GuildCacheResolvable*/) {
+		const guildCache = { language: defaultLocale }; //await fetchGuildCache(guild);
+		return new Translator(guildCache.language ?? defaultLocale);
+	}
+
 	/**
 	 * @description Muestra un texto localizado según la configuración del usuario
 	 * @param id id de texto a mostrar en forma localizada
