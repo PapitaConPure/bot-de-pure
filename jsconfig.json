@@ -17,6 +17,8 @@
         "strict": false,
         "strictBindCallApply": true,
         "strictNullChecks": true,
+        "strictBuiltinIteratorReturn": true,
+        "strictPropertyInitialization": true,
         "skipLibCheck": true
     },
     "exclude": [
