@@ -463,6 +463,11 @@ const localesObject = {
 		en: 'Create',
 		ja: '作成',
 	},
+	buttonAdd: {
+		es: 'Añadir',
+		en: 'Add',
+		ja: '追加',
+	},
 	buttonDelete: {
 		es: 'Eliminar',
 		en: 'Delete',
@@ -2619,6 +2624,106 @@ const localesObject = {
 		es: `⚠️ Debes entrar a una sesión PuréVoice para ejecutar este comando de esta forma.\nUsa \`${subl(0)}ayuda voz\` para más información`,
 		en: `⚠️ You must join a PuréVoice session to use this command this way.\nUse \`${subl(0)}help voice\` for more information`,
 		ja: `⚠️ これを行うにはセッションに参加する必要があります。\n 詳細については、\`${subl(0)}help voice\`を使用してください`,
+	},
+	voiceSessionMemberListTitle: {
+		es: '## Miembros de sesión',
+		en: '## Session members',
+		ja: '## セッションメンバー',
+	},
+	voiceSessionMemberListBanned: {
+		es: '🛑 Bloqueado',
+		en: '🛑 Banned',
+		ja: '🛑 利用停止された',
+	},
+	voiceSessionMemberListGuest: {
+		es: 'Invitado',
+		en: 'Guest',
+		ja: 'ゲスト',
+	},
+	voiceSessionMemberListMod: {
+		es: 'Moderador',
+		en: 'Moderator',
+		ja: 'モデレータ',
+	},
+	voiceSessionMemberListAdmin: {
+		es: 'Administrador',
+		en: 'Administrator',
+		ja: '管理者',
+	},
+	voiceSessionMemberListFooter: {
+		es: `**${subl(0)}** activos / **${subl(1)}** en total`,
+		en: `**${subl(0)}** active / **${subl(1)}** total`,
+		ja: `有効 **${subl(0)}名** / 総数 **${subl(1)}名**`,
+	},
+	voiceSessionMemberEditTransferAdminTitle: {
+		es: 'Elegir Administrador de Sesión',
+		en: 'Select Session Administrator',
+		ja: 'セッション管理者を選択',
+	},
+	voiceSessionMemberEditTransferAdminMemberLabel: {
+		es: 'Nuevo administrador',
+		en: 'New administrador',
+		ja: '新しい管理者',
+	},
+	voiceSessionMemberEditTransferAdminDisclaimer: {
+		es: '-# ⚠️ Esta acción te reducirá a un rol de moderador.',
+		en: '-# ⚠️ This action will demote you to a moderator role.',
+		ja: '-# ⚠️ この操作を行うと、あなたの役割はモデレーターに変更されます。',
+	},
+	voiceSessionMemberEditTitle: {
+		es: 'Editar Miembro de Sesión',
+		en: 'Edit Session Member',
+		ja: 'セッションメンバーの編集',
+	},
+	voiceSessionMemberEditFooter: {
+		es: '-# Miembro: ',
+		en: '-# Member: ',
+		ja: '-# メンバー：',
+	},
+	voiceSessionMemberEditRoleGroupLabel: {
+		es: 'Rol',
+		en: 'Role',
+		ja: '役割',
+	},
+	voiceSessionMemberEditGuestLabel: {
+		es: 'Invitado (fugaz)',
+		en: 'Guest (Ephemeral)',
+		ja: 'ゲスト（儚い）',
+	},
+	voiceSessionMemberEditGuestDesc: {
+		es: 'El miembro podrá permanecer en la sesión mientras no sea congelada en su ausencia.',
+		en: "The member can stay in the session as long as it's not frozen while they're away.",
+		ja: '離席中にセッションがフリーズしない限り、メンバーはセッションにとどまることができます。',
+	},
+	voiceSessionMemberEditWhitelistedLabel: {
+		es: 'Invitado (lista blanca)',
+		en: 'Guest (Whitelisted)',
+		ja: 'ゲスト（ホワイトリスト）',
+	},
+	voiceSessionMemberEditWhitelistedDesc: {
+		es: 'El miembro será capaz de unirse a la sesión incluso cuando está congelada.',
+		en: "The member will be allowed to join the session even when it's frozen.",
+		ja: 'セッションがフリーズしている場合でも、メンバーはセッションに参加できます。',
+	},
+	voiceSessionMemberEditModLabel: {
+		es: 'Moderador',
+		en: 'Moderator',
+		ja: 'モデレータ',
+	},
+	voiceSessionMemberEditModDesc: {
+		es: 'Puede echar miembros invitados.',
+		en: 'Can ban guest members.',
+		ja: 'セッションがフリーズしている場合でも、メンバーはセッションに参加できます。',
+	},
+	voiceSessionMemberEditBannedLabel: {
+		es: '🛑 Bloqueado',
+		en: '🛑 Banned',
+		ja: '🛑 利用停止された',
+	},
+	voiceSessionMemberEditBannedDesc: {
+		es: 'El miembro no será capaz de unirse a la sesión bajo ninguna circunstancia.',
+		en: 'The member will not be allowed into the session under any circumstance.',
+		ja: 'いかなる場合であっても、当該メンバーのセッションへの参加は認められません。',
 	},
 
 	confessionAnonReplyModalTitle: {
