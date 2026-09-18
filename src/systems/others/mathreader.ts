@@ -71,7 +71,7 @@ interface MathLexerPattern {
 export class MathLexer {
 	#stream = '';
 	#cursor = 0;
-	#tokens: MathToken[];
+	#tokens: MathToken[] = [];
 
 	readonly #patterns: MathLexerPattern[] = [
 		{ match: /^\s+/, handler: this.#makeSkipHandler() },

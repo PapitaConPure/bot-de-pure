@@ -9,7 +9,6 @@ import { PSGuild, PSUser } from '../v1.1/interpreter/environment/environmentProv
 export default class TestEnvironmentProvider implements EnvironmentProvider {
 	guild: PSGuild;
 	channel: PSChannel;
-	role: PSRole;
 	user: PSUser;
 	member: PSMember;
 
