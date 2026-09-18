@@ -1,6 +1,7 @@
 'use strict';
 
 import chalk from 'chalk';
+import { addMilliseconds, differenceInMilliseconds, getUnixTime } from 'date-fns';
 import type {
 	GuildMember,
 	MessageCreateOptions,
@@ -15,22 +16,28 @@ import {
 	ButtonBuilder,
 	ButtonStyle,
 	ChannelType,
+	ContainerBuilder,
 	EmbedBuilder,
 	Guild,
+	MessageFlags,
+	OverwriteType,
 } from 'discord.js';
 import type { ValuesOf } from 'types';
-import { tenshiColor } from '@/data/globalProps.js';
+import { ClientNotFoundError, client } from '@/core/client';
+import { tenshiAltColor, tenshiColor, tenshiPeachColor } from '@/data/globalProps.js';
 import { Translator } from '@/i18n/index.js';
-import type { PureVoiceDocument } from '@/models/purevoice.js';
+import type { PureVoiceDocument, PureVoiceSessionDocument } from '@/models/purevoice.js';
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice.js';
 import type { UserConfigSchemaType } from '@/models/userconfigs.js';
 import UserConfigModel from '@/models/userconfigs.js';
+import { fetchGuild, fetchMember } from '@/utils/discord';
 import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
+import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import Logger from '@/utils/logs.js';
 import { p_pure } from '@/utils/prefixes';
 import { attemptManyTimes } from '@/utils/promises';
 
-const { debug, info, warn, error } = Logger('WARN', 'PV');
+const { debug, info, warn, error, fatal } = Logger('DEBUG', 'PV');
 
 export function makePVSessionName(name: string, emoji?: string | null) {
 	return `${emoji || '💠'}【${name}】`;
@@ -139,15 +146,16 @@ export class PureVoiceUpdateHandler {
 		if (this.isNotConnectionUpdate()) return;
 		if (!this.#documentHandler.isInitialized()) return;
 
-		const {
-			guild,
-			channel: oldChannel,
-			member,
-		} = this.#oldState as VoiceState & { member: GuildMember };
+		const { guild, channel: oldChannel, member } = this.#oldState;
 		const pvDocument = this.#documentHandler.document;
 
 		if (!oldChannel) {
 			debug('Disconnection event had no previous channel. Discarding.');
+			return;
+		}
+
+		if (!member) {
+			debug('Disconnection event had no previous member. Discarding.');
 			return;
 		}
 
@@ -170,8 +178,8 @@ export class PureVoiceUpdateHandler {
 
 			const sessionRole = guild.roles.cache.get(session.roleId) as Role;
 
-			//Si la desconexión no es "fatal", simplemente asegurarse que haya un panel de control y quitarle los permisos del mismo al miembro
-			if (oldChannel.members.filter((member) => !member.user.bot).size) {
+			/**Cleans up the member's session permissions. Makes sure a control pannel exists and creates one if it doesn't.*/
+			const disconnectMember = async () => {
 				const result = await requestPVControlPanel(
 					guild,
 					pvDocument.categoryId,
@@ -190,82 +198,96 @@ export class PureVoiceUpdateHandler {
 				member.roles
 					.remove(sessionRole, 'Desconexión de miembro de sesión PuréVoice')
 					.catch(this.prematureError);
-				info('Disconnection was not fatal. Control panel was updated accordingly.');
+			};
+
+			if (oldChannel.members.filter((member) => !member.user.bot).size) {
+				await disconnectMember();
+				info('Session is still populated after disconnection. Control panel updated.');
 				return;
 			}
 
-			//La desconexión es "fatal". El canal de la sesión se programará para borrarse.
-			const controlPanel = guild.channels.cache.get(pvDocument.controlPanelId) as TextChannel;
+			info('Session was abandoned after disconnection. Beginning deletion procedure.');
+			const userConfigs =
+				(await UserConfigModel.findOne({ userId: session.adminId }))
+				|| new UserConfigModel({ userId: session.adminId });
 
-			const pvChannelToRemove = guild.channels.cache.get(session.channelId);
-			const pvSessionName = pvChannelToRemove?.name
-				? `#${pvChannelToRemove.name} (${session.channelId})`
-				: session.channelId;
-			const deletionMessage = 'Eliminar componentes de sesión PuréVoice';
+			const destroySessionAndUpdate = (
+				pvDocument: PureVoiceDocument,
+				session: PureVoiceSessionDocument,
+				guild: Guild,
+			) => {
+				const pvChannelToRemove = guild.channels.cache.get(session.channelId);
+				const pvSessionName = pvChannelToRemove?.name
+					? `#${pvChannelToRemove.name} (${session.channelId})`
+					: session.channelId;
+				const controlPanel = guild.channels.cache.get(
+					pvDocument.controlPanelId,
+				) as TextChannel;
 
-			debug(`About to remove components for session: ${pvSessionName}...`);
+				return Promise.all([
+					destroySession(pvDocument, session, guild),
+					controlPanel?.permissionOverwrites
+						.delete(member, 'Eliminar componentes de sesión PuréVoice')
+						.catch((err) => {
+							error(
+								new Error(
+									`Couldn't remove control panel member permissions for session: ${pvSessionName}`,
+								),
+							);
+							error(err);
+						}),
+				]);
+			};
 
-			let success = true;
-			const results = await Promise.all([
-				pvChannelToRemove?.delete(deletionMessage)?.catch((err) => {
-					error(new Error(`Couldn't remove voice channel for session: ${pvSessionName}`));
-					error(err);
-					success = false;
-				}),
-				controlPanel?.permissionOverwrites
-					?.delete(member, deletionMessage)
-					?.catch((err) => {
-						error(
-							new Error(
-								`Couldn't remove control panel member permissions for session: ${pvSessionName}`,
-							),
+			const killDelayMs = session.killDelayMs ?? userConfigs.voice.killDelay ?? 0;
+			if (killDelayMs === 0) return destroySessionAndUpdate(pvDocument, session, guild);
+
+			await disconnectMember();
+
+			const now = new Date(Date.now());
+			const killAt = addMilliseconds(now, killDelayMs);
+			const orchestrator = getOrchestrator(guild.id);
+			orchestrator.scheduleAction(
+				`kill-${sessionId}`,
+				new PureVoiceActionHandler(guild, async (documentHandler) => {
+					if (oldChannel.members.filter((member) => !member.user.bot).size) return;
+
+					const session = await PureVoiceSessionModel.findOne({ channelId: sessionId });
+					if (!session) {
+						warn(
+							`Found session ID "${sessionId}" within guild document, but couldn't find the related PureVoiceSessionModel document.`,
 						);
-						error(err);
-						success = false;
-					}),
-				sessionRole?.delete(deletionMessage)?.catch((err) => {
-					error(new Error(`Couldn't remove role for session: ${pvSessionName}`));
-					error(err);
-					success = false;
+						return;
+					}
+
+					return destroySessionAndUpdate(documentHandler.document, session, guild);
 				}),
-			]);
-
-			if (!success) {
-				warn(`Couldn't remove session components. Session entry will remain alive.`);
-				return results;
-			}
-
-			info(`Removed components for session: ${pvSessionName}`);
-			debug(`About to remove leftover data for session: ${pvSessionName}...`);
-
-			const indexToDelete = pvDocument.sessions.indexOf(oldChannel.id);
-			if (indexToDelete >= 0) {
-				pvDocument.sessions.splice(indexToDelete, 1);
-				pvDocument.markModified('sessions');
-			}
-
-			let removed: boolean = false;
-			await attemptManyTimes(
-				async () => {
-					removed = true;
-					await session.deleteOne().catch((err) => {
-						removed = false;
-
-						error(new Error(`Failed to remove session entry: #${pvSessionName}`));
-						error(err);
-					});
-				},
-				3,
-				{
-					onReattempt: (remaining) =>
-						info(`Retrying removal of session entry (${remaining} attempts left)...`),
-				},
+				killDelayMs,
 			);
+			session.lastActiveAt = now;
+			await session.save();
 
-			if (removed) info(`Removed session entry: #${pvSessionName}`);
-			else warn(`Couldn't remove session entry: #${pvSessionName}`);
+			const admin = fetchMember(session.adminId, { guild });
+			const adminMention =
+				userConfigs.voice.ping === 'always' ? `${admin}` : admin?.displayName;
 
-			return results;
+			return oldChannel.send({
+				flags: MessageFlags.IsComponentsV2,
+				components: [
+					new ContainerBuilder()
+						.setAccentColor(tenshiPeachColor)
+						.addTextDisplayComponents(
+							(textDisplay) => textDisplay.setContent('## Eliminación pendiente'),
+							(textDisplay) =>
+								textDisplay.setContent(
+									[
+										`Esta sesión está vacía y será eliminada en <t:${getUnixTime(killAt)}:R> (<t:${getUnixTime(killAt)}:F>) a obediencia de la configuración de su administrador (${adminMention}).`,
+										'La eliminación será cancelada si alguien permitido entra a la sesión.',
+									].join('\n'),
+								),
+						),
+				],
+			});
 		} catch (err) {
 			error(err);
 
@@ -313,6 +335,7 @@ export class PureVoiceUpdateHandler {
 				return;
 			}
 
+			//Connection to existing session
 			const currentSession = await PureVoiceSessionModel.findOne({
 				channelId: currentSessionId,
 			});
@@ -368,6 +391,30 @@ export class PureVoiceUpdateHandler {
 					.catch(prematureError);
 			}
 
+			const scheduleId = `kill-${currentSessionId}`;
+			const orchestrator = getOrchestrator(guild.id);
+			if (orchestrator.hasScheduledAction(scheduleId)) {
+				debug('Cancelling orchestrated kill action.');
+				orchestrator.cancelScheduledAction(scheduleId);
+
+				await channel.send({
+					flags: MessageFlags.IsComponentsV2,
+					components: [
+						new ContainerBuilder()
+							.setAccentColor(tenshiAltColor)
+							.addTextDisplayComponents(
+								(textDisplay) => textDisplay.setContent('## Eliminación cancelada'),
+								(textDisplay) =>
+									textDisplay.setContent(
+										[
+											'La eliminación previamente programada de esta sesión fue cancelada porque alguien permitido entró a la misma.',
+										].join('\n'),
+									),
+							),
+					],
+				});
+			}
+
 			const controlPanel = guild.channels.cache.get(pvDocument.controlPanelId) as TextChannel;
 
 			await Promise.all([
@@ -418,6 +465,7 @@ export class PureVoiceUpdateHandler {
 			return;
 		}
 
+		//Create a new session
 		try {
 			const [userConfigs, translator] = await Promise.all([
 				(await UserConfigModel.findOne({ userId: member.id }))
@@ -529,7 +577,7 @@ export class PureVoiceUpdateHandler {
 						role: PureVoiceSessionMemberRoles.ADMIN,
 					}).toJSON(),
 				),
-				killDelaySeconds: 0, //PENDIENTE: UserConfig
+				killDelayMs: userConfigs.voice.killDelay ?? undefined,
 			});
 
 			embed
@@ -612,9 +660,9 @@ export class PureVoiceUpdateHandler {
 					if (!sessionId) return;
 
 					const session = await PureVoiceSessionModel.findOne({ channelId: sessionId });
-					if (!session || session.nameChanged) return;
+					if (!session || session.nameChangedAt) return;
 
-					session.nameChanged = new Date(Date.now());
+					session.nameChangedAt = new Date(Date.now());
 
 					const name = member.user.username.slice(0, 24);
 					const namingReason = translator.getText('voiceSessionReasonChannelForceName');
@@ -698,14 +746,14 @@ export class PureVoiceUpdateHandler {
 	}
 }
 
-type ActionFn = (documentHandler: PureVoiceDocumentHandler) => Promise<unknown>;
+type PureVoiceActionFn = (documentHandler: PureVoiceDocumentHandler) => Promise<unknown>;
 
 export class PureVoiceActionHandler {
 	#documentHandler: PureVoiceDocumentHandler;
-	#actionFn: ActionFn;
+	#actionFn: PureVoiceActionFn;
 	#guild: Guild;
 
-	constructor(guild: Guild, actionHandler: ActionFn) {
+	constructor(guild: Guild, actionHandler: PureVoiceActionFn) {
 		this.#documentHandler = new PureVoiceDocumentHandler();
 		this.#actionFn = actionHandler;
 		this.#guild = guild;
@@ -714,7 +762,7 @@ export class PureVoiceActionHandler {
 	/** Comprueba si hay un sistema PuréVoice instalado en el servidor actual o no */
 	systemIsInstalled() {
 		return !!(
-			this.#documentHandler.document
+			this.#documentHandler.isInitialized()
 			&& this.#guild.channels.cache.get(this.#documentHandler.document.categoryId)
 		);
 	}
@@ -738,6 +786,7 @@ export class PureVoiceOrchestrator {
 	#updates: PureVoiceUpdateHandler[];
 	#actions: PureVoiceActionHandler[];
 	#busy: boolean;
+	#actionTimeouts: Map<string, ReturnType<typeof setTimeout>>;
 
 	/**
 	 * @description
@@ -748,11 +797,12 @@ export class PureVoiceOrchestrator {
 		this.#updates = [];
 		this.#actions = [];
 		this.#busy = false;
+		this.#actionTimeouts = new Map();
 	}
 
 	/**
 	 * @description
-	 * Pone en cola un análisis de cambio de estado de una sesión de voz
+	 * Pone en cola un análisis de cambio de estado de una sesión de voz.
 	 */
 	async orchestrateUpdate(handler: PureVoiceUpdateHandler) {
 		this.#updates.push(handler);
@@ -767,7 +817,7 @@ export class PureVoiceOrchestrator {
 
 	/**
 	 * @description
-	 * Pone en cola prioritaria una ejecución de acción en una sesión de voz
+	 * Pone en cola prioritaria una ejecución de acción en una sesión de voz.
 	 */
 	async orchestrateAction(handler: PureVoiceActionHandler) {
 		this.#actions.push(handler);
@@ -780,6 +830,161 @@ export class PureVoiceOrchestrator {
 		return false;
 	}
 
+	/**Performs a cleanup check task for the PuréVoice system associated to this orchestrator.*/
+	async check() {
+		const guild = await fetchGuild(this.#guildId);
+		if (!guild)
+			return fatal(
+				new Error("Guild associated to an orchestrator didn't exist during check."),
+			);
+
+		const handler = new PureVoiceActionHandler(guild, async (documentHandler) => {
+			const pvDocument = documentHandler.document;
+
+			const pvChannel = guild.channels.cache.get(pvDocument.controlPanelId);
+			const sessions = await PureVoiceSessionModel.find({ channelId: pvDocument.sessions });
+			const sessionsMap = new Map<string, PureVoiceSessionDocument>(
+				sessions.map((session) => [session.channelId, session]),
+			);
+
+			await fetchGuildMembers(guild);
+
+			return Promise.allSettled([
+				pvChannel?.isTextBased()
+					&& !pvChannel.isThread()
+					&& pvChannel.permissionOverwrites.cache.map(async (overwrite) => {
+						if (overwrite.type === OverwriteType.Role) return;
+
+						const memberId = overwrite.id;
+						const member = guild.members.cache.get(memberId);
+
+						const memberChannelId = member?.voice?.channelId;
+						if (!memberChannelId) return overwrite.delete();
+
+						const session = sessionsMap.get(memberChannelId);
+						if (!session) return overwrite.delete();
+
+						const dbMember = session.members.get(member.id);
+						if (!dbMember) return overwrite.delete();
+
+						const sessionMember = new PureVoiceSessionMember(dbMember);
+						if (sessionMember.isGuest()) return overwrite.delete();
+
+						return overwrite.edit({ ViewChannel: true });
+					}),
+				...sessions.map(async (session) => {
+					const sessionId = session.channelId;
+					const channel = guild.channels.cache.get(sessionId);
+					if (!channel?.isVoiceBased()) {
+						pvDocument.removeFromSessionsList(sessionId);
+						return session.deleteOne();
+					}
+
+					if (channel.members.filter((member) => !member.user.bot).size > 0) return;
+
+					const adminUserConfigs = await UserConfigModel.findOne({
+						userId: session.adminId,
+					});
+
+					const rawKillDelayMs =
+						session.killDelayMs ?? adminUserConfigs?.voice.killDelay ?? 0;
+					if (rawKillDelayMs <= 0) return destroySession(pvDocument, session, guild);
+
+					const then = session.lastActiveAt ?? new Date(Date.now());
+					const killAt = addMilliseconds(then, rawKillDelayMs);
+					const killDelayMs = differenceInMilliseconds(killAt, Date.now());
+					if (killDelayMs <= 0) return destroySession(pvDocument, session, guild);
+
+					const orchestrator = getOrchestrator(guild.id);
+					orchestrator.scheduleAction(
+						`kill-${sessionId}`,
+						new PureVoiceActionHandler(guild, async (documentHandler) => {
+							const channel = guild.channels.cache.get(sessionId);
+							if (
+								!channel?.isVoiceBased()
+								|| channel.members.filter((member) => !member.user.bot).size
+							)
+								return;
+
+							const session = await PureVoiceSessionModel.findOne({
+								channelId: sessionId,
+							});
+							if (!session) {
+								warn(
+									`Found session ID "${sessionId}" within guild document, but couldn't find the related PureVoiceSessionModel document.`,
+								);
+								return;
+							}
+
+							return destroySession(documentHandler.document, session, guild);
+						}),
+						killDelayMs,
+					);
+
+					const admin = fetchMember(session.adminId, { guild });
+					const adminMention =
+						adminUserConfigs?.voice.ping === 'always' ? `${admin}` : admin?.displayName;
+
+					return channel.send({
+						flags: MessageFlags.IsComponentsV2,
+						components: [
+							new ContainerBuilder()
+								.setAccentColor(tenshiPeachColor)
+								.addTextDisplayComponents(
+									(textDisplay) =>
+										textDisplay.setContent('## Eliminación pendiente'),
+									(textDisplay) =>
+										textDisplay.setContent(
+											[
+												`Esta sesión está vacía y será eliminada en <t:${getUnixTime(killAt)}:R> (<t:${getUnixTime(killAt)}:F>) a obediencia de la configuración de su administrador (${adminMention}).`,
+												'La eliminación será cancelada si alguien permitido entra a la sesión.',
+											].join('\n'),
+										),
+								),
+						],
+					});
+				}),
+			]);
+		});
+
+		this.orchestrateAction(handler);
+	}
+
+	/**
+	 * @description
+	 * Pone en cola de espera la ejecución de una acción en una sesión de voz.
+	 */
+	scheduleAction(scheduleId: string, handler: PureVoiceActionHandler, ms: number) {
+		this.cancelScheduledAction(scheduleId);
+
+		const timeout = setTimeout(() => {
+			this.#actionTimeouts.delete(scheduleId);
+			this.orchestrateAction(handler);
+		}, ms);
+
+		this.#actionTimeouts.set(scheduleId, timeout);
+	}
+
+	/**
+	 * @description
+	 * Previene la ejecución de una acción de sesión de voz inminente (si existe).
+	 */
+	cancelScheduledAction(scheduleId: string) {
+		const timeout = this.#actionTimeouts.get(scheduleId);
+		if (!timeout) return;
+
+		clearTimeout(timeout);
+		this.#actionTimeouts.delete(scheduleId);
+	}
+
+	/**
+	 * @description
+	 * Comprueba si existe una acción de sesión de voz en cola de espera (`true`) o no (`false`).
+	 */
+	hasScheduledAction(scheduleId: string) {
+		return this.#actionTimeouts.has(scheduleId);
+	}
+
 	/**
 	 * @description
 	 * Quita de la cola un análisis de cambio de estado de una sesión de voz y lo ejecuta. Si alguna cola no está vacía, se ejecuta consumeAction (prioridad) o consumeUpdate.
@@ -787,20 +992,18 @@ export class PureVoiceOrchestrator {
 	async #consumeUpdate() {
 		const handler = this.#updates.shift();
 		await handler?.fetchGuildDocument(this.#guildId).catch(error);
-		if (!handler?.systemIsInstalled()) return;
 
-		try {
-			await Promise.all([
-				handler.checkFaultySessions(),
-				handler.handleDisconnection(),
-				handler.handleConnection(),
-			]);
-			await handler.saveChanges();
-		} catch (err) {
-			error(
-				err,
-				'Ocurrió un error mientras se analizaba un cambio de estado en una sesión Purévoice',
-			);
+		if (handler?.systemIsInstalled()) {
+			try {
+				await Promise.all([
+					handler.checkFaultySessions(),
+					handler.handleDisconnection(),
+					handler.handleConnection(),
+				]);
+				await handler.saveChanges();
+			} catch (err) {
+				error(err, 'An error occurred while analyzing an orchestrator update.');
+			}
 		}
 
 		if (this.#actions.length) {
@@ -824,13 +1027,14 @@ export class PureVoiceOrchestrator {
 	async #consumeAction() {
 		const handler = this.#actions.shift();
 		await handler?.fetchSystemDocument().catch(error);
-		if (!handler?.systemIsInstalled()) return;
 
-		try {
-			await handler.performAction().catch(error);
-			await handler.saveChanges();
-		} catch (err) {
-			error(err, 'Ocurrió un error mientras se procesaba una acción en una sesión Purévoice');
+		if (handler?.systemIsInstalled()) {
+			try {
+				await handler.performAction().catch(error);
+				await handler.saveChanges();
+			} catch (err) {
+				error(err, 'An error occurred while processing an orchestrator action.');
+			}
 		}
 
 		if (this.#actions.length) {
@@ -846,6 +1050,59 @@ export class PureVoiceOrchestrator {
 		this.#busy = false;
 		return;
 	}
+}
+
+async function destroySession(
+	pvDocument: PureVoiceDocument,
+	session: PureVoiceSessionDocument,
+	guild: Guild,
+) {
+	const sessionRole = guild.roles.cache.get(session.roleId);
+	const oldChannel = guild.channels.cache.get(session.channelId);
+
+	const pvChannelToRemove = guild.channels.cache.get(session.channelId);
+	const pvSessionName = pvChannelToRemove?.name
+		? `#${pvChannelToRemove.name} (${session.channelId})`
+		: session.channelId;
+	const deletionMessage = 'Eliminar componentes de sesión PuréVoice';
+
+	debug(`About to remove components for session: ${pvSessionName}...`);
+
+	const results = await Promise.allSettled([
+		pvChannelToRemove?.delete(deletionMessage),
+		sessionRole?.delete(deletionMessage),
+	]);
+
+	if (results.some((result) => result.status === 'rejected')) {
+		warn(`Couldn't remove session components. Session entry will remain alive.`);
+		return;
+	}
+
+	info(`Removed components for session: ${pvSessionName}`);
+	debug(`About to remove leftover data for session: ${pvSessionName}...`);
+
+	if (oldChannel) pvDocument.removeFromSessionsList(oldChannel.id);
+
+	const removed = await attemptManyTimes(
+		async () => {
+			await session.deleteOne().catch((err) => {
+				error(new Error(`Failed to remove session entry: #${pvSessionName}`));
+				error(err);
+			});
+			return true;
+		},
+		3,
+		{
+			onReattempt: (remaining) =>
+				info(`Retrying removal of session entry (${remaining} attempts left)...`),
+			getFallback: () => false,
+		},
+	);
+
+	if (removed) info(`Removed session entry: #${pvSessionName}`);
+	else warn(`Couldn't remove session entry: #${pvSessionName}`);
+
+	return;
 }
 
 export const PureVoiceSessionMemberRoles = {
@@ -1152,10 +1409,28 @@ const orchestrators: Map<string, PureVoiceOrchestrator> = new Map();
  * Obtiene el orquestador de el servidor indicado.
  * Si el servidor aun no tiene un orquestador instanciado, se lo instancia automáticamente.
  */
-export function getOrchestrator(guildId: string) {
+export function getOrchestrator(guildId: string): PureVoiceOrchestrator {
 	const orchestrator = orchestrators.get(guildId) || new PureVoiceOrchestrator(guildId);
 
 	if (!orchestrators.has(guildId)) orchestrators.set(guildId, orchestrator);
 
 	return orchestrator;
+}
+
+/**
+ * @description
+ * Performs a cleanup on all existing PuréVoice systems.
+ */
+export async function cleanupPurevoiceSystems() {
+	debug('Inititating PuréVoice System global cleanup.');
+
+	if (!client?.isReady()) throw new ClientNotFoundError();
+
+	const guilds = client.guilds;
+
+	for (const [guildId] of guilds.cache) {
+		debug(`Processing orchestrator "${guildId}"...`);
+		const orchestrator = getOrchestrator(guildId);
+		await orchestrator.check();
+	}
 }

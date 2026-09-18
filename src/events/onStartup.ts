@@ -12,6 +12,7 @@ import { REST } from 'discord.js';
 import { Routes } from 'discord-api-types/v9';
 import { connect as mongooseConnect, set as mongooseSet } from 'mongoose';
 import { databaseUri } from '@/core/db';
+import { cleanupPurevoiceSystems } from '@/systems/others/purevoice';
 import { initializeWebhookMessageOwners } from '@/utils/discordagent';
 import { setupAppEmojis } from '@/utils/emojis';
 import { fetchAllGuildMembers } from '@/utils/guildratekeeper';
@@ -166,6 +167,9 @@ export async function onStartup(client: Client) {
 
 	console.log(chalk.gray('Preparando Cascadas de Mensajes...'));
 	await initializeMessageCascades();
+
+	console.log(chalk.gray('Preparando sistema PuréVoice...'));
+	await cleanupPurevoiceSystems();
 
 	console.log(chalk.gray('Preparando Suscripciones de Feeds...'));
 	userConfigs.forEach((config) => {

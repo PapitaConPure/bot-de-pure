@@ -1,29 +1,45 @@
 import { addMinutes, getUnixTime, isBefore } from 'date-fns';
-import type { CategoryChannel, ColorResolvable, GuildChannel, GuildMember } from 'discord.js';
 import {
 	ActionRowBuilder,
+	type BaseGuildVoiceChannel,
 	ButtonBuilder,
 	ButtonStyle,
+	type CategoryChannel,
 	ChannelType,
+	type ColorResolvable,
 	Colors,
+	ContainerBuilder,
 	EmbedBuilder,
+	type GuildChannel,
+	type GuildMember,
 	LabelBuilder,
 	MessageFlags,
 	ModalBuilder,
+	RadioGroupBuilder,
+	SeparatorSpacingSize,
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
-import type { ComplexCommandRequest } from 'types/commands';
+import type { AnyCommandInteraction, ComplexCommandRequest } from 'types/commands';
+import { tenshiColor } from '@/data/globalProps';
 import { Translator } from '@/i18n';
 import { PureVoiceModel as PureVoice, PureVoiceSessionModel } from '@/models/purevoice.js';
 import {
 	getFrozenSessionAllowedMembers,
 	makePVSessionName,
 	PureVoiceSessionMember,
+	PureVoiceSessionMemberRoles,
 } from '@/systems/others/purevoice.js';
 import { isNotModerator } from '@/utils/discord';
-import { getBotEmojiResolvable, parseUnicodeEmoji } from '@/utils/emojis';
-import { compressId } from '@/utils/encoding';
+import {
+	getBotEmoji,
+	getBotEmojiIdOrUnicode,
+	getBotEmojiResolvable,
+	parseUnicodeEmoji,
+} from '@/utils/emojis';
+import { compressId, decompressId } from '@/utils/encoding';
+import { millisecondsToDuration } from '@/utils/formatting';
+import { parseDuration } from '@/utils/parsing';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
@@ -32,6 +48,129 @@ const cancelbutton = (compressedUserId: string) =>
 		.setCustomId(`voz_cancelWizard_${compressedUserId}`)
 		.setEmoji(getBotEmojiResolvable('xmarkAccent'))
 		.setStyle(ButtonStyle.Secondary);
+
+const warnNotInSession = (interaction: AnyCommandInteraction, translator: Translator) =>
+	interaction
+		.reply({
+			content: translator.getText('voiceSessionJoinExpected', p_pure(interaction).raw),
+			flags: MessageFlags.Ephemeral,
+		})
+		.catch(console.error);
+
+function makeMembersListContainer(
+	voiceChannel: BaseGuildVoiceChannel,
+	sessionMembers: PureVoiceSessionMember[],
+	translator: Translator,
+	page: number = 0,
+): ContainerBuilder {
+	const pageSize = 5;
+	const pageCount = Math.ceil(sessionMembers.length / pageSize);
+	const finalPage = pageCount - 1;
+
+	if (page > finalPage) page -= pageCount;
+	else if (page < 0) page += pageCount;
+
+	const firstItemIndex = page * pageSize;
+	const lastItemIndex = firstItemIndex + pageSize - 1;
+
+	const chunk = sessionMembers.slice(firstItemIndex, lastItemIndex + 1);
+
+	const getMemberTypeDisplay = (member: PureVoiceSessionMember) => {
+		if (member.isBanned()) return translator.getText('voiceSessionMemberListBanned');
+
+		switch (member.role) {
+			case PureVoiceSessionMemberRoles.ADMIN:
+				return translator.getText('voiceSessionMemberListAdmin');
+			case PureVoiceSessionMemberRoles.MOD:
+				return translator.getText('voiceSessionMemberListMod');
+			default:
+				return translator.getText('voiceSessionMemberListGuest');
+		}
+	};
+
+	const container = new ContainerBuilder()
+		.setAccentColor(tenshiColor)
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(translator.getText('voiceSessionMemberListTitle')),
+		)
+		.addSeparatorComponents((separator) =>
+			separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
+		);
+
+	for (const sessionMember of chunk) {
+		const member = voiceChannel.members.get(sessionMember.id);
+		if (!member) continue;
+
+		container
+			.addSectionComponents((section) =>
+				section
+					.addTextDisplayComponents(
+						(textDisplay) =>
+							textDisplay.setContent(
+								`### -# ${getBotEmoji('userAccent')} ${getMemberTypeDisplay(sessionMember)}`,
+							),
+						(textDisplay) => textDisplay.setContent(member.displayName),
+					)
+					.setButtonAccessory(
+						new ButtonBuilder()
+							.setCustomId(`voz_editSessionMember_${compressId(member.id)}`)
+							.setEmoji(getBotEmojiIdOrUnicode('pencilWhite'))
+							.setStyle(ButtonStyle.Primary),
+					),
+			)
+			.addSeparatorComponents((separator) => separator.setDivider(true));
+	}
+
+	const activeMembers = voiceChannel.members.size;
+	const totalMembers = sessionMembers.length;
+	container
+		.addActionRowComponents((actionRow) =>
+			actionRow.addComponents(
+				new ButtonBuilder()
+					.setCustomId(`voz_sessionMembersNav_${0}_FS`)
+					.setEmoji(getBotEmojiIdOrUnicode('navFirstAccent'))
+					.setStyle(ButtonStyle.Secondary),
+				new ButtonBuilder()
+					.setCustomId(`voz_sessionMembersNav_${page - 1}`)
+					.setEmoji(getBotEmojiIdOrUnicode('navPrevAccent'))
+					.setStyle(ButtonStyle.Secondary),
+				new ButtonBuilder()
+					.setCustomId('voz_pageCounterDONOTUSE')
+					.setLabel(`${page + 1}/${finalPage + 1}`)
+					.setDisabled(true)
+					.setStyle(ButtonStyle.Secondary),
+				new ButtonBuilder()
+					.setCustomId(`voz_sessionMembersNav_${page + 1}`)
+					.setEmoji(getBotEmojiIdOrUnicode('navNextAccent'))
+					.setStyle(ButtonStyle.Secondary),
+				new ButtonBuilder()
+					.setCustomId(`voz_sessionMembersNav_${finalPage}_LS`)
+					.setEmoji(getBotEmojiIdOrUnicode('navLastAccent'))
+					.setStyle(ButtonStyle.Secondary),
+			),
+		)
+		.addActionRowComponents((actionRow) =>
+			actionRow.addComponents(
+				new ButtonBuilder()
+					.setCustomId(`voz_addSessionMember_${page}`)
+					.setEmoji(getBotEmojiIdOrUnicode('plusWhite'))
+					.setLabel(translator.getText('buttonAdd'))
+					.setStyle(ButtonStyle.Success),
+				new ButtonBuilder()
+					.setCustomId(`voz_sessionMembersNav_${page}_RE`)
+					.setEmoji(getBotEmojiIdOrUnicode('refreshWhite'))
+					.setLabel(translator.getText('buttonRefresh'))
+					.setStyle(ButtonStyle.Primary),
+			),
+		)
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(
+				`-# ${voiceChannel} • ${translator.getText('voiceSessionMemberListFooter', activeMembers, totalMembers)}`,
+			),
+		);
+
+	return container;
+}
 
 const options = new CommandOptions()
 	.addParam('nombre', 'TEXT', 'para decidir el nombre de la sesión actual', { optional: true })
@@ -119,7 +258,7 @@ const command = new Command(
 				content: translator.getText('voiceSessionAdminOrModExpected'),
 			});
 
-		const { channelId: voiceId, roleId, nameChanged } = session;
+		const { channelId: voiceId, roleId, nameChangedAt: nameChanged } = session;
 		const now = new Date(Date.now());
 		const renameUnblockDate = addMinutes(nameChanged ?? new Date(0), 20);
 
@@ -131,7 +270,7 @@ const command = new Command(
 				),
 			});
 
-		session.nameChanged = new Date(Date.now());
+		session.nameChangedAt = new Date(Date.now());
 
 		const guildChannels = request.guild.channels.cache;
 		const guildRoles = request.guild.roles.cache;
@@ -577,19 +716,11 @@ const command = new Command(
 		const { member } = interaction;
 		const translator = await Translator.from(member);
 
-		const warnNotInSession = () =>
-			interaction
-				.reply({
-					content: translator.getText('voiceSessionJoinExpected'),
-					flags: MessageFlags.Ephemeral,
-				})
-				.catch(console.error);
-
 		const voiceChannel = member.voice?.channel;
-		if (!voiceChannel) return warnNotInSession();
+		if (!voiceChannel) return warnNotInSession(interaction, translator);
 
 		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
-		if (!session) return warnNotInSession();
+		if (!session) return warnNotInSession(interaction, translator);
 
 		const modal = new ModalBuilder()
 			.setCustomId(`voz_applySessionName`)
@@ -628,7 +759,10 @@ const command = new Command(
 		const warnNotInSession = () =>
 			interaction
 				.editReply({
-					content: translator.getText('voiceSessionJoinExpected'),
+					content: translator.getText(
+						'voiceSessionJoinExpected',
+						p_pure(interaction).raw,
+					),
 				})
 				.catch(console.error);
 
@@ -656,6 +790,228 @@ const command = new Command(
 
 		voiceChannel.setName(makePVSessionName(name, defEmoji)).catch(console.error);
 		return interaction.editReply({ content: translator.getText('voiceSessionRenameSuccess') });
+	})
+	.setButtonResponse(async function editSessionMembers(interaction) {
+		const { member } = interaction;
+		const translator = await Translator.from(member);
+
+		const voiceChannel = member.voice?.channel;
+		if (!voiceChannel?.id) return warnNotInSession(interaction, translator);
+
+		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
+		if (!session) return warnNotInSession(interaction, translator);
+
+		const members = [...session.members.values()].map((m) => new PureVoiceSessionMember(m));
+
+		return interaction.reply({
+			flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+			components: [makeMembersListContainer(voiceChannel, members, translator)],
+		});
+	})
+	.setButtonResponse(async function sessionMembersNav(interaction, page) {
+		const { member } = interaction;
+		const translator = await Translator.from(member);
+
+		const voiceChannel = member.voice?.channel;
+		if (!voiceChannel?.id) return warnNotInSession(interaction, translator);
+
+		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
+		if (!session) return warnNotInSession(interaction, translator);
+
+		const members = [...session.members.values()].map((m) => new PureVoiceSessionMember(m));
+
+		return interaction.update({
+			flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+			components: [makeMembersListContainer(voiceChannel, members, translator, +page)],
+		});
+	})
+	.setButtonResponse(async function editSessionMember(interaction, compressedSessionMemberId) {
+		const translator = await Translator.from(interaction);
+
+		const voiceChannel = interaction.member.voice?.channel;
+		if (!voiceChannel?.id) return warnNotInSession(interaction, translator);
+
+		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
+		if (!session) return warnNotInSession(interaction, translator);
+
+		const thisSessionMemberId = interaction.member.id;
+		const thisSchemaMember = session.members.get(thisSessionMemberId);
+		if (!thisSchemaMember)
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('voiceSessionJoinExpected'),
+			});
+
+		const thisSessionMember = new PureVoiceSessionMember(thisSchemaMember);
+		if (thisSessionMember.isGuest())
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('voiceSessionAdminOrModExpected'),
+			});
+
+		const otherSessionMemberId = decompressId(compressedSessionMemberId);
+		const otherSchemaMember = session.members.get(otherSessionMemberId);
+		if (!otherSchemaMember)
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('invalidMember'),
+			});
+
+		const otherSessionMember = new PureVoiceSessionMember(otherSchemaMember);
+		if (thisSessionMember.isAdmin() && thisSessionMemberId === otherSessionMemberId) {
+			const modal = new ModalBuilder()
+				.setCustomId(`voz_transferSessionMember_${compressedSessionMemberId}`)
+				.setTitle(translator.getText('voiceSessionMemberEditTransferAdminTitle'))
+				.addLabelComponents((label) =>
+					label
+						.setLabel(
+							translator.getText('voiceSessionMemberEditTransferAdminMemberLabel'),
+						)
+						.setUserSelectMenuComponent((select) =>
+							select
+								.setCustomId('inputMember')
+								.addDefaultUsers(
+									[...session.members.values()]
+										.map((m) => new PureVoiceSessionMember(m))
+										.filter((m) => !m.isAdmin() && !m.isBanned())
+										.map((m) => m.id),
+								)
+								.setRequired(true),
+						),
+				)
+				.addTextDisplayComponents((textDisplay) =>
+					textDisplay.setContent(
+						translator.getText('voiceSessionMemberEditTransferAdminDisclaimer'),
+					),
+				);
+
+			return interaction.showModal(modal);
+		}
+
+		if (otherSessionMember.isAdmin())
+			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
+				content: translator.getText('voiceSessionAdminExpected'),
+			});
+
+		const modal = new ModalBuilder()
+			.setCustomId(`voz_applySessionMember_${compressedSessionMemberId}`)
+			.setTitle(translator.getText('voiceSessionMemberEditTitle'));
+
+		const otherIsBanned = otherSessionMember.isBanned();
+		const otherIsFreezeImmune = otherSessionMember.isAllowedEvenWhenFreezed();
+		const radioGroup = new RadioGroupBuilder().setCustomId('inputRole');
+		if (thisSessionMember.isAdmin()) {
+			radioGroup.addOptions(
+				{
+					value: 'guest',
+					label: translator.getText('voiceSessionMemberEditGuestLabel'),
+					description: translator.getText('voiceSessionMemberEditGuestDesc'),
+					default: !otherIsBanned && otherSessionMember.isGuest() && !otherIsFreezeImmune,
+				},
+				{
+					value: 'whitelist',
+					label: translator.getText('voiceSessionMemberEditWhitelistedLabel'),
+					description: translator.getText('voiceSessionMemberEditWhitelistedDesc'),
+					default: otherIsFreezeImmune,
+				},
+				{
+					value: 'mod',
+					label: translator.getText('voiceSessionMemberEditModLabel'),
+					description: translator.getText('voiceSessionMemberEditModDesc'),
+					default: !otherIsBanned && otherSessionMember.isMod(),
+				},
+			);
+		}
+
+		radioGroup.addOptions({
+			value: 'banned',
+			label: translator.getText('voiceSessionMemberEditBannedLabel'),
+			description: translator.getText('voiceSessionMemberEditBannedDesc'),
+			default: otherIsBanned,
+		});
+
+		modal
+			.addLabelComponents((label) =>
+				label
+					.setLabel(translator.getText('voiceSessionMemberEditRoleGroupLabel'))
+					.setRadioGroupComponent(radioGroup),
+			)
+			.addTextDisplayComponents((textDisplay) =>
+				textDisplay.setContent(
+					`${translator.getText('voiceSessionMemberEditFooter')}<@${otherSessionMemberId}>`,
+				),
+			);
+
+		return interaction.showModal(modal);
+	})
+	.setButtonResponse(async function editSessionKillDelay(interaction) {
+		const { member } = interaction;
+		const translator = await Translator.from(member);
+
+		const voiceChannel = member.voice?.channel;
+		if (!voiceChannel) return warnNotInSession(interaction, translator);
+
+		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
+		if (!session) return warnNotInSession(interaction, translator);
+
+		const modal = new ModalBuilder()
+			.setCustomId(`voz_applySessionKillDelay`)
+			.setTitle(translator.getText('yoVoiceKillDelayModalTitle'))
+			.addLabelComponents(
+				new LabelBuilder()
+					.setLabel(translator.getText('yoVoiceKillDelayModalDelayLabel'))
+					.setTextInputComponent(
+						new TextInputBuilder()
+							.setCustomId('inputDelay')
+							.setPlaceholder(
+								translator.getText('yoVoiceKillDelayModalDelayPlaceholder'),
+							)
+							.setMaxLength(10)
+							.setRequired(true)
+							.setValue(
+								session.killDelayMs
+									? millisecondsToDuration(session.killDelayMs)
+									: '',
+							)
+							.setStyle(TextInputStyle.Short),
+					),
+			);
+
+		return interaction.showModal(modal);
+	})
+	.setModalResponse(async function applySessionKillDelay(interaction) {
+		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+		const { member } = interaction;
+		const translator = await Translator.from(member);
+
+		const warnNotInSession = () =>
+			interaction
+				.editReply({
+					content: translator.getText(
+						'voiceSessionJoinExpected',
+						p_pure(interaction).raw,
+					),
+				})
+				.catch(console.error);
+
+		const voiceChannel = member.voice?.channel;
+		if (!voiceChannel?.id) return warnNotInSession();
+
+		const session = await PureVoiceSessionModel.findOne({ channelId: voiceChannel.id });
+		if (!session) return warnNotInSession();
+
+		const delayStr = interaction.fields.getTextInputValue('inputDelay');
+		const delayMs = parseDuration(delayStr);
+
+		session.killDelayMs = delayMs;
+
+		await session.save();
+
+		return interaction.editReply({
+			content: translator.getText('voiceSessionKillDelaySuccess'),
+		});
 	})
 	.setButtonResponse(async function freezeSession(interaction) {
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
