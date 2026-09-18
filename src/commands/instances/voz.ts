@@ -879,10 +879,15 @@ const command = new Command(
 								.setRequired(true),
 						),
 				)
-				.addTextDisplayComponents((textDisplay) =>
-					textDisplay.setContent(
-						translator.getText('voiceSessionMemberEditTransferAdminDisclaimer'),
-					),
+				.addTextDisplayComponents(
+					(textDisplay) =>
+						textDisplay.setContent(
+							translator.getText('voiceSessionMemberEditTransferAdminMemberDesc'),
+						),
+					(textDisplay) =>
+						textDisplay.setContent(
+							translator.getText('voiceSessionMemberEditTransferAdminDisclaimer'),
+						),
 				);
 
 			return interaction.showModal(modal);
@@ -899,7 +904,9 @@ const command = new Command(
 			.setTitle(translator.getText('voiceSessionMemberEditTitle'));
 
 		const otherIsBanned = otherSessionMember.isBanned();
+		const otherIsGuest = otherSessionMember.isGuest();
 		const otherIsFreezeImmune = otherSessionMember.isAllowedEvenWhenFreezed();
+
 		const radioGroup = new RadioGroupBuilder().setCustomId('inputRole');
 		if (thisSessionMember.isAdmin()) {
 			radioGroup.addOptions(
@@ -907,13 +914,13 @@ const command = new Command(
 					value: 'guest',
 					label: translator.getText('voiceSessionMemberEditGuestLabel'),
 					description: translator.getText('voiceSessionMemberEditGuestDesc'),
-					default: !otherIsBanned && otherSessionMember.isGuest() && !otherIsFreezeImmune,
+					default: otherIsGuest && !otherIsFreezeImmune && !otherIsBanned,
 				},
 				{
 					value: 'whitelist',
 					label: translator.getText('voiceSessionMemberEditWhitelistedLabel'),
 					description: translator.getText('voiceSessionMemberEditWhitelistedDesc'),
-					default: otherIsFreezeImmune,
+					default: otherIsGuest && otherIsFreezeImmune,
 				},
 				{
 					value: 'mod',
