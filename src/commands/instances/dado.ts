@@ -119,7 +119,7 @@ const command = new Command(
 		});
 	});
 
-function parseDice(diceInput: RegExpMatchArray):
+function parseDice(diceInput: RegExpMatchArray | null):
 	| {
 			d: number;
 			f: number;

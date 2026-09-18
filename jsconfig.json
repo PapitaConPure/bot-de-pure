@@ -19,6 +19,7 @@
         "strictNullChecks": true,
         "strictBuiltinIteratorReturn": true,
         "strictPropertyInitialization": true,
+        "strictFunctionTypes": true,
         "skipLibCheck": true
     },
     "exclude": [

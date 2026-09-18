@@ -443,7 +443,7 @@ const converterWizards = {
 		getKey: (userConfigs) => userConfigs.instagramConverter,
 		setKey: (userConfigs, key) => (userConfigs.instagramConverter = key),
 	} as ConverterWizard<AcceptedInstagramConverterKey>,
-} satisfies Record<string, ConverterWizard<string>>;
+} as const;
 type ConverterWizardKey = keyof typeof converterWizards;
 
 function makeConverterServicePickerContainer<
@@ -1090,7 +1090,7 @@ const command = new Command(
 		{ userFilterIndex: 0 },
 	)
 	.setSelectMenuResponse(
-		async function setBooruConvert(interaction, compressedAuthorId, service: 'gelbooru') {
+		async function setBooruConvert(interaction, compressedAuthorId, service) {
 			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 			const { success, context } = await getWizardContext(interaction, { editReply: true });

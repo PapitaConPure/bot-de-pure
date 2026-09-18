@@ -10,7 +10,7 @@ import {
 } from 'discord.js';
 import { globalConfigs } from '@/data/globalProps';
 import { Translator } from '@/i18n';
-import { ChannelStatsModel, StatsModel } from '@/models/stats';
+import { type ChannelStatsDocument, ChannelStatsModel, StatsModel } from '@/models/stats';
 import { fetchMember } from '@/utils/discord';
 import { getBotEmojiResolvable } from '@/utils/emojis';
 import { compressId } from '@/utils/encoding';
@@ -240,16 +240,15 @@ const command = new Command(
 			guildId: guild.id,
 			channelId: targetChannel.id,
 		};
-		const targetChannelStats = /**@type {import('@/models/stats.js').ChannelStatsDocument}*/ (
-			(await ChannelStatsModel.findOne(channelQuery)) || new ChannelStatsModel(channelQuery)
-		);
-		const guildChannelStats = /**@type {import('@/models/stats.js').ChannelStatsDocument[]}*/ (
-			await ChannelStatsModel.find({ guildId: guild.id })
-		);
-		const targetChannelHasMessages = Object.keys(targetChannelStats.sub).length;
+		const targetChannelStats = ((await ChannelStatsModel.findOne(channelQuery))
+			|| new ChannelStatsModel(channelQuery)) as ChannelStatsDocument;
+		const guildChannelStats = (await ChannelStatsModel.find({
+			guildId: guild.id,
+		})) as ChannelStatsDocument[];
+		const targetChannelHasMessages = targetChannelStats.sub.size > 0;
 
 		const membersRanking = targetChannelHasMessages
-			? Object.entries(targetChannelStats.sub)
+			? [...targetChannelStats.sub.entries()]
 					.sort((a: [string, number], b: [string, number]) => b[1] - a[1])
 					.slice(0, 5)
 			: undefined;
@@ -266,13 +265,10 @@ const command = new Command(
 		const channelsRanking = Object.values(guildChannelStats)
 			.sort((a, b) => b.cnt - a.cnt)
 			.slice(0, 5)
-			.map(
-				(channelStats) =>
-					/**@type {[String, Number]}*/ ([channelStats.channelId, channelStats.cnt]),
-			);
+			.map((channelStats) => [channelStats.channelId, channelStats.cnt] as const);
 		const formattedChannelsRanking = channelsRanking
 			.map(
-				([id, count]: [string, number]) =>
+				([id, count]) =>
 					`${translator.getText('infoStatsChannelMessageCountItem', id, quantityDisplay(count, translator))}`,
 			)
 			.join('\n');
@@ -305,14 +301,12 @@ const command = new Command(
 
 			const memberId = targetMember.id;
 			const channelAndMemberMessageCountPairs = Object.values(guildChannelStats)
-				.filter((channelStats) => channelStats.sub[memberId])
-				.map(
-					(channelStats) =>
-						/**@type {const}*/ ([
-							channelStats.channelId,
-							/**@type {number}*/ (channelStats.sub[memberId]),
-						]),
-				);
+				.map((channelStats) => {
+					const subCount = channelStats.sub.get(memberId);
+					if (subCount == null) return null;
+					return [channelStats.channelId, subCount] as const;
+				})
+				.filter((channelStats) => channelStats != null);
 
 			if (channelAndMemberMessageCountPairs.length) {
 				const memberActivitySum = channelAndMemberMessageCountPairs

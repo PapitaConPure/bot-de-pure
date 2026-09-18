@@ -35,8 +35,9 @@ const ChannelStatsSchema = new Mongoose.Schema({
 		default: 0,
 	},
 	sub: {
-		type: Object,
-		default: {},
+		type: Map,
+		of: Number,
+		default: () => new Map(),
 	},
 });
 

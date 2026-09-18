@@ -63,9 +63,7 @@ async function updateChannelMessageCounter(guildId: string, channelId: string, u
 	const channelStats =
 		(await ChannelStatsModel.findOne(channelQuery)) || new ChannelStatsModel(channelQuery);
 	channelStats.cnt++;
-	channelStats.sub[userId] ??= 0;
-	channelStats.sub[userId] += 1;
-	channelStats.markModified('sub');
+	channelStats.sub.set(userId, (channelStats.sub.get(userId) ?? 0) + 1);
 	channelStats.save();
 }
 

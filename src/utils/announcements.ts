@@ -6,13 +6,14 @@ import {
 	type Guild,
 	type GuildMember,
 	MessageFlags,
+	type PartialGuildMember,
 	type User,
 } from 'discord.js';
 import { tenshiColor } from '@/data/globalProps';
 import images from '@/data/images.json';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 
-export async function sendWelcomeMessage(member: GuildMember) {
+export async function sendWelcomeMessage(member: GuildMember | PartialGuildMember) {
 	if (member == null || typeof member !== 'object')
 		throw ReferenceError('Se esperaba un miembro a cual dar la bienvenida.');
 
@@ -129,7 +130,7 @@ export async function sendWelcomeMessage(member: GuildMember) {
 	}
 }
 
-export async function sendFarewellMessage(member: GuildMember) {
+export async function sendFarewellMessage(member: GuildMember | PartialGuildMember) {
 	const { guild } = member;
 	const channel = guild.systemChannel;
 
