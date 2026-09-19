@@ -16,6 +16,7 @@ import { getBotEmojiResolvable } from '@/utils/emojis';
 import type { ImgurImagePayload } from '@/utils/imgur';
 import { ImgurClient } from '@/utils/imgur';
 import Logger from '@/utils/logs';
+import { decryptString, encryptString } from '@/utils/security';
 import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
 
 const { error } = Logger('WARN', '/imgur');
@@ -103,7 +104,9 @@ const command = new Command('imgur', tags)
 			(await ImgurUserModel.findOne({ userId: request.userId }))
 			|| new ImgurUserModel({ userId: request.userId });
 
-		const clientId = imgurUser.clientId ?? process.env.IMGUR_CLIENT_ID;
+		const clientId = imgurUser.clientId
+			? decryptString(imgurUser.clientId)
+			: process.env.IMGUR_CLIENT_ID;
 		if (!clientId)
 			return request.editReply({ content: translator.getText('missingImgurCredentials') });
 
@@ -173,9 +176,12 @@ const command = new Command('imgur', tags)
 		const imgurUser =
 			(await ImgurUserModel.findOne({ userId: interaction.user.id }))
 			|| new ImgurUserModel({ userId: interaction.user.id });
+
 		const clientId = interaction.fields.getTextInputValue('clientId');
-		imgurUser.clientId = clientId;
+		imgurUser.clientId = encryptString(clientId);
+
 		await imgurUser.save();
+
 		return interaction.reply({
 			embeds: [
 				new EmbedBuilder()

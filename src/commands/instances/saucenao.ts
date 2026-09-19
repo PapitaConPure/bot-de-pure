@@ -136,6 +136,7 @@ const command = new Command('saucenao', flags)
 
 		if (!testSauceNAOToken(clientId)) {
 			return interaction.reply({
+				flags: MessageFlags.Ephemeral,
 				embeds: [
 					new EmbedBuilder()
 						.setColor(Colors.Red)
@@ -147,8 +148,11 @@ const command = new Command('saucenao', flags)
 		const sauceNAOUser =
 			(await SauceNAOUserModel.findOne({ userId: interaction.user.id }))
 			|| new SauceNAOUserModel({ userId: interaction.user.id });
+
 		sauceNAOUser.clientId = encryptString(clientId);
+
 		await sauceNAOUser.save();
+
 		return interaction.reply({
 			embeds: [
 				new EmbedBuilder()
