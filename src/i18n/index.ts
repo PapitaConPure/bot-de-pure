@@ -1020,6 +1020,11 @@ const localesObject = {
 		en: `${subl(0)}'s guild banner`,
 		ja: `${subl(0)}さんのサーバーバナー`,
 	},
+	avatarBannerNone: {
+		es: 'Sin portada',
+		en: 'No banner',
+		ja: 'バナーなし',
+	},
 
 	cultivarUnauthorized: {
 		es: `¡Solo puedes cultivar una vez por día! Podrás volver a cultivar <t:${subl(0)}:R>`,

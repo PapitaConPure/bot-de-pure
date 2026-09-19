@@ -1,13 +1,18 @@
+import { createCanvas } from '@napi-rs/canvas';
 import type { GuildMember, ImageURLOptions } from 'discord.js';
-import { ContainerBuilder, MessageFlags, TextDisplayBuilder } from 'discord.js';
+import { AttachmentBuilder, ContainerBuilder, MessageFlags, TextDisplayBuilder } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
+import { tenshiColor } from '@/data/globalProps';
 import { Translator } from '@/i18n';
 import { getBotEmoji } from '@/utils/emojis';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
 
-const getAvatarContainer = (member: GuildMember, translator: Translator) => {
+const getAvatarPayload = (
+	member: GuildMember,
+	translator: Translator,
+): { container: ContainerBuilder; attachment: AttachmentBuilder | null } => {
 	const avatarURLDisplayOptions: ImageURLOptions = { size: 4096 };
 	const bannerURLDisplayOptions: ImageURLOptions = { size: 4096 };
 	const userAvatarURL = member.user.displayAvatarURL(avatarURLDisplayOptions);
@@ -17,9 +22,9 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 	const hasServerAvatarOverride = memberAvatarURL !== userAvatarURL;
 	const hasServerBannerOverride = memberBannerURL !== userBannerURL;
 
-	const container = new ContainerBuilder().setAccentColor(
-		member.user.accentColor || member.displayColor || 0xfaa61a,
-	);
+	const themeColor = member.user.accentColor || member.displayColor || tenshiColor;
+	const container = new ContainerBuilder().setAccentColor(themeColor);
+	let attachment: AttachmentBuilder | null = null;
 
 	if (userBannerURL)
 		container.addMediaGalleryComponents((mediaGallery) =>
@@ -31,6 +36,23 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 					.setURL(userBannerURL),
 			),
 		);
+	else {
+		const canvas = createCanvas(640, 120);
+		const ctx = canvas.getContext('2d');
+		ctx.fillStyle = `#${themeColor.toString(16)}`;
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+		attachment = new AttachmentBuilder(canvas.toBuffer('image/webp'), {
+			name: 'banner.webp',
+		});
+		container.addMediaGalleryComponents((mediaGallery) =>
+			mediaGallery.addItems((mediaGalleryItem) =>
+				mediaGalleryItem
+					.setDescription('avatarGlobalBannerAlt')
+					.setURL('attachment://banner.webp'),
+			),
+		);
+	}
 
 	container.addSectionComponents((section) =>
 		section
@@ -42,11 +64,13 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 					textDisplay.setContent(
 						[
 							`${getBotEmoji('userAccent')} ${member.user}`,
-							`${getBotEmoji('urlAccent')} [${translator.getText('avatarAvatar')}](${userAvatarURL})`,
-							userBannerURL
-								? `${getBotEmoji('urlAccent')} [${translator.getText('avatarBanner')}](${userBannerURL})`
-								: '',
-						].join(' '),
+							[
+								`${getBotEmoji('urlAccent')} [${translator.getText('avatarAvatar')}](${userAvatarURL})`,
+								userBannerURL
+									? `${getBotEmoji('urlAccent')} [${translator.getText('avatarBanner')}](${userBannerURL})`
+									: `${getBotEmoji('urlAccent')} ${translator.getText('avatarBannerNone')}`,
+							].join('　'),
+						].join('\n'),
 					),
 			)
 			.setThumbnailAccessory((accessory) =>
@@ -58,17 +82,21 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 			),
 	);
 
-	//En caso de tener un override para el server
-	if (hasServerAvatarOverride || hasServerBannerOverride)
-		container.addSeparatorComponents((separator) => separator.setDivider(true));
+	if (!hasServerAvatarOverride && !hasServerBannerOverride) return { container, attachment };
 
-	const serverAvatarDetails: string[] = [
-		translator.getText('avatarGuildProfileSource', member.guild),
-	];
+	//En caso de tener un override para el server
+	container.addSeparatorComponents((separator) => separator.setDivider(true));
+
+	const serverAvatarURLs: string[] = [];
+
+	if (hasServerAvatarOverride)
+		serverAvatarURLs.push(
+			`${getBotEmoji('urlAccent')} [${translator.getText('avatarAvatar')}](${memberAvatarURL})`,
+		);
 
 	if (hasServerBannerOverride && memberBannerURL != null) {
-		serverAvatarDetails.push(
-			`${getBotEmoji('urlAccent')} [${translator.getText('avatarAvatar')}](${memberAvatarURL})`,
+		serverAvatarURLs.push(
+			`${getBotEmoji('urlAccent')} [${translator.getText('avatarBanner')}](${memberBannerURL})`,
 		);
 
 		container.addMediaGalleryComponents((mediaGallery) =>
@@ -78,17 +106,20 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 					.setURL(memberBannerURL),
 			),
 		);
-	}
-
-	if (hasServerAvatarOverride)
-		serverAvatarDetails.push(
-			`${getBotEmoji('urlAccent')} [${translator.getText('avatarBanner')}](${memberBannerURL})`,
+	} else
+		serverAvatarURLs.push(
+			`${getBotEmoji('urlAccent')} ${translator.getText('avatarBannerNone')}`,
 		);
 
 	const serverAvatarDetailsTextDisplay = [
 		new TextDisplayBuilder().setContent(translator.getText('avatarGuildProfileEpigraph')),
 		new TextDisplayBuilder().setContent(`## ${member.displayName}`),
-		new TextDisplayBuilder().setContent(serverAvatarDetails.join('\n')),
+		new TextDisplayBuilder().setContent(
+			[
+				translator.getText('avatarGuildProfileSource', member.guild),
+				...serverAvatarURLs.join('　'),
+			].join('\n'),
+		),
 	];
 
 	if (hasServerAvatarOverride)
@@ -105,7 +136,7 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 		);
 	else container.addTextDisplayComponents(serverAvatarDetailsTextDisplay);
 
-	return container;
+	return { container, attachment };
 };
 
 function getMembers(
@@ -151,6 +182,7 @@ const command = new Command('avatar', tags)
 			fetchGuildMembers(request.guild),
 		]);
 
+		const files: AttachmentBuilder[] = [];
 		const components: (TextDisplayBuilder | ContainerBuilder)[] = [];
 		const { found: members, notFound } = getMembers(request, args);
 
@@ -167,23 +199,26 @@ const command = new Command('avatar', tags)
 			);
 		}
 
-		if (members?.length) {
-			const fetchedMembers = await Promise.all(members.map((m) => m?.fetch(true)));
-			fetchedMembers?.forEach((member) => {
-				const avatarContainer = getAvatarContainer(member, translator);
-				avatarContainer && components.push(avatarContainer);
+		if (members.length) {
+			const fetchedMembers = await Promise.all(members.map((m) => m.fetch(true)));
+			fetchedMembers.forEach((member) => {
+				const { container, attachment } = getAvatarPayload(member, translator);
+				components.push(container);
+				attachment && files.push(attachment);
 			});
 		}
 
 		if (!components.length) {
 			await request.member.fetch(true);
-			const avatarContainer = getAvatarContainer(request.member, translator);
-			components.push(avatarContainer);
+			const { container, attachment } = getAvatarPayload(request.member, translator);
+			components.push(container);
+			attachment && files.push(attachment);
 		}
 
 		return request.reply({
 			flags: MessageFlags.IsComponentsV2,
 			components,
+			files,
 		});
 	});
 
