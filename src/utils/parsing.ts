@@ -33,3 +33,18 @@ export function parseDuration(input: string): number {
 
 	return total;
 }
+
+export function parseSearchParams(searchParamsStr: string): Map<string, string> {
+	if (searchParamsStr.startsWith('?')) searchParamsStr = searchParamsStr.slice(1);
+	const searchParamsList = searchParamsStr.split('&');
+	const searchParams = new Map<string, string>();
+
+	for (const searchParam of searchParamsList) {
+		const eq = searchParam.indexOf('=');
+		const key = searchParam.slice(0, eq);
+		const value = searchParam.slice(eq + 1);
+		searchParams.set(key, value);
+	}
+
+	return searchParams;
+}

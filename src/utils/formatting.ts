@@ -19,3 +19,8 @@ export function millisecondsToDuration(ms: number): string {
 
 	return parts.join(' ') || '0ms';
 }
+
+export function searchParamsToString(searchParams: Map<string, string>) {
+	if (searchParams.size === 0) return '';
+	return `?${[...searchParams.entries()].map(([key, value]) => `${key}=${value}`).join('&')}`;
+}

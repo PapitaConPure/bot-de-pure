@@ -507,7 +507,7 @@ function makeConverterServicePickerContainer<
 
 const makeBoorutatoServicePickerContainer = (
 	compressedAuthorId: string,
-	services: { gelbooru: AcceptedGelbooruConverterKey },
+	services: { gelbooru: AcceptedGelbooruConverterKey | '' },
 	translator: Translator,
 ) => {
 	const hasGelbooru = services.gelbooru !== '';

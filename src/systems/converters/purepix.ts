@@ -1,20 +1,22 @@
 import type { ConverterDefinition, ConverterService } from 'types/converters';
 import { getBotEmoji } from '@/utils/emojis';
 
-export const acceptedPixivConvertersWithoutNone = ['phixiv'] as const;
-export const acceptedPixivConverters = ['', ...acceptedPixivConvertersWithoutNone] as const;
-export const pixivRegex =
+export const pixivConvertRegex =
 	/(?<st>(?:<|\|\|){0,2}) ?(?:http:\/\/|https:\/\/)(?:www\.)?(?:pixiv.net(?<lang>\/en)?)\/artworks\/(?<id>[0-9]{6,9})(?:\/(?<page>[0-9]{1,4}))? ?(?<ed>(?:>|\|\|){0,2})/g;
 
-export type AcceptedPixivConverterKey = (typeof acceptedPixivConvertersWithoutNone)[number];
-
-const pixivConversionServices = {
+export const pixivConversionServices = {
 	phixiv: { name: 'phixiv', link: 'https://phixiv.net' },
-} as const satisfies Record<AcceptedPixivConverterKey, ConverterService>;
+} as const satisfies Record<string, ConverterService>;
+export type AcceptedPixivConverterKey = keyof typeof pixivConversionServices;
+
+export const acceptedPixivConvertersWithoutNone = Object.keys(
+	pixivConversionServices,
+) as ReadonlyArray<AcceptedPixivConverterKey>;
+export const acceptedPixivConverters = ['', ...acceptedPixivConvertersWithoutNone] as const;
 
 export const pixivConverter = {
 	name: 'PuréPix',
-	regex: pixivRegex,
+	regex: pixivConvertRegex,
 	external: {
 		services: pixivConversionServices,
 		convert(matchedLinks, { serviceLink }) {

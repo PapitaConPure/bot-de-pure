@@ -1,21 +1,23 @@
 import type { AttachmentBuilder, ContainerBuilder } from 'discord.js';
 import { MessageFlags, TextDisplayBuilder } from 'discord.js';
-import type { ConverterDefinition } from 'types/converters';
+import type { ConverterDefinition, ConverterService } from 'types/converters';
 import { isNSFWChannel } from '@/utils/discord';
 import { getBotEmoji } from '@/utils/emojis';
 import { getMainBooruClient } from '../booru/booruclient';
 import { formatBooruPostMessage } from '../booru/boorusend';
 
-export const acceptedGelbooruConverters = ['boorutato', ''] as const;
-
-export type AcceptedGelbooruConverterKey = (typeof acceptedGelbooruConverters)[number];
-
-const gelbooruPostRegex =
+export const gelbooruConvertRegex =
 	/(?<st>(?:<|\|\|){0,2}) ?(?<original>(?:(?:http:\/\/|https:\/\/))?(?:www\.)?gelbooru.com\/index\.php\?page=post(?:&[^\s&=]+=[^\s&=]+)*&id=(?<id>[0-9]+)(?:&[^\s&=]+=[^\s&=]+)*) ?(?<ed>(?:>|\|\|){0,2})/gi;
+
+export const gelbooruConversionServices = {} as const satisfies Record<string, ConverterService>;
+export type AcceptedGelbooruConverterKey = 'boorutato' | keyof typeof gelbooruConversionServices;
+
+export const acceptedGelbooruConvertersWithoutNone = ['boorutato'] as const;
+export const acceptedGelbooruConverters = ['', ...acceptedGelbooruConvertersWithoutNone] as const;
 
 export const gelbooruConverter = {
 	name: 'Gelbooru',
-	regex: gelbooruPostRegex,
+	regex: gelbooruConvertRegex,
 	native: {
 		key: 'boorutato',
 		async convert(matchedLinks, { message }) {
