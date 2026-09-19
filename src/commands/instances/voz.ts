@@ -34,7 +34,6 @@ import {
 import { isNotModerator } from '@/utils/discord';
 import {
 	getBotEmoji,
-	getBotEmojiIdOrUnicode,
 	getBotEmojiResolvable,
 	parseUnicodeEmoji,
 } from '@/utils/emojis';
@@ -118,7 +117,7 @@ function makeMembersListContainer(
 					.setButtonAccessory(
 						new ButtonBuilder()
 							.setCustomId(`voz_editSessionMember_${compressId(member.id)}_${page}`)
-							.setEmoji(getBotEmojiIdOrUnicode('pencilWhite'))
+							.setEmoji(getBotEmojiResolvable('pencilWhite'))
 							.setStyle(ButtonStyle.Primary),
 					),
 			)
@@ -132,11 +131,11 @@ function makeMembersListContainer(
 			actionRow.addComponents(
 				new ButtonBuilder()
 					.setCustomId(`voz_sessionMembersNav_${0}_FS`)
-					.setEmoji(getBotEmojiIdOrUnicode('navFirstAccent'))
+					.setEmoji(getBotEmojiResolvable('navFirstAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
 					.setCustomId(`voz_sessionMembersNav_${page - 1}_PV`)
-					.setEmoji(getBotEmojiIdOrUnicode('navPrevAccent'))
+					.setEmoji(getBotEmojiResolvable('navPrevAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
 					.setCustomId('voz_pageCounterDONOTUSE')
@@ -145,11 +144,11 @@ function makeMembersListContainer(
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
 					.setCustomId(`voz_sessionMembersNav_${page + 1}_NX`)
-					.setEmoji(getBotEmojiIdOrUnicode('navNextAccent'))
+					.setEmoji(getBotEmojiResolvable('navNextAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
 					.setCustomId(`voz_sessionMembersNav_${finalPage}_LS`)
-					.setEmoji(getBotEmojiIdOrUnicode('navLastAccent'))
+					.setEmoji(getBotEmojiResolvable('navLastAccent'))
 					.setStyle(ButtonStyle.Secondary),
 			),
 		)
@@ -157,12 +156,12 @@ function makeMembersListContainer(
 			actionRow.addComponents(
 				new ButtonBuilder()
 					.setCustomId(`voz_addSessionMember_${page}`)
-					.setEmoji(getBotEmojiIdOrUnicode('plusWhite'))
+					.setEmoji(getBotEmojiResolvable('plusWhite'))
 					.setLabel(translator.getText('buttonAdd'))
 					.setStyle(ButtonStyle.Success),
 				new ButtonBuilder()
 					.setCustomId(`voz_sessionMembersNav_${page}_RE`)
-					.setEmoji(getBotEmojiIdOrUnicode('refreshWhite'))
+					.setEmoji(getBotEmojiResolvable('refreshWhite'))
 					.setLabel(translator.getText('buttonRefresh'))
 					.setStyle(ButtonStyle.Primary),
 			),

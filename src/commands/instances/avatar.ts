@@ -2,6 +2,7 @@ import type { GuildMember, ImageURLOptions } from 'discord.js';
 import { ContainerBuilder, MessageFlags, TextDisplayBuilder } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
 import { Translator } from '@/i18n';
+import { getBotEmoji } from '@/utils/emojis';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptionSolver, CommandOptions, CommandTags } from '../commons';
@@ -40,12 +41,12 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 				(textDisplay) =>
 					textDisplay.setContent(
 						[
-							`👤 ${member.user}`,
-							`🔗 [${translator.getText('avatarAvatar')}](${userAvatarURL})`,
+							`${getBotEmoji('userAccent')} ${member.user}`,
+							`${getBotEmoji('urlAccent')} [${translator.getText('avatarAvatar')}](${userAvatarURL})`,
 							userBannerURL
-								? `🔗 [${translator.getText('avatarBanner')}](${userBannerURL})`
+								? `${getBotEmoji('urlAccent')} [${translator.getText('avatarBanner')}](${userBannerURL})`
 								: '',
-						].join('\n'),
+						].join(' '),
 					),
 			)
 			.setThumbnailAccessory((accessory) =>
@@ -61,7 +62,15 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 	if (hasServerAvatarOverride || hasServerBannerOverride)
 		container.addSeparatorComponents((separator) => separator.setDivider(true));
 
-	if (hasServerBannerOverride && memberBannerURL != null)
+	const serverAvatarDetails: string[] = [
+		translator.getText('avatarGuildProfileSource', member.guild),
+	];
+
+	if (hasServerBannerOverride && memberBannerURL != null) {
+		serverAvatarDetails.push(
+			`${getBotEmoji('urlAccent')} [${translator.getText('avatarAvatar')}](${memberAvatarURL})`,
+		);
+
 		container.addMediaGalleryComponents((mediaGallery) =>
 			mediaGallery.addItems((mediaGalleryItem) =>
 				mediaGalleryItem
@@ -69,25 +78,23 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 					.setURL(memberBannerURL),
 			),
 		);
+	}
+
+	if (hasServerAvatarOverride)
+		serverAvatarDetails.push(
+			`${getBotEmoji('urlAccent')} [${translator.getText('avatarBanner')}](${memberBannerURL})`,
+		);
+
+	const serverAvatarDetailsTextDisplay = [
+		new TextDisplayBuilder().setContent(translator.getText('avatarGuildProfileEpigraph')),
+		new TextDisplayBuilder().setContent(`## ${member.displayName}`),
+		new TextDisplayBuilder().setContent(serverAvatarDetails.join('\n')),
+	];
 
 	if (hasServerAvatarOverride)
 		container.addSectionComponents((section) =>
 			section
-				.addTextDisplayComponents(
-					(textDisplay) =>
-						textDisplay.setContent(translator.getText('avatarGuildProfileEpigraph')),
-					(textDisplay) => textDisplay.setContent(`## ${member.displayName}`),
-					(textDisplay) =>
-						textDisplay.setContent(
-							[
-								translator.getText('avatarGuildProfileSource', member.guild),
-								`🔗 [${translator.getText('avatarAvatar')}](${memberAvatarURL})`,
-								memberBannerURL
-									? `🔗 [${translator.getText('avatarBanner')}](${memberBannerURL})`
-									: '',
-							].join('\n'),
-						),
-				)
+				.addTextDisplayComponents(serverAvatarDetailsTextDisplay)
 				.setThumbnailAccessory((accessory) =>
 					accessory
 						.setDescription(
@@ -96,6 +103,7 @@ const getAvatarContainer = (member: GuildMember, translator: Translator) => {
 						.setURL(memberAvatarURL),
 				),
 		);
+	else container.addTextDisplayComponents(serverAvatarDetailsTextDisplay);
 
 	return container;
 };

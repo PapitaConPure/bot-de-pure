@@ -42,7 +42,6 @@ import { auditError } from '@/systems/others/auditor';
 import { makeSessionAutoname } from '@/systems/others/purevoice';
 import {
 	getBotEmoji,
-	getBotEmojiIdOrUnicode,
 	getBotEmojiResolvable,
 	parseUnicodeEmoji,
 } from '@/utils/emojis';
@@ -194,25 +193,25 @@ function makeDashboardContainer(
 							{
 								label: 'Boorutato',
 								description: translator.getText('yoDashboardMenuConfigFeedDesc'),
-								emoji: getBotEmojiIdOrUnicode('boorutatoFullColor'),
+								emoji: getBotEmojiResolvable('boorutatoFullColor'),
 								value: 'feed',
 							},
 							{
 								label: 'PuréVoice',
 								description: translator.getText('yoDashboardMenuConfigVoiceDesc'),
-								emoji: getBotEmojiIdOrUnicode('purevoiceFullColor'),
+								emoji: getBotEmojiResolvable('purevoiceFullColor'),
 								value: 'voice',
 							},
 							{
 								label: 'PuréPix',
 								description: translator.getText('yoDashboardMenuConfigPixixDesc'),
-								emoji: getBotEmojiIdOrUnicode('pixivFullColor'),
+								emoji: getBotEmojiResolvable('pixivFullColor'),
 								value: 'pixiv',
 							},
 							{
 								label: 'Puréet',
 								description: translator.getText('yoDashboardMenuConfigTwitterDesc'),
-								emoji: getBotEmojiIdOrUnicode('twitterFullColor'),
+								emoji: getBotEmojiResolvable('twitterFullColor'),
 								value: 'twitter',
 							},
 							{
@@ -220,7 +219,7 @@ function makeDashboardContainer(
 								description: translator.getText(
 									'yoDashboardMenuConfigBoorutatoDesc',
 								),
-								emoji: getBotEmojiIdOrUnicode('boorutatoFullColor'),
+								emoji: getBotEmojiResolvable('boorutatoFullColor'),
 								value: 'booru',
 							},
 							{
@@ -228,7 +227,7 @@ function makeDashboardContainer(
 								description: translator.getText(
 									'yoDashboardMenuConfigInstagramDesc',
 								),
-								emoji: getBotEmojiIdOrUnicode('instagramColor'),
+								emoji: getBotEmojiResolvable('instagramColor'),
 								value: 'instagram',
 							},
 						]),

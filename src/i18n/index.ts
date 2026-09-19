@@ -986,9 +986,9 @@ const localesObject = {
 		ja: '-# サーバープロファイル',
 	},
 	avatarGuildProfileSource: {
-		es: `📍 En _${subl(0)}_`,
-		en: `📍 On _${subl(0)}_`,
-		ja: `📍 _${subl(0)}_に`,
+		es: () => `${getBotEmoji('globeAccent')} En _${subl(0)}_`,
+		en: () => `${getBotEmoji('globeAccent')} On _${subl(0)}_`,
+		ja: () => `${getBotEmoji('globeAccent')} _${subl(0)}_に`,
 	},
 	avatarAvatar: {
 		es: 'Avatar',

@@ -4,169 +4,169 @@ import Logger from '@/utils/logs';
 
 const { debug, info, warn } = Logger('INFO', 'Emojis');
 
-export interface StaticBotEmoji {
+export interface BotEmoji {
 	fallback: string;
-}
-
-export interface BotEmoji extends StaticBotEmoji {
 	appEmoji?: ApplicationEmoji;
 }
 
-const expectedBotEmojis = {
+/**@description A record containing all the emoji names this bot expect, along with their respective fallbacks in case they don't exist.*/
+const expectedBotEmojis = Object.freeze({
 	//Common UI (any color)
-	xmark: { fallback: '❌' },
-	bot: { fallback: '🤖' },
+	xmark: '❌',
+	bot: '🤖',
 
 	//Primary/Success/Danger Button Icons (white)
-	checkmarkWhite: { fallback: '✅' },
-	xmarkWhite: { fallback: '❌' },
-	refreshWhite: { fallback: '🔃' },
-	redoWhite: { fallback: '🔄' },
-	plusWhite: { fallback: '➕' },
-	trashWhite: { fallback: '🗑️' },
-	eyeWhite: { fallback: '👁️' },
-	pencilWhite: { fallback: '✏️' },
-	userWhite: { fallback: '👤' },
-	clockWhite: { fallback: '🕒' },
-	timerWhite: { fallback: '⏱️' },
-	globeWhite: { fallback: '🌐' },
-	freezeWhite: { fallback: '❄️' },
-	handshakeWhite: { fallback: '🤝' },
-	magGlassLeftWhite: { fallback: '🔍' },
-	magGlassRightWhite: { fallback: '🔎' },
+	checkmarkWhite: '✅',
+	xmarkWhite: '❌',
+	refreshWhite: '🔃',
+	redoWhite: '🔄',
+	plusWhite: '➕',
+	trashWhite: '🗑️',
+	eyeWhite: '👁️',
+	pencilWhite: '✏️',
+	userWhite: '👤',
+	clockWhite: '🕒',
+	timerWhite: '⏱️',
+	globeWhite: '🌐',
+	freezeWhite: '❄️',
+	handshakeWhite: '🤝',
+	magGlassLeftWhite: '🔍',
+	magGlassRightWhite: '🔎',
 
 	//Secondary Button Icons (accent color)
-	navFirstAccent: { fallback: '⏮️' },
-	navPrevAccent: { fallback: '◀️' },
-	navNextAccent: { fallback: '▶️' },
-	navLastAccent: { fallback: '⏭️' },
-	navBackAccent: { fallback: '↩️' },
-	xmarkAccent: { fallback: '❌' },
-	eyeAccent: { fallback: '👁️' },
-	urlAccent: { fallback: '🔗' },
-	replyAccent: { fallback: '↪️' },
+	navFirstAccent: '⏮️',
+	navPrevAccent: '◀️',
+	navNextAccent: '▶️',
+	navLastAccent: '⏭️',
+	navBackAccent: '↩️',
+	xmarkAccent: '❌',
+	eyeAccent: '👁️',
+	urlAccent: '🔗',
+	replyAccent: '↪️',
 
 	//Common UI (accent color)
-	userAccent: { fallback: '👤' },
-	clockAccent: { fallback: '🕒' },
-	bellAccent: { fallback: '🔔' },
-	hashAccent: { fallback: '#️⃣' },
-	globeAccent: { fallback: '🌐' },
-	imageAccent: { fallback: '🖼️' },
-	videoAccent: { fallback: '🎞️' },
-	expandAccent: { fallback: '💻' },
-	ellipsisAccent: { fallback: '💻' },
-	handshakeAccent: { fallback: '🤝' },
-	heartAccent: { fallback: '❤️' },
+	userAccent: '👤',
+	clockAccent: '🕒',
+	bellAccent: '🔔',
+	hashAccent: '#️⃣',
+	globeAccent: '🌐',
+	imageAccent: '🖼️',
+	videoAccent: '🎞️',
+	expandAccent: '💻',
+	ellipsisAccent: '💻',
+	handshakeAccent: '🤝',
+	heartAccent: '❤️',
 
 	//Language Flags (full color, of course)
-	langEs: { fallback: '🇪🇸' },
-	langEn: { fallback: '🇬🇧' },
-	langJa: { fallback: '🇯🇵' },
+	langEs: '🇪🇸',
+	langEn: '🇬🇧',
+	langJa: '🇯🇵',
 
 	//Command Categories
-	cmdMod: { fallback: '⭐' },
-	cmdPapa: { fallback: '🥔' },
-	cmdOutdated: { fallback: '🏚️' },
-	cmdMaintenance: { fallback: '🛠️' },
-	cmdMusic: { fallback: '🎵' },
-	cmdMeme: { fallback: '🐸' },
-	cmdGame: { fallback: '🎲' },
-	cmdChaos: { fallback: '👹' },
+	cmdMod: '⭐',
+	cmdPapa: '🥔',
+	cmdOutdated: '🏚️',
+	cmdMaintenance: '🛠️',
+	cmdMusic: '🎵',
+	cmdMeme: '🐸',
+	cmdGame: '🎲',
+	cmdChaos: '👹',
 
 	//Header Icons (primary-colored box with carved shapes)
-	guidePrimary: { fallback: '📘' },
-	commandPrimary: { fallback: '⚙️' },
+	guidePrimary: '📘',
+	commandPrimary: '⚙️',
 
 	//Hero Icons (primary gradient-colored box with accent-colored shapes
-	boorutatoFullColor: { fallback: '🖼️' },
-	purevoiceFullColor: { fallback: '🔊' },
-	confessionsFullColor: { fallback: '🕊️' },
+	boorutatoFullColor: '🖼️',
+	purevoiceFullColor: '🔊',
+	confessionsFullColor: '🕊️',
 
 	//Hero Icons with site-specific theming
-	psFullColor: { fallback: '🥔' },
-	twitterFullColor: { fallback: '𝕏' },
-	pixivFullColor: { fallback: '🇵' },
+	psFullColor: '🥔',
+	twitterFullColor: '𝕏',
+	pixivFullColor: '🇵',
 
 	//PRC (currency color)
-	prc: { fallback: '🥔' },
+	prc: '🥔',
 
 	//Music Buttons (white)
-	playWhite: { fallback: '▶️' },
-	pauseWhite: { fallback: '⏸️' },
-	stopWhite: { fallback: '⏹️' },
-	skipWhite: { fallback: '⏩' },
-	repeatWhite: { fallback: '🔁' },
-	shuffleWhite: { fallback: '🔀' },
-	unshuffleWhite: { fallback: '↩️' },
-	headphonesWhite: { fallback: '🎧' },
+	playWhite: '▶️',
+	pauseWhite: '⏸️',
+	stopWhite: '⏹️',
+	skipWhite: '⏩',
+	repeatWhite: '🔁',
+	shuffleWhite: '🔀',
+	unshuffleWhite: '↩️',
+	headphonesWhite: '🎧',
 
 	//Voice and Music UI (accent color)
-	speakerAccent: { fallback: '🔊' },
-	headphonesAccent: { fallback: '🎧' },
-	repeatedAccent: { fallback: '🔁' },
-	shuffledAccent: { fallback: '🔀' },
-	unshuffledAccent: { fallback: '➡️' },
+	speakerAccent: '🔊',
+	headphonesAccent: '🎧',
+	repeatedAccent: '🔁',
+	shuffledAccent: '🔀',
+	unshuffledAccent: '➡️',
 
 	//Booru General Icons
-	gelbooruAccent: { fallback: '🇬' },
-	tagAccent: { fallback: '🏷️' },
-	tagWhite: { fallback: '🏷️' },
-	tagPlus: { fallback: '➕' },
-	tagMinus: { fallback: '➖' },
-	copyrightTagAccent: { fallback: '🏛️' },
-	artistTagAccent: { fallback: '🧑‍🎨' },
-	characterTagAccent: { fallback: '🧍' },
+	gelbooruAccent: '🇬',
+	tagAccent: '🏷️',
+	tagWhite: '🏷️',
+	tagPlus: '➕',
+	tagMinus: '➖',
+	copyrightTagAccent: '🏛️',
+	artistTagAccent: '🧑‍🎨',
+	characterTagAccent: '🧍',
 
 	//Source Icons (specific website's primary color)
 	//-- Unless it breaks ToS, in which case the website's color & fill guidelines should be followed
 	//-- Also, in the case of neutral sites like X, this bot's accent color should be used instead (for legibility).
-	gelbooruColor: { fallback: '🇬' },
-	twitterColor: { fallback: '𝕏' },
-	pixivColor: { fallback: '🇵' },
-	redditColor: { fallback: '🤖' },
-	tumblrColor: { fallback: '🇹' },
-	fanboxColor: { fallback: '🐙' },
-	fantiaColor: { fallback: '🇫' },
-	skebColor: { fallback: '📓' },
-	lofterColor: { fallback: '🇱' },
-	bilibiliColor: { fallback: '🌏' },
-	blueskyColor: { fallback: '🦋' },
-	caraColor: { fallback: '🇨' },
-	gdriveColor: { fallback: '🇬' },
-	youtubeColor: { fallback: '▶️' },
-	boothColor: { fallback: '🦙' },
-	weiboColor: { fallback: '👁‍🗨' },
-	dvntartColor: { fallback: '🌐' },
-	githubColor: { fallback: '🚀' },
-	niconicoColor: { fallback: '📺' },
-	patreonColor: { fallback: '🇵' },
-	newgroundsColor: { fallback: '⚔️' },
-	arcaliveColor: { fallback: '🌏' },
-	nitterColor: { fallback: '🐦' },
-	misskeyColor: { fallback: '🌐' },
-	instagramColor: { fallback: '📸' },
-	artstationColor: { fallback: '📸' },
+	gelbooruColor: '🇬',
+	twitterColor: '𝕏',
+	pixivColor: '🇵',
+	redditColor: '🤖',
+	tumblrColor: '🇹',
+	fanboxColor: '🐙',
+	fantiaColor: '🇫',
+	skebColor: '📓',
+	lofterColor: '🇱',
+	bilibiliColor: '🌏',
+	blueskyColor: '🦋',
+	caraColor: '🇨',
+	gdriveColor: '🇬',
+	youtubeColor: '▶️',
+	boothColor: '🦙',
+	weiboColor: '👁‍🗨',
+	dvntartColor: '🌐',
+	githubColor: '🚀',
+	niconicoColor: '📺',
+	patreonColor: '🇵',
+	newgroundsColor: '⚔️',
+	arcaliveColor: '🌏',
+	nitterColor: '🐦',
+	misskeyColor: '🌐',
+	instagramColor: '📸',
+	artstationColor: '📸',
 
 	//Booru Tag icons (full color)
-	boy: { fallback: '♂️' },
-	girl: { fallback: '♀️' },
-	futa: { fallback: '🍆' },
-	lowRes: { fallback: '🔬' },
-	highRes: { fallback: '📈' },
-	absurdRes: { fallback: '🧬' },
-	incrediblyAbsurdRes: { fallback: '🌌' },
+	boy: '♂️',
+	girl: '♀️',
+	futa: '🍆',
+	lowRes: '🔬',
+	highRes: '📈',
+	absurdRes: '🧬',
+	incrediblyAbsurdRes: '🌌',
 
 	//Other
-	emptySpace: { fallback: '⚫' },
-} as const satisfies Record<string, StaticBotEmoji>;
+	emptySpace: '⚫',
+} as const satisfies Record<string, string>);
 export type BotEmojiName = keyof typeof expectedBotEmojis;
 
 let ready = false;
 
+/**@description An easily-accessible registry of all the fully available bot application emojis.*/
 const botEmojis = new Map<BotEmojiName, BotEmoji>();
 
-export async function setupAppEmojis() {
+/**@description Populates the application emojis registry.*/
+export async function setupAppEmojis(): Promise<void> {
 	if (!client?.application) throw new ClientNotFoundError();
 
 	if (ready) return;
@@ -174,11 +174,14 @@ export async function setupAppEmojis() {
 	const appEmojis = await client.application.emojis.fetch();
 	const appEmojisByName = new Map(appEmojis.map((e) => [e.name, e]));
 
-	for (const [expectedEmojiName, staticBotEmoji] of Object.entries(expectedBotEmojis)) {
+	for (const [expectedEmojiName, emojiFallback] of Object.entries(expectedBotEmojis) as [
+		BotEmojiName,
+		string,
+	][]) {
 		const matchingAppEmoji = appEmojisByName.get(expectedEmojiName);
 
-		botEmojis.set(expectedEmojiName as BotEmojiName, {
-			...staticBotEmoji,
+		botEmojis.set(expectedEmojiName, {
+			fallback: emojiFallback,
 			appEmoji: matchingAppEmoji,
 		});
 
@@ -186,7 +189,7 @@ export async function setupAppEmojis() {
 			`Processed "${expectedEmojiName}". ${
 				matchingAppEmoji?.name
 					? `It successfully matched an application emoji of ID: "${matchingAppEmoji.id}".`
-					: `Couldn't find a matching application emoji, so "${staticBotEmoji.fallback}" will be used instead as a fallback.`
+					: `Couldn't find a matching application emoji, so "${emojiFallback}" will be used instead as a fallback.`
 			}`,
 		);
 	}
@@ -238,6 +241,12 @@ export async function setupAppEmojis() {
 	ready = true;
 }
 
+/**
+ * @description 
+ * Tries to obtain the emoji specified by name, and throws if it's not found.
+ * @param emojiName The name of the emoji to expect.
+ * @returns The expected {@link BotEmoji}'s object.
+ */
 function expectBotEmoji(emojiName: BotEmojiName): BotEmoji {
 	if (!ready)
 		throw new Error(
@@ -252,18 +261,28 @@ function expectBotEmoji(emojiName: BotEmojiName): BotEmoji {
 	return botEmoji;
 }
 
+/**
+ * @description 
+ * Obtains the string representation of the specified bot emoji.
+ *
+ * This is either the bot emoji's application emoji string representation, or the fallback Unicode string if there's no associated application emoji.
+ * @param emojiName The name of the emoji string to obtain.
+ * @returns The emoji's string representation.
+ */
 export function getBotEmoji(emojiName: BotEmojiName): string {
 	const botEmoji = expectBotEmoji(emojiName);
 
 	return botEmoji.appEmoji?.toString() ?? botEmoji.fallback;
 }
 
-export function getBotEmojiIdOrUnicode(emojiName: BotEmojiName): string {
-	const botEmoji = expectBotEmoji(emojiName);
-
-	return botEmoji.appEmoji?.id ?? botEmoji.fallback;
-}
-
+/**
+ * @description 
+ * Obtains a result object based on whether the specified bot emoji object had an associated application emoji:
+ * * If it does, it returns the bot emoji's application emoji object, with `app` set to `true`.
+ * * If it doesn't, it returns the bot emoji's fallback Unicode string, with `app` set to `false`.
+ * @param emojiName The name of the emoji ID to obtain.
+ * @returns The emoji's string representation.
+ */
 export function getBotEmojiResult(
 	emojiName: BotEmojiName,
 ): { app: true; emoji: ApplicationEmoji } | { app: false; emoji: string } {
@@ -274,6 +293,14 @@ export function getBotEmojiResult(
 		: { app: false, emoji: botEmoji.fallback };
 }
 
+/**
+ * @description 
+ * Obtains the identification data of the specified bot emoji.
+ *
+ * This is either the bot emoji's application emoji ID, or the fallback Unicode string if there's no associated application emoji.
+ * @param emojiName The name of the emoji ID to obtain.
+ * @returns The bot emoji's ID or Unicode.
+ */
 export function getBotEmojiResolvable(emojiName: BotEmojiName): ComponentEmojiResolvable {
 	const botEmoji = expectBotEmoji(emojiName);
 
