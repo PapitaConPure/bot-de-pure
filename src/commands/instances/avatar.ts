@@ -37,7 +37,7 @@ const getAvatarPayload = (
 			),
 		);
 	else {
-		const canvas = createCanvas(640, 120);
+		const canvas = createCanvas(640, 64);
 		const ctx = canvas.getContext('2d');
 		ctx.fillStyle = `#${themeColor.toString(16)}`;
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
