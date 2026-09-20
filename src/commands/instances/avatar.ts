@@ -117,7 +117,7 @@ const getAvatarPayload = (
 		new TextDisplayBuilder().setContent(
 			[
 				translator.getText('avatarGuildProfileSource', member.guild),
-				...serverAvatarURLs.join('　'),
+				serverAvatarURLs.join('　'),
 			].join('\n'),
 		),
 	];
