@@ -270,7 +270,9 @@ export function getWikiPageComponentsV2(
 			: `# ${getBotEmoji('guidePrimary')} ${toCapitalized(localizedCommandName.slice(2))}`,
 	);
 	const taglineTextBuilder = new TextDisplayBuilder().setContent(
-		isNotGuidePage ? `-# Comando • ${getDisplayFlags()}` : `-# ${getDisplayFlags()}`,
+		isNotGuidePage
+			? `-# ${translator.getText('wikiCommandSubtitle')} • ${getDisplayFlags()}`
+			: `-# ${getDisplayFlags()}`,
 	);
 
 	const metadataContainerBuilder = new ContainerBuilder()

@@ -432,7 +432,8 @@ export class CommandParam extends CommandOption {
 				: typeHelp(this.#type, translator),
 		];
 
-		if (this.#poly === 'MULTIPLE') typeString.push(`[múltiple/${this.#polymax}]`);
+		if (this.#poly === 'MULTIPLE')
+			typeString.push(translator.getText('wikiCommandParamMultiple', this.#polymax));
 		else if (Array.isArray(this.#poly)) typeString.push(`[${this.#poly.length}]`);
 
 		return typeString.join(' ');

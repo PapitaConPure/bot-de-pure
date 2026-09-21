@@ -787,6 +787,11 @@ const localesObject = {
 		en: 'Chaotic commands. Must be enabled first.',
 		ja: 'カオスなコマンドです。事前に有効化が必要です。',
 	},
+	wikiCommandSubtitle: {
+		es: 'Comando',
+		en: 'Command',
+		ja: 'コマンド',
+	},
 	wikiCommandIdentifiersName: {
 		es: '### -# Nombres',
 		en: '### -# Names',
@@ -806,6 +811,11 @@ const localesObject = {
 		es: '### -# Uso (plantilla)',
 		en: '### -# Usage (template)',
 		ja: '### -# 使用方法（テンプレート）',
+	},
+	wikiCommandParamMultiple: {
+		es: `[múltiple/${subl(0)}]`,
+		en: `[multiple/${subl(0)}]`,
+		ja: `[複数/${subl(0)}]`,
 	},
 	wikiCommandUsageTryItButton: {
 		es: 'Probar',
