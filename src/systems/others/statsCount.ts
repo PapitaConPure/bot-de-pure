@@ -1,5 +1,5 @@
 import type { AnyKeys, AnyObject } from 'mongoose';
-import { StatsModel, type StatsSchemaType } from '@/models/stats';
+import { ChannelStatsModel, StatsModel, type StatsSchemaType } from '@/models/stats';
 import Logger from '@/utils/logs';
 
 const { error } = Logger('WARN', 'Stats');
@@ -14,8 +14,22 @@ const statUpdates = {
 
 let ongoingFlush: Promise<void> | null = null;
 
-export function countStat(update: keyof typeof statUpdates, amount = 1) {
+export function countGlobalStat(update: keyof typeof statUpdates, amount = 1) {
 	statUpdates[update] += amount;
+}
+
+//TODO: buffer this one too
+export async function countChannelStat(
+	guildId: string,
+	channelId: string,
+	userId: string,
+): Promise<void> {
+	const channelQuery = { guildId, channelId };
+	const channelStats =
+		(await ChannelStatsModel.findOne(channelQuery)) || new ChannelStatsModel(channelQuery);
+	channelStats.cnt++;
+	channelStats.sub.set(userId, (channelStats.sub.get(userId) ?? 0) + 1);
+	await channelStats.save();
 }
 
 export async function flushStats() {
