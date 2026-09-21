@@ -25,26 +25,20 @@ import { updateFollowedFeedTagsCache } from '@/systems/booru/boorufeed';
 import { BooruSourceStyles } from '@/systems/booru/boorusources';
 import {
 	type AcceptedGelbooruConverterKey,
-	acceptedGelbooruConverters,
-} from '@/systems/converters/boorutato';
-import type { AcceptedTwitterConverterKey } from '@/systems/converters/pureet';
-import { acceptedTwitterConverters } from '@/systems/converters/pureet';
-import {
-	type AcceptedPixivConverterKey,
-	acceptedPixivConverters,
-} from '@/systems/converters/purepix';
-import {
 	type AcceptedInstagramConverterKey,
+	type AcceptedPixivConverterKey,
+	type AcceptedTwitterConverterKey,
+	acceptedGelbooruConverters,
 	acceptedInstagramConverters,
+	acceptedPixivConverters,
+	acceptedTwitterConverters,
 	instagramConversionServices,
-} from '@/systems/converters/purestagram';
+	pixivConversionServices,
+	twitterConversionServices,
+} from '@/systems/converters/instances';
 import { auditError } from '@/systems/others/auditor';
 import { makeSessionAutoname } from '@/systems/others/purevoice';
-import {
-	getBotEmoji,
-	getBotEmojiResolvable,
-	parseUnicodeEmoji,
-} from '@/utils/emojis';
+import { getBotEmoji, getBotEmojiResolvable, parseUnicodeEmoji } from '@/utils/emojis';
 import { compressId, decompressId } from '@/utils/encoding';
 import { millisecondsToDuration } from '@/utils/formatting';
 import { improveNumber, shortenText } from '@/utils/misc';
@@ -368,21 +362,21 @@ const converterWizards = {
 		getServiceOptions: (translator) => [
 			{
 				value: 'vx',
-				label: 'vxTwitter / fixvx',
+				label: twitterConversionServices.vx.name,
 				description: translator.getText('yoTwitterMenuServiceVxDesc'),
 			},
 			{
 				value: 'fx',
-				label: 'FxTwitter / FixupX',
+				label: twitterConversionServices.fx.name,
 				description: translator.getText('yoTwitterMenuServiceFxDesc'),
 			},
 			{
 				value: 'girlcockx',
-				label: 'girlcockx.com',
+				label: twitterConversionServices.girlcockx.name,
 			},
 			{
 				value: 'cunnyx',
-				label: 'cunnyx.com',
+				label: twitterConversionServices.cunnyx.name,
 			},
 		],
 		getKey: (userConfigs) => userConfigs.twitterPrefix,
@@ -397,7 +391,7 @@ const converterWizards = {
 		getServiceOptions: (translator) => [
 			{
 				value: 'phixiv',
-				label: 'phixiv',
+				label: pixivConversionServices.phixiv.name,
 				description: translator.getText('yoPixivMenuServicePhixivDesc'),
 			},
 		],

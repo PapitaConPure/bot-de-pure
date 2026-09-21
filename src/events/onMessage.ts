@@ -1,13 +1,19 @@
 import { addHours } from 'date-fns';
 import type { Guild, Message } from 'discord.js';
-import { Command, CommandOptionSolver, processMessageCommand } from '@/commands/commons';
-import { CommandResults } from '@/commands/commons/commandProcessing';
+import {
+	Command,
+	CommandOptionSolver,
+	CommandResults,
+	processMessageCommand,
+} from '@/commands/commons';
 import UserConfigModel from '@/models/userconfigs';
-import { gelbooruConverter } from '@/systems/converters/boorutato';
+import {
+	gelbooruConverter,
+	instagramConverter,
+	pixivConverter,
+	twitterConverter,
+} from '@/systems/converters/instances';
 import { mergeConverterPayloads, processConverter } from '@/systems/converters/pipeline';
-import { twitterConverter } from '@/systems/converters/pureet';
-import { pixivConverter } from '@/systems/converters/purepix';
-import { instagramConverter } from '@/systems/converters/purestagram';
 import { processGuildPlugins } from '@/systems/others/guildFunctions';
 import { addMessageCascade } from '@/systems/others/messageCascades';
 import { countChannelStat, countGlobalStat } from '@/systems/others/statsCount';

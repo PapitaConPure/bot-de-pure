@@ -47,4 +47,4 @@ export const instagramConverter = {
 			return { content };
 		},
 	},
-} satisfies ConverterDefinition;
+} as const satisfies ConverterDefinition;

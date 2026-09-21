@@ -34,4 +34,4 @@ export const pixivConverter = {
 			return { content };
 		},
 	},
-} satisfies ConverterDefinition;
+} as const satisfies ConverterDefinition;

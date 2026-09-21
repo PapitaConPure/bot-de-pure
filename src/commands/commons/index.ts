@@ -4,4 +4,6 @@ export * from './cmdTags';
 export * from './commandBuilder';
 export * from './commandDiscovery';
 export * from './commandExceptions';
+export * from './commandProcessing';
+export * from './interactionProcessing';
 export * from './messageProcessing';

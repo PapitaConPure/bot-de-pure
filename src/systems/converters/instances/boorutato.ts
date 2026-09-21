@@ -1,10 +1,10 @@
 import type { AttachmentBuilder, ContainerBuilder } from 'discord.js';
 import { MessageFlags, TextDisplayBuilder } from 'discord.js';
 import type { ConverterDefinition, ConverterService } from 'types/converters';
+import { getMainBooruClient } from '@/systems/booru/booruclient';
+import { formatBooruPostMessage } from '@/systems/booru/boorusend';
 import { isNSFWChannel } from '@/utils/discord';
 import { getBotEmoji } from '@/utils/emojis';
-import { getMainBooruClient } from '../booru/booruclient';
-import { formatBooruPostMessage } from '../booru/boorusend';
 
 export const gelbooruConvertRegex =
 	/(?<st>(?:<|\|\|){0,2}) ?(?<original>(?:(?:http:\/\/|https:\/\/))?(?:www\.)?gelbooru.com\/index\.php\?page=post(?:&[^\s&=]+=[^\s&=]+)*&id=(?<id>[0-9]+)(?:&[^\s&=]+=[^\s&=]+)*) ?(?<ed>(?:>|\|\|){0,2})/gi;
@@ -58,4 +58,4 @@ export const gelbooruConverter = {
 			};
 		},
 	},
-} satisfies ConverterDefinition;
+} as const satisfies ConverterDefinition;

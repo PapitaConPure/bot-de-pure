@@ -5,8 +5,8 @@ export const twitterConvertRegex =
 	/(?:<|\|{2})? ?((?:https?:\/\/)(?:www.)?(?:twitter|x).com\/(\w+)\/status\/(\d+)(?:\/([A-Za-z]+))?) ?(?:>|\|{2})?/g;
 
 export const twitterConversionServices = {
-	vx: { name: 'vxTwitter', link: 'https://fixvx.com' },
-	fx: { name: 'fixTwitter', link: 'https://fxtwitter.com' },
+	vx: { name: 'vxTwitter / fixvx', link: 'https://fixvx.com' },
+	fx: { name: 'FxTwitter / FixupX', link: 'https://fxtwitter.com' },
 	girlcockx: { name: 'girlcockx', link: 'https://girlcockx.com' },
 	cunnyx: { name: 'cunnyx', link: 'https://cunnyx.com' },
 } as const satisfies Record<string, ConverterService>;
@@ -40,4 +40,4 @@ export const twitterConverter = {
 			return { content };
 		},
 	},
-} satisfies ConverterDefinition;
+} as const satisfies ConverterDefinition;

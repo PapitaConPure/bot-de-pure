@@ -1,11 +1,13 @@
 import type { GuildMember, Interaction, User } from 'discord.js';
-import type { AcceptedGelbooruConverterKey } from '@/systems/converters/boorutato';
-import type { AcceptedPixivConverterKey } from '@/systems/converters/purepix';
-import type { AcceptedInstagramConverterKey } from '@/systems/converters/purestagram';
-import type { LocaleKey } from '../i18n';
-import UserConfigModel from '../models/userconfigs';
-import type { AcceptedTwitterConverterKey } from '../systems/converters/pureet';
-import type { AnyRequest } from '../types/commands';
+import type { LocaleKey } from '@/i18n';
+import UserConfigModel from '@/models/userconfigs';
+import type {
+	AcceptedGelbooruConverterKey,
+	AcceptedInstagramConverterKey,
+	AcceptedPixivConverterKey,
+	AcceptedTwitterConverterKey,
+} from '@/systems/converters/instances';
+import type { AnyRequest } from '@/types/commands';
 
 export interface UserCache {
 	language: LocaleKey;

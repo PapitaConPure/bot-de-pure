@@ -7,11 +7,13 @@ import {
 } from 'discord.js';
 import type { ContentfulConverterPayload } from 'types/converters';
 import WebhookOwnerModel from '@/models/webhookOwners';
-import { gelbooruConverter } from '@/systems/converters/boorutato';
+import {
+	gelbooruConverter,
+	instagramConverter,
+	pixivConverter,
+	twitterConverter,
+} from '@/systems/converters/instances';
 import { mergeConverterPayloads, processConverter } from '@/systems/converters/pipeline';
-import { twitterConverter } from '@/systems/converters/pureet';
-import { pixivConverter } from '@/systems/converters/purepix';
-import { instagramConverter } from '@/systems/converters/purestagram';
 import {
 	addMessageCascade,
 	deleteCachedMessageCascadePart,

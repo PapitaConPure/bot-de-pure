@@ -6,7 +6,13 @@ import {
 	MessageFlagsBitField,
 	type TextDisplayBuilder,
 } from 'discord.js';
-import type { ConverterDefinition, ConverterPayload, ConverterResult } from 'types/converters';
+import type {
+	ConverterDefinition,
+	ConverterPayload,
+	ConverterResult,
+	ExternalConversionApproach,
+	NativeConversionApproach,
+} from 'types/converters';
 import type { FixedBitFieldResolvable } from 'types/discord';
 import Logger from '@/utils/logs';
 import { ConverterEmptyPayload } from './commons';
@@ -15,10 +21,17 @@ const { error } = Logger('WARN', 'Converters');
 
 const CONVERTER_LINKS_MAX = 16;
 
-export async function processConverter(
-	converter: ConverterDefinition,
+export async function processConverter<TConverter extends ConverterDefinition>(
+	converter: TConverter,
 	message: Message<true>,
-	conversionKey: string,
+	conversionKey:
+		| (TConverter['native'] extends NativeConversionApproach
+				? TConverter['native']['key']
+				: never)
+		| (TConverter['external'] extends ExternalConversionApproach
+				? keyof TConverter['external']['services']
+				: never)
+		| '',
 ): Promise<ConverterPayload> {
 	if (conversionKey === '') return ConverterEmptyPayload;
 
@@ -54,7 +67,7 @@ export async function processConverter(
 	const { native, external } = converter;
 
 	if (external != null) {
-		const service = external.services[conversionKey];
+		const service = external.services[conversionKey as string];
 		const serviceLink = service?.link;
 		const result = await external.convert(linksMatch, { message, serviceLink });
 		if (!isContentfulResult(result)) return ConverterEmptyPayload;
