@@ -5,15 +5,11 @@ import { Command, CommandTags } from '../commons';
 
 const phrases = [
 	'Ahora sí vení que te saco la cresta',
-	'Vení que te dejo la cagá en la cara',
 	'Ah mira que bacán. Vení que te rajo',
-	'Aweonao recontraculiao ijoelamaraca',
+	'Te voy a pegar el meo pape',
 	"Avíspate po'",
-	'Te voy a pegar el meo pape, maraco ctm',
-	'Chúpalo gil qliao',
 	'Te tiraste',
 	'Te rifaste',
-	'Cagaste',
 ];
 const tenshiurl = 'https://i.imgur.com/eMyvXiC.png';
 

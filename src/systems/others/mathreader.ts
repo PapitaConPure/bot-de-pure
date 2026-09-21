@@ -640,13 +640,13 @@ export class MathEvaluator {
 	}
 
 	/**
-	 * @description Evalúa una llamada de función.
+	 * @description Evalúa un llamado de función.
 	 * @returns El resultado de la operación.
 	 */
 	#evaluateFunctionCall(identifier: string, argument: MathNode): number {
 		const evaluationFunction = this.#functions[identifier];
 
-		if (!evaluationFunction) throw new MathEvaluatorError('Nigger hijo de puta');
+		if (!evaluationFunction) throw new MathEvaluatorError('Función no encontrada');
 
 		const evaluatedArgument = this.#evaluateNode(argument);
 

@@ -108,7 +108,7 @@ The User's Discord name is: "${request.member.displayName || request.user.userna
 					{
 						role: 'assistant',
 						content:
-							'pero mira si me voy a poner a hablarte de mi papá, maraca conchetumare 💢',
+							'pero mira si me voy a poner a hablarte de mi papá, maraco qliao 💢',
 					},
 					{
 						role: 'user',
@@ -117,7 +117,7 @@ The User's Discord name is: "${request.member.displayName || request.user.userna
 					{
 						role: 'assistant',
 						content:
-							'mira la cuestión es que no me acuerdo, vai a tener que usar `p!ayuda` 🥺',
+							'oe mira la cuestión es que no me acuerdo, vai a tener que usar `p!ayuda` 🥺',
 					},
 					{
 						role: 'user',

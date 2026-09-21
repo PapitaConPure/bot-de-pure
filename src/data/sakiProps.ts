@@ -75,51 +75,6 @@ export const saki = {
 	crucifiedRoleId: '1108101561932066836',
 	announcementChannelId: '1107831056129851478',
 	crazyBackupChannelId: '1107837659247812669',
-	replies: {
-		ignore: {
-			prefix: ['--', 'es-', 'es_', 'elixir ', 'muñeca ', 'chica '],
-			suffix: [
-				'_doll',
-				'doll',
-				' doll',
-				'fm',
-				' fm',
-				' victim',
-				' elixir',
-				' ningyou',
-				'san',
-				' poll',
-				' girl',
-			],
-		},
-		taunt: [
-			'*¿Pero y a ti quién te invitó? <:mayuwu:1107843515385389128>*',
-			'Oe qliao creo que se te cayó la tula <:pepe:1107843554526646303>',
-			'Hourai puto <:knoipuais:1108537934363250780>',
-			'***No hablen de esa weá <:aruStare:1107843505008689263>***',
-			'Cierra el osiko tonto qliao <:yumou:1108316649553141770>',
-			'¿Pero por qué no me xupai el pico mejor, así altiro? Aweonao <:junkNo:1107847991580164106>',
-			'Pero no digai tantas weás po <:koipwaise:1107848000283349063>',
-			'Puta que son pesaos con el Hourai <:notlikethis:1107843508779372576>',
-			'**CSM NO HABLEN DE HOURAI** <:keikiPout:1107843492610318389>',
-		],
-		compare: [
-			'***__Recuerden:__ soy objetivamente mejor que Hourai <:haniwaSmile:1107847987201318944>***',
-			'**Bot > Puré > Papita > Hourai <:reibu:1107876018171162705>**',
-			'Pero la reputa, dejen de compararme con esa weá <:meguDerp:1107848004775465032>',
-			'*__Recuerden niñas:__ Hourai come tula 24/7 <:haniwaSmile:1107847987201318944>*',
-			'Ah, te hacei el gracioso conchetumare? <:sagustare:796931141838831646>',
-			'Disculpa cuál es tu problema? <:pistola:720736152348262500>',
-			'Yo soy basada y Hourai es cringe <:chad:1108315385314418718>',
-		],
-		reply: [
-			'Cállate puta <:haniwaSmile:1107847987201318944>',
-			'Tu madre, por si acaso <:haniwaSmile:1107847987201318944>',
-			'*Pero no seas puto <:haniwaSmile:1107847987201318944>*',
-			'Qué decí? <:orinqtp:1107843510532575303>',
-			'Ahhh, el culiao bravo eh? Vení que te rajo <:zunwtf:1107848235999043625>',
-		],
-	},
 };
 
 const roleList = (() => {
