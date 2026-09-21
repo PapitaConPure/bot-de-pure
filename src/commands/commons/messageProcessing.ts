@@ -27,7 +27,7 @@ export const CommandResults = Object.freeze({
 
 export type CommandResult = ValuesOf<typeof CommandResults>;
 
-export async function processCommand(message: Message<true>): Promise<CommandResult> {
+export async function processMessageCommand(message: Message<true>): Promise<CommandResult> {
 	const { content, guildId } = message;
 	const ppure = p_pure(guildId);
 

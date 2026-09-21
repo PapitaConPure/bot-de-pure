@@ -1,6 +1,6 @@
 import { addHours } from 'date-fns';
 import type { Guild, Message } from 'discord.js';
-import { Command, CommandOptionSolver, CommandResults, processCommand } from '@/commands/commons';
+import { Command, CommandOptionSolver, CommandResults, processMessageCommand } from '@/commands/commons';
 import UserConfigModel from '@/models/userconfigs';
 import { gelbooruConverter } from '@/systems/converters/boorutato';
 import { mergeConverterPayloads, processConverter } from '@/systems/converters/pipeline';
@@ -38,7 +38,7 @@ export async function onMessage(message: Message) {
 	countGlobalStat('read');
 	countChannelStat(guild.id, channel.id, author.id);
 
-	const commandResult = await processCommand(message);
+	const commandResult = await processMessageCommand(message);
 	switch (commandResult) {
 		case CommandResults.SUCCEEDED:
 			countGlobalStat('commands.succeeded');
