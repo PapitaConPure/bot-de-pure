@@ -13,7 +13,7 @@ import {
 } from 'discord.js';
 import type { SimpleTypeExpr } from 'types/typeExpr';
 import { UnexpectedValueError } from '@/errors/unexpectedValue';
-import type { LocaleKey } from '@/i18n';
+import type { LocaleKey, Translation, Translator } from '@/i18n';
 import type {
 	BaseParamType,
 	BaseParamTypeMap,
@@ -46,26 +46,140 @@ import {
 } from '@/utils/discord';
 import Logger from '@/utils/logs';
 import { regroupText } from '@/utils/misc';
+import { parseDuration } from '@/utils/parsing';
 
 const { warn } = Logger('WARN', 'CmdOpts');
 
 const paramTypes = {
-	NUMBER: { getMethod: 'getNumber', help: 'número' },
-	TEXT: { getMethod: 'getString', help: 'texto' },
-	USER: { getMethod: 'getUser', help: 'U{mención/texto/id}' },
-	MEMBER: { getMethod: 'getMember', help: 'M{mención/texto/id}' },
-	ROLE: { getMethod: 'getRole', help: 'R{mención/texto/id}' },
-	GUILD: { getMethod: 'getString', help: 'g{texto/id}' },
-	CHANNEL: { getMethod: 'getChannel', help: 'C{enlace/texto/id}' },
-	MESSAGE: { getMethod: 'getMessage', help: 'm{enlace/texto/id}' },
-	EMOTE: { getMethod: 'getString', help: 'emote' },
-	IMAGE: { getMethod: 'getAttachment', help: 'imagen/enlace' },
-	FILE: { getMethod: 'getAttachment', help: 'archivo/enlace' },
-	URL: { getMethod: 'getString', help: 'enlace' },
-	ID: { getMethod: 'getInteger', help: 'id' },
-	DATE: { getMethod: 'getString', help: 'fecha' },
-	TIME: { getMethod: 'getString', help: 'hora' },
-} as const satisfies Record<BaseParamType, { getMethod: GetMethodName; help: string }>;
+	NUMBER: {
+		getMethod: 'getNumber',
+		help: {
+			es: 'Número',
+			en: 'Number',
+			ja: '数値',
+		},
+	},
+	TEXT: {
+		getMethod: 'getString',
+		help: {
+			es: 'Texto',
+			en: 'Text',
+			ja: 'テキスト',
+		},
+	},
+	USER: {
+		getMethod: 'getUser',
+		help: {
+			es: 'Usuario{mención/texto/ID}',
+			en: 'User{mention/text/ID}',
+			ja: 'ユーザー{メンション/テキスト/ID}',
+		},
+	},
+	MEMBER: {
+		getMethod: 'getMember',
+		help: {
+			es: 'Miembro{mención/texto/ID}',
+			en: 'Member{mention/text/ID}',
+			ja: 'メンバー{メンション/テキスト/ID}',
+		},
+	},
+	ROLE: {
+		getMethod: 'getRole',
+		help: {
+			es: 'Rol{mención/texto/ID}',
+			en: 'Role{mention/text/ID}',
+			ja: 'ロール{メンション/テキスト/ID}',
+		},
+	},
+	GUILD: {
+		getMethod: 'getString',
+		help: {
+			es: 'Servidor{texto/ID}',
+			en: 'Server{text/ID}',
+			ja: 'サーバー{テキスト/ID}',
+		},
+	},
+	CHANNEL: {
+		getMethod: 'getChannel',
+		help: {
+			es: 'Canal{enlace/texto/ID}',
+			en: 'Channel{link/text/ID}',
+			ja: 'チャンネル{リンク/テキスト/ID}',
+		},
+	},
+	MESSAGE: {
+		getMethod: 'getMessage',
+		help: {
+			es: 'Mensaje{enlace/texto/ID}',
+			en: 'Message{link/text/ID}',
+			ja: 'メッセージ{リンク/テキスト/ID}',
+		},
+	},
+	EMOTE: {
+		getMethod: 'getString',
+		help: {
+			es: 'emoji',
+			en: 'emoji',
+			ja: '絵文字',
+		},
+	},
+	IMAGE: {
+		getMethod: 'getAttachment',
+		help: {
+			es: 'Imagen{adjunta/enlace}',
+			en: 'Image{attachment/link}',
+			ja: '画像{添付ファイル/リンク}',
+		},
+	},
+	FILE: {
+		getMethod: 'getAttachment',
+		help: {
+			es: 'Archivo{adjunto/enlace}',
+			en: 'File{attachment/link}',
+			ja: 'ファイル{添付ファイル/リンク}',
+		},
+	},
+	URL: {
+		getMethod: 'getString',
+		help: {
+			es: 'Enlace',
+			en: 'Link',
+			ja: 'リンク',
+		},
+	},
+	ID: {
+		getMethod: 'getInteger',
+		help: {
+			es: 'ID',
+			en: 'ID',
+			ja: 'ID',
+		},
+	},
+	DATE: {
+		getMethod: 'getString',
+		help: {
+			es: 'Fecha',
+			en: 'Date',
+			ja: '日付',
+		},
+	},
+	TIME: {
+		getMethod: 'getString',
+		help: {
+			es: 'Hora',
+			en: 'Time',
+			ja: '時間',
+		},
+	},
+	TIMESPAN: {
+		getMethod: 'getString',
+		help: {
+			es: 'Periodo de tiempo',
+			en: 'Timespan',
+			ja: '期間',
+		},
+	},
+} as const satisfies Record<BaseParamType, { getMethod: GetMethodName; help: Translation }>;
 
 function fetchMessageFlagText(args: string[], i: number): string | undefined {
 	if (i >= args.length) return undefined;
@@ -129,8 +243,10 @@ function fetchMessageFlag(
 }
 
 /**@description Devuelve el texto de página de ayuda del tipo ingresado.*/
-export const typeHelp = (type: ParamType) =>
-	isParamTypeStrict(type) ? `${type.name}: ${type.expression}` : paramTypes[type].help;
+export const typeHelp = (type: ParamType, translator: Translator) =>
+	isParamTypeStrict(type)
+		? `${type.name}: ${type.expression}`
+		: paramTypes[type].help[translator.locale];
 
 /**@description Devuelve si el parámetro es "de formato no-estricto".*/
 const isBaseParamType = (pt: ParamType): pt is BaseParamType =>
@@ -309,11 +425,11 @@ export class CommandParam extends CommandOption {
 	}
 
 	/**@description Texto del tipo aceptado del parámetro.*/
-	get typeDisplay() {
+	getTypeDisplay(translator: Translator) {
 		const typeString = [
 			Array.isArray(this.#type)
-				? this.#type.map((t) => typeHelp(t)).join(',')
-				: typeHelp(this.#type),
+				? this.#type.map((t) => typeHelp(t, translator)).join(',')
+				: typeHelp(this.#type, translator),
 		];
 
 		if (this.#poly === 'MULTIPLE') typeString.push(`[múltiple/${this.#polymax}]`);
@@ -323,14 +439,14 @@ export class CommandParam extends CommandOption {
 	}
 
 	/**@description Texto de ayuda del parámetro.*/
-	get display(): string {
+	getDisplay(translator: Translator): string {
 		const identifier = [this.#name];
 
 		if (this.#optional) identifier.push('?');
 		if (this.#poly === 'MULTIPLE') identifier.push('(...)');
 		else if (Array.isArray(this.#poly)) identifier.push(`(${this.#poly.join(',')})`);
 
-		return `\`<${identifier.join('')}>\` _(${this.typeDisplay})_ ${this.desc}`;
+		return `\`<${identifier.join('')}>\` _(${this.getTypeDisplay(translator)})_ ${this.desc}`;
 	}
 
 	get hasAutocomplete() {
@@ -398,7 +514,7 @@ export class CommandFlag extends CommandOption {
 	}
 
 	/**@description String de ayuda de la bandera.*/
-	get display(): string {
+	getDisplay(_translator: Translator): string {
 		const { _short: short, _long: long, desc } = this;
 		const flagString: string[] = [];
 
@@ -482,19 +598,19 @@ export class CommandFlagExpressive extends CommandFlag {
 	}
 
 	/**@description El tipo del parámetro de la bandera.*/
-	get typeDisplay(): string {
-		return this._type ? typeHelp(this._type) : '';
+	getTypeDisplay(translator: Translator): string {
+		return this._type ? typeHelp(this._type, translator) : '';
 	}
 
 	/**@description Texto de ayuda de la bandera.*/
-	get display(): string {
-		const { short, long, name, typeDisplay, desc } = this;
+	getDisplay(translator: Translator): string {
+		const { short, long, name, desc } = this;
 		const flagString: string[] = [];
 
 		if (Array.isArray(short) && short.length) flagString.push(`\`-${short[0]} <${name}>\``);
 		if (Array.isArray(long) && long.length) flagString.push(`\`--${long[0]} <${name}>\``);
 
-		return `${flagString.join(' o ')} _(${typeDisplay})_ ${desc}`;
+		return `${flagString.join(' o ')} _(${this.getTypeDisplay(translator)})_ ${desc}`;
 	}
 
 	get hasAutocomplete() {
@@ -628,10 +744,10 @@ export class CommandOptions {
 	}
 
 	/**@description String de ayuda de las opciones de comando del administrador.*/
-	get display(): string {
+	getDisplay(translator: Translator): string {
 		return [
-			...[...this.params.values()].map((p) => `* ${p.display}`),
-			...[...this.flags.values()].map((f) => `* ${f.display}`),
+			...[...this.params.values()].map((p) => `* ${p.getDisplay(translator)}`),
+			...[...this.flags.values()].map((f) => `* ${f.getDisplay(translator)}`),
 		].join('\n');
 	}
 
@@ -689,27 +805,27 @@ export class CommandOptions {
 				'Se requiere un contexto para realizar este fetch. Usa <CommandOptions>.in(request)',
 			);
 
-		const argsPrototype = this.getArgsPrototype(args, whole);
-		if (!argsPrototype) return;
+		const argsString = this.getArgsString(args, whole);
+		if (!argsString) return;
 
 		switch (type) {
 			case 'USER':
 				warn(
 					'USER ya no es un parámetro asíncrono. Se recomienda usar fetchMessageParamSync para este tipo de comandos',
 				);
-				return fetchUser(argsPrototype, this.#request);
+				return fetchUser(argsString, this.#request);
 			case 'MEMBER':
 				warn(
 					'MEMBER ya no es un parámetro asíncrono. Se recomienda usar fetchMessageParamSync para este tipo de comandos',
 				);
-				return fetchMember(argsPrototype, this.#request);
+				return fetchMember(argsString, this.#request);
 			case 'MESSAGE':
 				return fetchMessage(
-					argsPrototype,
+					argsString,
 					this.#request as unknown as { channel: GuildTextBasedChannel; guild: Guild },
 				);
 			case 'GUILD':
-				return fetchGuild(argsPrototype);
+				return fetchGuild(argsString);
 		}
 	}
 
@@ -729,30 +845,36 @@ export class CommandOptions {
 				'Se requiere un contexto para realizar este fetch. Usa <CommandOptions>.in(request)',
 			);
 
-		const argsPrototype = this.getArgsPrototype(args, whole);
-		if (!argsPrototype) return;
+		const argsString = this.getArgsString(args, whole);
+		if (!argsString) return;
 
-		if (isParamTypeStrict(type)) return argsPrototype;
+		if (isParamTypeStrict(type)) return argsString;
 
 		switch (type) {
 			case 'USER':
-				return fetchUser(argsPrototype, this.#request);
+				return fetchUser(argsString, this.#request);
 			case 'MEMBER':
-				return fetchMember(argsPrototype, this.#request);
+				return fetchMember(argsString, this.#request);
 			case 'ROLE':
-				return fetchRole(argsPrototype, this.#request?.guild as Guild);
+				if (!this.#request?.guild)
+					throw new Error('Role parsing requires requestized CommandOptions.');
+				return fetchRole(argsString, this.#request.guild);
 			case 'MESSAGE':
 				throw 'Los parámetros de mensaje solo pueden ser manejados mediante promesas';
 			case 'GUILD':
 				throw 'Los parámetros de servidor solo pueden ser manejados mediante promesas';
 			case 'CHANNEL':
-				return fetchChannel(argsPrototype, this.#request?.guild as Guild);
+				if (!this.#request?.guild)
+					throw new Error('Channel parsing requires requestized CommandOptions.');
+				return fetchChannel(argsString, this.#request.guild);
 			case 'IMAGE':
-				return argsPrototype;
+				return argsString;
+			case 'TIMESPAN':
+				return parseDuration(argsString);
 			case 'NUMBER': {
-				if (argsPrototype == null) return;
+				if (argsString == null) return;
 
-				const correctedNumber = argsPrototype
+				const correctedNumber = argsString
 					.replace(/,/g, '.')
 					.replace(/_+/g, '')
 					.replace(/^([\d.]+) .*/, '$1');
@@ -760,11 +882,11 @@ export class CommandOptions {
 				return +correctedNumber;
 			}
 			default:
-				return argsPrototype;
+				return argsString;
 		}
 	}
 
-	getArgsPrototype(args: string[], whole: boolean) {
+	getArgsString(args: string[], whole: boolean) {
 		return (whole ? args.join(' ') : regroupArgsByQuotes(args, 0)) || undefined;
 	}
 
@@ -970,6 +1092,7 @@ const typeValidators: {
 	ID: (v): v is string => typeof v === 'string',
 	DATE: (v): v is Date => v instanceof Date,
 	TIME: (v): v is Date => v instanceof Date,
+	TIMESPAN: (v): v is number => typeof v === 'number',
 };
 
 /**@class Representa un resolvedor de opciones de comando, sea este un comando de mensaje o un comandoSlash.*/
@@ -1349,12 +1472,13 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 	 * @param tzCode El código de zona horaria en el que se espera la fecha a interpretar.
 	 */
 	getDate(identifier: string, locale: LocaleKey, tzCode: string = 'Etc/UTC') {
-		const str = this.isInteractionSolver(this.#args)
-			? this.#args.getString(identifier)
-			: this.#getRelativeDateCompatibleMessageArgs();
+		const str =
+			(this.isInteractionSolver(this.#args)
+				? this.#args.getString(identifier)
+				: this.#getRelativeDateCompatibleMessageArgs()) ?? '';
 
 		for (const relativeDate of Object.values(relativeDates))
-			if (relativeDate.match.has(str ?? '')) return relativeDate.getValue(tzCode);
+			if (relativeDate.match.has(str)) return relativeDate.getValue(tzCode);
 
 		const dateComponents = this.isInteractionSolver(this.#args)
 			? this.#getDateComponentsFromInteraction(identifier)
@@ -1364,6 +1488,35 @@ export class CommandOptionSolver<TArgs extends CommandArguments = CommandArgumen
 
 		const [a, b, c] = dateComponents;
 		return makeDateFromComponents(a, b, c, locale, tzCode);
+	}
+
+	/**
+	 * @param identifier El identificador del {@linkcode CommandParam}.
+	 * @param getRestOfMessageWords Cuando se trata de un comando de mensaje, si considerar cada palabra desde la cabecera como parte del valor del parámetro. Por defecto: `false`.
+	 */
+	getTimespan(
+		identifier: string,
+		options: {
+			getRestOfMessageWords?: boolean;
+			convertfromMs?: (ms: number) => number;
+		} = {},
+	) {
+		const { getRestOfMessageWords = false, convertfromMs = (ms) => ms } = options;
+
+		if (this.isInteractionSolver(this.#args)) {
+			const timespan = this.#args.getString(identifier);
+			if (!timespan) return;
+
+			const parsedTimespan = parseDuration(timespan);
+			if (Number.isNaN(parsedTimespan)) return;
+
+			return convertfromMs(parsedTimespan);
+		}
+
+		const result = this.#getResultFromParamSync(identifier, getRestOfMessageWords);
+		const ms = CommandOptionSolver.asNumberOrUndefined(result);
+		if (!ms) return;
+		return convertfromMs(ms);
 	}
 
 	/**@description Obtiene un texto de hora en lenguaje natural a partir de los argumentos de mensaje.*/

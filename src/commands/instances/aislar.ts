@@ -7,7 +7,7 @@ import { CommandPermissions } from '../commons/cmdPerms';
 const perms = new CommandPermissions('ModerateMembers');
 
 const options = new CommandOptions()
-	.addParam('duración', 'NUMBER', 'para especificar el tiempo en minutos')
+	.addParam('duración', 'TIMESPAN', 'para especificar la duración del castigo')
 	.addParam('miembros', 'MEMBER', 'para aislar miembros', { poly: 'MULTIPLE', polymax: 8 });
 
 const tags = new CommandTags().add('MOD');
@@ -37,15 +37,14 @@ const command = new Command(
 				content: translator.getText('aislarNoTimeProvided'),
 			});
 
-		let duration: number | null | undefined = args.getNumber('duración');
-		if (duration === undefined || Number.isNaN(+duration) || duration < 0)
+		let durationMs: number | null | undefined = args.getTimespan('duración');
+		if (durationMs === undefined || Number.isNaN(+durationMs) || durationMs < 0)
 			return request.reply({
-				content: translator.getText('aislarInvalidTime'),
+				content: translator.getText('invalidTimespan'),
 				flags: MessageFlags.Ephemeral,
 			});
 
-		if (duration === 0) duration = null;
-		else duration = duration * 60e3;
+		if (durationMs === 0) durationMs = null;
 
 		const members = CommandOptionSolver.asMembers(
 			args.parsePolyParamSync('miembros', { regroupMethod: 'MENTIONABLES-WITH-SEP' }),
@@ -62,12 +61,12 @@ const command = new Command(
 		const succeeded: GuildMember[] = [];
 		const failed: GuildMember[] = [];
 
-		const existingMembers = members.filter((member) => member) as GuildMember[];
+		const existingMembers = members.filter((member) => member != null);
 
 		await Promise.all(
 			existingMembers.map((member) =>
 				member
-					.timeout(duration, `Aislado por ${request.member.user.tag}`)
+					.timeout(durationMs, `Aislado por ${request.member.user.tag}`)
 					.then(() => succeeded.push(member))
 					.catch(() => failed.push(member)),
 			),
@@ -80,7 +79,7 @@ const command = new Command(
 			members.map((member) => member.user.tag).join(', ');
 		return request.reply({
 			content: [
-				duration
+				durationMs
 					? `✅ Se ha aislado a **${membersList(succeeded)}**`
 					: `✅ Se ha revocado el aislamiento de **${membersList(succeeded)}**`,
 				failed.length

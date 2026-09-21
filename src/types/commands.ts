@@ -137,6 +137,7 @@ export interface BaseParamTypeMap {
 	ID: string;
 	DATE: Date;
 	TIME: Date;
+	TIMESPAN: number;
 }
 
 export type BaseParamType = keyof BaseParamTypeMap;

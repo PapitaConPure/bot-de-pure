@@ -68,6 +68,7 @@ const addFunctionNames: Record<BaseParamType, SlashCommandBuilderAddFunctionName
 	URL: 'addStringOption',
 	DATE: 'addStringOption',
 	TIME: 'addStringOption',
+	TIMESPAN: 'addStringOption',
 } as const;
 
 const defaultAddFunctionName: SlashCommandBuilderAddFunctionName = 'addStringOption';

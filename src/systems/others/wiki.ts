@@ -189,7 +189,11 @@ export async function searchCommand(
  *
  * Si no se encuentran resultados, se devuelve `null`.
  */
-export async function searchCommands(request: AnyRequest<'cached'>, query: string, translator: Translator) {
+export async function searchCommands(
+	request: AnyRequest<'cached'>,
+	query: string,
+	translator: Translator,
+) {
 	const commandsWithDistance: { command: Command; distance: number }[] = [];
 
 	const commands = await fetchCommandsFromFiles({
@@ -252,7 +256,7 @@ export function getWikiPageComponentsV2(
 ): WikiPageInjectionPayloadV2 {
 	const { localizedNames: localizedCommandNames, aliases, flags: commandTags } = command;
 
-	const commandName = localizedCommandNames[translator.locale];
+	const localizedCommandName = localizedCommandNames[translator.locale];
 	const components: WikiPageInjectionPayloadV2 = [];
 
 	const getDisplayFlags = () =>
@@ -262,8 +266,8 @@ export function getWikiPageComponentsV2(
 	//Contenedor de metadatos
 	const titleTextBuilder = new TextDisplayBuilder().setContent(
 		isNotGuidePage
-			? `# ${getBotEmoji('commandPrimary')} ${toCapitalized(commandName)}`
-			: `# ${getBotEmoji('guidePrimary')} ${toCapitalized(commandName.slice(2))}`,
+			? `# ${getBotEmoji('commandPrimary')} ${toCapitalized(localizedCommandName)}`
+			: `# ${getBotEmoji('guidePrimary')} ${toCapitalized(localizedCommandName.slice(2))}`,
 	);
 	const taglineTextBuilder = new TextDisplayBuilder().setContent(
 		isNotGuidePage ? `-# Comando • ${getDisplayFlags()}` : `-# ${getDisplayFlags()}`,
@@ -277,7 +281,7 @@ export function getWikiPageComponentsV2(
 		const namesHeaderTextBuilder = new TextDisplayBuilder().setContent(
 			translator.getText('wikiCommandIdentifiersName'),
 		);
-		const namesContent = `\`${commandName}\`, ${listExists(aliases) ? aliases.map((i) => `\`${i}\``).join(', ') : ''}`;
+		const namesContent = `\`${localizedCommandName}\`, ${listExists(aliases) ? aliases.map((i) => `\`${i}\``).join(', ') : ''}`;
 		const namesTextBuilder = new TextDisplayBuilder().setContent(namesContent);
 
 		metadataContainerBuilder
@@ -324,7 +328,7 @@ export function getWikiPageComponentsV2(
 			translator.getText('wikiCommandUsageName'),
 		);
 		const usageTextBuilder = new TextDisplayBuilder().setContent(
-			`\`\`\`bnf\n${p_pure(request).raw}${localizedCommandNames}${command.callx ? ` ${command.callx}` : ''}\n\`\`\``,
+			`\`\`\`bnf\n${p_pure(request).raw}${localizedCommandName}${command.callx ? ` ${command.callx}` : ''}\n\`\`\``,
 		);
 		const usageSectionBuilder = new SectionBuilder()
 			.addTextDisplayComponents(usageHeaderTextBuilder, usageTextBuilder)
@@ -335,7 +339,7 @@ export function getWikiPageComponentsV2(
 			.addSectionComponents(usageSectionBuilder)
 			.addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large));
 
-		if (command.options?.display) {
+		if (command.options?.getDisplay(translator)) {
 			const composeButton = new ButtonBuilder()
 				.setCustomId('help_compose')
 				.setLabel(translator.getText('wikiCommandOptionsComposeButton'))
@@ -346,7 +350,7 @@ export function getWikiPageComponentsV2(
 				translator.getText('wikiCommandOptionsName'),
 			);
 			const optionsTextBuilder = new TextDisplayBuilder().setContent(
-				command.options?.display,
+				command.options?.getDisplay(translator),
 			);
 			const optionsSectionBuilder = new SectionBuilder()
 				.addTextDisplayComponents(optionsHeaderTextBuilder, optionsTextBuilder)

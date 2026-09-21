@@ -337,9 +337,14 @@ const localesObject = {
 		ja: '⚠️️ 無効な日付',
 	},
 	invalidTime: {
-		es: '⚠️️ Tiempo inválido',
+		es: '⚠️️ Hora inválida',
 		en: '⚠️️ Invalid time',
 		ja: '⚠️️ 無効な時刻',
+	},
+	invalidTimespan: {
+		es: '⚠️️ Intervalo de tiempo inválido.\n-# Ejemplo de intervalo: 7d 11h 44m 50s 397ms',
+		en: '⚠️️ Invalid timespan.\n-# Timespan example: 7d 11h 44m 50s 397ms',
+		ja: '⚠️️ 無効な期間。\n-# 期間の例: 7d 11h 44m 50s 397ms',
 	},
 	invalidTimezone: {
 		es: '⚠️ Huso horario inválido',
