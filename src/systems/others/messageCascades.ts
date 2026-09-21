@@ -1,25 +1,73 @@
-import MessageCascades from '@/models/messageCascades';
+import MessageCascades, { type MessageCascadeDocument } from '@/models/messageCascades';
 
-const messageCascadesCache: Map<string, string> = new Map();
-
-export function addMessageCascade(messageId: string, otherMessageId: string, expirationDate: Date) {
-	if (messageCascadesCache.has(messageId))
-		throw Error(`Message cascade from id ${messageId} already exists.`);
-
-	messageCascadesCache.set(messageId, otherMessageId);
-	return MessageCascades.create({ messageId, otherMessageId, expirationDate });
+export interface MessageCascadeRecord {
+	contentBasedId?: string;
+	componentsBasedId?: string;
 }
 
-export function cacheMessageCascade(messageId: string, otherMessageId: string) {
-	messageCascadesCache.set(messageId, otherMessageId);
+export const messageCascadeMap = {
+	contentBased: 'contentBasedId',
+	componentsBased: 'componentsBasedId',
+} as const satisfies Record<string, keyof MessageCascadeRecord>;
+export type MessageCascadePartKey = keyof typeof messageCascadeMap;
+
+const messageCascadesCache: Map<string, MessageCascadeRecord> = new Map();
+
+export function addMessageCascade(
+	messageId: string,
+	otherMessageId: string,
+	part: MessageCascadePartKey,
+	expirationDate: Date,
+): Promise<MessageCascadeDocument> {
+	cacheMessageCascade(messageId, otherMessageId, part);
+	return MessageCascades.create({ messageId, otherMessageId, part, expirationDate });
+}
+
+export function cacheMessageCascade(
+	messageId: string,
+	otherMessageId: string,
+	part: MessageCascadePartKey,
+): void {
+	const cached = messageCascadesCache.get(messageId);
+	const partKey = messageCascadeMap[part];
+
+	if (!cached) {
+		messageCascadesCache.set(messageId, { [partKey]: otherMessageId });
+		return;
+	}
+
+	if (part === 'contentBased' && cached.contentBasedId != null)
+		throw new Error(`Content-based message cascade for ID ${messageId} already exists.`);
+
+	if (part === 'componentsBased' && cached.componentsBasedId != null)
+		throw new Error(`Components-based message cascade for ID ${messageId} already exists.`);
+
+	if (cached.contentBasedId != null && cached.contentBasedId === cached.componentsBasedId)
+		throw new Error(
+			`Duplicated chained message ID for message cascade which originates from ID ${messageId}.`,
+		);
+
+	cached[partKey] = otherMessageId;
 }
 
 export function getMessageCascade(messageId: string) {
 	return messageCascadesCache.get(messageId);
 }
 
-export function deleteMessageCascade(messageId: string) {
+export function deleteCachedMessageCascade(messageId: string) {
 	return messageCascadesCache.delete(messageId);
+}
+
+export function deleteCachedMessageCascadePart(messageId: string, part: MessageCascadePartKey) {
+	const cached = messageCascadesCache.get(messageId);
+	if (!cached) return false;
+
+	const partKey = messageCascadeMap[part];
+	delete cached[partKey];
+
+	if (!Object.keys(cached).length) return messageCascadesCache.delete(messageId);
+
+	return false;
 }
 
 export async function deleteExpiredMessageCascades() {
@@ -39,7 +87,7 @@ export async function initializeMessageCascades() {
 	setInterval(deleteExpiredMessageCascades, 60 * 60e3);
 	await MessageCascades.syncIndexes();
 	await MessageCascades.createIndexes();
-	messageCascades.forEach(({ messageId, otherMessageId }) =>
-		cacheMessageCascade(messageId, otherMessageId),
+	messageCascades.forEach(({ messageId, otherMessageId, part }) =>
+		cacheMessageCascade(messageId, otherMessageId, part),
 	);
 }

@@ -23,6 +23,7 @@ export async function bootstrap() {
 	client.on('messageCreate', events.onMessage);
 	client.on('messageReactionAdd', events.onReactionAdd);
 	client.on('messageReactionRemove', events.onReactionRemove);
+	client.on('messageUpdate', events.onMessageUpdate);
 	client.on('messageDelete', events.onMessageDelete);
 	client.on('interactionCreate', events.onInteraction);
 	client.on('voiceStateUpdate', events.onVoiceUpdate);

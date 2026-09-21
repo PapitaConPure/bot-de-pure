@@ -4,6 +4,7 @@ export { onGuildMemberUpdate } from './onGuildMemberUpdate';
 export { onInteraction } from './onInteraction';
 export { onMessage } from './onMessage';
 export { onMessageDelete } from './onMessageDelete';
+export { onMessageUpdate } from './onMessageUpdate';
 export { onRateLimit } from './onRateLimit';
 export { onReactionAdd } from './onReactionAdd';
 export { onReactionRemove } from './onReactionRemove';

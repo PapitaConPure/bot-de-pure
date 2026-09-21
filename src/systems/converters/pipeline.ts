@@ -3,9 +3,8 @@ import {
 	ChannelType,
 	type ContainerBuilder,
 	type Message,
-	MessageFlags,
 	MessageFlagsBitField,
-	TextDisplayBuilder,
+	type TextDisplayBuilder,
 } from 'discord.js';
 import type { ConverterDefinition, ConverterPayload, ConverterResult } from 'types/converters';
 import type { FixedBitFieldResolvable } from 'types/discord';
@@ -101,22 +100,11 @@ export async function mergeConverterPayloads(
 
 	const mergedContent = contentFragments.join(' ');
 
-	if (!mergedFlags.has(MessageFlags.IsComponentsV2)) {
-		return {
-			contentful: true,
-			flags: mergedFlags as FixedBitFieldResolvable,
-			content: `-# ${mergedContent}`,
-		};
-	}
-
-	const finalComponents = mergedContent
-		? [new TextDisplayBuilder().setContent(mergedContent), ...mergedComponents]
-		: mergedComponents;
-
 	return {
 		contentful: true,
 		flags: mergedFlags as FixedBitFieldResolvable,
-		components: finalComponents,
+		content: mergedContent ? `-# ${mergedContent}` : undefined,
+		components: mergedComponents,
 		files: mergedFiles,
 	};
 }

@@ -1,6 +1,6 @@
 import type { Message, PartialMessage } from 'discord.js';
 import { channelIsBlocked, fetchMessage, isUsageBanned } from '@/utils/discord';
-import { deleteMessageCascade, getMessageCascade } from '../systems/others/messageCascades';
+import { deleteCachedMessageCascade, getMessageCascade } from '../systems/others/messageCascades';
 
 export async function onMessageDelete(message: Message | PartialMessage) {
 	const { author } = message;
@@ -16,10 +16,17 @@ export async function onMessageDelete(message: Message | PartialMessage) {
 
 	const { id: messageId, guild, channel } = message;
 
-	const otherMessageId = getMessageCascade(messageId);
-	if (!otherMessageId) return;
+	const cascade = getMessageCascade(messageId);
+	deleteCachedMessageCascade(messageId);
+	if (cascade == null) return;
 
-	const otherMessage = await fetchMessage(otherMessageId, { guild, channel });
-	deleteMessageCascade(messageId);
-	return otherMessage?.deletable && otherMessage.delete().catch(console.error);
+	const deleteMessageById = async (otherMessageId: string) => {
+		const otherMessage = await fetchMessage(otherMessageId, { guild, channel });
+		return otherMessage?.deletable && otherMessage.delete().catch(console.error);
+	};
+
+	return Promise.all([
+		cascade.contentBasedId != null && deleteMessageById(cascade.contentBasedId),
+		cascade.componentsBasedId != null && deleteMessageById(cascade.componentsBasedId),
+	]);
 }

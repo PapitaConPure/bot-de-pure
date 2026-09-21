@@ -1,3 +1,4 @@
+import { addHours } from 'date-fns';
 import type { Guild, Message } from 'discord.js';
 import { ContainerBuilder, MessageFlags } from 'discord.js';
 import { Command, CommandOptionSolver, type CommandOptions } from '@/commands/commons';
@@ -306,23 +307,37 @@ async function processLinkConverters(message: Message<true>, userCache: UserCach
 
 	if (!convertersPayload.contentful) return;
 
-	const suppressEmbeds = async (n: number) => {
-		if (!message?.embeds.length) return;
+	const suppressEmbeds = async (n: number, m: number) => {
+		if (!message?.embeds.length && n > m) return;
 		await message.suppressEmbeds(true).catch(() => undefined);
-		if (n > 0) setTimeout(suppressEmbeds, 1500, n - 1);
+		if (n > 0) setTimeout(suppressEmbeds, 1500, n - 1, m);
 	};
 
-	const [sent] = await Promise.all([
-		message.reply(convertersPayload),
+	const { content, ...restOfPayload } = convertersPayload;
+	const [contentSent, componentsSent] = await Promise.all([
+		convertersPayload.content ? message.reply({ content }) : undefined,
+		convertersPayload.components ? message.reply(restOfPayload) : undefined,
 		message.suppressEmbeds(true).catch(() => undefined),
 	]);
 
-	setTimeout(suppressEmbeds, 3000, 3);
+	setTimeout(suppressEmbeds, 3000, 3, 2);
 
-	await Promise.all([
-		addAgentMessageOwner(sent, message.author.id),
-		addMessageCascade(message.id, sent.id, new Date(+message.createdAt + 4 * 60 * 60e3)),
-	]);
+	const expiresAt = addHours(message.createdAt, 4);
+	const registrations: Promise<unknown>[] = [];
+
+	if (contentSent != null)
+		registrations.push(
+			addAgentMessageOwner(contentSent, message.author.id),
+			addMessageCascade(message.id, contentSent.id, 'contentBased', expiresAt),
+		);
+
+	if (componentsSent != null)
+		registrations.push(
+			addAgentMessageOwner(componentsSent, message.author.id),
+			addMessageCascade(message.id, componentsSent.id, 'componentsBased', expiresAt),
+		);
+
+	await Promise.all(registrations);
 }
 
 async function processBeginnerHelp(message: Message<true>) {
