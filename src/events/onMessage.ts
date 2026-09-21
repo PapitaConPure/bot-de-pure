@@ -2,34 +2,35 @@ import { addHours } from 'date-fns';
 import type { Guild, Message } from 'discord.js';
 import { ContainerBuilder, MessageFlags } from 'discord.js';
 import { Command, CommandOptionSolver, type CommandOptions } from '@/commands/commons';
+import puré from '@/core/puréRegistry';
+import type { PrefixPair } from '@/data/globalProps';
+import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
+import unknownCommandReplies from '@/data/unknownCommandReplies.json';
+import { Translator } from '@/i18n/index';
+import { ChannelStatsModel } from '@/models/stats';
+import UserConfigModel from '@/models/userconfigs';
 import { gelbooruConverter } from '@/systems/converters/boorutato';
 import { mergeConverterPayloads, processConverter } from '@/systems/converters/pipeline';
+import { twitterConverter } from '@/systems/converters/pureet';
+import { pixivConverter } from '@/systems/converters/purepix';
 import { instagramConverter } from '@/systems/converters/purestagram';
+import { auditRequest } from '@/systems/others/auditor';
+import globalGuildFunctions from '@/systems/others/guildFunctions';
+import { addMessageCascade } from '@/systems/others/messageCascades';
+import { countStat } from '@/systems/others/statsCount';
+import type { ValuesOf } from '@/types/util';
 import {
-	findFirstException,
-	generateExceptionEmbed,
+	findFirstCommandExclusion,
+	generateCommandExceptionEmbed,
 	handleAndAuditError,
 } from '@/utils/cmdExceptions';
-import { channelIsBlocked } from '@/utils/discord';
+import { channelIsBlocked, suppressEmbedsAsSoonAsPossible } from '@/utils/discord';
 import { addAgentMessageOwner, updateAgentMessageOwners } from '@/utils/discordagent';
 import Logger from '@/utils/logs';
 import { edlDistance } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import { rand } from '@/utils/random';
 import { fetchUserCache, type UserCache } from '@/utils/usercache';
-import puré from '../core/puréRegistry';
-import type { PrefixPair } from '../data/globalProps';
-import { tenshiAltColor, tenshiColor } from '../data/globalProps';
-import unknownCommandReplies from '../data/unknownCommandReplies.json';
-import { Translator } from '../i18n/index';
-import { ChannelStatsModel, StatsModel } from '../models/stats';
-import UserConfigModel from '../models/userconfigs';
-import { twitterConverter } from '../systems/converters/pureet';
-import { pixivConverter } from '../systems/converters/purepix';
-import { auditRequest } from '../systems/others/auditor';
-import globalGuildFunctions from '../systems/others/guildFunctions';
-import { addMessageCascade } from '../systems/others/messageCascades';
-import type { ValuesOf } from '../types/util';
 
 const { error } = Logger('WARN', 'Message');
 
@@ -37,21 +38,53 @@ const CommandResults = {
 	VOID: 0,
 	SUCCEEDED: 1,
 	FAILED: 2,
-} as const;
+} as const satisfies Record<string, number>;
 
 export type CommandResult = ValuesOf<typeof CommandResults>;
 
-/**
- *
- * @param {Message<true>} message
- * @returns
- */
-async function processGuildPlugins(message: Message<true>) {
+export async function onMessage(message: Message) {
+	if (!message.inGuild()) return;
+
+	const { author, channel, guild } = message;
+
+	if (author.bot || channelIsBlocked(channel)) return;
+
+	const userCache = await fetchUserCache(author);
+
+	if (userCache.banned) return;
+
+	await processGuildPlugins(message, userCache);
+
+	countStat('read');
+	updateChannelMessageCounter(guild.id, channel.id, author.id);
+
+	const commandResult = await processCommand(message);
+	switch (commandResult) {
+		case CommandResults.SUCCEEDED:
+			countStat('commands.succeeded');
+			break;
+		case CommandResults.FAILED:
+			countStat('commands.failed');
+			break;
+		case CommandResults.VOID:
+			await processBeginnerHelp(message);
+			break;
+	}
+
+	//Automatic tasks
+	await Promise.allSettled([
+		gainPRC(guild, author.id),
+		updateAgentMessageOwners(),
+		processLinkConverters(message, userCache),
+	]);
+}
+
+async function processGuildPlugins(message: Message<true>, userCache: UserCache) {
 	const guildFunctions = globalGuildFunctions[message.guild.id];
 
 	if (!guildFunctions) return;
 
-	return Promise.all(Object.values(guildFunctions).map((fgf) => fgf(message))).catch((error) =>
+	return Promise.all(guildFunctions.map((fgf) => fgf(message, userCache))).catch((error) =>
 		handleAndAuditError(error, message, {
 			brief: 'Ocurrió un problema al ejecutar una respuesta rápida',
 			details: message.content ? `"${message.content}"` : 'Mensaje sin contenido',
@@ -59,13 +92,50 @@ async function processGuildPlugins(message: Message<true>) {
 	);
 }
 
-async function updateChannelMessageCounter(guildId: string, channelId: string, userId: string) {
+async function updateChannelMessageCounter(
+	guildId: string,
+	channelId: string,
+	userId: string,
+): Promise<void> {
 	const channelQuery = { guildId, channelId };
 	const channelStats =
 		(await ChannelStatsModel.findOne(channelQuery)) || new ChannelStatsModel(channelQuery);
 	channelStats.cnt++;
 	channelStats.sub.set(userId, (channelStats.sub.get(userId) ?? 0) + 1);
-	channelStats.save();
+	await channelStats.save();
+}
+
+async function processCommand(message: Message<true>): Promise<CommandResult> {
+	const { content, guildId } = message;
+	const ppure = p_pure(guildId);
+
+	if (!content.toLowerCase().match(ppure.regex)) return CommandResults.VOID;
+
+	auditRequest(message);
+
+	const args = content.replace(ppure.regex, '').split(/[\n ]+/);
+	const commandName = args.shift()?.toLowerCase();
+
+	if (!commandName) {
+		const translator = await Translator.from(message.author);
+		message.reply(translator.getText('invalidEmptyCommandName'));
+		return CommandResults.VOID;
+	}
+
+	const command =
+		puré.commands.get(commandName)
+		|| puré.commands.find((cmd) => cmd.aliases?.includes(commandName));
+
+	if (!command) return handleInvalidCommand(message, commandName, ppure);
+
+	const rawArgs = content.slice(content.indexOf(commandName) + commandName.length).trim();
+	try {
+		await handleMessageCommand(message, command, args, rawArgs, `${ppure.raw}${commandName}`);
+		return CommandResults.SUCCEEDED;
+	} catch (error) {
+		handleMessageCommandError(error, message, commandName, args);
+		return CommandResults.FAILED;
+	}
 }
 
 async function handleInvalidCommand(
@@ -152,70 +222,17 @@ async function handleMessageCommand(
 	command: Command<CommandOptions | undefined>,
 	args: string[],
 	rawArgs?: string,
-	exceptionString?: string,
+	requestString?: string,
 ): Promise<unknown> {
-	if (command.permissions) {
-		if (!message.member || !command.permissions.isAllowedIn(message.member, message.channel)) {
-			const translator = await Translator.from(message.author);
-			if (!exceptionString) return;
-			return message.channel.send({
-				embeds: [
-					generateExceptionEmbed(
-						{
-							title: translator.getText('missingMemberChannelPermissionsTitle'),
-							desc: translator.getText('missingMemberChannelPermissionsDescription'),
-						},
-						{ cmdString: exceptionString },
-					).addFields({
-						name: translator.getText(
-							'missingMemberChannelPermissionsFullRequisitesName',
-						),
-						value: command.permissions.matrix
-							.map(
-								(requisite, n) =>
-									`${n + 1}. ${requisite.map((p) => `\`${p}\``).join(' **o** ')}`,
-							)
-							.join('\n'),
-					}),
-				],
-			});
-		}
+	const satisfiesPermissions = await handleCommandPermissions(message, command, requestString);
+	if (!satisfiesPermissions) return;
 
-		if (!command.permissions.amAllowedIn(message.channel)) {
-			const translator = await Translator.from(message.member);
-			if (!exceptionString) return;
-			return message.channel.send({
-				embeds: [
-					generateExceptionEmbed(
-						{
-							title: translator.getText('missingMemberChannelPermissionsTitle'),
-							desc: translator.getText('missingClientChannelPermissionsDescription'),
-						},
-						{ cmdString: exceptionString },
-					).addFields({
-						name: translator.getText(
-							'missingMemberChannelPermissionsFullRequisitesName',
-						),
-						value: command.permissions.matrix
-							.map(
-								(requisite, n) =>
-									`${n + 1}. ${requisite.map((p) => `\`${p}\``).join(' **o** ')}`,
-							)
-							.join('\n'),
-					}),
-				],
-			});
-		}
-	}
-
-	const exception = await findFirstException(command, message);
-	if (exception)
-		return (
-			exceptionString
-			&& message.channel.send({
-				embeds: [generateExceptionEmbed(exception, { cmdString: exceptionString })],
-			})
-		);
+	const satisfiesExceptions = await handleMessageCommandExclusions(
+		message,
+		command,
+		requestString,
+	);
+	if (!satisfiesExceptions) return;
 
 	const request = Command.requestize(message);
 
@@ -225,6 +242,87 @@ async function handleMessageCommand(
 	} else if (command.hasNoOptions() /*Inferencia*/) {
 		await command.execute(request);
 	}
+}
+
+async function handleCommandPermissions(
+	message: Message<true>,
+	command: Command<CommandOptions | undefined>,
+	requestString?: string,
+): Promise<boolean> {
+	if (!command.permissions) return true;
+
+	if (!message.member || !command.permissions.isAllowedIn(message.member, message.channel)) {
+		if (!requestString) return false;
+
+		const translator = await Translator.from(message.author);
+		await message.channel.send({
+			embeds: [
+				generateCommandExceptionEmbed(
+					{
+						title: translator.getText('missingMemberChannelPermissionsTitle'),
+						desc: translator.getText('missingMemberChannelPermissionsDescription'),
+					},
+					{ cmdString: requestString },
+				).addFields({
+					name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
+					value: command.permissions.matrix
+						.map(
+							(requisite, n) =>
+								`${n + 1}. ${requisite.map((p) => `\`${p}\``).join(' **o** ')}`,
+						)
+						.join('\n'),
+				}),
+			],
+		});
+
+		return false;
+	}
+
+	if (!command.permissions.amAllowedIn(message.channel)) {
+		if (!requestString) return false;
+
+		const translator = await Translator.from(message.member);
+		message.channel.send({
+			embeds: [
+				generateCommandExceptionEmbed(
+					{
+						title: translator.getText('missingMemberChannelPermissionsTitle'),
+						desc: translator.getText('missingClientChannelPermissionsDescription'),
+					},
+					{ cmdString: requestString },
+				).addFields({
+					name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
+					value: command.permissions.matrix
+						.map(
+							(requisite, n) =>
+								`${n + 1}. ${requisite.map((p) => `\`${p}\``).join(' **o** ')}`,
+						)
+						.join('\n'),
+				}),
+			],
+		});
+
+		return false;
+	}
+
+	return true;
+}
+
+async function handleMessageCommandExclusions(
+	message: Message<true>,
+	command: Command<CommandOptions | undefined>,
+	requestString?: string,
+): Promise<boolean> {
+	const exception = await findFirstCommandExclusion(command, message);
+
+	if (!exception) return true;
+
+	if (requestString)
+		message.channel.send({
+			embeds: [generateCommandExceptionEmbed(exception, { cmdString: requestString })],
+		});
+
+	return false;
 }
 
 function handleMessageCommandError(
@@ -237,39 +335,6 @@ function handleMessageCommandError(
 		details: `"${message.content?.slice(0, 699)}"\n[${commandName} :: ${args}]`,
 	});
 	return isPermissionsError ? CommandResults.VOID : CommandResults.FAILED;
-}
-
-async function processCommand(message: Message<true>): Promise<CommandResult> {
-	const { content, guildId } = message;
-	const ppure = p_pure(guildId);
-
-	if (!content.toLowerCase().match(ppure.regex)) return CommandResults.VOID;
-
-	auditRequest(message);
-
-	const args = content.replace(ppure.regex, '').split(/[\n ]+/);
-	const commandName = args.shift()?.toLowerCase();
-
-	if (!commandName) {
-		const translator = await Translator.from(message.author);
-		message.reply(translator.getText('invalidEmptyCommandName'));
-		return CommandResults.VOID;
-	}
-
-	const command =
-		puré.commands.get(commandName)
-		|| puré.commands.find((cmd) => cmd.aliases?.includes(commandName));
-
-	if (!command) return handleInvalidCommand(message, commandName, ppure);
-
-	const rawArgs = content.slice(content.indexOf(commandName) + commandName.length).trim();
-	try {
-		await handleMessageCommand(message, command, args, rawArgs, `${ppure.raw}${commandName}`);
-		return CommandResults.SUCCEEDED;
-	} catch (error) {
-		handleMessageCommandError(error, message, commandName, args);
-		return CommandResults.FAILED;
-	}
 }
 
 async function gainPRC(guild: Guild, userId: string) {
@@ -307,37 +372,26 @@ async function processLinkConverters(message: Message<true>, userCache: UserCach
 
 	if (!convertersPayload.contentful) return;
 
-	const suppressEmbeds = async (n: number, m: number) => {
-		if (!message?.embeds.length && n > m) return;
-		await message.suppressEmbeds(true).catch(() => undefined);
-		if (n > 0) setTimeout(suppressEmbeds, 1500, n - 1, m);
-	};
-
 	const { content, ...restOfPayload } = convertersPayload;
 	const [contentSent, componentsSent] = await Promise.all([
-		convertersPayload.content ? message.reply({ content }) : undefined,
-		convertersPayload.components ? message.reply(restOfPayload) : undefined,
-		message.suppressEmbeds(true).catch(() => undefined),
+		content ? message.reply({ content }) : undefined,
+		restOfPayload.components?.length ? message.reply(restOfPayload) : undefined,
+		suppressEmbedsAsSoonAsPossible(message),
 	]);
 
-	setTimeout(suppressEmbeds, 3000, 3, 2);
-
 	const expiresAt = addHours(message.createdAt, 4);
-	const registrations: Promise<unknown>[] = [];
 
 	if (contentSent != null)
-		registrations.push(
+		await Promise.all([
 			addAgentMessageOwner(contentSent, message.author.id),
 			addMessageCascade(message.id, contentSent.id, 'contentBased', expiresAt),
-		);
+		]);
 
 	if (componentsSent != null)
-		registrations.push(
+		await Promise.all([
 			addAgentMessageOwner(componentsSent, message.author.id),
 			addMessageCascade(message.id, componentsSent.id, 'componentsBased', expiresAt),
-		);
-
-	await Promise.all(registrations);
+		]);
 }
 
 async function processBeginnerHelp(message: Message<true>) {
@@ -345,47 +399,9 @@ async function processBeginnerHelp(message: Message<true>) {
 
 	if (!content.includes(`${client.user}`)) return;
 
-	const prefixModule = await import('../commands/instances/prefijo');
+	const prefixModule = await import('@/commands/instances/prefijo');
 	const prefixCommand = prefixModule instanceof Command ? prefixModule : prefixModule.default;
 	const request = Command.requestize(message);
 	const solver = new CommandOptionSolver(request, [], prefixCommand.options);
 	return prefixCommand.execute(request, solver).catch(error);
-}
-
-export async function onMessage(message: Message) {
-	if (!message.inGuild()) return;
-
-	const { author, channel, guild } = message;
-
-	if (channelIsBlocked(channel)) return;
-
-	const userCache = await fetchUserCache(author);
-
-	if (userCache?.banned) return;
-
-	await processGuildPlugins(message);
-
-	if (author.bot) return;
-
-	const stats = (await StatsModel.findOne({})) || new StatsModel({ since: Date.now() });
-	stats.read++;
-	updateChannelMessageCounter(guild.id, channel.id, author.id);
-
-	const commandResult = await processCommand(message);
-
-	if (commandResult === CommandResults.VOID) await processBeginnerHelp(message);
-
-	//#region Trabajos automáticos
-	Promise.allSettled([
-		gainPRC(guild, author.id),
-		updateAgentMessageOwners(),
-		userCache && processLinkConverters(message, userCache),
-	]);
-	//#endregion
-
-	commandResult === CommandResults.SUCCEEDED && stats.commands.succeeded++;
-	commandResult === CommandResults.FAILED && stats.commands.failed++;
-
-	stats.markModified('commands');
-	stats.save();
 }

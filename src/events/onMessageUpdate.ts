@@ -12,9 +12,6 @@ import { mergeConverterPayloads, processConverter } from '@/systems/converters/p
 import { twitterConverter } from '@/systems/converters/pureet';
 import { pixivConverter } from '@/systems/converters/purepix';
 import { instagramConverter } from '@/systems/converters/purestagram';
-import { channelIsBlocked, fetchMessage } from '@/utils/discord';
-import { addAgentMessageOwner } from '@/utils/discordagent';
-import { fetchUserCache } from '@/utils/usercache';
 import {
 	addMessageCascade,
 	deleteCachedMessageCascadePart,
@@ -22,7 +19,10 @@ import {
 	type MessageCascadePartKey,
 	type MessageCascadeRecord,
 	messageCascadeMap,
-} from '../systems/others/messageCascades';
+} from '@/systems/others/messageCascades';
+import { channelIsBlocked, fetchMessage, suppressEmbedsAsSoonAsPossible } from '@/utils/discord';
+import { addAgentMessageOwner } from '@/utils/discordagent';
+import { fetchUserCache } from '@/utils/usercache';
 
 export async function onMessageUpdate(
 	oldMessage: OmitPartialGroupDMChannel<Message<boolean> | PartialMessage<boolean>>,
@@ -32,7 +32,7 @@ export async function onMessageUpdate(
 
 	const { author } = message;
 
-	if (!author || author.bot || !message.inGuild() || channelIsBlocked(message.channel)) return;
+	if (author.bot || !message.inGuild() || channelIsBlocked(message.channel)) return;
 
 	const userCache = await fetchUserCache(author);
 	if (userCache == null || userCache.banned) return;
@@ -45,6 +45,7 @@ export async function onMessageUpdate(
 		processConverter(gelbooruConverter, message, userCache.gelbooruConverter),
 		processConverter(instagramConverter, message, userCache.instagramConverter),
 	]);
+
 	if (!convertersPayload.contentful) return;
 
 	const cascade = getMessageCascade(messageId) ?? {};
@@ -69,10 +70,8 @@ async function addCascadePart(
 		part === 'componentsBased' && restOfPayload.components?.length
 			? message.reply(restOfPayload)
 			: undefined,
-		supressEmbedsLikeCrazy(message),
+		suppressEmbedsAsSoonAsPossible(message),
 	]);
-
-	if (contentSent == null && componentsSent == null) return;
 
 	const expiresAt = addHours(message.createdAt, 4);
 
@@ -129,18 +128,6 @@ async function editOrDeleteExistingCascadePart(
 					content: convertersPayload.content,
 					components: [],
 				}),
-		supressEmbedsLikeCrazy(message),
+		suppressEmbedsAsSoonAsPossible(message),
 	]);
-}
-
-async function supressEmbedsLikeCrazy(message: Message<true>, n?: number) {
-	if (n == null) {
-		message.suppressEmbeds(true).catch(() => undefined);
-		setTimeout(supressEmbedsLikeCrazy, 3000, message, 3);
-		return;
-	}
-
-	if (!message?.embeds.length) return;
-	await message.suppressEmbeds(true).catch(() => undefined);
-	if (n > 0) setTimeout(supressEmbedsLikeCrazy, 1500, message, n - 1);
 }

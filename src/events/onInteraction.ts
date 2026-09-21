@@ -8,8 +8,8 @@ import {
 } from 'discord.js';
 import type { AnyCommandInteraction } from 'types/commands';
 import {
-	findFirstException,
-	generateExceptionEmbed,
+	findFirstCommandExclusion,
+	generateCommandExceptionEmbed,
 	handleAndAuditError,
 } from '@/utils/cmdExceptions';
 import { channelIsBlocked, isUsageBanned } from '@/utils/discord';
@@ -96,7 +96,7 @@ async function handleCommand(
 				const translator = await Translator.from(interaction.member);
 				return interaction.channel?.send({
 					embeds: [
-						generateExceptionEmbed(
+						generateCommandExceptionEmbed(
 							{
 								title: translator.getText('missingMemberChannelPermissionsTitle'),
 								desc: translator.getText(
@@ -127,7 +127,7 @@ async function handleCommand(
 				const translator = await Translator.from(interaction.member);
 				return interaction.channel.send({
 					embeds: [
-						generateExceptionEmbed(
+						generateCommandExceptionEmbed(
 							{
 								title: translator.getText('missingMemberChannelPermissionsTitle'),
 								desc: translator.getText(
@@ -151,13 +151,13 @@ async function handleCommand(
 			}
 		}
 
-		const exception = await findFirstException(command, interaction);
+		const exception = await findFirstCommandExclusion(command, interaction);
 		if (exception) {
 			debug(
 				`The Slash Command interaction "${interaction.id}" is not authorized in the current context.`,
 			);
 			return interaction.reply({
-				embeds: [generateExceptionEmbed(exception, { cmdString: `/${commandName}` })],
+				embeds: [generateCommandExceptionEmbed(exception, { cmdString: `/${commandName}` })],
 				flags: MessageFlags.Ephemeral,
 			});
 		}

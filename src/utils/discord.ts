@@ -10,15 +10,19 @@ import {
 	type GuildMember,
 	type GuildTextBasedChannel,
 	type Message,
+	type OmitPartialGroupDMChannel,
 	type Role,
 	StringSelectMenuBuilder,
 	type User,
 } from 'discord.js';
 import { ClientNotFoundError, client } from '@/core/client';
 import { globalConfigs } from '@/data/globalProps';
+import Logger from '@/utils/logs';
 import { getBotEmojiResolvable } from './emojis';
-import { levenshteinDistance } from './misc';
+import { levenshteinDistance, sleep } from './misc';
 import { fetchUserCache } from './usercache';
+
+const { debug } = Logger('DEBUG', 'Discord');
 
 export function extractUserID(data: string): string {
 	if (data.startsWith('<@') && data.endsWith('>')) {
@@ -504,4 +508,56 @@ export const isNotModerator = (member: GuildMember) =>
 export async function isUsageBanned(user: User | GuildMember) {
 	const userCache = await fetchUserCache(user);
 	return userCache?.banned ?? false;
+}
+
+export async function suppressEmbedsAsSoonAsPossible(
+	message: OmitPartialGroupDMChannel<Message<true>>,
+): Promise<void> {
+	await waitUntilThereAreEmbeds(message, 5);
+	await suppressUntilThereAreNoEmbeds(message, 3);
+}
+
+async function waitUntilThereAreEmbeds(
+	message: OmitPartialGroupDMChannel<Message<true>>,
+	checks: number,
+): Promise<void> {
+	debug(`Waiting until message "${message.id}" gets embeds (${checks} checks left)...`);
+
+	if (checks <= 0 || message.embeds.length) {
+		debug(
+			message.embeds.length
+				? `Message "${message.id}" has embeds!`
+				: `No embed checks left. Message "${message.id}" didn't generate embeds in time.`,
+		);
+		return;
+	}
+
+	await sleep(1000);
+	return waitUntilThereAreEmbeds(message, checks - 1);
+}
+
+async function suppressUntilThereAreNoEmbeds(
+	message: OmitPartialGroupDMChannel<Message<true>>,
+	attempts: number,
+): Promise<void> {
+	debug(`Suppressing embeds until message "${message.id}" has none...`);
+
+	if (attempts <= 0 || !message.embeds.length) {
+		debug(
+			!message.embeds.length
+				? `Message "${message.id}" already had no embeds.`
+				: `No suppression attempts left for message "${message.id}".`,
+		);
+		return;
+	}
+
+	const updatedMessage = await message.suppressEmbeds(true).catch(() => undefined);
+
+	if (!updatedMessage?.embeds.length) {
+		debug(`Successfully suppressed embeds for message "${message.id}".`);
+		return;
+	}
+
+	await sleep(1500);
+	return suppressUntilThereAreNoEmbeds(updatedMessage, attempts - 1);
 }

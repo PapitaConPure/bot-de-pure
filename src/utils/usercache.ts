@@ -18,13 +18,14 @@ export interface UserCache {
 
 export type UserCacheResolvable = AnyRequest | Interaction | User | GuildMember | string;
 
-const userCache = new Map<string, UserCache>();
+/**Stores frequently-used configuration and metadata associated to specific users.*/
+const cachedUsers = new Map<string, UserCache>();
 
 /**
  * @description
- * Guarda una ID con caché de usuario para uso posterior frecuente
+ * Stores frequently-used configuration and metadata associated to a user.
  */
-export async function cacheUser(user: UserCacheResolvable) {
+export async function cacheUser(user: UserCacheResolvable): Promise<UserCache> {
 	const userId = resolveUserCacheId(user);
 	if (!userId) throw new ReferenceError('Se esperaba una ID de usuario');
 
@@ -36,39 +37,52 @@ export async function cacheUser(user: UserCacheResolvable) {
 		await userConfigs.save();
 	}
 
-	return userCache.set(userId, {
+	const userCache: UserCache = {
 		language: userConfigs.language,
 		pixivConverter: userConfigs.pixivConverter || '',
 		twitterPrefix: userConfigs.twitterPrefix || '',
 		gelbooruConverter: userConfigs.gelbooruConverter || '',
 		instagramConverter: userConfigs.instagramConverter || '',
 		banned: userConfigs.banned ?? false,
-	});
+	};
+
+	cachedUsers.set(userId, userCache);
+
+	return userCache;
 }
 
 /**
  * @description
- * Sobreescribe una ID en caché de usuario para uso posterior frecuente
+ * Refreshes a user's cache ID.
+ * @returns The refreshed {@link UserCache}.
  */
-export async function recacheUser(user: UserCacheResolvable) {
+export async function recacheUser(user: UserCacheResolvable): Promise<UserCache> {
 	return cacheUser(user);
 }
 
 /**
  * @description
- * Devuelve los datos vinculados a la ID de usuario cacheada.
- * Si la ID no está cacheada, se realiza una llamada a la base de datos, se cachea el usuario y se devuelve lo obtenido
+ * Obtains frequently-used configuration and metadata associated to a user.
+ * If the user is not cached, a database query is performed in order to cache it.
+ * @returns The obtained {@link UserCache}.
  */
-export async function fetchUserCache(user: UserCacheResolvable): Promise<UserCache | undefined> {
+export async function fetchUserCache(user: UserCacheResolvable): Promise<UserCache> {
 	const userId = resolveUserCacheId(user);
 	if (!userId) throw new ReferenceError('User ID expected.');
 
-	if (!userCache.has(userId)) await cacheUser(userId);
+	const found = cachedUsers.get(userId);
 
-	return userCache.get(userId);
+	if (found == null) return cacheUser(userId);
+
+	return found;
 }
 
-export function resolveUserCacheId(data: UserCacheResolvable): string | undefined {
+/**
+ * @description
+ * Attempts to resolve supplied data into a key of the users cache store.
+ * @returns The ID (or cache key) of the user that was found to be associated to the supplied data.
+ */
+function resolveUserCacheId(data: UserCacheResolvable): string | undefined {
 	if (typeof data === 'string') return data;
 
 	if ('member' in data) {

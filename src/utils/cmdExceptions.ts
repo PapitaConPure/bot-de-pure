@@ -1,5 +1,11 @@
 import chalk from 'chalk';
-import { EmbedBuilder, type GuildMember, type Interaction, type User } from 'discord.js';
+import {
+	type CacheType,
+	EmbedBuilder,
+	type GuildMember,
+	type Interaction,
+	type User,
+} from 'discord.js';
 import type { CommandOptions, CommandTagResolvable } from '@/commands/commons';
 import { Command } from '../commands/commons/commandBuilder';
 import { reportFormUrl } from '../data/globalProps';
@@ -12,40 +18,43 @@ import { isNotModerator } from './discord';
 
 type ExceptionTestFn = (request: CommandRequest) => Promise<boolean>;
 
-export interface ExceptionSummary {
-	tag: CommandTagResolvable;
+export interface CommandExclusionMetadata {
 	title: string;
 	desc: string;
-	isException: ExceptionTestFn;
+}
+
+export interface CommandExclusion extends CommandExclusionMetadata {
+	tag: CommandTagResolvable;
+	test: ExceptionTestFn;
 }
 
 const isNotByPapita: ExceptionTestFn = async (request) =>
 	request.member?.user.id !== userIds.papita;
 
-export const exceptions: ExceptionSummary[] = [
+export const commandExclusions: CommandExclusion[] = [
 	{
 		tag: 'OUTDATED',
 		title: 'Comando desactualizado',
 		desc: 'El comando no se encuentra disponible debido a que su función ya no es requerida en absoluto o su mantención no se encontró justificada',
-		isException: async (request) => isNotByPapita(request),
+		test: async (request) => isNotByPapita(request),
 	},
 	{
 		tag: 'MAINTENANCE',
 		title: 'Comando en mantenimiento',
 		desc: 'El comando no se encuentra disponible debido a que está en proceso de actualización o reparación en este momento. Espera a que se actualice~',
-		isException: async (request) => isNotByPapita(request),
+		test: async (request) => isNotByPapita(request),
 	},
 	{
 		tag: 'MOD',
 		title: 'Comando exclusivo para moderación',
 		desc: 'El comando es de uso restringido para moderación.\n**Considero a alguien como moderador cuando** tiene permisos para administrar roles *(MANAGE_ROLES)* o mensajes *(MANAGE_MESSAGES)*\nNota: esto cambiará en una futura actualización, o puede ya haber cambiado pero no se ha actualizado este mensaje de error',
-		isException: async (request) => isNotModerator(request.member as GuildMember),
+		test: async (request) => isNotModerator(request.member as GuildMember),
 	},
 	{
 		tag: 'CHAOS',
 		title: 'Los Comandos Caóticos están desactivados',
 		desc: 'Este comando se considera un Comando Caótico debido a su volatilidad y tendencia a corromper la paz. Los comandos caóticos están desactivados por defecto. Refiérete al comando "caos" para ver cómo activarlos',
-		isException: async (request) => {
+		test: async (request) => {
 			const gcfg =
 				(await GuildConfig.findOne({ guildId: request.guild.id }))
 				|| new GuildConfig({ guildId: request.guild.id });
@@ -56,13 +65,13 @@ export const exceptions: ExceptionSummary[] = [
 		tag: 'GUIDE',
 		title: 'Símbolo de página de guía',
 		desc: 'Esto no es un comando, sino que una *página de guía* para buscarse con el comando de ayuda (`p!ayuda <guía>`)',
-		isException: async () => true,
+		test: async () => true,
 	},
 	{
 		tag: 'PAPA',
 		title: 'Comando exclusivo de Papita con Puré',
 		desc: 'El comando es de uso restringido para el usuario __Papita con Puré#6932__. Esto generalmente se debe a que el comando es usado para pruebas o ajustes globales/significativos/sensibles del Bot',
-		isException: async (request) => isNotByPapita(request),
+		test: async (request) => isNotByPapita(request),
 	},
 	{
 		tag: 'SAKI',
@@ -72,33 +81,33 @@ export const exceptions: ExceptionSummary[] = [
 			'Esto generalmente se debe a que cumple funciones que solo funcionan allí o que solo tiene sentido que se mantengan en dicho lugar',
 			'Si te interesa, puedes [unirte al servidor](https://discord.gg/pPwP2UNvAC)',
 		].join('\n'),
-		isException: async (request) =>
+		test: async (request) =>
 			(await isNotByPapita(request)) && request.guild.id !== serverIds.saki,
 	},
 ];
 
-export async function findFirstException(
+export async function findFirstCommandExclusion(
 	command: Command<CommandOptions | undefined>,
 	request: CommandRequest,
-): Promise<ExceptionSummary | null> {
+): Promise<CommandExclusion | null> {
 	const flags = command.flags;
 	if (!flags) return null;
 
-	const possibleExceptions = await Promise.all(
-		exceptions.map((exception) => flags.has(exception.tag) && exception.isException(request)),
+	const possibleExclusions = await Promise.all(
+		commandExclusions.map((exception) => flags.has(exception.tag) && exception.test(request)),
 	);
-	const ex = exceptions.filter((_, i) => possibleExceptions[i]);
+	const ex = commandExclusions.filter((_, i) => possibleExclusions[i]);
 
 	return ex?.[0];
 }
 
-interface ExceptionOptions {
+interface CommandExceptionEmbedOptions {
 	cmdString: string;
 }
 
-export function generateExceptionEmbed(
-	exception: Omit<ExceptionSummary, 'tag' | 'isException'>,
-	{ cmdString = '' }: ExceptionOptions,
+export function generateCommandExceptionEmbed(
+	exception: CommandExclusionMetadata,
+	{ cmdString = '' }: CommandExceptionEmbedOptions,
 ): EmbedBuilder {
 	return new EmbedBuilder()
 		.setColor(0xf01010)
@@ -114,10 +123,10 @@ interface ErrorLogOptions {
 	details?: string;
 }
 
-/**@returns Devuelve si el error se debe a una falta de permisos.*/
+/**@returns Whether the error was due to a lack of permissions (`true`) or not (`false`).*/
 export function handleAndAuditError(
 	error: Error,
-	request: CommandRequest | Interaction<import('discord.js').CacheType>,
+	request: CommandRequest | Interaction<CacheType>,
 	logOptions: ErrorLogOptions = {},
 ) {
 	if (error.message === 'Missing Permissions') {
