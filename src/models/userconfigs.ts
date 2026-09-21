@@ -1,11 +1,11 @@
 import Mongoose, { type InferSchemaType } from 'mongoose';
+import Locales from '@/i18n/locales';
 import {
 	acceptedGelbooruConverters,
 	acceptedInstagramConverters,
 	acceptedPixivConverters,
+	acceptedTwitterConverters,
 } from '@/systems/converters/instances';
-import Locales from '../i18n/locales';
-import { acceptedTwitterConverters } from '../systems/converters/pureet';
 
 const UserConfigVoiceSchema = new Mongoose.Schema(
 	{
