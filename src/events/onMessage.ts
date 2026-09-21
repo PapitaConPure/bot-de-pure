@@ -2,6 +2,11 @@ import { addHours } from 'date-fns';
 import type { Guild, Message } from 'discord.js';
 import { ContainerBuilder, MessageFlags } from 'discord.js';
 import { Command, CommandOptionSolver, type CommandOptions } from '@/commands/commons';
+import {
+	findFirstCommandExclusion,
+	generateCommandExclusionEmbed,
+	handleAndAuditError,
+} from '@/commands/commons/commandExceptions';
 import puré from '@/core/puréRegistry';
 import type { PrefixPair } from '@/data/globalProps';
 import { tenshiAltColor, tenshiColor } from '@/data/globalProps';
@@ -19,11 +24,6 @@ import globalGuildFunctions from '@/systems/others/guildFunctions';
 import { addMessageCascade } from '@/systems/others/messageCascades';
 import { countStat } from '@/systems/others/statsCount';
 import type { ValuesOf } from '@/types/util';
-import {
-	findFirstCommandExclusion,
-	generateCommandExceptionEmbed,
-	handleAndAuditError,
-} from '@/utils/cmdExceptions';
 import { channelIsBlocked, suppressEmbedsAsSoonAsPossible } from '@/utils/discord';
 import { addAgentMessageOwner, updateAgentMessageOwners } from '@/utils/discordagent';
 import Logger from '@/utils/logs';
@@ -257,7 +257,7 @@ async function handleCommandPermissions(
 		const translator = await Translator.from(message.author);
 		await message.channel.send({
 			embeds: [
-				generateCommandExceptionEmbed(
+				generateCommandExclusionEmbed(
 					{
 						title: translator.getText('missingMemberChannelPermissionsTitle'),
 						desc: translator.getText('missingMemberChannelPermissionsDescription'),
@@ -284,7 +284,7 @@ async function handleCommandPermissions(
 		const translator = await Translator.from(message.member);
 		message.channel.send({
 			embeds: [
-				generateCommandExceptionEmbed(
+				generateCommandExclusionEmbed(
 					{
 						title: translator.getText('missingMemberChannelPermissionsTitle'),
 						desc: translator.getText('missingClientChannelPermissionsDescription'),
@@ -319,7 +319,7 @@ async function handleMessageCommandExclusions(
 
 	if (requestString)
 		message.channel.send({
-			embeds: [generateCommandExceptionEmbed(exception, { cmdString: requestString })],
+			embeds: [generateCommandExclusionEmbed(exception, { cmdString: requestString })],
 		});
 
 	return false;

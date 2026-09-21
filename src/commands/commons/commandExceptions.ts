@@ -7,16 +7,16 @@ import {
 	type User,
 } from 'discord.js';
 import type { CommandOptions, CommandTagResolvable } from '@/commands/commons';
-import { Command } from '../commands/commons/commandBuilder';
-import { reportFormUrl } from '../data/globalProps';
-import serverIds from '../data/serverIds.json';
-import userIds from '../data/userIds.json';
-import GuildConfig from '../models/guildconfigs';
-import { auditError } from '../systems/others/auditor';
-import type { CommandRequest } from '../types/commands';
-import { isNotModerator } from './discord';
+import { reportFormUrl } from '@/data/globalProps';
+import serverIds from '@/data/serverIds.json';
+import userIds from '@/data/userIds.json';
+import GuildConfig from '@/models/guildconfigs';
+import { auditError } from '@/systems/others/auditor';
+import type { CommandRequest } from '@/types/commands';
+import { isNotModerator } from '@/utils/discord';
+import { Command } from './commandBuilder';
 
-type ExceptionTestFn = (request: CommandRequest) => Promise<boolean>;
+type ExclusionTestFn = (request: CommandRequest) => Promise<boolean>;
 
 export interface CommandExclusionMetadata {
 	title: string;
@@ -25,10 +25,10 @@ export interface CommandExclusionMetadata {
 
 export interface CommandExclusion extends CommandExclusionMetadata {
 	tag: CommandTagResolvable;
-	test: ExceptionTestFn;
+	test: ExclusionTestFn;
 }
 
-const isNotByPapita: ExceptionTestFn = async (request) =>
+const isNotByPapita: ExclusionTestFn = async (request) =>
 	request.member?.user.id !== userIds.papita;
 
 export const commandExclusions: CommandExclusion[] = [
@@ -105,15 +105,15 @@ interface CommandExceptionEmbedOptions {
 	cmdString: string;
 }
 
-export function generateCommandExceptionEmbed(
-	exception: CommandExclusionMetadata,
+export function generateCommandExclusionEmbed(
+	exclusion: CommandExclusionMetadata,
 	{ cmdString = '' }: CommandExceptionEmbedOptions,
 ): EmbedBuilder {
 	return new EmbedBuilder()
 		.setColor(0xf01010)
 		.setAuthor({ name: 'Un momento...' })
-		.setTitle(`${exception.title}`)
-		.addFields({ name: cmdString, value: `${exception.desc}` })
+		.setTitle(`${exclusion.title}`)
+		.addFields({ name: cmdString, value: `${exclusion.desc}` })
 		.setThumbnail('https://i.imgur.com/vZaDu1o.jpg')
 		.setFooter({ text: '¿Dudas? ¿Sugerencias? Contacta con Papita con Puré#6932' });
 }
