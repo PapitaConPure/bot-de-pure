@@ -34,7 +34,7 @@ export async function onInteraction(interaction: Interaction) {
 		if (await isUsageBanned(interaction.user))
 			return handleBlockedInteraction(interaction).catch(console.error);
 
-		return handleComponent(interaction as AnyCommandInteraction);
+		return handleComponent(interaction);
 	}
 
 	if (!interaction.inCachedGuild())

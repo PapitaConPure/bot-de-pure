@@ -149,7 +149,7 @@ export default class TestEnvironmentProvider implements EnvironmentProvider {
 		let bestMatch: PSMember | undefined;
 
 		for (const member of this.guild.members.values()) {
-			const tryName = (/**@type {string?}*/ name: string | null) => {
+			const tryName = (name: string | null) => {
 				if (name?.includes(query) && name.length > bestScore) {
 					bestScore = name.length;
 					bestMatch = member;

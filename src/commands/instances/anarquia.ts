@@ -329,7 +329,7 @@ const command = new Command(
 			return request.reply({ embeds: [embed] });
 		}
 
-		const reactIfMessage = async (/**@type {String}*/ reaction: string) =>
+		const reactIfMessage = async (reaction: string) =>
 			request.isMessage
 			&& request
 				.inferAsMessage()
@@ -497,10 +497,9 @@ const command = new Command(
 
 			const emoteId = decompressId(compressedEmoteId);
 
-			const react = (/**@type {string}*/ reaction: string) =>
-				interaction.message.react(reaction);
+			const react = (reaction: string) => interaction.message.react(reaction);
 
-			const skillKey = /**@type {keyof skills}*/ (interaction.values[0]);
+			const skillKey = interaction.values[0];
 			const auser = await AnarchyUser.findOne({ userId });
 			if (!auser?.skills?.[skillKey]) {
 				react('❌');

@@ -31,7 +31,6 @@ const backgrounds = [
 ];
 
 const highlights = {
-	/**@type {Object}*/
 	survival: {
 		clear: 'https://i.imgur.com/b7eKjYR.png',
 		'1cc': 'https://i.imgur.com/LOpNoOO.png',
@@ -49,7 +48,7 @@ const highlights = {
 		asset('https://i.imgur.com/ur0CMwN.png', ['ln', 'lunático', 'lunatic', 'luna']),
 		asset('https://i.imgur.com/YyIbi1C.png', ['ex', 'extra']),
 	],
-};
+} as const;
 
 const options = new CommandOptions().addOptions(
 	new CommandParam('juego', ['TEXT', 'NUMBER'])

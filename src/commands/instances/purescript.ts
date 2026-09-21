@@ -53,7 +53,7 @@ async function getScriptString(args: CommandOptionSolver) {
 			status: 400,
 			statusText:
 				'Se requiere que ingreses código PuréScript válido. Nótese que solo los Tubérculos pueden usar las características de registro y lectura Entradas de Usuario',
-			result: /**@type {null}*/ (null),
+			result: null as null,
 		};
 
 	return {

@@ -530,7 +530,7 @@ const command = new Command(
 		const channel = interaction.fields.getSelectedChannels('channel')?.first();
 		const reminderContent = interaction.fields.getTextInputValue('content');
 
-		const informIssue = async (/**@type {string}*/ content: string) => {
+		const informIssue = async (content: string) => {
 			await interaction.editReply({
 				components: [await makeRemindersListContainer(compressedUserId, translator)],
 			});
