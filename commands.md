@@ -79,6 +79,7 @@ La columna "Meta" indica los modificadores de interés de un comando:
 | sonando         | ✅ | ✅ |  |
 | sticker         | ✅ | ✅ |  |
 | sugerir         | ✅ | ✅ |  |
+| roles           | ✅ | ✅ | 🎎 |
 | tarjeta         | ✅ | ✅ |  |
 | touhou          | ✅ | ✅ |  |
 | transferir      | ✅ | ✅ |  |
