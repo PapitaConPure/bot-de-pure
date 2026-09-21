@@ -8,7 +8,6 @@ import {
 	MessageFlags,
 	SectionBuilder,
 } from 'discord.js';
-import { globalConfigs } from '@/data/globalProps';
 import { Translator } from '@/i18n';
 import { type ChannelStatsDocument, ChannelStatsModel, StatsModel } from '@/models/stats';
 import { fetchMember } from '@/utils/discord';
@@ -365,24 +364,6 @@ const command = new Command(
 		);
 
 		pages.push(activityStatsContainer);
-
-		//Página de estadísticas de tiempo
-		const timeStatsContainer = new ContainerBuilder().setAccentColor(0xe99979);
-
-		const botLastResetUnix = getUnixTime(new Date(globalConfigs.startupTime));
-
-		timeStatsContainer.addTextDisplayComponents(
-			(textDisplay) => textDisplay.setContent('## Estadísticas de tiempo'),
-			(textDisplay) =>
-				textDisplay.setContent(
-					[
-						translator.getText('infoTimeGuildCreatedAt', guildCreatedAtUnix),
-						translator.getText('infoTimeBotLastResetAt', botLastResetUnix),
-					].join('\n'),
-				),
-		);
-
-		pages.push(timeStatsContainer);
 
 		//Finalizar páginas y responder
 		const requestId = compressId(request.id);

@@ -1,3 +1,4 @@
+import { getUnixTime } from 'date-fns';
 import {
 	type APISelectMenuOption,
 	ButtonBuilder,
@@ -10,7 +11,7 @@ import {
 } from 'discord.js';
 import type { AnyRequest } from 'types/commands';
 import { changelog, note, todo as toDo, version } from '@/data/botStatus.json';
-import { tenshiColor } from '@/data/globalProps';
+import { globalConfigs, tenshiColor } from '@/data/globalProps';
 import { Translator } from '@/i18n';
 import { StatsModel } from '@/models/stats';
 import { getWikiPageComponentsV2, makeGuideRow, searchCommand } from '@/systems/others/wiki';
@@ -82,8 +83,15 @@ const command = new Command(
 					),
 			)
 			.addSeparatorComponents((separator) => separator.setDivider(true))
-			.addTextDisplayComponents((textDisplay) =>
-				textDisplay.setContent(`## ${note[translator.locale]}`),
+			.addTextDisplayComponents(
+				(textDisplay) => textDisplay.setContent(`## ${note[translator.locale]}`),
+				(textDisplay) =>
+					textDisplay.setContent(
+						translator.getText(
+							'estadoLastBotResetAt',
+							getUnixTime(globalConfigs.startupTime),
+						),
+					),
 			)
 			.addActionRowComponents((actionRow) =>
 				actionRow.addComponents(

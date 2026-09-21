@@ -1777,9 +1777,9 @@ const localesObject = {
 		ja: `-# ${subif(0, '=', true, '公開', '非公開')}サーバー`,
 	},
 	infoGuildCreatedAt: {
-		es: `🗓️ Creado el <t:${subl(0)}:f>`,
-		en: `🗓️ Created on <t:${subl(0)}:f>`,
-		ja: `🗓️ <t:${subl(0)}:f>作成`,
+		es: `🗓️ Creado el <t:${subl(0)}:d> a las <t:${subl(0)}:t> (<t:${subl(0)}:R>)`,
+		en: `🗓️ Created on <t:${subl(0)}:d> at <t:${subl(0)}:t> (<t:${subl(0)}:R>)`,
+		ja: `🗓️ 作成日時: <t:${subl(0)}:d> <t:${subl(0)}:t> (<t:${subl(0)}:R>)`,
 	},
 	infoGuildOwnerEpigraph: {
 		es: '-# Dueño del servidor',
@@ -1905,21 +1905,6 @@ const localesObject = {
 		en: `-# These stats are being collected since <t:${subl(0)}:d>`,
 		ja: `-# これらの統計は<t:${subl(0)}:d>から収集されています`,
 	},
-	infoTimeTitle: {
-		es: '## Estadísticas de tiempo',
-		en: '## Time Stats',
-		ja: '## 時間統計',
-	},
-	infoTimeGuildCreatedAt: {
-		es: `🗓️ El servidor se creó <t:${subl(0)}:R>`,
-		en: `🗓️ The guild was created <t:${subl(0)}:R>`,
-		ja: `🗓️ ギルドは<t:${subl(0)}:R>に作成されました`,
-	},
-	infoTimeBotLastResetAt: {
-		es: `🕰️ Me reinicié por última vez <t:${subl(0)}:R>`,
-		en: `🕰️ I was last reset <t:${subl(0)}:R>`,
-		ja: `🕰️ 最後にリセットされたのは<t:${subl(0)}:R>です`,
-	},
 
 	inforolNoRoleProvided: {
 		es: '❌ ¡Debes indicar al menos un rol!',
@@ -2038,9 +2023,9 @@ const localesObject = {
 		ja: `🎦 **${subl(0)}件**のメッセージが記録されました`,
 	},
 	estadoStatsProcessedCommandsCount: {
-		es: `⚙️ **${subl(0)}** comandos procesados`,
-		en: `⚙️ **${subl(0)}** commands processed`,
-		ja: `⚙️ **${subl(0)}件**のコマンドが処理されました`,
+		es: () => `${getBotEmoji('commandPrimary')} **${subl(0)}** comandos procesados`,
+		en: () => `${getBotEmoji('commandPrimary')} **${subl(0)}** commands processed`,
+		ja: () => `${getBotEmoji('commandPrimary')} **${subl(0)}件**のコマンドが処理されました`,
 	},
 	estadoStatsSuccessfulCommandsCount: {
 		es: `✅ **${subl(0)}** (${subl(1)}%) ejecuciones de comando exitosas`,
@@ -2051,6 +2036,11 @@ const localesObject = {
 		es: `⚠️️ **${subl(0)}** (${subl(1)}%) ejecuciones de comando fallidas`,
 		en: `⚠️️ **${subl(0)}** (${subl(1)}%) failed command executions`,
 		ja: `⚠️️ **${subl(0)}件**（${subl(1)}％）のコマンド実行が失敗しました`,
+	},
+	estadoLastBotResetAt: {
+		es: `La última vez que me reiniciaron fue <t:${subl(0)}:R>.`,
+		en: `I was last reset <t:${subl(0)}:R>.`,
+		ja: `最後にリセットされたのは<t:${subl(0)}:R>です.`,
 	},
 
 	horaDateButNoTime: {
