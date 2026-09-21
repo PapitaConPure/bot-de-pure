@@ -1,5 +1,4 @@
 import type { BooruClient, Gelbooru, Post } from '@papitaconpure/booru-client';
-import chalk from 'chalk';
 import { getUnixTime, minutesToMilliseconds } from 'date-fns';
 import type { GuildTextBasedChannel, Snowflake } from 'discord.js';
 import { MessageFlags } from 'discord.js';
@@ -506,11 +505,7 @@ export class BooruFeed {
 
 			return { success: true, posts: fetched, newPosts: newPosts };
 		} catch (err) {
-			warn(
-				chalk.redBright(
-					'Ocurrió un problema mientras se esperaban los resultados de búsqueda de un Feed',
-				),
-			);
+			warn('A problem occurred while fetching search results of a Feed.');
 			debug({
 				guildName: this.channel?.guild?.name,
 				channelId: this.#feedDoc.channelId,
