@@ -213,7 +213,7 @@ export async function onStartup(client: Client) {
 	for (const id of uniqueEmoteIds) pendingEmoteCells.push(getEmoteCell(id));
 	const [, pureTableImage, emoteCells] = await Promise.all([
 		puretable.save(),
-		loadImage('https://i.imgur.com/TIL0jPV.png'),
+		loadImage('https://i.imgur.com/hp8pV81.png'),
 		(async () => {
 			const results = await Promise.allSettled(pendingEmoteCells);
 			return results

@@ -679,7 +679,7 @@ async function drawPureTable(cells: string[][]) {
 	const { image: pureTableImage, defaultEmote } = pureTableAssets;
 	const loadedEmotes = globalConfigs.loademotes;
 
-	const canvas = createCanvas(864, 996);
+	const canvas = createCanvas(864, 864);
 	const ctx = canvas.getContext('2d');
 
 	ctx.drawImage(pureTableImage, 0, 0, canvas.width, canvas.height);
@@ -691,9 +691,8 @@ async function drawPureTable(cells: string[][]) {
 
 	//Dibujar emotes en imagen
 	const emoteSize = 48;
-	const offsetY = 77; //Compensación - va a variar según la implementación de canvas porque por supuesto que lo hace
 	const tableX = canvas.width / 2 - (emoteSize * cells.length) / 2;
-	const tableY = ctx.measureText('M').actualBoundingBoxDescent + offsetY;
+	const tableY = canvas.height / 2 - (emoteSize * cells.length) / 2;
 	cells.forEach((arr, y) => {
 		arr.forEach((cell, x) => {
 			if (!loadedEmotes[cell]) loadedEmotes[cell] = defaultEmote;
