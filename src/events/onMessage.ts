@@ -1,6 +1,7 @@
 import { addHours } from 'date-fns';
 import type { Guild, Message } from 'discord.js';
-import { Command, CommandOptionSolver, CommandResults, processMessageCommand } from '@/commands/commons';
+import { Command, CommandOptionSolver, processMessageCommand } from '@/commands/commons';
+import { CommandResults } from '@/commands/commons/commandProcessing';
 import UserConfigModel from '@/models/userconfigs';
 import { gelbooruConverter } from '@/systems/converters/boorutato';
 import { mergeConverterPayloads, processConverter } from '@/systems/converters/pipeline';
@@ -17,7 +18,7 @@ import { fetchUserCache, type UserCache } from '@/utils/usercache';
 
 const { error } = Logger('WARN', 'Message');
 
-export async function onMessage(message: Message) {
+export async function onMessage(message: Message): Promise<void> {
 	if (!message.inGuild()) return;
 
 	const { author, channel, guild } = message;

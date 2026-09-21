@@ -1,5 +1,4 @@
 import { ContainerBuilder, type Message, MessageFlags } from 'discord.js';
-import type { ValuesOf } from 'types';
 import puré from '@/core/puréRegistry';
 import { type PrefixPair, tenshiAltColor, tenshiColor } from '@/data/globalProps';
 import unknownCommandReplies from '@/data/unknownCommandReplies.json';
@@ -16,16 +15,9 @@ import {
 	generateCommandExclusionEmbed,
 	handleAndAuditError,
 } from './commandExceptions';
+import { type CommandResult, CommandResults } from './commandProcessing';
 
 const { error } = Logger('WARN', 'MessageCommand');
-
-export const CommandResults = Object.freeze({
-	VOID: 0,
-	SUCCEEDED: 1,
-	FAILED: 2,
-} as const satisfies Record<string, number>);
-
-export type CommandResult = ValuesOf<typeof CommandResults>;
 
 export async function processMessageCommand(message: Message<true>): Promise<CommandResult> {
 	const { content, guildId } = message;
@@ -145,7 +137,7 @@ async function handleMessageCommand(
 	args: string[],
 	rawArgs?: string,
 	requestString?: string,
-): Promise<unknown> {
+): Promise<void> {
 	const satisfiesPermissions = await handleCommandPermissions(message, command, requestString);
 	if (!satisfiesPermissions) return;
 

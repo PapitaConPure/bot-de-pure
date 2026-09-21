@@ -1,10 +1,11 @@
 import chalk from 'chalk';
 import {
-	type CacheType,
+	type AutocompleteInteraction,
 	EmbedBuilder,
 	type GuildMember,
-	type Interaction,
+	type MessageContextMenuCommandInteraction,
 	type User,
+	type UserContextMenuCommandInteraction,
 } from 'discord.js';
 import type { CommandOptions, CommandTagResolvable } from '@/commands/commons';
 import { reportFormUrl } from '@/data/globalProps';
@@ -12,7 +13,7 @@ import serverIds from '@/data/serverIds.json';
 import userIds from '@/data/userIds.json';
 import GuildConfig from '@/models/guildconfigs';
 import { auditError } from '@/systems/others/auditor';
-import type { CommandRequest } from '@/types/commands';
+import type { AnyCommandInteraction, CommandRequest } from '@/types/commands';
 import { isNotModerator } from '@/utils/discord';
 import { Command } from './commandBuilder';
 
@@ -126,7 +127,12 @@ interface ErrorLogOptions {
 /**@returns Whether the error was due to a lack of permissions (`true`) or not (`false`).*/
 export function handleAndAuditError(
 	error: Error,
-	request: CommandRequest | Interaction<CacheType>,
+	request:
+		| CommandRequest
+		| AnyCommandInteraction
+		| AutocompleteInteraction
+		| UserContextMenuCommandInteraction
+		| MessageContextMenuCommandInteraction,
 	logOptions: ErrorLogOptions = {},
 ) {
 	if (error.message === 'Missing Permissions') {
