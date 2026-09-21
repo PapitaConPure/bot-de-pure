@@ -7,7 +7,7 @@ export type GuildMessagePlugin = (message: Message<true>, userCache: UserCache) 
 //Permite agregar plugins que se ejecutan en cada procesado de mensaje en servidores particulares.
 //Para agregar un servidor, introduce su ID como clave y un objeto como valor.
 //Cada campo del objeto debe ser una función, y representa un plugin para ese servidor.
-const guildMessagePlugins: Record<string, GuildMessagePlugin[]> = {
+export const guildMessagePlugins: Record<string, GuildMessagePlugin[]> = {
 	// '1234567890': [
 	//   () => {
 	//     //(...)
@@ -23,4 +23,10 @@ const guildMessagePlugins: Record<string, GuildMessagePlugin[]> = {
 	// ],
 };
 
-export default guildMessagePlugins;
+export async function processGuildPlugins(message: Message<true>, userCache: UserCache) {
+	const guildFunctions = guildMessagePlugins[message.guild.id];
+
+	if (!guildFunctions) return;
+
+	return Promise.allSettled(guildFunctions.map((fgf) => fgf(message, userCache)));
+}
