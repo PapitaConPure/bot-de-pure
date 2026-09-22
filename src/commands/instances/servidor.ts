@@ -6,9 +6,12 @@ import {
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 } from 'discord.js';
+import type { AnyCommandInteraction } from 'types/commands';
 import { tenshiColor } from '@/data/globalProps';
-import { Locales, Translator } from '@/i18n';
+import { isValidLocaleKey, Locales, Translator } from '@/i18n';
+import { type GuildConfigDocument, GuildConfigModel } from '@/models/guildconfigs';
 import { compressId } from '@/utils/encoding';
+import { recacheGuild } from '@/utils/guildcache';
 import { Command, CommandPermissions, CommandTags } from '../commons';
 
 const tags = new CommandTags().add('MOD', 'MAINTENANCE');
@@ -33,16 +36,95 @@ const command = new Command(
 	)
 	.setPermissions(permissions)
 	.setExecution(async (request) => {
-		const translator = await Translator.from(request);
+		const [translator, guildTranslator] = await Translator.from(request);
 		const compressedUserId = compressId(request.userId);
-		console.log('wa');
+
 		return request.reply({
 			flags: MessageFlags.IsComponentsV2,
-			components: [makeDashboardContainer(compressedUserId, request.guild, translator)],
+			components: [
+				makeDashboardContainer(
+					compressedUserId,
+					request.guild,
+					translator,
+					guildTranslator,
+				),
+			],
 		});
-	});
+	})
+	.setSelectMenuResponse(
+		async function selectLanguage(interaction, compressedUserId) {
+			const { success, context } = await getWizardContext(interaction);
+			if (!success) return;
+			const { guild, guildConfigs, translator } = context;
 
-function makeDashboardContainer(compressedUserId: string, guild: Guild, translator: Translator) {
+			const newLocale = interaction.values[0];
+			if (!newLocale || !isValidLocaleKey(newLocale)) return interaction.deleteReply();
+
+			guildConfigs.locale = newLocale;
+			const guildTranslator = new Translator(newLocale);
+
+			await guildConfigs.save();
+			await recacheGuild(guild);
+
+			return interaction.update({
+				flags: MessageFlags.IsComponentsV2,
+				components: [
+					makeDashboardContainer(compressedUserId, guild, translator, guildTranslator),
+				],
+			});
+		},
+		{ userFilterIndex: 0 },
+	);
+
+async function getWizardContext(
+	request: AnyCommandInteraction & { guild: Guild },
+	options: {
+		notEphemeral?: boolean;
+		editReply?: boolean;
+	} = {},
+): Promise<
+	| {
+			success: true;
+			context: {
+				guild: Guild;
+				guildConfigs: GuildConfigDocument;
+				translator: Translator;
+				guildTranslator: Translator;
+			};
+	  }
+	| { success: false; context: null }
+> {
+	const { notEphemeral = false, editReply = false } = options;
+	const { guild } = request;
+
+	const [translator, guildConfigs] = await Promise.all([
+		Translator.fromUser(request),
+		GuildConfigModel.findOne({ guildId: request.guild.id }),
+	]);
+
+	if (!guildConfigs) {
+		const guildNotAvailableText = translator.getText('servidorGuildUnavailable');
+		if (editReply) await request.editReply({ content: guildNotAvailableText });
+		else
+			await request.reply({
+				content: guildNotAvailableText,
+				flags: notEphemeral ? undefined : MessageFlags.Ephemeral,
+			});
+
+		return { success: false, context: null };
+	}
+
+	const guildTranslator = new Translator(guildConfigs.locale);
+
+	return { success: true, context: { guild, guildConfigs, translator, guildTranslator } };
+}
+
+function makeDashboardContainer(
+	compressedUserId: string,
+	guild: Guild,
+	translator: Translator,
+	guildTranslator: Translator,
+) {
 	const container = new ContainerBuilder().setAccentColor(tenshiColor);
 	const guildIcon = guild.iconURL({ size: 512 });
 
@@ -84,7 +166,7 @@ function makeDashboardContainer(compressedUserId: string, guild: Guild, translat
 								.setLabel(subTranslator.getText('currentLanguage'))
 								.setEmoji(subTranslator.getText('currentLanguageEmojiId'))
 								.setValue(locale)
-								.setDefault(translator.locale === subTranslator.locale);
+								.setDefault(guildTranslator.locale === subTranslator.locale);
 						}),
 					),
 			),
