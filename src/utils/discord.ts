@@ -514,10 +514,12 @@ export async function suppressEmbedsAsSoonAsPossible(
 	message: OmitPartialGroupDMChannel<Message<true>>,
 ): Promise<void> {
 	await waitUntilThereAreEmbeds(message, 6);
+
 	if (!message.embeds.length) {
 		debug('Because the message still has no embeds, a refetch attempt will be made');
-		message = await message.fetch(true);
+		message = (await message.fetch(true)) ?? message;
 	}
+
 	await suppressUntilThereAreNoEmbeds(message, 3);
 }
 
