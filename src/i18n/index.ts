@@ -2803,6 +2803,12 @@ const localesObject = {
 		ja: '-# このウィンドウでは、告白に対して匿名で返信できます。既にその告白に関するスレッドが存在する場合は、返信はそのスレッドに送信されます。存在しない場合は、新しいスレッドが自動的に作成されます。',
 	},
 
+	servidorGuildUnavailable: {
+		es: '⚠️ Servidor no disponible',
+		en: '⚠️ Server unavailable',
+		ja: '⚠️ サーバーは利用できません',
+	},
+
 	yoCancelledStep: {
 		es: 'Se canceló la configuración de Preferencias de usuario',
 		en: 'The User Preferences configuration was cancelled',
