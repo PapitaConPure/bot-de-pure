@@ -1,11 +1,20 @@
 import Mongoose, { type InferSchemaType } from 'mongoose';
+import { Locales } from '@/i18n';
 import { makeStringIdValidator } from './modelUtils';
 
+/**@description Describe la configuración de un servidor.*/
 const GuildConfigSchema = new Mongoose.Schema({
 	guildId: {
 		type: String,
 		required: true,
 		validator: makeStringIdValidator('Se esperaba una ID de servidor que no estuviera vacía'),
+	},
+
+	locale: {
+		type: String,
+		enum: Object.values(Locales),
+		default: Locales.Spanish,
+		required: true,
 	},
 
 	/** Habilitar modo caótico del servidor. */
@@ -14,9 +23,8 @@ const GuildConfigSchema = new Mongoose.Schema({
 
 export type GuildConfigSchemaType = InferSchemaType<typeof GuildConfigSchema>;
 
-/**@description Describe la configuración de un servidor.*/
-const GuildConfig = Mongoose.model('GuildConfig', GuildConfigSchema);
+export const GuildConfigModel = Mongoose.model('GuildConfig', GuildConfigSchema);
 
-export type GuildConfigDocument = InstanceType<typeof GuildConfig>;
+export type GuildConfigDocument = InstanceType<typeof GuildConfigModel>;
 
-export default GuildConfig;
+export default GuildConfigModel;
