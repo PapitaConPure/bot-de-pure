@@ -126,6 +126,12 @@ export class CommandPermissions {
 		});
 	}
 
+	get requisiteTreeString() {
+		return this.matrix
+			.map((requisite, n) => `${n + 1}. ${requisite.map((p) => `\`${p}\``).join(' **o** ')}`)
+			.join('\n');
+	}
+
 	get requisites() {
 		return this.#requisites;
 	}
