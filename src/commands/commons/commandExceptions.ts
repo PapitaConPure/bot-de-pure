@@ -17,7 +17,7 @@ import type { AnyCommandInteraction, CommandRequest } from '@/types/commands';
 import { isNotModerator } from '@/utils/discord';
 import { Command } from './commandBuilder';
 
-type ExclusionTestFn = (request: CommandRequest) => Promise<boolean>;
+type ExclusionTestFn = (request: CommandRequest | AnyCommandInteraction) => Promise<boolean>;
 
 export interface CommandExclusionMetadata {
 	title: string;
@@ -56,6 +56,7 @@ export const commandExclusions: CommandExclusion[] = [
 		title: 'Los Comandos Caóticos están desactivados',
 		desc: 'Este comando se considera un Comando Caótico debido a su volatilidad y tendencia a corromper la paz. Los comandos caóticos están desactivados por defecto. Refiérete al comando "caos" para ver cómo activarlos',
 		test: async (request) => {
+			if (!request.guild) return true;
 			const gcfg =
 				(await GuildConfig.findOne({ guildId: request.guild.id }))
 				|| new GuildConfig({ guildId: request.guild.id });
@@ -83,13 +84,14 @@ export const commandExclusions: CommandExclusion[] = [
 			'Si te interesa, puedes [unirte al servidor](https://discord.gg/pPwP2UNvAC)',
 		].join('\n'),
 		test: async (request) =>
-			(await isNotByPapita(request)) && request.guild.id !== serverIds.saki,
+			(await isNotByPapita(request))
+			&& (request.guild == null || request.guild.id !== serverIds.saki),
 	},
 ];
 
 export async function findFirstCommandExclusion(
 	command: Command<CommandOptions | undefined>,
-	request: CommandRequest,
+	request: CommandRequest | AnyCommandInteraction,
 ): Promise<CommandExclusion | null> {
 	const flags = command.flags;
 	if (!flags) return null;
