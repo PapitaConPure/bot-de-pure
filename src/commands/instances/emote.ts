@@ -51,14 +51,14 @@ const command = new Command(
 				.setColor('Blurple')
 				.setAuthor({ name: 'Emoji' })
 				.setTitle(emoji.name)
-				.setImage(emoji.url)
+				.setImage(emoji.imageURL({ size: 512 }))
 				.setFooter({ text: emoji.animated ? '🎞️' : '🖼️' })
 				.setTimestamp(emoji.createdTimestamp);
 
 			embeds.push(embed);
 
 			const button = new ButtonBuilder()
-				.setURL(emoji.url)
+				.setURL(emoji.imageURL({ size: 4096 }))
 				.setEmoji(getBotEmojiResolvable('urlAccent'))
 				.setLabel(emoji.name)
 				.setStyle(ButtonStyle.Link);
