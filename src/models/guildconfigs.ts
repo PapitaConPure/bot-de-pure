@@ -1,5 +1,6 @@
 import Mongoose, { type InferSchemaType } from 'mongoose';
 import { Locales } from '@/i18n';
+import { defaultLocale } from '@/i18n/locales';
 import { makeStringIdValidator } from './modelUtils';
 
 /**@description Describe la configuración de un servidor.*/
@@ -13,7 +14,7 @@ const GuildConfigSchema = new Mongoose.Schema({
 	locale: {
 		type: String,
 		enum: Object.values(Locales),
-		default: Locales.Spanish,
+		default: defaultLocale,
 		required: true,
 	},
 

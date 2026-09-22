@@ -1,5 +1,5 @@
 import Mongoose, { type InferSchemaType } from 'mongoose';
-import Locales from '@/i18n/locales';
+import Locales, { defaultLocale } from '@/i18n/locales';
 import {
 	acceptedGelbooruConverters,
 	acceptedInstagramConverters,
@@ -38,7 +38,7 @@ const UserConfigSchema = new Mongoose.Schema({
 	language: {
 		type: String,
 		enum: Object.values(Locales),
-		default: Locales.Spanish,
+		default: defaultLocale,
 		required: true,
 	},
 	tzCode: {
