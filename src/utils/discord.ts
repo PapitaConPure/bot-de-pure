@@ -513,7 +513,11 @@ export async function isUsageBanned(user: User | GuildMember) {
 export async function suppressEmbedsAsSoonAsPossible(
 	message: OmitPartialGroupDMChannel<Message<true>>,
 ): Promise<void> {
-	await waitUntilThereAreEmbeds(message, 8);
+	await waitUntilThereAreEmbeds(message, 6);
+	if (!message.embeds.length) {
+		debug('Because the message still has no embeds, a refetch attempt will be made');
+		message = await message.fetch(true);
+	}
 	await suppressUntilThereAreNoEmbeds(message, 3);
 }
 
