@@ -513,7 +513,7 @@ export async function isUsageBanned(user: User | GuildMember) {
 export async function suppressEmbedsAsSoonAsPossible(
 	message: OmitPartialGroupDMChannel<Message<true>>,
 ): Promise<void> {
-	await waitUntilThereAreEmbeds(message, 5);
+	await waitUntilThereAreEmbeds(message, 8);
 	await suppressUntilThereAreNoEmbeds(message, 3);
 }
 
@@ -541,15 +541,6 @@ async function suppressUntilThereAreNoEmbeds(
 	attempts: number,
 ): Promise<void> {
 	debug(`Suppressing embeds until message "${message.id}" has none...`);
-
-	if (attempts <= 0 || !message.embeds.length) {
-		debug(
-			!message.embeds.length
-				? `Message "${message.id}" already had no embeds.`
-				: `No suppression attempts left for message "${message.id}".`,
-		);
-		return;
-	}
 
 	const updatedMessage = await message.suppressEmbeds(true).catch(() => undefined);
 
