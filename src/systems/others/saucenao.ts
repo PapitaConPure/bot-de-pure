@@ -26,7 +26,7 @@ export async function pourSauce(
 	request: AnyRequest & { channel: GuildBasedChannel },
 	payload: { successes: EmbedBuilder[]; failures: EmbedBuilder[] },
 ) {
-	const translator = await Translator.from(request.user.id);
+	const translator = await Translator.fromUser(request.user.id);
 	const allowNSFW = isNSFWChannel(request.channel);
 	const { successes, failures } = payload;
 

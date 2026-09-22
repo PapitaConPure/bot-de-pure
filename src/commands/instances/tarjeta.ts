@@ -129,7 +129,7 @@ const command = new Command(
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const translator = await Translator.from(request);
+		const translator = await Translator.fromUser(request);
 
 		//Cargar imágenes derivadas de flags
 		const canvas = Canvas.createCanvas(640, 1120);

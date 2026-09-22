@@ -178,7 +178,7 @@ const command = new Command('avatar', tags)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const [translator] = await Promise.all([
-			Translator.from(request),
+			Translator.fromUser(request),
 			fetchGuildMembers(request.guild),
 		]);
 

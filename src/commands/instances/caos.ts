@@ -35,7 +35,7 @@ const command = new Command(
 		const [gcfg, translator] = await Promise.all([
 			(async () =>
 				(await GuildConfig.findOne(guildsearch)) || new GuildConfig(guildsearch))(),
-			Translator.from(request),
+			Translator.fromUser(request),
 		]);
 
 		if (activate && deactivate)

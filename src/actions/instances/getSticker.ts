@@ -14,7 +14,7 @@ const action = new ContextMenuAction('actionGetSticker', 'Message').setMessageRe
 		const message = interaction.targetMessage;
 		const uid = interaction.user.id;
 		// biome-ignore lint/correctness/noUnusedVariables: TODO: Traducir
-		const translator = await Translator.from(uid);
+		const translator = await Translator.fromUser(uid);
 
 		const sticker = await message.stickers.first()?.fetch().catch(console.error);
 		if (!sticker)

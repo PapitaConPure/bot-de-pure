@@ -358,7 +358,7 @@ export class PureVoiceUpdateHandler {
 
 			const translator = member.user.bot
 				? new Translator('es')
-				: await Translator.from(member);
+				: await Translator.fromUser(member);
 
 			const dbMember = currentSession.members.get(member.id);
 			const sessionMember = new PureVoiceSessionMember(
@@ -477,7 +477,7 @@ export class PureVoiceUpdateHandler {
 			const [userConfigs, translator] = await Promise.all([
 				(await UserConfigModel.findOne({ userId: member.id }))
 					|| new UserConfigModel({ userId: member.id }),
-				member.user.bot ? new Translator('es') : await Translator.from(member),
+				member.user.bot ? new Translator('es') : await Translator.fromUser(member),
 			]);
 
 			const prepareSessionRole = async () => {

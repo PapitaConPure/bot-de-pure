@@ -333,7 +333,7 @@ const command = new Command(
 		}
 	})
 	.setButtonResponse(async function getHelp(interaction, userId) {
-		const translator = await Translator.from(interaction.user);
+		const translator = await Translator.fromUser(interaction.user);
 
 		if (interaction.user.id !== userId)
 			return interaction.reply({

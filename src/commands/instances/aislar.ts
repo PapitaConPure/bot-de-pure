@@ -29,7 +29,7 @@ const command = new Command(
 	.setPermissions(perms)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const translator = await Translator.from(request.member);
+		const translator = await Translator.fromUser(request.member);
 
 		if (args.empty)
 			return request.reply({

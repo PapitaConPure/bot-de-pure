@@ -31,7 +31,7 @@ const command = new Command(
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const [translator] = await Promise.all([
-			Translator.from(request.userId),
+			Translator.fromUser(request.userId),
 			request.deferReply({ flags: MessageFlags.Ephemeral }),
 		]);
 

@@ -41,7 +41,7 @@ const options = new CommandOptions().addOptions(
 		.setDesc('para ver ayuda en un comando en específico')
 		.setOptional(true)
 		.setAutocomplete(async (interaction, query) => {
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 			const commands = await searchCommands(interaction, query, translator);
 
 			return interaction.respond(
@@ -80,7 +80,7 @@ const command = new Command(
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const translator = await Translator.from(request);
+		const translator = await Translator.fromUser(request);
 
 		const search = args.getString('comando');
 
@@ -113,7 +113,7 @@ const command = new Command(
 		{ userFilterIndex: 0 },
 	)
 	.setButtonResponse(async function showCommand(interaction, search) {
-		const translator = await Translator.from(interaction);
+		const translator = await Translator.fromUser(interaction);
 
 		const foundCommand = await searchCommand(interaction, search, translator);
 
@@ -140,7 +140,7 @@ const command = new Command(
 			if (!isMenu && !isButton) return;
 			if (!interaction.guild) return;
 
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 
 			let search: string | undefined;
 			switch (isMenu ? interaction.values[0] : 'index') {
@@ -217,7 +217,7 @@ async function listCommands(
 			excludedTags: makeExcludedTags(request),
 			context: request,
 		}),
-		Translator.from(request),
+		Translator.fromUser(request),
 	]);
 
 	const prefix = p_pure(request).raw;

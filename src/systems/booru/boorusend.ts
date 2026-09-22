@@ -506,7 +506,7 @@ export async function notifyUsers(
 			const member = members.get(userId);
 			if (!channel || !member) return Promise.resolve(null);
 
-			const translator = await Translator.from(member);
+			const translator = await Translator.fromUser(member);
 			const matchingTags = followedTags.filter((tag) => post.tags.includes(tag));
 
 			const userContainer = new ContainerBuilder().setAccentColor(
@@ -657,7 +657,7 @@ export async function searchAndReplyWithPost(
 		const booru = getMainBooruClient();
 		if (!booru)
 			return request.editReply({
-				content: (await Translator.from(request)).getText('missingBooruCredentials'),
+				content: (await Translator.fromUser(request)).getText('missingBooruCredentials'),
 			});
 
 		const posts = await booru.search(finalTags, { limit: +poolSize });

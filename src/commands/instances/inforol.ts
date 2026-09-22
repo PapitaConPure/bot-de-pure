@@ -66,7 +66,7 @@ const command = new Command(
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const [translator] = await Promise.all([
-			await Translator.from(request),
+			await Translator.fromUser(request),
 			fetchGuildMembers(request.guild),
 		]);
 
@@ -99,7 +99,7 @@ const command = new Command(
 	})
 	.setButtonResponse(
 		async function showPage(interaction, page, requestId) {
-			const translator = await Translator.from(interaction.user);
+			const translator = await Translator.fromUser(interaction.user);
 
 			const query = command.memory.get(requestId) as InforolQuery;
 			if (!query)

@@ -15,7 +15,7 @@ const action = new ContextMenuAction('actionGetEmojis', 'Message').setMessageRes
 		const message = interaction.targetMessage;
 		const uid = interaction.user.id;
 		// biome-ignore lint/correctness/noUnusedVariables: TODO: Traducir
-		const translator = await Translator.from(uid);
+		const translator = await Translator.fromUser(uid);
 
 		const emojisMatches = message.content.matchAll(discordEmojiRegex);
 		if (!emojisMatches)

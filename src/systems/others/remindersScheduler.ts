@@ -129,7 +129,7 @@ async function triggerReminder(reminder: ReminderDocument) {
 async function sendReminder(channel: GuildTextBasedChannel, user: User, reminderContent: string) {
 	debug('Attempting to send a reminder message.');
 
-	const translator = await Translator.from(user.id);
+	const translator = await Translator.fromUser(user.id);
 
 	const container = new ContainerBuilder().setAccentColor(tenshiColor).addTextDisplayComponents(
 		(textDisplay) =>

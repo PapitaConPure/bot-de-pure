@@ -258,7 +258,7 @@ const command = new Command(
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const translator = await Translator.from(request.user);
+		const translator = await Translator.fromUser(request.user);
 
 		//Revisar perfil
 		const perfil = args.hasFlag('perfil');
@@ -491,7 +491,7 @@ const command = new Command(
 	})
 	.setSelectMenuResponse(
 		async function selectSkill(interaction, x, y, compressedEmoteId) {
-			const translator = await Translator.from(interaction.user);
+			const translator = await Translator.fromUser(interaction.user);
 			const { user } = interaction;
 			const userId = user.id;
 
@@ -575,7 +575,7 @@ const command = new Command(
 	)
 	.setButtonResponse(
 		async function cancel(interaction) {
-			const translator = await Translator.from(interaction.user);
+			const translator = await Translator.fromUser(interaction.user);
 			return interaction.update({
 				embeds: [
 					new EmbedBuilder().setFooter({

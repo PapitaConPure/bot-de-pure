@@ -14,7 +14,7 @@ const action = new ContextMenuAction('actionFindSource', 'Message').setMessageRe
 	async (interaction) => {
 		const message = interaction.targetMessage;
 		const uid = interaction.user.id;
-		const translator = await Translator.from(uid);
+		const translator = await Translator.fromUser(uid);
 
 		const sauceNAOUser = await SauceNAOUserModel.findOne({ userId: interaction.user.id });
 		if (!sauceNAOUser)

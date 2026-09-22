@@ -65,7 +65,7 @@ const command = new Command(
 		const guild = request.guild;
 		const [stats, translator] = await Promise.all([
 			StatsModel.findOne({}),
-			Translator.from(request),
+			Translator.fromUser(request),
 			request.deferReply(),
 			fetchGuildMembers(guild),
 		]);
@@ -381,7 +381,7 @@ const command = new Command(
 		});
 	})
 	.setButtonResponse(async function navigate(interaction, page, requestId) {
-		const translator = await Translator.from(interaction.user);
+		const translator = await Translator.fromUser(interaction.user);
 
 		const pageNumber = +page;
 		const pages = command.memory.get(requestId);

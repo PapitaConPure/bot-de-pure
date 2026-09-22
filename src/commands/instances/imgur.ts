@@ -49,7 +49,7 @@ const command = new Command('imgur', tags)
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const translator = await Translator.from(request.userId);
+		const translator = await Translator.fromUser(request.userId);
 
 		if (args.hasFlag('registrar')) {
 			const embeds = [
@@ -165,13 +165,13 @@ const command = new Command('imgur', tags)
 		return request.editReply({ embeds: [...successes, ...failures] });
 	})
 	.setButtonResponse(async function onButtonRegisterRequest(interaction) {
-		const translator = await Translator.from(interaction.user.id);
+		const translator = await Translator.fromUser(interaction.user.id);
 
 		const modal = makeRegisterModal(translator);
 		return interaction.showModal(modal);
 	})
 	.setModalResponse(async function onRegisterRequest(interaction) {
-		const translator = await Translator.from(interaction.user.id);
+		const translator = await Translator.fromUser(interaction.user.id);
 
 		const imgurUser =
 			(await ImgurUserModel.findOne({ userId: interaction.user.id }))

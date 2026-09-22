@@ -333,7 +333,7 @@ const command = new Command(
 		const userId = request.userId;
 		const compressedUserId = compressId(userId);
 		const [translator, userConfigs] = await Promise.all([
-			Translator.from(request),
+			Translator.fromUser(request),
 			UserConfigModel.findOne({ userId }),
 		]);
 
@@ -428,7 +428,7 @@ const command = new Command(
 		async function viewReminder(interaction, reminderId) {
 			const [reminder, translator] = await Promise.all([
 				ReminderModel.findById(reminderId),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 				interaction.deferReply({
 					flags: MessageFlags.Ephemeral,
 				}),
@@ -450,7 +450,7 @@ const command = new Command(
 		async function promptAddReminder(interaction) {
 			const userId = interaction.user.id;
 			const [translator, userConfigs] = await Promise.all([
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 				UserConfigModel.findOne({ userId }),
 			]);
 
@@ -478,7 +478,7 @@ const command = new Command(
 			const userId = interaction.user.id;
 			const [reminder, translator, userConfigs] = await Promise.all([
 				ReminderModel.findById(reminderId),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 				UserConfigModel.findOne({ userId }),
 			]);
 
@@ -511,7 +511,7 @@ const command = new Command(
 		const userId = interaction.user.id;
 		const compressedUserId = compressId(userId);
 		const [translator, userConfigs] = await Promise.all([
-			Translator.from(interaction),
+			Translator.fromUser(interaction),
 			UserConfigModel.findOne({ userId }),
 			interaction.deferUpdate(),
 		]);
@@ -587,7 +587,7 @@ const command = new Command(
 	.setModalResponse(async function editReminder(interaction, reminderId) {
 		const [reminder, translator, userConfigs] = await Promise.all([
 			ReminderModel.findById(reminderId),
-			Translator.from(interaction),
+			Translator.fromUser(interaction),
 			UserConfigModel.findOne({ userId: interaction.user.id }),
 		]);
 
@@ -670,7 +670,7 @@ const command = new Command(
 		async function deleteReminder(interaction, reminderId) {
 			const [reminder, translator] = await Promise.all([
 				ReminderModel.findById(reminderId),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 			]);
 
 			if (!reminder)
@@ -697,7 +697,7 @@ const command = new Command(
 	.setButtonResponse(
 		async function refreshRemindersList(interaction, compressedUserId) {
 			const [translator] = await Promise.all([
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 				interaction.deferUpdate(),
 			]);
 

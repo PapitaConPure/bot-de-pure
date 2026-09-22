@@ -149,7 +149,7 @@ const command = new Command('feed', tags)
 	)
 	.setPermissions(perms)
 	.setExecution(async (request) => {
-		const translator = await Translator.from(request.userId);
+		const translator = await Translator.fromUser(request.userId);
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Aqua)
 			.setAuthor({
@@ -180,7 +180,7 @@ const command = new Command('feed', tags)
 		const guildQuery = { guildId: interaction.guild.id };
 		const [feeds, translator] = await Promise.all([
 			FeedConfigModel.find(guildQuery),
-			Translator.from(interaction.user.id),
+			Translator.fromUser(interaction.user.id),
 		]);
 		const hasFeeds = feeds.length;
 
@@ -258,7 +258,7 @@ const command = new Command('feed', tags)
 	)
 	.setModalResponse(
 		async function createOnChannel(interaction, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			let input = interaction.fields.getTextInputValue('channelInput');
 			if (input.startsWith('<') && input.endsWith('>')) input = input.slice(1, -1);
 			if (input.startsWith('#')) input = input.slice(1);
@@ -336,7 +336,7 @@ const command = new Command('feed', tags)
 	)
 	.setModalResponse(
 		async function setTags(interaction, channelId, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 			const input = interaction.fields.getTextInputValue('tagsInput').toLowerCase().trim();
 
@@ -398,7 +398,7 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function selectEdit(interaction, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Greyple)
 				.setAuthor({
@@ -439,7 +439,7 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function selectCustomize(interaction, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Greyple)
 				.setAuthor({
@@ -480,7 +480,7 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function selectView(interaction, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Greyple)
 				.setAuthor({
@@ -521,7 +521,7 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function selectDelete(interaction, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Greyple)
 				.setAuthor({
@@ -562,7 +562,7 @@ const command = new Command('feed', tags)
 	)
 	.setSelectMenuResponse(
 		async function selectedEdit(interaction, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			const channelId = interaction.values[0];
 			const wizard = tagsSetupPrompt(interaction, channelId, translator);
 			return interaction.update({
@@ -588,7 +588,7 @@ const command = new Command('feed', tags)
 		async function selectedCustomize(interaction, authorId) {
 			if (!interaction.channel) return interaction.deleteReply();
 
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 
 			const fetchedChannel = interaction.guild.channels.cache.get(
 				interaction.values[0] || interaction.channel.id,
@@ -676,7 +676,7 @@ const command = new Command('feed', tags)
 	.setSelectMenuResponse(
 		async function selectedView(interaction, authorId) {
 			const [translator] = await Promise.all([
-				Translator.from(interaction.user.id),
+				Translator.fromUser(interaction.user.id),
 				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 			]);
 
@@ -760,7 +760,7 @@ const command = new Command('feed', tags)
 	)
 	.setSelectMenuResponse(
 		async function selectedDelete(interaction, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			const chid = interaction.values[0];
 			const feed = await FeedConfigModel.findOne({ channelId: chid });
 
@@ -801,7 +801,7 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function deleteOne(interaction, channelId, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.DarkRed)
 				.setAuthor({
@@ -838,7 +838,7 @@ const command = new Command('feed', tags)
 	)
 	.setSelectMenuResponse(
 		async function selectItemCustomize(interaction, channelId, authorId) {
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			const customizeTarget = interaction.values[0];
 			const fetchedChannel = interaction.guild.channels.cache.get(
 				channelId,
@@ -1079,7 +1079,7 @@ const command = new Command('feed', tags)
 		async function setCustomTitle(interaction, channelId) {
 			const [feed, translator] = await Promise.all([
 				FeedConfigModel.findOne({ channelId }),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 			]);
 
 			if (!feed)
@@ -1100,7 +1100,7 @@ const command = new Command('feed', tags)
 		async function setCustomMaxTags(interaction, channelId) {
 			const [feed, translator] = await Promise.all([
 				FeedConfigModel.findOne({ channelId }),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 			]);
 
 			if (!feed)
@@ -1128,7 +1128,7 @@ const command = new Command('feed', tags)
 		async function setCustomSubtitle(interaction, channelId) {
 			const [feed, translator] = await Promise.all([
 				FeedConfigModel.findOne({ channelId }),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 			]);
 
 			if (!feed)
@@ -1149,7 +1149,7 @@ const command = new Command('feed', tags)
 		async function setCustomFooter(interaction, channelId) {
 			const [feed, translator] = await Promise.all([
 				FeedConfigModel.findOne({ channelId }),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 			]);
 
 			if (!feed)
@@ -1170,7 +1170,7 @@ const command = new Command('feed', tags)
 		async function setCustomIcon(interaction, channelId) {
 			const [feed, translator] = await Promise.all([
 				FeedConfigModel.findOne({ channelId }),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 			]);
 
@@ -1211,7 +1211,7 @@ const command = new Command('feed', tags)
 		async function removeCustomTitle(interaction, channelId, authorId) {
 			const [feed, translator] = await Promise.all([
 				FeedConfigModel.findOne({ channelId }),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 			]);
 
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
@@ -1257,7 +1257,7 @@ const command = new Command('feed', tags)
 		async function removeCustomTags(interaction, channelId, authorId) {
 			const [feed, translator] = await Promise.all([
 				FeedConfigModel.findOne({ channelId }),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 			]);
 
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
@@ -1302,7 +1302,7 @@ const command = new Command('feed', tags)
 		async function removeCustomFooter(interaction, channelId, authorId) {
 			const [feed, translator] = await Promise.all([
 				FeedConfigModel.findOne({ channelId }),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 			]);
 
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
@@ -1347,7 +1347,7 @@ const command = new Command('feed', tags)
 		async function removeCustomFooter(interaction, channelId, authorId) {
 			const [feed, translator] = await Promise.all([
 				FeedConfigModel.findOne({ channelId }),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 			]);
 
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
@@ -1392,7 +1392,7 @@ const command = new Command('feed', tags)
 		async function removeCustomIcon(interaction, channelId, authorId) {
 			const [feed, translator] = await Promise.all([
 				FeedConfigModel.findOne({ channelId }),
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 			]);
 
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
@@ -1435,7 +1435,7 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function cancelWizard(interaction) {
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			const cancelEmbed = new EmbedBuilder()
 				.setAuthor({
 					name: wizTitle(translator),
@@ -1455,7 +1455,7 @@ const command = new Command('feed', tags)
 	)
 	.setButtonResponse(
 		async function finishWizard(interaction) {
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			const cancelEmbed = new EmbedBuilder()
 				.setAuthor({
 					name: wizTitle(translator),
@@ -1471,7 +1471,7 @@ const command = new Command('feed', tags)
 		{ userFilterIndex: 0 },
 	)
 	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
-		const translator = await Translator.from(interaction.user.id);
+		const translator = await Translator.fromUser(interaction.user.id);
 
 		const url = getPostUrlFromComponents(interaction.message.components);
 		if (!url) return interaction.deleteReply();
@@ -1624,7 +1624,7 @@ const command = new Command('feed', tags)
 		}
 	})
 	.setButtonResponse(async function editFollowedTags(interaction, operation) {
-		const translator = await Translator.from(interaction.user.id);
+		const translator = await Translator.fromUser(interaction.user.id);
 
 		const tagsInput = new TextInputBuilder()
 			.setCustomId('tagsInput')
@@ -1652,7 +1652,7 @@ const command = new Command('feed', tags)
 		return interaction.showModal(modal).catch(auditError);
 	})
 	.setGlobalButtonResponse(async function deletePost(interaction, manageableBy, isNotFeed) {
-		const translator = await Translator.from(interaction.user.id);
+		const translator = await Translator.fromUser(interaction.user.id);
 
 		if (
 			interaction.inCachedGuild()
@@ -1742,7 +1742,7 @@ const command = new Command('feed', tags)
 		}
 	})
 	.setButtonResponse(async function contribute(interaction) {
-		const translator = await Translator.from(interaction.user.id);
+		const translator = await Translator.fromUser(interaction.user.id);
 
 		const url = getPostUrlFromComponents(interaction.message.components);
 		if (!url) return interaction.deleteReply();
@@ -1813,7 +1813,7 @@ const command = new Command('feed', tags)
 		return interaction.reply({ content: 'Shock aplicado.', flags: MessageFlags.Ephemeral });
 	})
 	.setButtonResponse(async function giveFeedback(interaction, type) {
-		const translator = await Translator.from(interaction.user);
+		const translator = await Translator.fromUser(interaction.user);
 		//return interaction.reply({ content: translator.getText('feedFeedbackExpired'), flags: MessageFlags.Ephemeral });
 
 		//type = 'Y' | 'N' | 'F'
@@ -1854,7 +1854,7 @@ const command = new Command('feed', tags)
 		return interaction.showModal(modal);
 	})
 	.setModalResponse(async function sendFeedback(interaction) {
-		const translator = await Translator.from(interaction.user);
+		const translator = await Translator.fromUser(interaction.user);
 		const feedback = interaction.fields.getTextInputValue('feedback');
 
 		auditAction(`Boorutato • Feedback • ${interaction.user.username}`, {

@@ -10,7 +10,7 @@ const action = new ContextMenuAction('actionPVUnbanMember', 'User').setUserRespo
 		const other = interaction.targetMember;
 
 		const [translator] = await Promise.all([
-			Translator.from(member),
+			Translator.fromUser(member),
 			interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 		]);
 

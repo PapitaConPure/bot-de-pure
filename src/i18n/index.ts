@@ -1,5 +1,6 @@
 import { Locale as DiscordLocaleKey } from 'discord.js';
 import { getBotEmoji, getBotEmojiResult } from '@/utils/emojis';
+import { fetchGuildCache, type GuildCacheResolvable } from '@/utils/guildcache';
 import type { UserCacheResolvable } from '@/utils/usercache';
 import { fetchUserCache } from '@/utils/usercache';
 import type { ValuesOf } from '../types/util';
@@ -3299,15 +3300,22 @@ export class Translator {
 	}
 
 	/**@description Instancia un {@link Translator} en base al idioma del usuario indicado*/
-	static async from(user: UserCacheResolvable) {
+	static async fromUser(user: UserCacheResolvable): Promise<Translator> {
 		const userCache = await fetchUserCache(user);
 		return new Translator(userCache?.language ?? defaultLocale);
 	}
 
 	//TODO: Implementar idioma y caché de configuración de Guild
-	static async fromGuild(_guild: unknown /*GuildCacheResolvable*/) {
-		const guildCache = { language: defaultLocale }; //await fetchGuildCache(guild);
-		return new Translator(guildCache.language ?? defaultLocale);
+	static async fromGuild(guild: GuildCacheResolvable): Promise<Translator> {
+		const guildCache = await fetchGuildCache(guild);
+		return new Translator(guildCache.locale ?? defaultLocale);
+	}
+
+	/**@description Instancia un {@link Translator} en base al idioma del usuario indicado*/
+	static async from(
+		data: UserCacheResolvable & GuildCacheResolvable,
+	): Promise<readonly [Translator, Translator]> {
+		return Promise.all([Translator.fromUser(data), Translator.fromGuild(data)]);
 	}
 
 	/**

@@ -41,7 +41,7 @@ export async function handleSlashCommand(
 			);
 
 		if (!interaction.channel) {
-			const translator = await Translator.from(interaction.user);
+			const translator = await Translator.fromUser(interaction.user);
 			interaction.reply({
 				content: translator.getText('invalidChannel'),
 			});
@@ -58,7 +58,7 @@ export async function handleSlashCommand(
 					`The Slash Command interaction "${interaction.id}" is not allowed for the requesting member in the source channel.`,
 				);
 
-				const translator = await Translator.from(interaction.member);
+				const translator = await Translator.fromUser(interaction.member);
 				interaction.channel?.send({
 					embeds: [
 						generateCommandExclusionEmbed(
@@ -90,7 +90,7 @@ export async function handleSlashCommand(
 					`The Slash Command interaction "${interaction.id}" is not allowed in the source channel.`,
 				);
 
-				const translator = await Translator.from(interaction.member);
+				const translator = await Translator.fromUser(interaction.member);
 				interaction.channel.send({
 					embeds: [
 						generateCommandExclusionEmbed(
@@ -178,7 +178,7 @@ export async function handleComponent(interaction: AnyCommandInteraction): Promi
 			debug(
 				`The Component interaction "${interaction.id}" is not authorized for the requesting user.`,
 			);
-			const translator = await Translator.from(interaction.user.id);
+			const translator = await Translator.fromUser(interaction.user.id);
 			await interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
 				flags: MessageFlags.Ephemeral,
@@ -257,7 +257,7 @@ export async function handleComponent(interaction: AnyCommandInteraction): Promi
 				debug(
 					`The Component interaction "${interaction.id}" is not authorized for the requesting user.`,
 				);
-				const translator = await Translator.from(interaction.user.id);
+				const translator = await Translator.fromUser(interaction.user.id);
 				await interaction.reply({
 					content: translator.getText('unauthorizedInteraction'),
 					flags: MessageFlags.Ephemeral,
@@ -326,7 +326,7 @@ export async function handleAutocompleteInteraction(
 }
 
 export async function handleBlockedInteraction(interaction: Interaction): Promise<void> {
-	const translator = await Translator.from(interaction.user.id);
+	const translator = await Translator.fromUser(interaction.user.id);
 	if (interaction.isRepliable()) {
 		await interaction.reply({
 			content: translator.getText('blockedInteraction', userIds.papita),
@@ -338,7 +338,7 @@ export async function handleBlockedInteraction(interaction: Interaction): Promis
 }
 
 export async function handleUnknownInteraction(interaction: Interaction): Promise<void> {
-	const translator = await Translator.from(interaction.user.id);
+	const translator = await Translator.fromUser(interaction.user.id);
 	if (interaction.isRepliable()) {
 		await interaction.reply({
 			content: translator.getText('unknownInteraction'),
@@ -350,7 +350,7 @@ export async function handleUnknownInteraction(interaction: Interaction): Promis
 }
 
 async function handleHuskInteraction(interaction: Interaction): Promise<void> {
-	const translator = await Translator.from(interaction.user.id);
+	const translator = await Translator.fromUser(interaction.user.id);
 	if (interaction.isRepliable()) {
 		await interaction.reply({
 			content: translator.getText('huskInteraction'),

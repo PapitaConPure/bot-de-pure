@@ -31,7 +31,7 @@ export async function processMessageCommand(message: Message<true>): Promise<Com
 	const commandName = args.shift()?.toLowerCase();
 
 	if (!commandName) {
-		const translator = await Translator.from(message.author);
+		const translator = await Translator.fromUser(message.author);
 		message.reply(translator.getText('invalidEmptyCommandName'));
 		return CommandResults.VOID;
 	}
@@ -86,7 +86,7 @@ async function handleInvalidCommand(
 		if (lowestDistance < 3) foundList.push({ command: cmd, distance: lowestDistance });
 	}
 
-	const translator = await Translator.from(message.author.id);
+	const translator = await Translator.fromUser(message.author.id);
 
 	const suggestions = [
 		...new Map(
@@ -168,7 +168,7 @@ async function handleCommandPermissions(
 	if (!message.member || !command.permissions.isAllowedIn(message.member, message.channel)) {
 		if (!requestString) return false;
 
-		const translator = await Translator.from(message.author);
+		const translator = await Translator.fromUser(message.author);
 		await message.channel.send({
 			embeds: [
 				generateCommandExclusionEmbed(
@@ -195,7 +195,7 @@ async function handleCommandPermissions(
 	if (!command.permissions.amAllowedIn(message.channel)) {
 		if (!requestString) return false;
 
-		const translator = await Translator.from(message.member);
+		const translator = await Translator.fromUser(message.member);
 		message.channel.send({
 			embeds: [
 				generateCommandExclusionEmbed(

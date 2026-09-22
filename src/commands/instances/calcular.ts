@@ -35,7 +35,7 @@ const command = new Command(
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const translator = await Translator.from(request);
+		const translator = await Translator.fromUser(request);
 
 		const shorten = args.hasFlag('acortar');
 		const minDigits = args.flagExprIf('mínimo', (v) => CommandOptionSolver.asNumber(v), 1);

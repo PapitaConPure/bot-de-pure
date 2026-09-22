@@ -28,7 +28,7 @@ const command = new Command(
 		const userQuery = { userId: request.userId };
 		const userConfigs =
 			(await UserConfigModel.findOne(userQuery)) || new UserConfigModel(userQuery);
-		const translator = await Translator.from(request.userId);
+		const translator = await Translator.fromUser(request.userId);
 
 		const now = new Date(Date.now());
 		const lastCultivationDate = new Date(userConfigs.lastCultivate);

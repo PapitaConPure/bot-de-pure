@@ -19,7 +19,7 @@ const command = new Command(
 	.setAliases('presentacion', 'presentación', 'hola', 'saludar', 'presentarse', 'puré', 'pure')
 	.setDescription('Me presento y digo cositas sobre mí~')
 	.setExecution(async (request) => {
-		const translator = await Translator.from(request);
+		const translator = await Translator.fromUser(request);
 		const papita = await request.client.users.fetch(userIds.papita);
 		const counts = {
 			commands: commandFilenames.length,

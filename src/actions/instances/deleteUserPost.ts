@@ -7,7 +7,7 @@ const action = new ContextMenuAction('actionDeleteUserPost', 'Message').setMessa
 	async (interaction) => {
 		const message = interaction.targetMessage;
 		const uid = interaction.user.id;
-		const translator = await Translator.from(uid);
+		const translator = await Translator.fromUser(uid);
 
 		if (
 			(message.webhookId == null || message.webhookId.length === 0)

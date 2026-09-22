@@ -40,7 +40,7 @@ const command = new Command(
 		'Muestra mi estado actual. Eso incluye versión, registro de cambios, cosas por hacer, etc',
 	)
 	.setExecution(async (request) => {
-		const translator = await Translator.from(request.member);
+		const translator = await Translator.fromUser(request.member);
 		const stats = (await StatsModel.findOne({})) || new StatsModel({ since: Date.now() });
 		const counts = {
 			commands: commandFilenames.length,
@@ -140,7 +140,7 @@ const command = new Command(
 		});
 	})
 	.setSelectMenuResponse(async function getHelp(interaction) {
-		const translator = await Translator.from(interaction);
+		const translator = await Translator.fromUser(interaction);
 
 		const guildPrefix = p_pure(interaction).raw;
 		const helpCommand = `${guildPrefix}${command.localizedNames[translator.locale]}`;
@@ -170,7 +170,7 @@ const command = new Command(
 		});
 	})
 	.setButtonResponse(async function showChanges(interaction) {
-		const translator = await Translator.from(interaction);
+		const translator = await Translator.fromUser(interaction);
 
 		const matchedCommands = changelog.join().matchAll(COMMAND_REGEX);
 		const formattedChangelog = changelog.map((item) => `- ${item}`).join('\n');
@@ -212,7 +212,7 @@ const command = new Command(
 		});
 	})
 	.setButtonResponse(async function showUpcoming(interaction) {
-		const translator = await Translator.from(interaction);
+		const translator = await Translator.fromUser(interaction);
 
 		const formattedToDo = toDo.map((item) => `- ${item}`).join('\n');
 		const container = new ContainerBuilder()

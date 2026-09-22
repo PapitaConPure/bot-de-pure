@@ -1167,7 +1167,7 @@ const command = new Command(
 	.setButtonResponse(async function editFT(interaction, authorId, channelId, operation, isAlt) {
 		channelId = decompressId(channelId);
 		const { user } = interaction;
-		const translator = await Translator.from(user);
+		const translator = await Translator.fromUser(user);
 
 		if (compressId(user.id) !== authorId)
 			return interaction.reply({
@@ -1272,7 +1272,7 @@ const command = new Command(
 	)
 	.setButtonResponse(
 		async function cancelWizard(interaction) {
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 
 			const container = new ContainerBuilder().addTextDisplayComponents((textDisplay) =>
 				textDisplay.setContent(translator.getText('yoCancelledStep')),
@@ -1286,7 +1286,7 @@ const command = new Command(
 	)
 	.setButtonResponse(
 		async function exitWizard(interaction) {
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 
 			const finishContainer = new ContainerBuilder().addTextDisplayComponents((textDisplay) =>
 				textDisplay.setContent(translator.getText('yoFinishedStep')),

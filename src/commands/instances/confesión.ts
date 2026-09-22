@@ -587,7 +587,7 @@ const command = new Command(
 		return interaction.update({ embeds: [confirmationEmbed], components: [] });
 	})
 	.setButtonResponse(async function promptReplyAnon(interaction) {
-		const translator = await Translator.from(interaction.user);
+		const translator = await Translator.fromUser(interaction.user);
 
 		const modal = new ModalBuilder()
 			.setCustomId('confesión_replyAnon')

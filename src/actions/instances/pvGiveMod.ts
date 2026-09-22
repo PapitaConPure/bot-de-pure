@@ -13,7 +13,7 @@ const action = new ContextMenuAction('actionPVGiveMod', 'User').setUserResponse(
 		const other = interaction.targetMember;
 
 		const [translator] = await Promise.all([
-			Translator.from(member),
+			Translator.fromUser(member),
 			interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 		]);
 

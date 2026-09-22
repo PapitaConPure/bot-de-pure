@@ -28,7 +28,7 @@ const command = new Command(
 	.setDescription('Para operar un número. Sí, solo eso, tenía ganas de jugar con algo')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const translator = await Translator.from(request);
+		const translator = await Translator.fromUser(request);
 
 		const shorten = args.hasFlag('acortar');
 		const minDigits = args.flagExprIf('mínimo', (x) => CommandOptionSolver.asNumber(x), 1);

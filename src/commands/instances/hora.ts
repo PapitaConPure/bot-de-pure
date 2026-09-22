@@ -52,7 +52,7 @@ const command = new Command(
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const translator = await Translator.from(request.user);
+		const translator = await Translator.fromUser(request.user);
 
 		const tzCode =
 			args.parseFlagExpr('huso')

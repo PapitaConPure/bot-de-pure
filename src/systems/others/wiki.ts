@@ -38,7 +38,7 @@ export const makeCategoriesRow = async (
 	request: ComplexCommandRequest | ComponentInteraction<'cached'>,
 	selections: CommandTagResolvable[],
 ) => {
-	const translator = await Translator.from(request);
+	const translator = await Translator.fromUser(request);
 	const getDefault = (d: CommandTagResolvable) => !!selections.includes(d);
 
 	const categoryOptions: StringSelectMenuOptionBuilder[] = [

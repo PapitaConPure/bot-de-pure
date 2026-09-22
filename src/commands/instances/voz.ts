@@ -206,7 +206,7 @@ const command = new Command(
 	)
 	.setOptions(options)
 	.setExecution(async (request, args) => {
-		const translator = await Translator.from(request);
+		const translator = await Translator.fromUser(request);
 
 		//TODO: Mover asistente a p!servidor y eliminar esta bandera
 		if (args.hasFlag('asistente')) return generateFirstWizard(request, translator);
@@ -308,7 +308,7 @@ const command = new Command(
 	})
 	.setButtonResponse(
 		async function startWizard(interaction, authorId) {
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 			const { guild } = interaction;
 
 			const wizard = wizEmbed(
@@ -359,7 +359,7 @@ const command = new Command(
 	)
 	.setButtonResponse(
 		async function selectInstallation(interaction, authorId) {
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 
 			const wizard = wizEmbed(
 				translator,
@@ -391,7 +391,7 @@ const command = new Command(
 	)
 	.setButtonResponse(
 		async function promptInstallSystem(interaction, authorId, createNew) {
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 
 			const modal = new ModalBuilder()
 				.setCustomId(`voz_installSystem_${authorId}${createNew ? `_${createNew}` : ''}`)
@@ -430,7 +430,7 @@ const command = new Command(
 	.setModalResponse(
 		async function installSystem(interaction, _, createNew) {
 			const [translator] = await Promise.all([
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
 			]);
 
@@ -509,7 +509,7 @@ const command = new Command(
 	)
 	.setButtonResponse(
 		async function promptRelocateSystem(interaction, authorId) {
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 
 			const guildQuery = { guildId: interaction.guildId };
 			const pv = await PureVoice.findOne(guildQuery);
@@ -537,7 +537,7 @@ const command = new Command(
 	)
 	.setModalResponse(
 		async function relocateSystem(interaction) {
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 
 			const guildQuery = { guildId: interaction.guildId };
 			const pv = await PureVoice.findOne(guildQuery);
@@ -604,7 +604,7 @@ const command = new Command(
 	)
 	.setButtonResponse(
 		async function deleteSystem(interaction, authorId) {
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 
 			const wizard = wizEmbed(
 				translator,
@@ -638,7 +638,7 @@ const command = new Command(
 		async function deleteSystemConfirmed(interaction) {
 			const guildQuery = { guildId: interaction.guildId };
 			const [translator, pv] = await Promise.all([
-				Translator.from(interaction),
+				Translator.fromUser(interaction),
 				PureVoice.findOne(guildQuery),
 			]);
 
@@ -697,7 +697,7 @@ const command = new Command(
 	)
 	.setButtonResponse(
 		async function cancelWizard(interaction) {
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 
 			const cancelEmbed = wizEmbed(
 				translator,
@@ -717,7 +717,7 @@ const command = new Command(
 	)
 	.setButtonResponse(async function setSessionName(interaction) {
 		const { member } = interaction;
-		const translator = await Translator.from(member);
+		const translator = await Translator.fromUser(member);
 
 		const voiceChannel = member.voice?.channel;
 		if (!voiceChannel) return warnNotInSession(interaction, translator);
@@ -757,7 +757,7 @@ const command = new Command(
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 		const { member } = interaction;
-		const translator = await Translator.from(member);
+		const translator = await Translator.fromUser(member);
 
 		const warnNotInSession = () =>
 			interaction
@@ -796,7 +796,7 @@ const command = new Command(
 	})
 	.setButtonResponse(async function editSessionMembers(interaction) {
 		const { member } = interaction;
-		const translator = await Translator.from(member);
+		const translator = await Translator.fromUser(member);
 
 		const voiceChannel = member.voice?.channel;
 		if (!voiceChannel?.id) return warnNotInSession(interaction, translator);
@@ -813,7 +813,7 @@ const command = new Command(
 	})
 	.setButtonResponse(async function sessionMembersNav(interaction, page) {
 		const { member } = interaction;
-		const translator = await Translator.from(member);
+		const translator = await Translator.fromUser(member);
 
 		const voiceChannel = member.voice?.channel;
 		if (!voiceChannel?.id) return warnNotInSession(interaction, translator);
@@ -829,7 +829,7 @@ const command = new Command(
 	})
 	.setButtonResponse(
 		async function editSessionMember(interaction, compressedSessionMemberId, page) {
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 
 			const voiceChannel = interaction.member.voice?.channel;
 			if (!voiceChannel?.id) return warnNotInSession(interaction, translator);
@@ -963,7 +963,7 @@ const command = new Command(
 	.setModalResponse(async function transferSessionAdmin(interaction, page) {
 		const { member: thisMember, guildId } = interaction;
 
-		const translator = await Translator.from(interaction);
+		const translator = await Translator.fromUser(interaction);
 
 		const voiceChannel = thisMember.voice?.channel;
 		if (!voiceChannel?.id) return warnNotInSession(interaction, translator);
@@ -1038,7 +1038,7 @@ const command = new Command(
 		async function applyEditSessionMember(interaction, compressedSessionMemberId, page) {
 			const { member: thisMember, guildId } = interaction;
 
-			const translator = await Translator.from(interaction);
+			const translator = await Translator.fromUser(interaction);
 
 			const voiceChannel = interaction.member.voice?.channel;
 			if (!voiceChannel?.id) return warnNotInSession(interaction, translator);
@@ -1124,7 +1124,7 @@ const command = new Command(
 	)
 	.setButtonResponse(async function editSessionKillDelay(interaction) {
 		const { member } = interaction;
-		const translator = await Translator.from(member);
+		const translator = await Translator.fromUser(member);
 
 		const voiceChannel = member.voice?.channel;
 		if (!voiceChannel) return warnNotInSession(interaction, translator);
@@ -1161,7 +1161,7 @@ const command = new Command(
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 		const { member } = interaction;
-		const translator = await Translator.from(member);
+		const translator = await Translator.fromUser(member);
 
 		const warnNotInSession = () =>
 			interaction
@@ -1194,7 +1194,7 @@ const command = new Command(
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
 		const { member } = interaction;
-		const translator = await Translator.from(member);
+		const translator = await Translator.fromUser(member);
 
 		const warnNotInSession = () =>
 			interaction
