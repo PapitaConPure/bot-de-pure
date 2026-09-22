@@ -208,15 +208,25 @@ const localesObject = {
 		ja: '❌ このウィザードはセッションデータを使用しますが、セッションが見つかりませんでした。コマンドを再度実行して新しいセッションを開始してください',
 	},
 
+	interactionNotInCachedGuildTitle: {
+		es: 'Esta interacción no está permitida',
+		en: 'This interaction is not allowed',
+		ja: 'この操作は許可されていません。',
+	},
+	interactionNotInCachedGuildDescription: {
+		es: 'Este comando u esta acción debe realizarse en un servidor al que yo tenga acceso apropiado.',
+		en: 'This command or action needs to be executed within a server I have proper access to.',
+		ja: 'このコマンドやアクションは、適切なアクセス権限を持つサーバー上で実行する必要があります。',
+	},
 	missingMemberChannelPermissionsTitle: {
 		es: 'Permisos insuficientes',
 		en: 'Insufficient permissions',
 		ja: '権限が不十分です',
 	},
 	missingMemberChannelPermissionsDescription: {
-		es: 'Este comando u esta acción requiere permisos para ejecutarse que no tienes actualmente',
-		en: "This command or action requires permissions that you don't currently have to execute",
-		ja: 'このコマンドまたはアクションを実行するには、現在所有していない権限が必要です',
+		es: 'Este comando u esta acción requiere permisos para ejecutarse que no tienes actualmente.',
+		en: "This command or action requires permissions that you don't currently have to execute.",
+		ja: 'このコマンドまたはアクションを実行するには、現在所有していない権限が必要です。',
 	},
 	missingMemberChannelPermissionsFullRequisitesName: {
 		es: 'Árbol de requisitos',
@@ -225,16 +235,16 @@ const localesObject = {
 	},
 	missingClientChannelPermissionsDescription: {
 		es: paragraph(
-			'No tengo los permisos necesarios para ejecutar el comando o la acción que acabas de pedirme en este canal',
-			'Soy una niña educada, así que no haré nada hasta que me den permiso. Puedes comentarle el asunto a algún moderador del server para que lo revise',
+			'No tengo los permisos necesarios para ejecutar el comando o la acción que acabas de pedirme en este canal.',
+			'Soy una niña educada, así que no haré nada hasta que me den permiso. Puedes comentarle el asunto a algún moderador del server para que lo revise.',
 		),
 		en: paragraph(
-			"I don't have the required permissions to execute the command or action that you requested in this channel",
-			"I'm a well educated girl, so I won't do anything until I'm given permission to do so. You can ask a mod to review and address the issue",
+			"I don't have the required permissions to execute the command or action that you requested in this channel.",
+			"I'm a well educated girl, so I won't do anything until I'm given permission to do so. You can ask a mod to review and address the issue.",
 		),
 		ja: paragraph(
-			'このチャンネルでは、リクエストされたコマンドや操作を実行するための権限がありません',
-			'お行儀のいい子なので、許可がもらえるまで何もしません。モデレーターに相談して確認してもらってください',
+			'このチャンネルでは、リクエストされたコマンドや操作を実行するための権限がありません。',
+			'お行儀のいい子なので、許可がもらえるまで何もしません。モデレーターに相談して確認してもらってください。',
 		),
 	},
 
