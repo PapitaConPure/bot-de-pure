@@ -438,16 +438,20 @@ export class PureVoiceUpdateHandler {
 			if (dbMember) return;
 
 			info(
-				`Dará lugar el registro de un nuevo miembro de sesión: "${member.user.username}" (${member.id}), para la sesión del canal: #${channel.name} (${channel.id})`,
+				`A new session member: "${member.user.username}" (${member.id}), will be registered for session of channel: #${channel.name} (${channel.id})`,
 			);
+
+			currentSession.members.set(member.id, sessionMember.toJSON());
+			currentSession.markModified('members');
+			await currentSession.save();
 
 			const userConfigs =
 				(await UserConfigModel.findOne({ userId: member.id }))
 				|| new UserConfigModel({ userId: member.id });
 
 			embed
-				.setColor(0x00ff7f)
-				.setFooter({ text: `👥 ${currentSession.members.size}` })
+				.setColor(tenshiColor)
+				.setFooter({ text: `👥 ${channel.members.size} / ${currentSession.members.size}` })
 				.addFields({
 					name: `${member.user.bot ? '🤖' : '👤'} ${translator.getText('voiceSessionNewMemberName')}`,
 					value: translator.getText(
@@ -458,18 +462,13 @@ export class PureVoiceUpdateHandler {
 					),
 				});
 
-			await channel
-				?.send({
-					content:
-						userConfigs.voice.ping !== 'always' || member.user.bot
-							? undefined
-							: translator.getText('voiceSessionNewMemberContentHint', `${member}`),
-					embeds: [embed],
-				})
-				.catch(prematureError);
-			currentSession.members.set(member.id, sessionMember.toJSON());
-			currentSession.markModified('members');
-			await currentSession.save();
+			const content =
+				userConfigs.voice.ping !== 'always' || member.user.bot
+					? undefined
+					: translator.getText('voiceSessionNewMemberContentHint', `${member}`);
+
+			channel.send({ content, embeds: [embed] }).catch(prematureError);
+
 			return;
 		}
 
@@ -589,7 +588,7 @@ export class PureVoiceUpdateHandler {
 			});
 
 			embed
-				.setColor(0x21abcd)
+				.setColor(tenshiColor)
 				.setTitle(translator.getText('voiceSessionNewSessionTitle'))
 				.setFooter({ text: `👥 1` })
 				.addFields(
