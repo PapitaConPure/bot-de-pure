@@ -451,7 +451,7 @@ export class PureVoiceUpdateHandler {
 
 			embed
 				.setColor(tenshiColor)
-				.setFooter({ text: `👥 ${channel.members.size} / ${currentSession.members.size}` })
+				.setFooter({ text: `👥 ${channel.members.size}/${currentSession.members.size}` })
 				.addFields({
 					name: `${member.user.bot ? '🤖' : '👤'} ${translator.getText('voiceSessionNewMemberName')}`,
 					value: translator.getText(
@@ -590,7 +590,7 @@ export class PureVoiceUpdateHandler {
 			embed
 				.setColor(tenshiColor)
 				.setTitle(translator.getText('voiceSessionNewSessionTitle'))
-				.setFooter({ text: `👥 1` })
+				.setFooter({ text: `👥 1/1` })
 				.addFields(
 					{
 						name: translator.getText('voiceSessionNewSessionCustomizeName'),
