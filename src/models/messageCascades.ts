@@ -1,3 +1,4 @@
+import { addHours } from 'date-fns';
 import Mongoose, { type InferSchemaType } from 'mongoose';
 import type { MessageCascadePartKey } from '@/systems/others/messageCascades';
 
@@ -17,7 +18,7 @@ const MessageCascadeSchema = new Mongoose.Schema({
 	},
 	expirationDate: {
 		type: Date,
-		default: () => new Date(Date.now() + 4 * 60 * 60e3),
+		default: () => addHours(Date.now(), 4),
 	},
 });
 MessageCascadeSchema.index({ messageId: 1, otherMessageId: 1 }, { unique: true });
