@@ -468,6 +468,26 @@ const localesObject = {
 		en: 'Emote',
 		ja: 'エモート',
 	},
+	guild: {
+		es: 'Servidor',
+		en: 'Server',
+		ja: 'サーバー',
+	},
+	channel: {
+		es: 'Canal',
+		en: 'Channel',
+		ja: 'チャネル',
+	},
+	user: {
+		es: 'Usuario',
+		en: 'User',
+		ja: 'ユーザー',
+	},
+	member: {
+		es: 'Miembro',
+		en: 'Member',
+		ja: 'メンバー',
+	},
 
 	buttonStart: {
 		es: 'Comenzar',
@@ -1607,26 +1627,6 @@ const localesObject = {
 		ja: '興味のあるタグ',
 	},
 
-	feedAuthor: {
-		es: 'Asistente de configuración de Feed de imágenes',
-		en: 'Imageboard Feed Configuration Wizard',
-		ja: '画像フィード設定ウィザード',
-	},
-	feedCancelledStep: {
-		es: 'Se canceló la configuración de Feeds',
-		en: 'The Feeds Wizard has been terminated',
-		ja: 'フィード設定ウィザードがキャンセルされました',
-	},
-	feedFinishedStep: {
-		es: 'Se finalizó la configuración de Feeds',
-		en: 'The Feeds Wizard has been closed',
-		ja: 'フィード設定ウィザードが完了しました',
-	},
-	feedSelectFeed: {
-		es: 'Selecciona un Feed...',
-		en: 'Select a Feed...',
-		ja: 'フィードを選択してください...',
-	},
 	feedViewUrlsName: {
 		es: 'Enlaces',
 		en: 'Links',
@@ -2228,64 +2228,241 @@ const localesObject = {
 		ja: 'サーバー設定ウィザードが閉じられました。',
 	},
 
-	voiceExpected: {
-		es: '❌ Debes conectarte a un canal de voz primero',
-		en: '❌ You need to connect to a voice channel first',
-		ja: '❌ まず音声チャンネルに接続する必要があります',
+	serverFeedWizardEpigraph: {
+		es: '-# Asistente de Sistema Boorutato',
+		en: '-# Boorutato System Wizard',
+		ja: '-# Boorutato システムウイザード',
 	},
-	voiceWizardEpigraph: {
-		es: '-# Asistente de Configuración de Sistema PuréVoice',
-		en: '-# PuréVoice System Configuration Wizard',
-		ja: '-# PuréVoice システム設定ウィザード',
+	serverFeedWizardMainTitle: {
+		es: () =>
+			`## ${getBotEmoji('boorutatoFullColor')} Asistente de Configuración de Feeds de imágenes`,
+		en: () => `## ${getBotEmoji('boorutatoFullColor')} Imageboard Feeds Configuration Wizard`,
+		ja: () => `## ${getBotEmoji('boorutatoFullColor')} 画像掲示板フィードの設定ウィザード`,
 	},
-	voiceInstallationStartTitle: {
+	serverFeedWizardWelcome: {
+		es: 'Si es la primera vez que configuras un Feed de Boorutato, ¡no te preocupes!\nSolo sigue las instrucciones del Asistente de configuración.',
+		en: "If this is your first time setting up a Boorutato Feed, don't worry!\nJust follow the Configuration Wizard's instructions.",
+		ja: 'Boorutato フィードを初めて設定される場合でも、ご安心ください！\n設定ウィザードの指示に従うだけで設定できます。',
+	},
+	serverFeedNextStepQuestion: {
+		es: '¿Qué deseas hacer ahora mismo?',
+		en: 'What do you want to do now?',
+		ja: '今、何をしたいですか？',
+	},
+	serverFeedEditModalChannelPlaceholder: {
+		es: 'Selecciona el canal objetivo',
+		en: 'Select the target channel',
+		ja: '対象チャンネルを選択してください',
+	},
+	serverFeedEditModalSearchLabel: {
+		es: 'Tags',
+		en: 'Tags',
+		ja: 'タグ',
+	},
+	serverFeedEditModalSearchHelp: {
+		es: paragraph(
+			'### -# Cómo buscar',
+			'Entra a [Gelbooru](https://gelbooru.com) y realiza una búsqueda con tags que desees incluir en el Feed, separadas por espacios.',
+			'Una vez consigas resultados que te gusten, simplemente copia tu búsqueda en el campo de texto de arriba.',
+			'### -# Ejemplos',
+			'* `virtual_youtuber pink_hair cat_ears`',
+			'* `pixel_art {white_gloves ~ black_gloves} 1girl`',
+		),
+		en: paragraph(
+			'### -# How to search',
+			'Go to [Gelbooru](https://gelbooru.com) and perform a search using the tags you want to include in the Feed, separated by spaces.',
+			'Once you find results you like, simply copy your search into the text field above.',
+			'### -# Examples',
+			'* `touhou -blonde_hair hat`',
+			'* `virtual_youtuber pink_hair cat_ears`',
+			'* `pixel_art {white_gloves ~ black_gloves} 1girl`',
+		),
+		ja: paragraph(
+			'### -# 検索方法',
+			'[Gelbooru](https://gelbooru.com)にアクセスし、Feedに含めたいタグをスペースで区切って検索してください。',
+			'気に入った結果が見つかったら、その検索条件をそのまま上のテキスト欄にコピーしてください。',
+			'タグは正しく入力する必要があります。',
+			'### -# 例',
+			'* `virtual_youtuber -gun pink_hair cat_ears`',
+			'* `pixel_art {white_gloves ~ black_gloves} 1girl`',
+		),
+	},
+	serverFeedEditModalRatingLabel: {
+		es: 'Calificación',
+		en: 'Rating',
+		ja: 'レーティング',
+	},
+	serverFeedEditModalRatingLabelOptionGeneralName: {
+		es: 'Contenido general',
+		en: 'General content',
+		ja: '一般向けコンテンツ',
+	},
+	serverFeedEditModalRatingLabelOptionGeneralDescription: {
+		es: 'Totalmente apto para oficinas. Nada sexualizado o inapropiado para ver delante de otras personas.',
+		en: 'Completely safe for work content. Nothing sexualized or inappropriate to view in front of others.',
+		ja: '職場など人前でも安心して見られるコンテンツ。性的な表現や、人前で見るのに不適切な内容は一切ありません。',
+	},
+	serverFeedEditModalRatingLabelOptionSensitiveName: {
+		es: 'Contenido sensible',
+		en: 'Sensitive content',
+		ja: 'センシティブなコンテンツ',
+	},
+	serverFeedEditModalRatingLabelOptionSensitiveDescription: {
+		es: 'Contenido «ecchi», sexy, sugerente o ligeramente erótico; potencialmente no seguro para oficinas.',
+		en: '«Ecchi», sexy, suggestive, or mildly erotic content; potentially not safe for work content.',
+		ja: 'エッチな内容、セクシーな内容、性的な示唆を含む内容、または軽度の性的描写を含む内容。職場での閲覧には適さない可能性があります。',
+	},
+	serverFeedEditModalRatingLabelOptionQuestionableName: {
+		es: 'Contenido cuestionable',
+		en: 'Questionable content',
+		ja: '問題のあるコンテンツ',
+	},
+	serverFeedEditModalRatingLabelOptionQuestionableDescription: {
+		es: 'Erotismo suave. Desnudez simple o casi desnudez, pero sin sexo explícito ni genitales expuestos.',
+		en: 'Softcore erotica. Simple nudity or near-nudity, but no explicit sex or exposed genitals.',
+		ja: 'ソフトコアなエロティカ。単純な裸体やそれに近い露出を含みますが、露骨な性行為や露出した性器は含みません。',
+	},
+	serverFeedEditModalRatingLabelOptionExplicitName: {
+		es: 'Contenido explícito',
+		en: 'Explicit content',
+		ja: '露骨なコンテンツ',
+	},
+	serverFeedEditModalRatingLabelOptionExplicitDescription: {
+		es: 'Contenido abiertamente sexual. Actos sexuales explícitos, genitales expuestos y fluidos sexuales.',
+		en: 'Blatantly sexual content. Explicit sex acts, exposed genitals, and sexual fluids.',
+		ja: '露骨に性的なコンテンツ。明示的な性行為、露出した性器、性的な体液を含みます。',
+	},
+	serverFeedEditModalAdditionalHelp: {
+		es: () =>
+			paragraph(
+				'### -# Más información (inglés)',
+				`* ${getBotEmoji('gelbooruAccent')} [Cómo buscar correctamente](https://gelbooru.com/index.php?page=wiki&s=view&id=25921)`,
+				`* ${getBotEmoji('gelbooruAccent')} [Sobre las calificaciones de imágenes](https://gelbooru.com/index.php?page=wiki&s=view&id=2535)`,
+				`* ${getBotEmoji('gelbooruAccent')} [Ayudamemoria de tags](https://gelbooru.com/index.php?page=wiki&s=view&id=26263)`,
+			),
+		en: () =>
+			paragraph(
+				'### -# More information (English)',
+				`* ${getBotEmoji('gelbooruAccent')} [How to search correctly](https://gelbooru.com/index.php?page=wiki&s=view&id=25921)`,
+				`* ${getBotEmoji('gelbooruAccent')} [About image ratings](https://gelbooru.com/index.php?page=wiki&s=view&id=2535)`,
+				`* ${getBotEmoji('gelbooruAccent')} [Tag cheat sheet](https://gelbooru.com/index.php?page=wiki&s=view&id=26263)`,
+			),
+		ja: () =>
+			paragraph(
+				'### -# 詳細情報（英語）',
+				`* ${getBotEmoji('gelbooruAccent')} [正しい検索方法](https://gelbooru.com/index.php?page=wiki&s=view&id=25921)`,
+				`* ${getBotEmoji('gelbooruAccent')} [画像のレーティングについて](https://gelbooru.com/index.php?page=wiki&s=view&id=2535)`,
+				`* ${getBotEmoji('gelbooruAccent')} [タグ早見表](https://gelbooru.com/index.php?page=wiki&s=view&id=26263)`,
+			),
+	},
+	serverFeedEditModalSelectFeedLabel: {
+		es: 'Feed',
+		en: 'Feed',
+		ja: 'フィード',
+	},
+	serverFeedEditModalSelectFeedPlaceholder: {
+		es: 'Selecciona un Feed...',
+		en: 'Select a Feed...',
+		ja: 'フィードを選択してください...',
+	},
+	serverFeedDeleteModalTitle: {
+		es: 'Eliminar Feed',
+		en: 'Delete Feed',
+		ja: 'フィードを削除',
+	},
+	serverFeedDeleteTitle: {
+		es: '## A punto de eliminar un Feed',
+		en: '## About to Delete a Feed',
+		ja: '## フィードを削除しようとしています',
+	},
+	serverFeedDeleteDescription: {
+		es: paragraph(
+			'Esta acción eliminará toda la configuración asociada al Feed y detendrá el envío de nuevas imágenes a su canal destino.',
+			'No se borrarán las imágenes que ya hayan sido enviadas ni el canal de destino en cuestión.',
+		),
+		en: paragraph(
+			'This action will delete all configuration associated with the Feed and stop new images from being sent to its target channel.',
+			'Images that have already been sent and the target channel itself will not be deleted.',
+		),
+		ja: paragraph(
+			'この操作を行うと、Feedに関連するすべての設定が削除され、送信先チャンネルへの新しい画像の送信が停止します。',
+			'すでに送信された画像や送信先チャンネル自体は削除されません。',
+		),
+	},
+	serverFeedDeleteConfirmQuestion: {
+		es: '**¿Estás segur@?**',
+		en: '**Are you sure?**',
+		ja: '**本気ですか？**',
+	},
+	serverFeedDeleteConfirm: {
+		es: 'ELIMINAR',
+		en: 'DELETE',
+		ja: '消去',
+	},
+	serverFeedDeletedTitle: {
+		es: '## Feed eliminado',
+		en: '## Feed Deleted',
+		ja: '## フィードが削除されました',
+	},
+	serverFeedDeletedDescription: {
+		es: `Se eliminó el Feed de <#${subl(0)}>.`,
+		en: `The Feed in <#${subl(0)}> has been deleted.`,
+		ja: `<#${subl(0)}> のフィードが削除されました。`,
+	},
+
+	serverVoiceWizardEpigraph: {
+		es: '-# Asistente de Sistema PuréVoice',
+		en: '-# PuréVoice System Wizard',
+		ja: '-# PuréVoice システムウィザード',
+	},
+	serverVoiceWizardMainTitle: {
 		es: () =>
 			`## ${getBotEmoji('purevoiceFullColor')} Asistente de instalación de Sistema PuréVoice`,
 		en: () => `## ${getBotEmoji('purevoiceFullColor')} PuréVoice System Installation Wizard`,
 		ja: () =>
 			`## ${getBotEmoji('purevoiceFullColor')} PuréVoice システム・インストールウィザード`,
 	},
-	voiceWizardWelcome: {
+	serverVoiceWizardWelcome: {
 		es: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes!\nSolo sigue las instrucciones del Asistente de configuración.',
 		en: "If this is your first time setting up a PuréVoice System, don't worry!\nJust follow the Configuration Wizard's instructions.",
 		ja: 'PuréVoice システムを初めて設定される場合でも、ご安心ください！\n設定ウィザードの指示に従うだけで設定できます。',
 	},
-	voiceInstallationNextStepDescription: {
+	serverVoiceInstallationNextStepQuestion: {
 		es: '¿Qué deseas hacer ahora mismo?',
 		en: 'What do you want to do now?',
 		ja: '今、何をしたいですか？',
 	},
-	voiceInstallationSelectTitle: {
+	serverVoiceInstallationSelectTitle: {
 		es: '## Instalación',
 		en: '## Installation',
 		ja: '## インストール',
 	},
-	voiceInstallationSelectDescription: {
+	serverVoiceInstallationSelectDescription: {
 		es: 'Selecciona el tipo de instalación que deseas realizar',
 		en: 'Select the installation type that best fits your needs',
 		ja: 'ご自身のニーズに最も適したインストールタイプを選択してください',
 	},
-	voiceInstallationSelectButtonCreateNew: {
+	serverVoiceInstallationSelectButtonCreateNew: {
 		es: 'Crear categoría con PuréVoice',
 		en: 'Create a category for PuréVoice',
 		ja: 'PuréVoice のカテゴリを作成する',
 	},
-	voiceInstallationSelectButtonInject: {
+	serverVoiceInstallationSelectButtonInject: {
 		es: 'Inyectar PuréVoice en categoría',
 		en: 'Inject PuréVoice into category',
 		ja: 'PuréVoice をカテゴリーに導入',
 	},
-	voiceInstallationModalDescription: {
+	serverVoiceInstallationModalDescription: {
 		es: 'Menciona el nombre de la categoría a la cual inyectarle PuréVoice',
 		en: 'Mention the name of the category you want to inject PuréVoice into',
 		ja: 'PuréVoice を導入するカテゴリ名を指定してください',
 	},
-	voiceCategoryInstalledTitle: {
+	serverVoiceCategoryInstalledTitle: {
 		es: '## La categoría fue instalada',
 		en: '## The category has been installed',
 		ja: '## カテゴリがインストールされました',
 	},
-	voiceCategoryInstalledDescription: {
+	serverVoiceCategoryInstalledDescription: {
 		es: paragraph(
 			'Se ha preparado una categoría que escala de forma dinámica sus canales de voz.',
 			`Puedes reubicar el Sistema PuréVoice creado en el futuro, solo usa \`${subl(0)}servidor\` otra vez.`,
@@ -2299,12 +2476,12 @@ const localesObject = {
 			`作成した PuréVoice システムは将来的に再配置できます。\`${subl(0)}server\`を再度使用するだけです。`,
 		),
 	},
-	voiceCategoryInstallSuccess: {
+	serverVoiceCategoryInstallSuccess: {
 		es: '✅ Instalación de Sistema PuréVoice finalizada',
 		en: '✅ PuréVoice System installation finished',
 		ja: '✅ PuréVoice システムのインストールが完了しました',
 	},
-	voiceCategoryInstallError: {
+	serverVoiceCategoryInstallError: {
 		es: paragraph(
 			'⚠️ Ocurrió un error al inyectar PuréVoice en una categoría.',
 			'Asegúrate de que tenga los permisos necesarios para realizar esta acción (administrar canales).',
@@ -2321,12 +2498,12 @@ const localesObject = {
 			'また、入力した名前が他のカテゴリやチャンネルにすでに占有されていないことを確認してください',
 		),
 	},
-	voiceUninstallTitle: {
+	serverVoiceUninstallTitle: {
 		es: '## Desinstalación del Sistema PuréVoice del servidor',
 		en: '## Uninstalling the PuréVoice System from the server',
 		ja: '## PuréVoice システムをサーバーからアンインストールする',
 	},
-	voiceUninstallDescription: {
+	serverVoiceUninstallDescription: {
 		es: paragraph(
 			'Esto borrará todas los canales creados por el Sistema. La categoría del Sistema y los canales creados manualmente se ignorarán.',
 			'Confirma la desasociación del servidor con PuréVoice.',
@@ -2340,75 +2517,81 @@ const localesObject = {
 			'このサーバーと PuréVoice の関連付けが解除されていることを確認します。',
 		),
 	},
-	voiceUninstallConfirmQuestion: {
+	serverVoiceUninstallConfirmQuestion: {
 		es: '**¿Estás segur@?**',
 		en: '**Are you sure?**',
 		ja: '**本気ですか？**',
 	},
-	voiceRelocatedTitle: {
+	serverVoiceRelocatedTitle: {
 		es: '## Sistema PuréVoice reubicado',
 		en: '## PuréVoice System relocated',
 		ja: '## PuréVoice システム移転',
 	},
-	voiceRelocatedDescription: {
+	serverVoiceRelocatedDescription: {
 		es: 'Se reubicó el Sistema PuréVoice asociado al servidor.',
 		en: "This server's PuréVoice System has been relocated.",
 		ja: 'サーバーに関連付けられている PuréVoice システムは移転されました。',
 	},
-	voiceUninstalledTitle: {
+	serverVoiceUninstalledTitle: {
 		es: '## Sistema PuréVoice eliminado',
 		en: '## PuréVoice System removed',
 		ja: '## PuréVoice システムが削除されました',
 	},
-	voiceUninstalledDescription: {
+	serverVoiceUninstalledDescription: {
 		es: 'Se eliminó el Sistema PuréVoice asociado al servidor.',
 		en: "This server's PuréVoice System has been removed.",
 		ja: 'サーバーに関連付けられた PuréVoice システムが削除されました。',
 	},
-	voiceInstallationModalTitle: {
+	serverVoiceInstallationModalTitle: {
 		es: `${subif(0, '=', true, 'Creación', 'Selección')} de categoría`,
 		en: `Category ${subif(0, '=', true, 'Creation', 'Selection')}`,
 		ja: `カテゴリの${subif(0, '=', true, '作成', '選択')}`,
 	},
-	voiceRelocateModalTitle: {
+	serverVoiceRelocateModalTitle: {
 		es: 'Reubicar Sistema PuréVoice',
 		en: 'Relocate PuréVoice System',
 		ja: 'PuréVoice システムを移設する',
 	},
-	voiceModalCategoryLabel: {
+	serverVoiceModalCategoryLabel: {
 		es: 'Categoría',
 		en: 'Category',
 		ja: 'カテゴリ',
 	},
-	voiceCreateCategoryModalCategoryNameLabel: {
+	serverVoiceCreateCategoryModalCategoryNameLabel: {
 		es: 'Nombre de la nueva categoría',
 		en: 'Name of the new category',
 		ja: '新しいカテゴリの名前',
+	},
+	serverVoiceButtonRelocate: {
+		es: 'Reubicar',
+		en: 'Relocate',
+		ja: '移転する',
+	},
+	serverVoiceButtonInstall: {
+		es: 'Instalar',
+		en: 'Install',
+		ja: 'インストール',
+	},
+	serverVoiceButtonUninstall: {
+		es: 'Desinstalar',
+		en: 'Uninstall',
+		ja: 'アンインストール',
+	},
+	serverVoiceButtonUninstallConfirm: {
+		es: 'DESINSTALAR',
+		en: 'UNINSTALL',
+		ja: '本当にアンインストール',
+	},
+
+	voiceExpected: {
+		es: '❌ Debes conectarte a un canal de voz primero',
+		en: '❌ You need to connect to a voice channel first',
+		ja: '❌ まず音声チャンネルに接続する必要があります',
 	},
 	voiceSameChannelExpected: {
 		es: '❌ Ya estoy conectada a otro chat de voz. ¡Ven conmigo antes de hacer eso!',
 		en: "❌ I'm already connected to another voice channel. Come here before doing that!",
 		ja: '❌ すでに別の音声チャネルに接続しています。その前にここに来てください！',
-	},
-	voiceButtonRelocate: {
-		es: 'Reubicar',
-		en: 'Relocate',
-		ja: '移転する',
-	},
-	voiceButtonInstall: {
-		es: 'Instalar',
-		en: 'Install',
-		ja: 'インストール',
-	},
-	voiceButtonUninstall: {
-		es: 'Desinstalar',
-		en: 'Uninstall',
-		ja: 'アンインストール',
-	},
-	voiceButtonUninstallConfirm: {
-		es: 'DESINSTALAR',
-		en: 'UNINSTALL',
-		ja: '本当にアンインストール',
 	},
 	voiceSessionNameExpected: {
 		es: paragraph(
@@ -2889,7 +3072,7 @@ const localesObject = {
 		ja: '日本語',
 	},
 	yoDashboardButtonTags: {
-		es: 'Tags Seguidas...',
+		es: 'Tags seguidas...',
 		en: 'Followed Tags...',
 		ja: 'フォロー中のタグ…',
 	},
@@ -3255,7 +3438,7 @@ const localesObject = {
 		ja: 'フォローしているフィードのいずれかを選択して。',
 	},
 	yoTagsName: {
-		es: 'Tags Seguidas',
+		es: 'Tags seguidas',
 		en: 'Followed Tags',
 		ja: 'フォロー中のタグ',
 	},

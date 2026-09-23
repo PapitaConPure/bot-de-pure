@@ -10,7 +10,6 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
-	ChannelType,
 	Colors,
 	ContainerBuilder,
 	EmbedBuilder,
@@ -24,7 +23,7 @@ import { tenshiAltColor } from '@/data/globalProps';
 import { Translator } from '@/i18n';
 import FeedConfigModel from '@/models/feeds';
 import { getMainBooruClient } from '@/systems/booru/booruclient';
-import { addFeedToUpdateStack } from '@/systems/booru/boorufeed';
+import { addFeedToUpdateStack, setupFeedUpdateStack } from '@/systems/booru/boorufeed';
 import {
 	formatBooruPostMessage,
 	formatTagNameList,
@@ -38,23 +37,15 @@ import { compressId } from '@/utils/encoding';
 import { shortenText, shortenTextLoose } from '@/utils/misc';
 import { Command, CommandPermissions, CommandTags } from '../commons';
 
-const wizTitle = (translator: Translator) => translator.getText('feedAuthor');
-
-const cancelbutton = (compressedAuthorId: string) =>
+const cancelButton = (compressedAuthorId: string) =>
 	new ButtonBuilder()
-		.setCustomId(`feed_cancelWizard_${compressedAuthorId}`)
+		.setCustomId(`feed_exitWizard_${compressedAuthorId}`)
 		.setEmoji(getBotEmojiResolvable('xmarkAccent'))
 		.setStyle(ButtonStyle.Secondary);
 
-const finishButton = (translator: Translator, compressedAuthorId: string) =>
-	new ButtonBuilder()
-		.setCustomId(`feed_finishWizard_${compressedAuthorId}`)
-		.setLabel(translator.getText('buttonFinish'))
-		.setStyle(ButtonStyle.Secondary);
+const safeFeedTags = (_tags = '') => _tags.replace(/\\*\*/g, '\\*').replace(/\\*_/g, '\\_');
 
-const safeTags = (_tags = '') => _tags.replace(/\\*\*/g, '\\*').replace(/\\*_/g, '\\_');
-
-const generateFeedOptions = async (
+const makeFeedOptions = async (
 	interaction: ButtonInteraction,
 ): Promise<SelectMenuComponentOptionData[]> => {
 	const feeds = await FeedConfigModel.find({ guildId: interaction.guild?.id });
@@ -88,7 +79,7 @@ function tagsSetupPrompt(
 	const embed = new EmbedBuilder()
 		.setColor(Colors.Blurple)
 		.setAuthor({
-			name: wizTitle(translator),
+			name: translator.getText('serverFeedWizardEpigraph'),
 			iconURL: interaction.client.user.displayAvatarURL(),
 		})
 		.setFooter({ text: 'Asignar tags' })
@@ -153,7 +144,7 @@ const command = new Command('feed', tags)
 		const wizard = new EmbedBuilder()
 			.setColor(Colors.Aqua)
 			.setAuthor({
-				name: wizTitle(translator),
+				name: translator.getText('serverFeedWizardEpigraph'),
 				iconURL: request.client.user.displayAvatarURL(),
 			})
 			.setFooter({ text: 'Comenzar' })
@@ -168,154 +159,18 @@ const command = new Command('feed', tags)
 			components: [
 				new ActionRowBuilder<ButtonBuilder>().addComponents(
 					new ButtonBuilder()
-						.setCustomId('feed_startWizard')
+						.setCustomId('feed_goToFeedWizard')
 						.setLabel('Comenzar')
 						.setStyle(ButtonStyle.Primary),
-					cancelbutton(authorId),
-				),
-			],
-		});
-	})
-	.setButtonResponse(async function startWizard(interaction) {
-		const guildQuery = { guildId: interaction.guild.id };
-		const [feeds, translator] = await Promise.all([
-			FeedConfigModel.find(guildQuery),
-			Translator.fromUser(interaction.user.id),
-		]);
-		const hasFeeds = feeds.length;
-
-		const authorId = compressId(interaction.user.id);
-		const wizard = new EmbedBuilder()
-			.setColor(Colors.Navy)
-			.setAuthor({
-				name: wizTitle(translator),
-				iconURL: interaction.client.user.displayAvatarURL(),
-			})
-			.setFooter({ text: 'Seleccionar operación' })
-			.addFields({
-				name: 'Selecciona una operación',
-				value: '¿Qué deseas hacer ahora mismo?',
-			});
-
-		return interaction.update({
-			embeds: [wizard],
-			components: [
-				new ActionRowBuilder<ButtonBuilder>().addComponents(
-					new ButtonBuilder()
-						.setCustomId(`feed_createNew_${authorId}`)
-						.setEmoji(getBotEmojiResolvable('plusWhite'))
-						.setLabel(translator.getText('buttonCreate'))
-						.setStyle(ButtonStyle.Success),
-					new ButtonBuilder()
-						.setCustomId(`feed_selectDelete_${authorId}`)
-						.setEmoji(getBotEmojiResolvable('trashWhite'))
-						.setLabel(translator.getText('buttonDelete'))
-						.setStyle(ButtonStyle.Danger)
-						.setDisabled(!hasFeeds),
-					finishButton(translator, authorId),
-				),
-				new ActionRowBuilder<ButtonBuilder>().addComponents(
-					new ButtonBuilder()
-						.setCustomId(`feed_selectEdit_${authorId}`)
-						.setEmoji(getBotEmojiResolvable('tagWhite'))
-						.setLabel(translator.getText('buttonEdit'))
-						.setStyle(ButtonStyle.Primary)
-						.setDisabled(!hasFeeds),
-					new ButtonBuilder()
-						.setCustomId(`feed_selectCustomize_${authorId}`)
-						.setEmoji(getBotEmojiResolvable('pencilWhite'))
-						.setLabel(translator.getText('buttonCustomize'))
-						.setStyle(ButtonStyle.Primary)
-						.setDisabled(!hasFeeds),
-					new ButtonBuilder()
-						.setCustomId(`feed_selectView_${authorId}`)
-						.setEmoji(getBotEmojiResolvable('eyeWhite'))
-						.setLabel(translator.getText('buttonView'))
-						.setStyle(ButtonStyle.Primary)
-						.setDisabled(!hasFeeds),
+					cancelButton(authorId),
 				),
 			],
 		});
 	})
 	.setButtonResponse(
-		async function createNew(interaction, authorId) {
-			const channelInput = new TextInputBuilder()
-				.setCustomId('channelInput')
-				.setLabel('Canal')
-				.setPlaceholder(
-					`Ej: #${interaction.channel?.name ?? 'un-canal'} / ${interaction.channel?.id ?? '1234567890123456789'}`,
-				)
-				.setStyle(TextInputStyle.Short)
-				.setRequired(true);
-			const row = new ActionRowBuilder<TextInputBuilder>().addComponents(channelInput);
+		async function setFeedTags(interaction, channelId, compressedUserId) {
 			const modal = new ModalBuilder()
-				.setCustomId(`feed_createOnChannel_${authorId}`)
-				.setTitle('Creación de Feed')
-				.addComponents(row);
-			return interaction.showModal(modal);
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setModalResponse(
-		async function createOnChannel(interaction, authorId) {
-			const translator = await Translator.fromUser(interaction.user.id);
-			let input = interaction.fields.getTextInputValue('channelInput');
-			if (input.startsWith('<') && input.endsWith('>')) input = input.slice(1, -1);
-			if (input.startsWith('#')) input = input.slice(1);
-			if (input.startsWith('!')) input = input.slice(1);
-
-			const channels = interaction.guild.channels.cache;
-			const textChannels = channels.filter((c) =>
-				[
-					ChannelType.GuildText,
-					ChannelType.PublicThread,
-					ChannelType.PrivateThread,
-				].includes(c.type),
-			);
-			const fetchedChannel = Number.isNaN(+input)
-				? textChannels.find((c) => c.name.toLowerCase().includes(input))
-				: textChannels.get(input);
-
-			if (!fetchedChannel)
-				return interaction.reply({
-					content: '⚠️ Canal inválido',
-					flags: MessageFlags.Ephemeral,
-				});
-
-			const channelQuery = { channelId: fetchedChannel.id };
-			const channelHasFeed = await FeedConfigModel.exists(channelQuery);
-
-			if (channelHasFeed)
-				return interaction.reply({
-					content:
-						'⚠️ Ya existe un Feed en el canal solicitado. Prueba editarlo o crear un Feed en otro canal',
-					flags: MessageFlags.Ephemeral,
-				});
-
-			const wizard = tagsSetupPrompt(interaction, fetchedChannel.id, translator);
-			return interaction.update({
-				embeds: [wizard],
-				components: [
-					new ActionRowBuilder<ButtonBuilder>().addComponents(
-						new ButtonBuilder()
-							.setCustomId(`feed_editTags_${fetchedChannel.id}_${authorId}`)
-							.setLabel('Ingresar Tags')
-							.setStyle(ButtonStyle.Primary),
-						new ButtonBuilder()
-							.setCustomId(`feed_startWizard_${authorId}`)
-							.setEmoji(getBotEmojiResolvable('navBackAccent'))
-							.setStyle(ButtonStyle.Secondary),
-						cancelbutton(authorId),
-					),
-				],
-			});
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setButtonResponse(
-		async function editTags(interaction, channelId, authorId) {
-			const modal = new ModalBuilder()
-				.setCustomId(`feed_setTags_${channelId}_${authorId}`)
+				.setCustomId(`feed_setTags_${channelId}_${compressedUserId}`)
 				.setTitle('Personalización de Feed')
 				.addLabelComponents((label) =>
 					label
@@ -335,7 +190,7 @@ const command = new Command('feed', tags)
 		{ userFilterIndex: 1 },
 	)
 	.setModalResponse(
-		async function setTags(interaction, channelId, authorId) {
+		async function setTags(interaction, channelId, compressedUserId) {
 			const translator = await Translator.fromUser(interaction.user.id);
 			const fetchedChannel = interaction.guild.channels.cache.get(channelId);
 			const input = interaction.fields.getTextInputValue('tagsInput').toLowerCase().trim();
@@ -363,14 +218,14 @@ const command = new Command('feed', tags)
 			const concludedEmbed = new EmbedBuilder()
 				.setColor(Colors.DarkVividPink)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields(
 					{
 						name: 'Feed configurado',
-						value: `Se ha configurado un Feed con las tags _"${safeTags(input)}"_ para el canal **${fetchedChannel.name}**`,
+						value: `Se ha configurado un Feed con las tags _"${safeFeedTags(input)}"_ para el canal **${fetchedChannel.name}**`,
 					},
 					{
 						name: 'Control del Feed',
@@ -386,10 +241,10 @@ const command = new Command('feed', tags)
 				components: [
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
-							.setCustomId(`feed_startWizard_${authorId}`)
+							.setCustomId(`feed_goToFeedWizard_${compressedUserId}`)
 							.setLabel('Seguir configurando')
 							.setStyle(ButtonStyle.Primary),
-						finishButton(translator, authorId),
+						cancelButton(compressedUserId),
 					),
 				],
 			});
@@ -397,12 +252,12 @@ const command = new Command('feed', tags)
 		{ userFilterIndex: 1 },
 	)
 	.setButtonResponse(
-		async function selectEdit(interaction, authorId) {
+		async function selectFeedEdit(interaction, compressedUserId) {
 			const translator = await Translator.fromUser(interaction.user.id);
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Greyple)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Seleccionar Feed' })
@@ -410,8 +265,8 @@ const command = new Command('feed', tags)
 					name: 'Selección de Feed',
 					value: 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras modificar en esta lista y selecciónalo',
 				});
-			const feeds = await generateFeedOptions(interaction);
-			if (!feeds.length)
+			const feedOptions = await makeFeedOptions(interaction);
+			if (!feedOptions.length)
 				return interaction.reply({
 					content: '⚠️ No hay Feeds para mostrar',
 					flags: MessageFlags.Ephemeral,
@@ -421,16 +276,16 @@ const command = new Command('feed', tags)
 				components: [
 					new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 						new StringSelectMenuBuilder()
-							.setCustomId(`feed_selectedEdit_${authorId}`)
+							.setCustomId(`feed_selectedEdit_${compressedUserId}`)
 							.setPlaceholder('Selecciona un Feed')
-							.addOptions(feeds),
+							.addOptions(feedOptions),
 					),
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
-							.setCustomId(`feed_startWizard_${authorId}`)
+							.setCustomId(`feed_goToFeedWizard_${compressedUserId}`)
 							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
-						cancelbutton(authorId),
+						cancelButton(compressedUserId),
 					),
 				],
 			});
@@ -438,12 +293,12 @@ const command = new Command('feed', tags)
 		{ userFilterIndex: 0 },
 	)
 	.setButtonResponse(
-		async function selectCustomize(interaction, authorId) {
+		async function selectFeedCustomize(interaction, compressedUserId) {
 			const translator = await Translator.fromUser(interaction.user.id);
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Greyple)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Seleccionar Feed' })
@@ -451,7 +306,7 @@ const command = new Command('feed', tags)
 					name: 'Selección de Feed',
 					value: 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras personalizar en esta lista y selecciónalo',
 				});
-			const feeds = await generateFeedOptions(interaction);
+			const feeds = await makeFeedOptions(interaction);
 			if (!feeds.length)
 				return interaction.reply({
 					content: '⚠️ No hay Feeds para mostrar',
@@ -462,16 +317,16 @@ const command = new Command('feed', tags)
 				components: [
 					new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 						new StringSelectMenuBuilder()
-							.setCustomId(`feed_selectedCustomize_${authorId}`)
+							.setCustomId(`feed_selectedCustomize_${compressedUserId}`)
 							.setPlaceholder('Selecciona un Feed')
 							.addOptions(feeds),
 					),
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
-							.setCustomId(`feed_startWizard_${authorId}`)
+							.setCustomId(`feed_goToFeedWizard_${compressedUserId}`)
 							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
-						cancelbutton(authorId),
+						cancelButton(compressedUserId),
 					),
 				],
 			});
@@ -479,12 +334,12 @@ const command = new Command('feed', tags)
 		{ userFilterIndex: 0 },
 	)
 	.setButtonResponse(
-		async function selectView(interaction, authorId) {
+		async function selectFeedView(interaction, compressedUserId) {
 			const translator = await Translator.fromUser(interaction.user.id);
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Greyple)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Seleccionar Feed' })
@@ -492,7 +347,7 @@ const command = new Command('feed', tags)
 					name: 'Selección de Feed',
 					value: 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras ver en esta lista y selecciónalo',
 				});
-			const feeds = await generateFeedOptions(interaction);
+			const feeds = await makeFeedOptions(interaction);
 			if (!feeds.length)
 				return interaction.reply({
 					content: '⚠️ No hay Feeds para mostrar',
@@ -503,57 +358,16 @@ const command = new Command('feed', tags)
 				components: [
 					new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
 						new StringSelectMenuBuilder()
-							.setCustomId(`feed_selectedView_${authorId}`)
+							.setCustomId(`feed_selectedView_${compressedUserId}`)
 							.setPlaceholder('Selecciona un Feed')
 							.addOptions(feeds),
 					),
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
-							.setCustomId(`feed_startWizard_${authorId}`)
+							.setCustomId(`feed_goToFeedWizard_${compressedUserId}`)
 							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
-						cancelbutton(authorId),
-					),
-				],
-			});
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setButtonResponse(
-		async function selectDelete(interaction, authorId) {
-			const translator = await Translator.fromUser(interaction.user.id);
-			const wizard = new EmbedBuilder()
-				.setColor(Colors.Greyple)
-				.setAuthor({
-					name: wizTitle(translator),
-					iconURL: interaction.client.user.displayAvatarURL(),
-				})
-				.setFooter({ text: 'Seleccionar Feed' })
-				.addFields({
-					name: 'Selección de Feed',
-					value: 'Los Feeds que configuraste anteriormente están categorizados por canal y tags. Encuentra el que quieras eliminar en esta lista y selecciónalo',
-				});
-			const feeds = await generateFeedOptions(interaction);
-			if (!feeds.length)
-				return interaction.reply({
-					content: '⚠️ No hay Feeds para mostrar',
-					flags: MessageFlags.Ephemeral,
-				});
-			return interaction.update({
-				embeds: [wizard],
-				components: [
-					new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-						new StringSelectMenuBuilder()
-							.setCustomId(`feed_selectedDelete_${authorId}`)
-							.setPlaceholder('Selecciona un Feed')
-							.addOptions(feeds),
-					),
-					new ActionRowBuilder<ButtonBuilder>().addComponents(
-						new ButtonBuilder()
-							.setCustomId(`feed_startWizard_${authorId}`)
-							.setEmoji(getBotEmojiResolvable('navBackAccent'))
-							.setStyle(ButtonStyle.Secondary),
-						cancelbutton(authorId),
+						cancelButton(compressedUserId),
 					),
 				],
 			});
@@ -570,14 +384,14 @@ const command = new Command('feed', tags)
 				components: [
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
-							.setCustomId(`feed_editTags_${channelId}_${authorId}`)
+							.setCustomId(`feed_setFeedTags_${channelId}_${authorId}`)
 							.setLabel('Ingresar Tags')
 							.setStyle(ButtonStyle.Primary),
 						new ButtonBuilder()
-							.setCustomId(`feed_selectEdit_${authorId}`)
+							.setCustomId(`feed_selectFeedEdit_${authorId}`)
 							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
-						finishButton(translator, authorId),
+						cancelButton(authorId),
 					),
 				],
 			});
@@ -604,7 +418,7 @@ const command = new Command('feed', tags)
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Blurple)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Seleccionar elemento a personalizar' })
@@ -663,10 +477,10 @@ const command = new Command('feed', tags)
 					),
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
-							.setCustomId(`feed_selectCustomize_${authorId}`)
+							.setCustomId(`feed_selectFeedCustomize_${authorId}`)
 							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
-						finishButton(translator, authorId),
+						cancelButton(authorId),
 					),
 				],
 			});
@@ -696,7 +510,7 @@ const command = new Command('feed', tags)
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Blurple)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Visualizando Feed' })
@@ -714,10 +528,10 @@ const command = new Command('feed', tags)
 					components: [
 						new ActionRowBuilder<ButtonBuilder>().addComponents(
 							new ButtonBuilder()
-								.setCustomId(`feed_selectView_${authorId}`)
+								.setCustomId(`feed_selectFeedView_${authorId}`)
 								.setEmoji(getBotEmojiResolvable('navBackAccent'))
 								.setStyle(ButtonStyle.Secondary),
-							finishButton(translator, authorId),
+							cancelButton(authorId),
 						),
 					],
 				})
@@ -771,13 +585,13 @@ const command = new Command('feed', tags)
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Red)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Confirmar' })
 				.addFields({
 					name: 'Confirmar eliminación de Feed',
-					value: `Estás por borrar el Feed _"${safeTags(tags)}"_ ubicado en el canal **<#${chid}>**. ¿Estás seguro?`,
+					value: `Estás por borrar el Feed _"${safeFeedTags(tags)}"_ ubicado en el canal **<#${chid}>**. ¿Estás seguro?`,
 				});
 
 			return interaction.update({
@@ -789,10 +603,10 @@ const command = new Command('feed', tags)
 							.setLabel('Borrar')
 							.setStyle(ButtonStyle.Danger),
 						new ButtonBuilder()
-							.setCustomId(`feed_selectDelete_${authorId}`)
+							.setCustomId(`feed_selectFeedDelete_${authorId}`)
 							.setEmoji(getBotEmojiResolvable('navBackAccent'))
 							.setStyle(ButtonStyle.Secondary),
-						cancelbutton(authorId),
+						cancelButton(authorId),
 					),
 				],
 			});
@@ -805,7 +619,7 @@ const command = new Command('feed', tags)
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.DarkRed)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
@@ -815,10 +629,10 @@ const command = new Command('feed', tags)
 				});
 			const rows = new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
-					.setCustomId(`feed_startWizard_${authorId}`)
+					.setCustomId(`feed_goToFeedWizard_${authorId}`)
 					.setLabel('Seguir configurando')
 					.setStyle(ButtonStyle.Primary),
-				finishButton(translator, authorId),
+				cancelButton(authorId),
 			);
 
 			const feed = await FeedConfigModel.findOne({ channelId });
@@ -827,7 +641,7 @@ const command = new Command('feed', tags)
 				return interaction.editReply({ content: translator.getText('invalidChannel') });
 
 			return Promise.all([
-				feed.deleteOne(),
+				feed.deleteOne().then(() => setupFeedUpdateStack()),
 				interaction.update({
 					embeds: [wizard],
 					components: [rows],
@@ -847,7 +661,7 @@ const command = new Command('feed', tags)
 			const wizard = new EmbedBuilder()
 				.setColor(Colors.Green)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Personalizar elemento' })
@@ -951,10 +765,10 @@ const command = new Command('feed', tags)
 			}
 			row.addComponents(
 				new ButtonBuilder()
-					.setCustomId(`feed_selectCustomize_${authorId}`)
+					.setCustomId(`feed_selectFeedCustomize_${authorId}`)
 					.setEmoji(getBotEmojiResolvable('navBackAccent'))
 					.setStyle(ButtonStyle.Secondary),
-				cancelbutton(authorId),
+				cancelButton(authorId),
 			);
 
 			return interaction.update({
@@ -1230,13 +1044,13 @@ const command = new Command('feed', tags)
 			const concludedEmbed = new EmbedBuilder()
 				.setColor(Colors.DarkGreen)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha eliminado el título personalizado del Feed con las tags _"${safeTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha eliminado el título personalizado del Feed con las tags _"${safeFeedTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 
 			return interaction.update({
@@ -1244,7 +1058,7 @@ const command = new Command('feed', tags)
 				components: [
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
-							.setCustomId(`feed_selectCustomize_${authorId}`)
+							.setCustomId(`feed_selectFeedCustomize_${authorId}`)
 							.setLabel('Seguir personalizando')
 							.setStyle(ButtonStyle.Primary),
 					),
@@ -1276,20 +1090,20 @@ const command = new Command('feed', tags)
 			const concludedEmbed = new EmbedBuilder()
 				.setColor(Colors.DarkGreen)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha restaurado la cantidad de tags máxima por defecto del Feed con las tags _"${safeTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha restaurado la cantidad de tags máxima por defecto del Feed con las tags _"${safeFeedTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
 				components: [
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
-							.setCustomId(`feed_selectCustomize_${authorId}`)
+							.setCustomId(`feed_selectFeedCustomize_${authorId}`)
 							.setLabel('Seguir personalizando')
 							.setStyle(ButtonStyle.Primary),
 					),
@@ -1321,20 +1135,20 @@ const command = new Command('feed', tags)
 			const concludedEmbed = new EmbedBuilder()
 				.setColor(Colors.DarkGreen)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha eliminado el subtítulo personalizado del Feed con las tags _"${safeTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha eliminado el subtítulo personalizado del Feed con las tags _"${safeFeedTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
 				components: [
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
-							.setCustomId(`feed_selectCustomize_${authorId}`)
+							.setCustomId(`feed_selectFeedCustomize_${authorId}`)
 							.setLabel('Seguir personalizando')
 							.setStyle(ButtonStyle.Primary),
 					),
@@ -1366,20 +1180,20 @@ const command = new Command('feed', tags)
 			const concludedEmbed = new EmbedBuilder()
 				.setColor(Colors.DarkGreen)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha eliminado el texto de pie personalizado del Feed con las tags _"${safeTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha eliminado el texto de pie personalizado del Feed con las tags _"${safeFeedTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
 				components: [
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
-							.setCustomId(`feed_selectCustomize_${authorId}`)
+							.setCustomId(`feed_selectFeedCustomize_${authorId}`)
 							.setLabel('Seguir personalizando')
 							.setStyle(ButtonStyle.Primary),
 					),
@@ -1411,20 +1225,20 @@ const command = new Command('feed', tags)
 			const concludedEmbed = new EmbedBuilder()
 				.setColor(Colors.DarkGreen)
 				.setAuthor({
-					name: wizTitle(translator),
+					name: translator.getText('serverFeedWizardEpigraph'),
 					iconURL: interaction.client.user.displayAvatarURL(),
 				})
 				.setFooter({ text: 'Operación finalizada' })
 				.addFields({
 					name: 'Feed personalizado',
-					value: `Se ha eliminado el ícono de esquina personalizado del Feed con las tags _"${safeTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
+					value: `Se ha eliminado el ícono de esquina personalizado del Feed con las tags _"${safeFeedTags(feed.searchTags)}"_ para el canal **${fetchedChannel.name}**`,
 				});
 			return interaction.update({
 				embeds: [concludedEmbed],
 				components: [
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
-							.setCustomId(`feed_selectCustomize_${authorId}`)
+							.setCustomId(`feed_selectFeedCustomize_${authorId}`)
 							.setLabel('Seguir personalizando')
 							.setStyle(ButtonStyle.Primary),
 					),
@@ -1432,43 +1246,6 @@ const command = new Command('feed', tags)
 			});
 		},
 		{ userFilterIndex: 1 },
-	)
-	.setButtonResponse(
-		async function cancelWizard(interaction) {
-			const translator = await Translator.fromUser(interaction.user.id);
-			const cancelEmbed = new EmbedBuilder()
-				.setAuthor({
-					name: wizTitle(translator),
-					iconURL: interaction.client.user.displayAvatarURL(),
-				})
-				.setFooter({ text: translator.getText('cancelledStepFooterName') })
-				.addFields({
-					name: translator.getText('cancelledStepName'),
-					value: translator.getText('feedCancelledStep'),
-				});
-			return interaction.update({
-				embeds: [cancelEmbed],
-				components: [],
-			});
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setButtonResponse(
-		async function finishWizard(interaction) {
-			const translator = await Translator.fromUser(interaction.user.id);
-			const cancelEmbed = new EmbedBuilder()
-				.setAuthor({
-					name: wizTitle(translator),
-					iconURL: interaction.client.user.displayAvatarURL(),
-				})
-				.setFooter({ text: translator.getText('finishedStepFooterName') })
-				.setDescription(translator.getText('feedFinishedStep'));
-			return interaction.update({
-				embeds: [cancelEmbed],
-				components: [],
-			});
-		},
-		{ userFilterIndex: 0 },
 	)
 	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
 		const translator = await Translator.fromUser(interaction.user.id);
@@ -1709,7 +1486,7 @@ const command = new Command('feed', tags)
 				);
 			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 				new ButtonBuilder()
-					.setCustomId('feed_startWizard')
+					.setCustomId('feed_goToFeedWizard')
 					.setLabel('Configurar Feeds...')
 					.setStyle(ButtonStyle.Primary),
 			);
@@ -1814,7 +1591,7 @@ const command = new Command('feed', tags)
 	})
 	.setButtonResponse(async function giveFeedback(interaction, type) {
 		const translator = await Translator.fromUser(interaction.user);
-		//return interaction.reply({ content: translator.getText('feedFeedbackExpired'), flags: MessageFlags.Ephemeral });
+		//return interaction.reply({ content: translator.getText('serverFeedFeedbackExpired'), flags: MessageFlags.Ephemeral });
 
 		//type = 'Y' | 'N' | 'F'
 		if (type === 'Y' || type === 'N') {

@@ -1,6 +1,9 @@
+import { getUnixTime } from 'date-fns';
 import {
 	ActionRowBuilder,
+	type APISelectMenuOption,
 	ButtonBuilder,
+	type ButtonInteraction,
 	ButtonStyle,
 	type CategoryChannel,
 	ChannelType,
@@ -19,11 +22,14 @@ import {
 import type { AnyCommandInteraction } from 'types/commands';
 import { tenshiAltColor, tenshiColor, tenshiPeachColor } from '@/data/globalProps';
 import { isValidLocaleKey, Locales, Translator } from '@/i18n';
+import FeedConfigModel from '@/models/feeds';
 import { type GuildConfigDocument, GuildConfigModel } from '@/models/guildconfigs';
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice';
+import { addFeedToUpdateStack, setupFeedUpdateStack } from '@/systems/booru/boorufeed';
 import { getBotEmojiResolvable } from '@/utils/emojis';
-import { compressId } from '@/utils/encoding';
+import { compressId, decompressId } from '@/utils/encoding';
 import { recacheGuild } from '@/utils/guildcache';
+import { shortenText } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandPermissions, CommandTags } from '../commons';
 
@@ -42,6 +48,12 @@ const backToMainDashboardButton = (compressedAuthorId: string) =>
 const backToVoiceWizardButton = (compressedUserId: string) =>
 	new ButtonBuilder()
 		.setCustomId(`servidor_goToVoiceWizard_${compressedUserId}`)
+		.setEmoji(getBotEmojiResolvable('navBackAccent'))
+		.setStyle(ButtonStyle.Secondary);
+
+const backToFeedWizardButton = (compressedUserId: string) =>
+	new ButtonBuilder()
+		.setCustomId(`servidor_goToFeedWizard_${compressedUserId}`)
 		.setEmoji(getBotEmojiResolvable('navBackAccent'))
 		.setStyle(ButtonStyle.Secondary);
 
@@ -67,10 +79,10 @@ const command = new Command(
 		'guildconfigs',
 	)
 	.setBriefDescription(
-		'Para ver y configurar las preferencias del servidor por medio de un Asistente',
+		'Permite ver y configurar las preferencias del servidor por medio de un Asistente',
 	)
 	.setLongDescription(
-		'Para ver y configurar las preferencias del servidor.',
+		'Permite ver y configurar las preferencias del servidor.',
 		'Si quieres cambiar alguna configuración, puedes presionar cualquier botón para proceder con el Asistente',
 	)
 	.setPermissions(permissions)
@@ -121,8 +133,18 @@ const command = new Command(
 			const { guild, translator } = context;
 
 			switch (interaction.values[0]) {
+				case 'feed': {
+					const container = await makeFeedWizardMainContainer(
+						compressedUserId,
+						guild,
+						translator,
+					);
+
+					return interaction.update({ components: [container] });
+				}
+
 				case 'voice': {
-					const container = await makeMainVoiceWizardContainer(
+					const container = await makeVoiceWizardMainContainer(
 						compressedUserId,
 						guild,
 						translator,
@@ -168,11 +190,362 @@ const command = new Command(
 		{ userFilterIndex: 0, applyTagExclusions: true },
 	)
 	.setButtonResponse(
+		async function goToFeedWizard(interaction, compressedUserId) {
+			const translator = await Translator.fromUser(interaction);
+			const { guild } = interaction;
+
+			const container = await makeFeedWizardMainContainer(
+				compressedUserId,
+				guild,
+				translator,
+			);
+
+			return interaction.update({ components: [container] });
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setButtonResponse(
+		async function selectFeedEdit(interaction, compressedUserId, isNew) {
+			const translator = await Translator.fromUser(interaction);
+
+			const modal = new ModalBuilder()
+				.setCustomId(`servidor_editFeed_${compressedUserId}_${isNew ?? ''}`)
+				.setTitle('Creación de Feed');
+
+			if (isNew) {
+				modal.addLabelComponents((label) =>
+					label
+						.setLabel(translator.getText('channel'))
+						.setChannelSelectMenuComponent((textInput) =>
+							textInput
+								.setCustomId('inputChannel')
+								.setPlaceholder(
+									translator.getText('serverFeedEditModalChannelPlaceholder'),
+								)
+								.setChannelTypes(
+									ChannelType.GuildText,
+									ChannelType.PublicThread,
+									ChannelType.PrivateThread,
+								)
+								.setRequired(true),
+						),
+				);
+			} else {
+				const feeds = await makeFeedOptions(interaction);
+				if (!feeds.length)
+					return interaction.reply({
+						content: '⚠️ No hay Feeds para mostrar',
+						flags: MessageFlags.Ephemeral,
+					});
+				modal.addLabelComponents((label) =>
+					label
+						.setLabel(translator.getText('serverFeedEditModalSelectFeedLabel'))
+						.setStringSelectMenuComponent((textInput) =>
+							textInput
+								.setCustomId('inputChannel')
+								.setPlaceholder(
+									translator.getText('serverFeedEditModalSelectFeedPlaceholder'),
+								)
+								.setOptions(feeds)
+								.setRequired(true),
+						),
+				);
+			}
+
+			modal
+				.addLabelComponents((label) =>
+					label
+						.setLabel(translator.getText('serverFeedEditModalSearchLabel'))
+						.setTextInputComponent((textInput) =>
+							textInput
+								.setCustomId('inputTags')
+								.setMinLength(1)
+								.setMaxLength(160)
+								.setPlaceholder('touhou animated 1girl')
+								.setStyle(TextInputStyle.Paragraph),
+						),
+				)
+				.addTextDisplayComponents((textDisplay) =>
+					textDisplay.setContent(translator.getText('serverFeedEditModalSearchHelp')),
+				)
+				.addLabelComponents((label) =>
+					label
+						.setLabel(translator.getText('serverFeedEditModalRatingLabel'))
+						.setCheckboxGroupComponent((checkBoxGroup) =>
+							checkBoxGroup.setCustomId('inputRatings').addOptions(
+								{
+									value: 'rating:general',
+									label: translator.getText(
+										'serverFeedEditModalRatingLabelOptionGeneralName',
+									),
+									description: translator.getText(
+										'serverFeedEditModalRatingLabelOptionGeneralDescription',
+									),
+									default: true,
+								},
+								{
+									value: 'rating:sensitive',
+									label: translator.getText(
+										'serverFeedEditModalRatingLabelOptionSensitiveName',
+									),
+									description: translator.getText(
+										'serverFeedEditModalRatingLabelOptionSensitiveDescription',
+									),
+								},
+								{
+									value: 'rating:questionable',
+									label: translator.getText(
+										'serverFeedEditModalRatingLabelOptionQuestionableName',
+									),
+									description: translator.getText(
+										'serverFeedEditModalRatingLabelOptionQuestionableDescription',
+									),
+								},
+								{
+									value: 'rating:explicit',
+									label: translator.getText(
+										'serverFeedEditModalRatingLabelOptionExplicitName',
+									),
+									description: translator.getText(
+										'serverFeedEditModalRatingLabelOptionExplicitDescription',
+									),
+								},
+							),
+						),
+				)
+				.addTextDisplayComponents((textDisplay) =>
+					textDisplay.setContent(translator.getText('serverFeedEditModalAdditionalHelp')),
+				);
+
+			return interaction.showModal(modal);
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setModalResponse(
+		async function editFeed(interaction, compressedUserId, isNew) {
+			const translator = await Translator.fromUser(interaction.user.id);
+			const selectedChannel = (
+				isNew
+					? () => {
+							const channels = interaction.fields.getSelectedChannels('inputChannel');
+							return channels?.first();
+						}
+					: () => {
+							const stringField =
+								interaction.fields.getStringSelectValues('inputChannel');
+							const channels = stringField;
+							const channel = interaction.guild.channels.cache.get(channels[0]);
+							return channel;
+						}
+			)();
+
+			if (
+				selectedChannel == null
+				|| !selectedChannel.isTextBased()
+				|| selectedChannel.isVoiceBased()
+			)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('invalidChannel'),
+				});
+
+			const tagsString = interaction.fields.getTextInputValue('inputTags');
+			const ratingsGroup = interaction.fields.getCheckboxGroup('inputRatings');
+			const ratingsTagsString = (
+				[
+					'rating:general',
+					'rating:sensitive',
+					'rating:questionable',
+					'rating:explicit',
+				] as const
+			)
+				.filter((rating) => !ratingsGroup.includes(rating))
+				.map((rating) => `-${rating}` as const)
+				.join(' ');
+
+			if (isNew) {
+				const feedExists = await FeedConfigModel.exists({ channelId: selectedChannel.id });
+				if (feedExists)
+					return interaction.reply({
+						flags: MessageFlags.Ephemeral,
+						content: translator.getText('invalidChannel'),
+					});
+			}
+
+			const sortOrRatingRegex = /\b(?:sort|rating):[^\s]+/gi;
+			const sanitizedTagsString = tagsString
+				.split(/\s+/)
+				.filter((t) => t.length && !sortOrRatingRegex.test(t))
+				.join(' ');
+
+			const fullTagsString = `${sanitizedTagsString} ${ratingsTagsString}`;
+
+			const feedConfig = isNew
+				? new FeedConfigModel({
+						guildId: selectedChannel.guildId,
+						channelId: selectedChannel.id,
+					})
+				: await FeedConfigModel.findOne({ channelId: selectedChannel.id });
+
+			if (!feedConfig)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('invalidChannel'),
+				});
+
+			feedConfig.searchTags = fullTagsString;
+			feedConfig.lastFetchedAt = new Date();
+
+			const firstUpdateDelayMs = addFeedToUpdateStack(feedConfig);
+			await feedConfig.save();
+
+			const concludedContainer = makeFeedWizardContainer(translator, Colors.Green)
+				.addTextDisplayComponents(
+					(textDisplay) => textDisplay.setContent('## Feed configurado'),
+					(textDisplay) =>
+						textDisplay.setContent(
+							`Se ha configurado un Feed con las tags _"${safeFeedTags(tagsString)}"_ para el canal **${selectedChannel.name}**, y será actualizado por primera vez <t:${getUnixTime(Date.now() + firstUpdateDelayMs)}:R>.`,
+						),
+				)
+				.addSeparatorComponents((separator) => separator.setDivider(true))
+				.addTextDisplayComponents(
+					(textDisplay) => textDisplay.setContent('### -# Control del Feed'),
+					(textDisplay) =>
+						textDisplay.setContent(
+							'Puedes modificar, personalizar o eliminar este Feed en cualquier momento siguiendo el Asistente una vez más.',
+						),
+				)
+				.addSeparatorComponents((separator) =>
+					separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
+				)
+				.addActionRowComponents((actionRow) =>
+					actionRow.addComponents(
+						backToFeedWizardButton(compressedUserId),
+						cancelButton(compressedUserId),
+					),
+				);
+
+			return interaction.update({ components: [concludedContainer] });
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setButtonResponse(
+		async function selectFeedDelete(interaction, compressedUserId) {
+			const translator = await Translator.fromUser(interaction.user.id);
+			const feeds = await makeFeedOptions(interaction);
+
+			if (!feeds.length)
+				return interaction.reply({
+					content: '⚠️ No hay Feeds para mostrar',
+					flags: MessageFlags.Ephemeral,
+				});
+
+			const modal = new ModalBuilder()
+				.setCustomId(`servidor_deleteFeed_${compressedUserId}`)
+				.setTitle(translator.getText('serverFeedDeleteModalTitle'))
+				.addLabelComponents((label) =>
+					label
+						.setLabel(translator.getText('serverFeedEditModalSelectFeedLabel'))
+						.setStringSelectMenuComponent((textInput) =>
+							textInput
+								.setCustomId('inputChannel')
+								.setPlaceholder(
+									translator.getText('serverFeedEditModalSelectFeedPlaceholder'),
+								)
+								.setOptions(feeds)
+								.setRequired(true),
+						),
+				);
+
+			return interaction.showModal(modal);
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setModalResponse(
+		async function deleteFeed(interaction, compressedUserId) {
+			const channelId = interaction.fields.getStringSelectValues('inputChannel')[0];
+			const [translator, feedConfig] = await Promise.all([
+				Translator.fromUser(interaction.user.id),
+				FeedConfigModel.findOne({ channelId }),
+			]);
+
+			if (!feedConfig)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('invalidChannel'),
+				});
+
+			const container = makeFeedWizardContainer(translator, Colors.Red)
+				.addTextDisplayComponents(
+					(textDisplay) =>
+						textDisplay.setContent(translator.getText('serverFeedDeleteTitle')),
+					(textDisplay) =>
+						textDisplay.setContent(translator.getText('serverFeedDeleteDescription')),
+				)
+				.addSeparatorComponents((separator) => separator.setDivider(false))
+				.addTextDisplayComponents((textDisplay) =>
+					textDisplay.setContent(translator.getText('serverFeedDeleteConfirmQuestion')),
+				)
+				.addActionRowComponents((actionRow) =>
+					actionRow.addComponents(
+						new ButtonBuilder()
+							.setCustomId(
+								`servidor_deleteFeedConfirm_${compressedUserId}_${compressId(channelId)}`,
+							)
+							.setLabel(translator.getText('serverFeedDeleteConfirm'))
+							.setStyle(ButtonStyle.Danger),
+						backToFeedWizardButton(compressedUserId),
+						cancelButton(compressedUserId),
+					),
+				);
+
+			return interaction.update({ components: [container] });
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setButtonResponse(
+		async function deleteFeedConfirm(interaction, compressedUserId, compressedChannelId) {
+			const channelId = decompressId(compressedChannelId);
+			const [translator, feedConfig] = await Promise.all([
+				Translator.fromUser(interaction.user.id),
+				FeedConfigModel.findOne({ channelId }),
+			]);
+
+			if (!feedConfig)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('invalidChannel'),
+				});
+
+			await feedConfig.deleteOne();
+			setupFeedUpdateStack();
+
+			const container = makeFeedWizardContainer(translator, Colors.Red)
+				.addTextDisplayComponents(
+					(textDisplay) =>
+						textDisplay.setContent(translator.getText('serverFeedDeletedTitle')),
+					(textDisplay) =>
+						textDisplay.setContent(
+							translator.getText('serverFeedDeletedDescription', channelId),
+						),
+				)
+				.addActionRowComponents((actionRow) =>
+					actionRow.addComponents(
+						backToFeedWizardButton(compressedUserId),
+						cancelButton(compressedUserId),
+					),
+				);
+
+			return interaction.update({ components: [container] });
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setButtonResponse(
 		async function goToVoiceWizard(interaction, compressedUserId) {
 			const translator = await Translator.fromUser(interaction);
 			const { guild } = interaction;
 
-			const container = await makeMainVoiceWizardContainer(
+			const container = await makeVoiceWizardMainContainer(
 				compressedUserId,
 				guild,
 				translator,
@@ -189,10 +562,12 @@ const command = new Command(
 			const wizard = makeVoiceWizardContainer(translator, Colors.Gold)
 				.addTextDisplayComponents(
 					(textDisplay) =>
-						textDisplay.setContent(translator.getText('voiceInstallationSelectTitle')),
+						textDisplay.setContent(
+							translator.getText('serverVoiceInstallationSelectTitle'),
+						),
 					(textDisplay) =>
 						textDisplay.setContent(
-							translator.getText('voiceInstallationSelectDescription'),
+							translator.getText('serverVoiceInstallationSelectDescription'),
 						),
 				)
 				.addActionRowComponents((actionRow) =>
@@ -201,11 +576,15 @@ const command = new Command(
 							.setCustomId(
 								`servidor_promptInstallVoiceSystem_${compressedUserId}_new`,
 							)
-							.setLabel(translator.getText('voiceInstallationSelectButtonCreateNew'))
+							.setLabel(
+								translator.getText('serverVoiceInstallationSelectButtonCreateNew'),
+							)
 							.setStyle(ButtonStyle.Success),
 						new ButtonBuilder()
 							.setCustomId(`servidor_promptInstallVoiceSystem_${compressedUserId}`)
-							.setLabel(translator.getText('voiceInstallationSelectButtonInject'))
+							.setLabel(
+								translator.getText('serverVoiceInstallationSelectButtonInject'),
+							)
 							.setStyle(ButtonStyle.Primary),
 						backToVoiceWizardButton(compressedUserId),
 						cancelButton(compressedUserId),
@@ -224,12 +603,14 @@ const command = new Command(
 				.setCustomId(
 					`servidor_installVoiceSystem_${compressedUserId}${createNew ? `_${createNew}` : ''}`,
 				)
-				.setTitle(translator.getText('voiceRelocateModalTitle', createNew));
+				.setTitle(translator.getText('serverVoiceRelocateModalTitle', createNew));
 
 			if (createNew) {
 				modal.addLabelComponents((label) =>
 					label
-						.setLabel(translator.getText('voiceCreateCategoryModalCategoryNameLabel'))
+						.setLabel(
+							translator.getText('serverVoiceCreateCategoryModalCategoryNameLabel'),
+						)
 						.setTextInputComponent((selectMenu) =>
 							selectMenu
 								.setCustomId('categoryName')
@@ -242,7 +623,7 @@ const command = new Command(
 			} else {
 				modal.addLabelComponents((label) =>
 					label
-						.setLabel(translator.getText('voiceModalCategoryLabel'))
+						.setLabel(translator.getText('serverVoiceModalCategoryLabel'))
 						.setChannelSelectMenuComponent((selectMenu) =>
 							selectMenu
 								.setCustomId('category')
@@ -308,12 +689,12 @@ const command = new Command(
 					.addTextDisplayComponents(
 						(textDisplay) =>
 							textDisplay.setContent(
-								translator.getText('voiceCategoryInstalledTitle'),
+								translator.getText('serverVoiceCategoryInstalledTitle'),
 							),
 						(textDisplay) =>
 							textDisplay.setContent(
 								translator.getText(
-									'voiceCategoryInstalledDescription',
+									'serverVoiceCategoryInstalledDescription',
 									p_pure(interaction.guildId).raw,
 								),
 							),
@@ -332,13 +713,13 @@ const command = new Command(
 						components: [wizard],
 					}),
 					interaction.editReply({
-						content: translator.getText('voiceCategoryInstallSuccess'),
+						content: translator.getText('serverVoiceCategoryInstallSuccess'),
 					}),
 				]);
 			} catch (error) {
 				console.error(error);
 				return interaction.editReply({
-					content: translator.getText('voiceCategoryInstallError'),
+					content: translator.getText('serverVoiceCategoryInstallError'),
 				});
 			}
 		},
@@ -355,10 +736,10 @@ const command = new Command(
 
 			const modal = new ModalBuilder()
 				.setCustomId(`servidor_relocateVoiceSystem_${compressedUserId}`)
-				.setTitle(translator.getText('voiceRelocateModalTitle'))
+				.setTitle(translator.getText('serverVoiceRelocateModalTitle'))
 				.addLabelComponents((label) =>
 					label
-						.setLabel(translator.getText('voiceModalCategoryLabel'))
+						.setLabel(translator.getText('serverVoiceModalCategoryLabel'))
 						.setChannelSelectMenuComponent((selectMenu) =>
 							selectMenu
 								.setCustomId('category')
@@ -426,9 +807,11 @@ const command = new Command(
 			const wizard = makeVoiceWizardContainer(translator, Colors.Yellow)
 				.addTextDisplayComponents(
 					(textDisplay) =>
-						textDisplay.setContent(translator.getText('voiceRelocatedTitle')),
+						textDisplay.setContent(translator.getText('serverVoiceRelocatedTitle')),
 					(textDisplay) =>
-						textDisplay.setContent(translator.getText('voiceRelocatedDescription')),
+						textDisplay.setContent(
+							translator.getText('serverVoiceRelocatedDescription'),
+						),
 				)
 				.addActionRowComponents((actionRow) =>
 					actionRow.addComponents(
@@ -448,19 +831,23 @@ const command = new Command(
 			const wizard = makeVoiceWizardContainer(translator, Colors.Red)
 				.addTextDisplayComponents(
 					(textDisplay) =>
-						textDisplay.setContent(translator.getText('voiceUninstallTitle')),
+						textDisplay.setContent(translator.getText('serverVoiceUninstallTitle')),
 					(textDisplay) =>
-						textDisplay.setContent(translator.getText('voiceUninstallDescription')),
+						textDisplay.setContent(
+							translator.getText('serverVoiceUninstallDescription'),
+						),
 				)
 				.addSeparatorComponents((separator) => separator.setDivider(false))
 				.addTextDisplayComponents((textDisplay) =>
-					textDisplay.setContent(translator.getText('voiceUninstallConfirmQuestion')),
+					textDisplay.setContent(
+						translator.getText('serverVoiceUninstallConfirmQuestion'),
+					),
 				)
 				.addActionRowComponents((actionRow) =>
 					actionRow.addComponents(
 						new ButtonBuilder()
 							.setCustomId(`servidor_deleteVoiceSystemConfirmed_${compressedUserId}`)
-							.setLabel(translator.getText('voiceButtonUninstallConfirm'))
+							.setLabel(translator.getText('serverVoiceButtonUninstallConfirm'))
 							.setStyle(ButtonStyle.Danger),
 						backToVoiceWizardButton(compressedUserId),
 						cancelButton(compressedUserId),
@@ -514,10 +901,12 @@ const command = new Command(
 				const deleteEmbed = makeVoiceWizardContainer(translator, tenshiPeachColor)
 					.addTextDisplayComponents(
 						(textDisplay) =>
-							textDisplay.setContent(translator.getText('voiceUninstalledTitle')),
+							textDisplay.setContent(
+								translator.getText('serverVoiceUninstalledTitle'),
+							),
 						(textDisplay) =>
 							textDisplay.setContent(
-								translator.getText('voiceUninstalledDescription'),
+								translator.getText('serverVoiceUninstalledDescription'),
 							),
 					)
 					.addActionRowComponents((actionRow) =>
@@ -641,21 +1030,21 @@ function makeDashboardContainer(
 					.setPlaceholder(translator.getText('serverDashboardMenuConfig'))
 					.setOptions([
 						{
+							value: 'feed',
 							label: 'Boorutato',
 							description: translator.getText('yoDashboardMenuConfigFeedDesc'),
 							emoji: '1460145550119669912',
-							value: 'feed',
 						},
 						{
+							value: 'voice',
 							label: 'PuréVoice',
 							description: translator.getText('yoDashboardMenuConfigVoiceDesc'),
 							emoji: '1460145551847723132',
-							value: 'voice',
 						},
 						{
+							value: 'confessions',
 							label: translator.getText('serverDashboardMenuConfigConfessionsLabel'),
 							emoji: '1461426802890244116',
-							value: 'confessions',
 						},
 					]),
 			),
@@ -675,28 +1064,123 @@ function makeDashboardContainer(
 	return container;
 }
 
-function makeVoiceWizardContainer(translator: Translator, stepColor: number) {
+function makeFeedWizardContainer(translator: Translator, stepColor: number): ContainerBuilder {
 	return new ContainerBuilder()
 		.setAccentColor(stepColor)
 		.addTextDisplayComponents((textDisplay) =>
-			textDisplay.setContent(translator.getText('voiceWizardEpigraph')),
+			textDisplay.setContent(translator.getText('serverFeedWizardEpigraph')),
 		);
 }
 
-async function makeMainVoiceWizardContainer(
+async function makeFeedWizardMainContainer(
 	compressedUserId: string,
 	guild: Guild,
 	translator: Translator,
-) {
-	const container = makeVoiceWizardContainer(translator, tenshiAltColor)
+): Promise<ContainerBuilder> {
+	const feeds = await FeedConfigModel.find({ guildId: guild.id });
+	const hasFeeds = feeds.length;
+
+	const container = makeFeedWizardContainer(translator, tenshiAltColor)
 		.addTextDisplayComponents(
 			(textDisplay) =>
-				textDisplay.setContent(translator.getText('voiceInstallationStartTitle')),
-			(textDisplay) => textDisplay.setContent(translator.getText('voiceWizardWelcome')),
+				textDisplay.setContent(translator.getText('serverFeedWizardMainTitle')),
+			(textDisplay) => textDisplay.setContent(translator.getText('serverFeedWizardWelcome')),
 		)
 		.addSeparatorComponents((separator) => separator.setDivider(false))
 		.addTextDisplayComponents((textDisplay) =>
-			textDisplay.setContent(translator.getText('voiceInstallationNextStepDescription')),
+			textDisplay.setContent(translator.getText('serverFeedNextStepQuestion')),
+		)
+		.addActionRowComponents(
+			(actionRow) =>
+				actionRow.addComponents(
+					new ButtonBuilder()
+						.setCustomId(`server_selectFeedEdit_${compressedUserId}_new`)
+						.setEmoji(getBotEmojiResolvable('plusWhite'))
+						.setLabel(translator.getText('buttonCreate'))
+						.setStyle(ButtonStyle.Success),
+					new ButtonBuilder()
+						.setCustomId(`server_selectFeedDelete_${compressedUserId}`)
+						.setEmoji(getBotEmojiResolvable('trashWhite'))
+						.setLabel(translator.getText('buttonDelete'))
+						.setStyle(ButtonStyle.Danger)
+						.setDisabled(!hasFeeds),
+					backToMainDashboardButton(compressedUserId),
+					cancelButton(compressedUserId),
+				),
+			(actionRow) =>
+				actionRow.addComponents(
+					new ButtonBuilder()
+						.setCustomId(`server_selectFeedEdit_${compressedUserId}`)
+						.setEmoji(getBotEmojiResolvable('tagWhite'))
+						.setLabel(translator.getText('buttonEdit'))
+						.setStyle(ButtonStyle.Primary)
+						.setDisabled(!hasFeeds),
+					new ButtonBuilder()
+						.setCustomId(`server_selectFeedCustomize_${compressedUserId}`)
+						.setEmoji(getBotEmojiResolvable('pencilWhite'))
+						.setLabel(translator.getText('buttonCustomize'))
+						.setStyle(ButtonStyle.Primary)
+						.setDisabled(!hasFeeds),
+					new ButtonBuilder()
+						.setCustomId(`server_selectFeedView_${compressedUserId}`)
+						.setEmoji(getBotEmojiResolvable('eyeWhite'))
+						.setLabel(translator.getText('buttonView'))
+						.setStyle(ButtonStyle.Primary)
+						.setDisabled(!hasFeeds),
+				),
+		);
+
+	return container;
+}
+
+function safeFeedTags(tags: string = '') {
+	return tags.replace(/\\*\*/g, '\\*').replace(/\\*_/g, '\\_');
+}
+
+async function makeFeedOptions(interaction: ButtonInteraction): Promise<APISelectMenuOption[]> {
+	const feeds = await FeedConfigModel.find({ guildId: interaction.guild?.id });
+
+	if (!feeds.length) return [];
+
+	const feedOptions = feeds
+		.map((feed) => {
+			const channel = interaction.guild?.channels.cache.get(feed.channelId);
+
+			if (!channel) return null;
+
+			return {
+				label: shortenText(feed.searchTags, 99),
+				description: `#${channel.name}`,
+				value: feed.channelId,
+			};
+		})
+		.filter((feed) => feed != null);
+
+	return feedOptions;
+}
+
+function makeVoiceWizardContainer(translator: Translator, stepColor: number): ContainerBuilder {
+	return new ContainerBuilder()
+		.setAccentColor(stepColor)
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(translator.getText('serverVoiceWizardEpigraph')),
+		);
+}
+
+async function makeVoiceWizardMainContainer(
+	compressedUserId: string,
+	guild: Guild,
+	translator: Translator,
+): Promise<ContainerBuilder> {
+	const container = makeVoiceWizardContainer(translator, tenshiAltColor)
+		.addTextDisplayComponents(
+			(textDisplay) =>
+				textDisplay.setContent(translator.getText('serverVoiceWizardMainTitle')),
+			(textDisplay) => textDisplay.setContent(translator.getText('serverVoiceWizardWelcome')),
+		)
+		.addSeparatorComponents((separator) => separator.setDivider(false))
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(translator.getText('serverVoiceInstallationNextStepQuestion')),
 		);
 
 	const pv = await PureVoiceModel.findOne({ guildId: guild.id });
@@ -707,21 +1191,21 @@ async function makeMainVoiceWizardContainer(
 		row.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`servidor_selectVoiceInstallation_${compressedUserId}`)
-				.setLabel(translator.getText('voiceButtonInstall'))
+				.setLabel(translator.getText('serverVoiceButtonInstall'))
 				.setStyle(ButtonStyle.Primary),
 		);
 	else
 		row.addComponents(
 			new ButtonBuilder()
 				.setCustomId(`servidor_promptRelocateVoiceSystem_${compressedUserId}`)
-				.setLabel(translator.getText('voiceButtonRelocate'))
+				.setLabel(translator.getText('serverVoiceButtonRelocate'))
 				.setStyle(ButtonStyle.Primary),
 		);
 
 	row.addComponents(
 		new ButtonBuilder()
 			.setCustomId(`servidor_deleteVoiceSystem_${compressedUserId}`)
-			.setLabel(translator.getText('voiceButtonUninstall'))
+			.setLabel(translator.getText('serverVoiceButtonUninstall'))
 			.setStyle(ButtonStyle.Danger)
 			.setDisabled(!isInstalled),
 		backToMainDashboardButton(compressedUserId),
