@@ -174,7 +174,7 @@ async function processFeeds(booru: BooruClient<Gelbooru>, feedChunk: FeedChunk) 
 
 			if (!posts.length) {
 				debug(
-					`Because, no Posts were retrieved for Booru Feed #${channel.name} (#${feed.channelId}), it's processing will conclude as FAULTY for now.`,
+					`Because, no Posts were retrieved for Booru Feed #${channel.name} (#${feed.channelId}), its processing will conclude as FAULTY for now.`,
 				);
 				const write = booruFeed.addFault();
 				if (write) bulkOps.push(write);
@@ -183,7 +183,7 @@ async function processFeeds(booru: BooruClient<Gelbooru>, feedChunk: FeedChunk) 
 
 			if (!newPosts.length) {
 				debug(
-					`Because no new Posts were retrieved for Booru Feed #${channel.name} (#${feed.channelId}), it's processing will conclude for now.`,
+					`Because no new Posts were retrieved for Booru Feed #${channel.name} (#${feed.channelId}), its processing will conclude for now.`,
 				);
 				bulkOps.push(booruFeed.reduceFaults());
 				return;
