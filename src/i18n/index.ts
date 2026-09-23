@@ -2207,6 +2207,11 @@ const localesObject = {
 		en: '### -# Language',
 		ja: '### -# 言語',
 	},
+	serverDashboardOtherConfigsName: {
+		es: '### -# Otras Configuraciones',
+		en: '### -# Other Configurations',
+		ja: '### -# その他の構成',
+	},
 	serverDashboardMenuConfig: {
 		es: 'Sistemas de servidor',
 		en: 'Server Systems',
@@ -2217,38 +2222,45 @@ const localesObject = {
 		en: 'Confessions',
 		ja: '告白',
 	},
+	serverWizardClosedDescription: {
+		es: 'Se cerró el asistente de configuración de preferencias de servidor.',
+		en: 'The Server Preferences Configuration Wizard has been closed.',
+		ja: 'サーバー設定ウィザードが閉じられました。',
+	},
 
 	voiceExpected: {
 		es: '❌ Debes conectarte a un canal de voz primero',
 		en: '❌ You need to connect to a voice channel first',
 		ja: '❌ まず音声チャンネルに接続する必要があります',
 	},
-	voiceWizardAuthorName: {
-		es: 'Asistente de Configuración de Sistema PuréVoice',
-		en: 'PuréVoice System Configuration Wizard',
-		ja: 'PuréVoice システム設定ウィザード',
+	voiceWizardEpigraph: {
+		es: '-# Asistente de Configuración de Sistema PuréVoice',
+		en: '-# PuréVoice System Configuration Wizard',
+		ja: '-# PuréVoice システム設定ウィザード',
+	},
+	voiceInstallationStartTitle: {
+		es: () =>
+			`## ${getBotEmoji('purevoiceFullColor')} Asistente de instalación de Sistema PuréVoice`,
+		en: () => `## ${getBotEmoji('purevoiceFullColor')} PuréVoice System Installation Wizard`,
+		ja: () =>
+			`## ${getBotEmoji('purevoiceFullColor')} PuréVoice システム・インストールウィザード`,
 	},
 	voiceWizardWelcome: {
-		es: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes! Solo sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
-		en: "If this is your first time setting up a PuréVoice System, don't worry! Just follow the Wizard's instructions and adapt your Feed to what you want",
-		ja: '初めて PuréVoice システムをセットアップする場合でも、心配する必要はありません。ウィザードの指示に従って、必要に応じてフィードを調整するだけです',
+		es: 'Si es la primera vez que configuras un Sistema PuréVoice, ¡no te preocupes!\nSolo sigue las instrucciones del Asistente de configuración.',
+		en: "If this is your first time setting up a PuréVoice System, don't worry!\nJust follow the Configuration Wizard's instructions.",
+		ja: 'PuréVoice システムを初めて設定される場合でも、ご安心ください！\n設定ウィザードの指示に従うだけで設定できます。',
 	},
-	voiceInstallationStartFieldName: {
-		es: 'Inyección de Sistema PuréVoice',
-		en: 'PuréVoice System Injection',
-		ja: 'PuréVoice システム注入',
-	},
-	voiceInstallationStartFieldValue: {
+	voiceInstallationNextStepDescription: {
 		es: '¿Qué deseas hacer ahora mismo?',
 		en: 'What do you want to do now?',
 		ja: '今、何をしたいですか？',
 	},
-	voiceInstallationSelectFieldName: {
-		es: 'Instalación',
-		en: 'Installation',
-		ja: 'インストール',
+	voiceInstallationSelectTitle: {
+		es: '## Instalación',
+		en: '## Installation',
+		ja: '## インストール',
 	},
-	voiceInstallationSelectFieldValue: {
+	voiceInstallationSelectDescription: {
 		es: 'Selecciona el tipo de instalación que deseas realizar',
 		en: 'Select the installation type that best fits your needs',
 		ja: 'ご自身のニーズに最も適したインストールタイプを選択してください',
@@ -2268,23 +2280,23 @@ const localesObject = {
 		en: 'Mention the name of the category you want to inject PuréVoice into',
 		ja: 'PuréVoice を導入するカテゴリ名を指定してください',
 	},
-	voiceCategoryInstalledFieldName: {
-		es: 'La categoría fue instalada',
-		en: 'The category has been installed',
-		ja: 'カテゴリがインストールされました',
+	voiceCategoryInstalledTitle: {
+		es: '## La categoría fue instalada',
+		en: '## The category has been installed',
+		ja: '## カテゴリがインストールされました',
 	},
-	voiceCategoryInstalledFieldValue: {
+	voiceCategoryInstalledDescription: {
 		es: paragraph(
 			'Se ha preparado una categoría que escala de forma dinámica sus canales de voz.',
-			`Puedes reubicar el Sistema PuréVoice creado en el futuro, solo usa \`${subl(0)} voz -a\` otra vez`,
+			`Puedes reubicar el Sistema PuréVoice creado en el futuro, solo usa \`${subl(0)}servidor\` otra vez.`,
 		),
 		en: paragraph(
 			'A category that dynamically scales its voice channels has been prepared.',
-			`You can relocate the created PuréVoice System in the future, just use \`${subl(0)} voice -w\` again`,
+			`You can relocate the created PuréVoice System in the future, just use \`${subl(0)}server\` again.`,
 		),
 		ja: paragraph(
 			'動的に音声チャネルを拡張するカテゴリが用意されました。',
-			`作成した PuréVoice システムは将来的に再配置できます。\`${subl(0)} voice -w\`を再度使用するだけです`,
+			`作成した PuréVoice システムは将来的に再配置できます。\`${subl(0)}server\`を再度使用するだけです。`,
 		),
 	},
 	voiceCategoryInstallSuccess: {
@@ -2309,49 +2321,49 @@ const localesObject = {
 			'また、入力した名前が他のカテゴリやチャンネルにすでに占有されていないことを確認してください',
 		),
 	},
-	voiceUninstallFieldName: {
-		es: 'Desinstalación del Sistema PuréVoice del servidor',
-		en: 'Uninstalling the PuréVoice System from the server',
-		ja: 'PuréVoice システムをサーバーからアンインストールする',
+	voiceUninstallTitle: {
+		es: '## Desinstalación del Sistema PuréVoice del servidor',
+		en: '## Uninstalling the PuréVoice System from the server',
+		ja: '## PuréVoice システムをサーバーからアンインストールする',
 	},
-	voiceUninstallFieldValue: {
+	voiceUninstallDescription: {
 		es: paragraph(
 			'Esto borrará todas los canales creados por el Sistema. La categoría del Sistema y los canales creados manualmente se ignorarán.',
-			'Confirma la desasociación del servidor con PuréVoice',
+			'Confirma la desasociación del servidor con PuréVoice.',
 		),
 		en: paragraph(
 			'This will delete all channels created by the System. The System category and manually created channels will be ignored.',
-			'Confirm the disassociation of this server with PuréVoice',
+			'Confirm the disassociation of this server with PuréVoice.',
 		),
 		ja: paragraph(
 			'これにより、システムによって作成されたすべてのチャンネルが削除されます。システム カテゴリと手動で作成したチャネルは無視されます。',
-			'このサーバーと PuréVoice の関連付けが解除されていることを確認します',
+			'このサーバーと PuréVoice の関連付けが解除されていることを確認します。',
 		),
 	},
-	voiceRelocatedFieldName: {
-		es: 'Sistema PuréVoice reubicado',
-		en: 'PuréVoice System relocated',
-		ja: 'PuréVoice システム移転',
+	voiceUninstallConfirmQuestion: {
+		es: '**¿Estás segur@?**',
+		en: '**Are you sure?**',
+		ja: '**本気ですか？**',
 	},
-	voiceRelocatedFieldValue: {
-		es: 'Se reubicó el Sistema PuréVoice asociado al servidor',
-		en: "This server's PuréVoice System has been relocated",
-		ja: 'サーバーに関連付けられている PuréVoice システムは移転されました',
+	voiceRelocatedTitle: {
+		es: '## Sistema PuréVoice reubicado',
+		en: '## PuréVoice System relocated',
+		ja: '## PuréVoice システム移転',
 	},
-	voiceUninstalledFieldName: {
-		es: 'Sistema PuréVoice eliminado',
-		en: 'PuréVoice System removed',
-		ja: 'PuréVoice システムが削除されました',
+	voiceRelocatedDescription: {
+		es: 'Se reubicó el Sistema PuréVoice asociado al servidor.',
+		en: "This server's PuréVoice System has been relocated.",
+		ja: 'サーバーに関連付けられている PuréVoice システムは移転されました。',
 	},
-	voiceUninstalledFieldValue: {
-		es: 'Se eliminó el Sistema PuréVoice asociado al servidor',
-		en: "This server's PuréVoice System has been removed",
-		ja: 'サーバーに関連付けられた PuréVoice システムが削除されました',
+	voiceUninstalledTitle: {
+		es: '## Sistema PuréVoice eliminado',
+		en: '## PuréVoice System removed',
+		ja: '## PuréVoice システムが削除されました',
 	},
-	voiceCancelledFieldValue: {
-		es: 'Se canceló la configuración del Sistema PuréVoice',
-		en: 'The PuréVoice System wizard has been cancelled',
-		ja: 'PuréVoice システムウィザードはキャンセルされました',
+	voiceUninstalledDescription: {
+		es: 'Se eliminó el Sistema PuréVoice asociado al servidor.',
+		en: "This server's PuréVoice System has been removed.",
+		ja: 'サーバーに関連付けられた PuréVoice システムが削除されました。',
 	},
 	voiceInstallationModalTitle: {
 		es: `${subif(0, '=', true, 'Creación', 'Selección')} de categoría`,
@@ -2819,14 +2831,9 @@ const localesObject = {
 		ja: '⚠️ サーバーは利用できません',
 	},
 
-	yoCancelledStep: {
-		es: 'Se canceló la configuración de Preferencias de usuario',
-		en: 'The User Preferences configuration was cancelled',
-		ja: 'ユーザー設定の構成がキャンセルされました',
-	},
-	yoFinishedStep: {
-		es: 'Se cerró el Asistente de preferencias de usuario.',
-		en: 'The User Preferences Wizard has been closed.',
+	yoWizardClosedDescription: {
+		es: 'Se cerró el asistente de configuración de preferencias de usuario.',
+		en: 'The User Preferences Configuration Wizard has been closed.',
 		ja: 'ユーザー設定ウィザードが閉じました。',
 	},
 	yoDashboardEpigraph: {
@@ -2838,6 +2845,11 @@ const localesObject = {
 		es: '### -# Idioma',
 		en: '### -# Language',
 		ja: '### -# 言語',
+	},
+	yoDashboardOtherConfigsName: {
+		es: '### -# Otras Configuraciones',
+		en: '### -# Other Configurations',
+		ja: '### -# その他の構成',
 	},
 	yoDashboardTimezoneName: {
 		es: '### -# Huso Horario',

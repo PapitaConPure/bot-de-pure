@@ -1,17 +1,9 @@
 import { addMinutes, getUnixTime, isBefore } from 'date-fns';
 import {
-	ActionRowBuilder,
 	type BaseGuildVoiceChannel,
 	ButtonBuilder,
 	ButtonStyle,
-	type CategoryChannel,
-	ChannelType,
-	type ColorResolvable,
-	Colors,
 	ContainerBuilder,
-	EmbedBuilder,
-	type GuildChannel,
-	type GuildMember,
 	LabelBuilder,
 	MessageFlags,
 	ModalBuilder,
@@ -20,10 +12,10 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
-import type { AnyCommandInteraction, ComplexCommandRequest } from 'types/commands';
+import type { AnyCommandInteraction } from 'types/commands';
 import { tenshiColor } from '@/data/globalProps';
 import { Translator } from '@/i18n';
-import { PureVoiceModel as PureVoice, PureVoiceSessionModel } from '@/models/purevoice.js';
+import { PureVoiceSessionModel } from '@/models/purevoice.js';
 import {
 	getFrozenSessionAllowedMembers,
 	getOrchestrator,
@@ -31,23 +23,12 @@ import {
 	PureVoiceSessionMember,
 	PureVoiceSessionMemberRoles,
 } from '@/systems/others/purevoice.js';
-import { isNotModerator } from '@/utils/discord';
-import {
-	getBotEmoji,
-	getBotEmojiResolvable,
-	parseUnicodeEmoji,
-} from '@/utils/emojis';
+import { getBotEmoji, getBotEmojiResolvable, parseUnicodeEmoji } from '@/utils/emojis';
 import { compressId, decompressId } from '@/utils/encoding';
 import { millisecondsToDuration } from '@/utils/formatting';
 import { parseDuration } from '@/utils/parsing';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandOptions, CommandTags } from '../commons';
-
-const cancelbutton = (compressedUserId: string) =>
-	new ButtonBuilder()
-		.setCustomId(`voz_cancelWizard_${compressedUserId}`)
-		.setEmoji(getBotEmojiResolvable('xmarkAccent'))
-		.setStyle(ButtonStyle.Secondary);
 
 const warnNotInSession = (interaction: AnyCommandInteraction, translator: Translator) =>
 	interaction
@@ -180,12 +161,7 @@ const options = new CommandOptions()
 	.addFlag('e', ['emote', 'emoji'], 'para determinar el emote de la sesión actual', {
 		name: 'emt',
 		type: 'EMOTE',
-	})
-	.addFlag(
-		'aw',
-		['asistente', 'instalador', 'wizard'],
-		'para inicializar el Asistente de Configuración',
-	);
+	});
 
 const tags = new CommandTags().add('COMMON');
 
@@ -197,19 +173,11 @@ const command = new Command(
 	},
 	tags,
 )
-	.setAliases('purévoz', 'purevoz', 'voice', 'purévoice', 'purevoice', 'vc')
-	.setBriefDescription(
-		'Para inyectar un Sistema PuréVoice en una categoria por medio de un Asistente',
-	)
-	.setLongDescription(
-		'Para inyectar un Sistema PuréVoice en una categoria. Simplemente usa el comando y sigue los pasos del Asistente para configurar todo',
-	)
+	.setAliases('purévoz', 'purevoz', 'purévoice', 'purevoice', 'vc')
+	.setDescription('Permite manipular sesiones de voz del sistema PuréVoice')
 	.setOptions(options)
 	.setExecution(async (request, args) => {
 		const translator = await Translator.fromUser(request);
-
-		//TODO: Mover asistente a p!servidor y eliminar esta bandera
-		if (args.hasFlag('asistente')) return generateFirstWizard(request, translator);
 
 		const voiceState = request.member.voice;
 		const warnNotInSession = () =>
@@ -306,415 +274,6 @@ const command = new Command(
 			});
 		}
 	})
-	.setButtonResponse(
-		async function startWizard(interaction, authorId) {
-			const translator = await Translator.fromUser(interaction);
-			const { guild } = interaction;
-
-			const wizard = wizEmbed(
-				translator,
-				interaction.client.user.displayAvatarURL(),
-				Colors.Navy,
-			).addFields({
-				name: translator.getText('voiceInstallationStartFieldName'),
-				value: translator.getText('voiceInstallationStartFieldValue'),
-			});
-
-			const pv = await PureVoice.findOne({ guildId: guild.id });
-			const row = new ActionRowBuilder<ButtonBuilder>();
-			const isInstalled =
-				pv
-				&& guild.channels.cache.get(pv.categoryId)
-				&& guild.channels.cache.get(pv.voiceMakerId);
-			if (!isInstalled)
-				row.addComponents(
-					new ButtonBuilder()
-						.setCustomId(`voz_selectInstallation_${authorId}`)
-						.setLabel(translator.getText('voiceButtonInstall'))
-						.setStyle(ButtonStyle.Primary),
-				);
-			else
-				row.addComponents(
-					new ButtonBuilder()
-						.setCustomId(`voz_promptRelocateSystem_${authorId}`)
-						.setLabel(translator.getText('voiceButtonRelocate'))
-						.setStyle(ButtonStyle.Primary),
-				);
-
-			row.addComponents(
-				new ButtonBuilder()
-					.setCustomId(`voz_deleteSystem_${authorId}`)
-					.setLabel(translator.getText('voiceButtonUninstall'))
-					.setStyle(ButtonStyle.Danger)
-					.setDisabled(!isInstalled),
-				cancelbutton(authorId),
-			);
-
-			return interaction.update({
-				embeds: [wizard],
-				components: [row],
-			});
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setButtonResponse(
-		async function selectInstallation(interaction, authorId) {
-			const translator = await Translator.fromUser(interaction);
-
-			const wizard = wizEmbed(
-				translator,
-				interaction.client.user.displayAvatarURL(),
-				Colors.Gold,
-			).addFields({
-				name: translator.getText('voiceInstallationSelectFieldName'),
-				value: translator.getText('voiceInstallationSelectFieldValue'),
-			});
-
-			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-				new ButtonBuilder()
-					.setCustomId(`voz_promptInstallSystem_${authorId}_new`)
-					.setLabel(translator.getText('voiceInstallationSelectButtonCreateNew'))
-					.setStyle(ButtonStyle.Success),
-				new ButtonBuilder()
-					.setCustomId(`voz_promptInstallSystem_${authorId}`)
-					.setLabel(translator.getText('voiceInstallationSelectButtonInject'))
-					.setStyle(ButtonStyle.Primary),
-				cancelbutton(authorId),
-			);
-
-			return interaction.update({
-				embeds: [wizard],
-				components: [row],
-			});
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setButtonResponse(
-		async function promptInstallSystem(interaction, authorId, createNew) {
-			const translator = await Translator.fromUser(interaction);
-
-			const modal = new ModalBuilder()
-				.setCustomId(`voz_installSystem_${authorId}${createNew ? `_${createNew}` : ''}`)
-				.setTitle(translator.getText('voiceRelocateModalTitle', createNew));
-
-			if (createNew) {
-				modal.addLabelComponents((label) =>
-					label
-						.setLabel(translator.getText('voiceCreateCategoryModalCategoryNameLabel'))
-						.setTextInputComponent((selectMenu) =>
-							selectMenu
-								.setCustomId('categoryName')
-								.setMinLength(1)
-								.setMaxLength(50)
-								.setRequired(true)
-								.setStyle(TextInputStyle.Short),
-						),
-				);
-			} else {
-				modal.addLabelComponents((label) =>
-					label
-						.setLabel(translator.getText('voiceModalCategoryLabel'))
-						.setChannelSelectMenuComponent((selectMenu) =>
-							selectMenu
-								.setCustomId('category')
-								.setChannelTypes(ChannelType.GuildCategory)
-								.setRequired(true),
-						),
-				);
-			}
-
-			return interaction.showModal(modal);
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setModalResponse(
-		async function installSystem(interaction, _, createNew) {
-			const [translator] = await Promise.all([
-				Translator.fromUser(interaction),
-				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
-			]);
-
-			let category: CategoryChannel;
-			if (createNew) {
-				const categoryName = interaction.fields.getTextInputValue('categoryName');
-				category = await interaction.guild.channels.create({
-					name: categoryName,
-					type: ChannelType.GuildCategory,
-					reason: translator.getText('voiceReasonCategoryCreate'),
-				});
-			} else {
-				category = interaction.fields
-					.getSelectedChannels('category')
-					?.first() as CategoryChannel;
-			}
-
-			try {
-				const voiceMaker = await interaction.guild.channels.create({
-					name: '➕',
-					type: ChannelType.GuildVoice,
-					parent: category.id,
-					bitrate: 64 * 1000,
-					userLimit: 1,
-					reason: translator.getText('voiceSessionReasonChannelCreate'),
-				});
-
-				await voiceMaker.lockPermissions().catch(console.error);
-				await voiceMaker.permissionOverwrites
-					.edit(interaction.guild.roles.everyone, { SendMessages: false })
-					.catch(console.error);
-				await voiceMaker.permissionOverwrites
-					.edit(interaction.guild.members.me as GuildMember, { SendMessages: true })
-					.catch(console.error);
-
-				//Guardar nueva categoría PuréVoice
-				const guildQuery = { guildId: interaction.guild.id };
-				await PureVoice.deleteOne(guildQuery);
-				const pv = new PureVoice({
-					...guildQuery,
-					categoryId: category.id,
-					voiceMakerId: voiceMaker.id,
-				});
-
-				const wizard = wizEmbed(
-					translator,
-					interaction.client.user.displayAvatarURL(),
-					Colors.Green,
-				).addFields({
-					name: translator.getText('voiceCategoryInstalledFieldName'),
-					value: translator.getText(
-						'voiceCategoryInstalledFieldValue',
-						p_pure(interaction.guildId).raw,
-					),
-				});
-
-				await pv.save();
-
-				return Promise.all([
-					interaction.message.edit({
-						embeds: [wizard],
-						components: [],
-					}),
-					interaction.editReply({
-						content: translator.getText('voiceCategoryInstallSuccess'),
-					}),
-				]);
-			} catch (error) {
-				console.error(error);
-				return interaction.editReply({
-					content: translator.getText('voiceCategoryInstallError'),
-				});
-			}
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setButtonResponse(
-		async function promptRelocateSystem(interaction, authorId) {
-			const translator = await Translator.fromUser(interaction);
-
-			const guildQuery = { guildId: interaction.guildId };
-			const pv = await PureVoice.findOne(guildQuery);
-
-			if (!pv) return interaction.deleteReply();
-
-			const modal = new ModalBuilder()
-				.setCustomId(`voz_relocateSystem_${authorId}`)
-				.setTitle(translator.getText('voiceRelocateModalTitle'))
-				.addLabelComponents((label) =>
-					label
-						.setLabel(translator.getText('voiceModalCategoryLabel'))
-						.setChannelSelectMenuComponent((selectMenu) =>
-							selectMenu
-								.setCustomId('category')
-								.setChannelTypes(ChannelType.GuildCategory)
-								.setDefaultChannels(pv.categoryId)
-								.setRequired(true),
-						),
-				);
-
-			return interaction.showModal(modal);
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setModalResponse(
-		async function relocateSystem(interaction) {
-			const translator = await Translator.fromUser(interaction);
-
-			const guildQuery = { guildId: interaction.guildId };
-			const pv = await PureVoice.findOne(guildQuery);
-
-			if (!pv) return interaction.deleteReply();
-
-			const channelsCache = interaction.guild.channels.cache;
-			const category = interaction.fields
-				.getSelectedChannels('category')
-				?.first() as CategoryChannel;
-			const voiceMaker = channelsCache.get(pv.voiceMakerId) as GuildChannel;
-			const controlPanel = channelsCache.get(pv.controlPanelId) as GuildChannel;
-			const relocateReason = translator.getText(
-				'voiceReasonSystemRelocate',
-				interaction.user.username,
-			);
-
-			await Promise.all([
-				voiceMaker
-					&& category
-					&& voiceMaker
-						.setParent(category, { lockPermissions: true, reason: relocateReason })
-						.catch(console.error),
-				controlPanel
-					&& category
-					&& controlPanel.delete(relocateReason).catch(console.error),
-			]);
-
-			pv.categoryId = category.id;
-
-			await voiceMaker.permissionOverwrites
-				.edit(
-					interaction.guild.roles.everyone,
-					{ SendMessages: false },
-					{ reason: relocateReason },
-				)
-				.catch(console.error);
-			await Promise.all([
-				voiceMaker.permissionOverwrites
-					.edit(
-						interaction.guild.members.me as GuildMember,
-						{ SendMessages: true },
-						{ reason: relocateReason },
-					)
-					.catch(console.error),
-				pv.save(),
-			]);
-
-			const wizard = wizEmbed(
-				translator,
-				interaction.client.user.displayAvatarURL(),
-				Colors.Yellow,
-			).addFields({
-				name: translator.getText('voiceRelocatedFieldName'),
-				value: translator.getText('voiceRelocatedFieldValue'),
-			});
-
-			return interaction.update({
-				embeds: [wizard],
-				components: [],
-			});
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setButtonResponse(
-		async function deleteSystem(interaction, authorId) {
-			const translator = await Translator.fromUser(interaction);
-
-			const wizard = wizEmbed(
-				translator,
-				interaction.client.user.displayAvatarURL(),
-				Colors.Yellow,
-			).addFields({
-				name: translator.getText('voiceUninstallFieldName'),
-				value: translator.getText('voiceUninstallFieldValue'),
-			});
-
-			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-				new ButtonBuilder()
-					.setCustomId(`voz_deleteSystemConfirmed_${authorId}`)
-					.setLabel(translator.getText('voiceButtonUninstallConfirm'))
-					.setStyle(ButtonStyle.Danger),
-				new ButtonBuilder()
-					.setCustomId(`voz_startWizard_${authorId}`)
-					.setEmoji(getBotEmojiResolvable('navBackAccent'))
-					.setStyle(ButtonStyle.Secondary),
-				cancelbutton(authorId),
-			);
-
-			return interaction.update({
-				embeds: [wizard],
-				components: [row],
-			});
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setButtonResponse(
-		async function deleteSystemConfirmed(interaction) {
-			const guildQuery = { guildId: interaction.guildId };
-			const [translator, pv] = await Promise.all([
-				Translator.fromUser(interaction),
-				PureVoice.findOne(guildQuery),
-			]);
-
-			if (!pv) return interaction.deleteReply();
-
-			await interaction.deferUpdate();
-
-			try {
-				const guildChannels = interaction.guild.channels.cache;
-				await Promise.all([
-					guildChannels
-						.get(pv.voiceMakerId)
-						?.delete(
-							translator.getText(
-								'voiceReasonSystemRemove',
-								interaction.user.username,
-							),
-						)
-						.catch(console.error),
-					guildChannels
-						.get(pv.controlPanelId)
-						?.delete(
-							translator.getText(
-								'voiceReasonSystemRemove',
-								interaction.user.username,
-							),
-						)
-						.catch(console.error),
-				]);
-
-				await Promise.all([
-					PureVoiceSessionModel.deleteMany({ channelId: { $in: pv.sessions } }),
-					PureVoice.deleteOne(guildQuery),
-				]);
-
-				const deleteEmbed = wizEmbed(
-					translator,
-					interaction.client.user.displayAvatarURL(),
-					Colors.Red,
-				).addFields({
-					name: translator.getText('voiceUninstalledFieldName'),
-					value: translator.getText('voiceUninstalledFieldValue'),
-				});
-
-				return interaction.editReply({
-					embeds: [deleteEmbed],
-					components: [],
-				});
-			} catch {
-				return interaction.editReply({
-					content: null,
-				});
-			}
-		},
-		{ userFilterIndex: 0 },
-	)
-	.setButtonResponse(
-		async function cancelWizard(interaction) {
-			const translator = await Translator.fromUser(interaction);
-
-			const cancelEmbed = wizEmbed(
-				translator,
-				interaction.client.user.displayAvatarURL(),
-				Colors.NotQuiteBlack,
-			).addFields({
-				name: translator.getText('cancelledStepName'),
-				value: translator.getText('voiceCancelledFieldValue'),
-			});
-
-			return interaction.update({
-				embeds: [cancelEmbed],
-				components: [],
-			});
-		},
-		{ userFilterIndex: 0 },
-	)
 	.setButtonResponse(async function setSessionName(interaction) {
 		const { member } = interaction;
 		const translator = await Translator.fromUser(member);
@@ -1314,43 +873,5 @@ const command = new Command(
 			flags: MessageFlags.Ephemeral,
 		});
 	});
-
-function wizEmbed(translator: Translator, iconUrl: string, stepColor: ColorResolvable) {
-	return new EmbedBuilder().setColor(stepColor).setAuthor({
-		name: translator.getText('voiceWizardAuthorName'),
-		iconURL: iconUrl,
-	});
-}
-
-function generateFirstWizard(request: ComplexCommandRequest, translator: Translator) {
-	if (isNotModerator(request.member))
-		return request.reply({
-			flags: MessageFlags.Ephemeral,
-			content: translator.getText('insufficientPermissions'),
-		});
-
-	const wizard = wizEmbed(
-		translator,
-		request.client.user.displayAvatarURL(),
-		Colors.Aqua,
-	).addFields({
-		name: translator.getText('welcome'),
-		value: translator.getText('voiceWizardWelcome'),
-	});
-
-	const uid = compressId(request.userId);
-	return request.reply({
-		embeds: [wizard],
-		components: [
-			new ActionRowBuilder<ButtonBuilder>().addComponents(
-				new ButtonBuilder()
-					.setCustomId(`voz_startWizard_${uid}`)
-					.setLabel(translator.getText('buttonStart'))
-					.setStyle(ButtonStyle.Primary),
-				cancelbutton(uid),
-			),
-		],
-	});
-}
 
 export default command;

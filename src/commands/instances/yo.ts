@@ -174,65 +174,65 @@ function makeDashboardContainer(
 					),
 			),
 		)
+		.addSeparatorComponents((separator) => separator.setDivider(true))
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(translator.getText('yoDashboardOtherConfigsName')),
+		)
+		.addActionRowComponents((actionRow) =>
+			actionRow.addComponents(
+				new StringSelectMenuBuilder()
+					.setCustomId(`yo_selectConfig_${compressedUserId}`)
+					.setPlaceholder(translator.getText('yoDashboardMenuConfig'))
+					.setOptions([
+						{
+							label: 'Boorutato',
+							description: translator.getText('yoDashboardMenuConfigFeedDesc'),
+							emoji: getBotEmojiResolvable('boorutatoFullColor'),
+							value: 'feed',
+						},
+						{
+							label: 'PuréVoice',
+							description: translator.getText('yoDashboardMenuConfigVoiceDesc'),
+							emoji: getBotEmojiResolvable('purevoiceFullColor'),
+							value: 'voice',
+						},
+						{
+							label: 'PuréPix',
+							description: translator.getText('yoDashboardMenuConfigPixixDesc'),
+							emoji: getBotEmojiResolvable('pixivFullColor'),
+							value: 'pixiv',
+						},
+						{
+							label: 'Puréet',
+							description: translator.getText('yoDashboardMenuConfigTwitterDesc'),
+							emoji: getBotEmojiResolvable('twitterFullColor'),
+							value: 'twitter',
+						},
+						{
+							label: 'BoorutatoConvert',
+							description: translator.getText('yoDashboardMenuConfigBoorutatoDesc'),
+							emoji: getBotEmojiResolvable('boorutatoFullColor'),
+							value: 'booru',
+						},
+						{
+							label: 'Puréstagram',
+							description: translator.getText('yoDashboardMenuConfigInstagramDesc'),
+							emoji: getBotEmojiResolvable('instagramColor'),
+							value: 'instagram',
+						},
+					]),
+			),
+		)
 		.addSeparatorComponents((separator) =>
 			separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
 		)
-		.addActionRowComponents(
-			(actionRow) =>
-				actionRow.addComponents(
-					new StringSelectMenuBuilder()
-						.setCustomId(`yo_selectConfig_${compressedUserId}`)
-						.setPlaceholder(translator.getText('yoDashboardMenuConfig'))
-						.setOptions([
-							{
-								label: 'Boorutato',
-								description: translator.getText('yoDashboardMenuConfigFeedDesc'),
-								emoji: getBotEmojiResolvable('boorutatoFullColor'),
-								value: 'feed',
-							},
-							{
-								label: 'PuréVoice',
-								description: translator.getText('yoDashboardMenuConfigVoiceDesc'),
-								emoji: getBotEmojiResolvable('purevoiceFullColor'),
-								value: 'voice',
-							},
-							{
-								label: 'PuréPix',
-								description: translator.getText('yoDashboardMenuConfigPixixDesc'),
-								emoji: getBotEmojiResolvable('pixivFullColor'),
-								value: 'pixiv',
-							},
-							{
-								label: 'Puréet',
-								description: translator.getText('yoDashboardMenuConfigTwitterDesc'),
-								emoji: getBotEmojiResolvable('twitterFullColor'),
-								value: 'twitter',
-							},
-							{
-								label: 'BoorutatoConvert',
-								description: translator.getText(
-									'yoDashboardMenuConfigBoorutatoDesc',
-								),
-								emoji: getBotEmojiResolvable('boorutatoFullColor'),
-								value: 'booru',
-							},
-							{
-								label: 'Puréstagram',
-								description: translator.getText(
-									'yoDashboardMenuConfigInstagramDesc',
-								),
-								emoji: getBotEmojiResolvable('instagramColor'),
-								value: 'instagram',
-							},
-						]),
-				),
-			(actionRow) =>
-				actionRow.addComponents(
-					new ButtonBuilder()
-						.setCustomId(`yo_exitWizard_${compressedUserId}`)
-						.setLabel(translator.getText('buttonClose'))
-						.setStyle(ButtonStyle.Secondary),
-				),
+		.addActionRowComponents((actionRow) =>
+			actionRow.addComponents(
+				new ButtonBuilder()
+					.setCustomId(`yo_exitWizard_${compressedUserId}`)
+					.setLabel(translator.getText('buttonClose'))
+					.setStyle(ButtonStyle.Secondary),
+			),
 		);
 
 	return container;
@@ -1270,17 +1270,16 @@ const command = new Command(
 			]);
 		},
 	)
+	//We maintain both cancelWizard and exitWizard for compatibility for now...
 	.setButtonResponse(
 		async function cancelWizard(interaction) {
 			const translator = await Translator.fromUser(interaction);
 
 			const container = new ContainerBuilder().addTextDisplayComponents((textDisplay) =>
-				textDisplay.setContent(translator.getText('yoCancelledStep')),
+				textDisplay.setContent(translator.getText('yoWizardClosedDescription')),
 			);
 
-			return interaction.update({
-				components: [container],
-			});
+			return interaction.update({ components: [container] });
 		},
 		{ userFilterIndex: 0 },
 	)
@@ -1288,13 +1287,11 @@ const command = new Command(
 		async function exitWizard(interaction) {
 			const translator = await Translator.fromUser(interaction);
 
-			const finishContainer = new ContainerBuilder().addTextDisplayComponents((textDisplay) =>
-				textDisplay.setContent(translator.getText('yoFinishedStep')),
+			const container = new ContainerBuilder().addTextDisplayComponents((textDisplay) =>
+				textDisplay.setContent(translator.getText('yoWizardClosedDescription')),
 			);
 
-			return interaction.update({
-				components: [finishContainer],
-			});
+			return interaction.update({ components: [container] });
 		},
 		{ userFilterIndex: 0 },
 	);
