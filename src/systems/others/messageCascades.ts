@@ -82,12 +82,12 @@ export async function deleteExpiredMessageCascades() {
 }
 
 export async function initializeMessageCascades() {
-	const messageCascades = await MessageCascades.find({});
-	deleteExpiredMessageCascades();
-	setInterval(deleteExpiredMessageCascades, 60 * 60e3);
 	await MessageCascades.syncIndexes();
 	await MessageCascades.createIndexes();
+	const messageCascades = await MessageCascades.find({});
 	messageCascades.forEach(({ messageId, otherMessageId, part }) =>
 		cacheMessageCascade(messageId, otherMessageId, part),
 	);
+	await deleteExpiredMessageCascades();
+	setInterval(deleteExpiredMessageCascades, 60 * 60e3);
 }
