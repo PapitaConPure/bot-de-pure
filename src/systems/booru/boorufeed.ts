@@ -295,6 +295,11 @@ export async function setupFeedUpdateStack() {
 function rebuildFeedChunks(feeds: Iterable<FeedDocument>) {
 	const feedMap = new Map<string, FeedDocument>();
 
+	if (globalConfigs.feedChunks)
+		globalConfigs.feedChunks.forEach(
+			(feedChunks) => feedChunks.tid && clearTimeout(feedChunks.tid),
+		);
+
 	for (const feed of feeds) feedMap.set(feed.channelId, feed);
 
 	const feedChunks = paginateFeeds(feedMap, FEED_CHUNK_MAX_SIZE);
