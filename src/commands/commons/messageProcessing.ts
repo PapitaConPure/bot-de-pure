@@ -179,12 +179,7 @@ async function handleCommandPermissions(
 					{ cmdString: requestString },
 				).addFields({
 					name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
-					value: command.permissions.matrix
-						.map(
-							(requisite, n) =>
-								`${n + 1}. ${requisite.map((p) => `\`${p}\``).join(' **o** ')}`,
-						)
-						.join('\n'),
+					value: command.permissions.requisiteTreeString,
 				}),
 			],
 		});
@@ -206,12 +201,7 @@ async function handleCommandPermissions(
 					{ cmdString: requestString },
 				).addFields({
 					name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
-					value: command.permissions.matrix
-						.map(
-							(requisite, n) =>
-								`${n + 1}. ${requisite.map((p) => `\`${p}\``).join(' **o** ')}`,
-						)
-						.join('\n'),
+					value: command.permissions.requisiteTreeString,
 				}),
 			],
 		});
