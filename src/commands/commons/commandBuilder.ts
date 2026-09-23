@@ -156,6 +156,8 @@ type InteractionResponseFunction = (
 
 interface InteractionResponseOptions {
 	userFilterIndex?: number;
+	permissionOverrides?: CommandPermissions;
+	applyTagExclusions?: boolean;
 }
 
 type ButtonResponseFunction = (
@@ -331,6 +333,8 @@ export class Command<TOptions extends CommandOptions | undefined = undefined> {
 		const functionName = fn.name;
 		this[functionName] = fn;
 		fn.userFilterIndex = options.userFilterIndex;
+		fn.permissionOverrides = options.permissionOverrides;
+		fn.applyTagExclusions = options.applyTagExclusions;
 		return this;
 	}
 

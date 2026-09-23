@@ -18,6 +18,7 @@ import { decompressId } from '@/utils/encoding';
 import Logger from '@/utils/logs';
 import type { CommandOption, CommandOptions } from './cmdOpts';
 import { CommandOptionSolver } from './cmdOpts';
+import type { CommandPermissions } from './cmdPerms';
 import { type AnyCommandComponentResponseFunction, Command } from './commandBuilder';
 import { type CommandResult, CommandResults } from './commandProcessing';
 
@@ -162,48 +163,8 @@ export async function handleComponent(interaction: AnyCommandInteraction): Promi
 		return handleUnknownInteraction(interaction);
 	}
 
-	if (interaction.customId.startsWith('/')) {
-		const stream = interaction.customId.slice(1).split('_');
-		const commandName = stream.shift();
-		const authorId = stream.shift();
-
-		if (!commandName || !authorId) {
-			debug(
-				`Component Interaction under the ID: "${interaction.id}" had a malformed custom ID: "${interaction.customId}".`,
-			);
-			return handleUnknownInteraction(interaction);
-		}
-
-		if (interaction.user.id !== decompressId(authorId)) {
-			debug(
-				`The Component interaction "${interaction.id}" is not authorized for the requesting user.`,
-			);
-			const translator = await Translator.fromUser(interaction.user.id);
-			await interaction.reply({
-				content: translator.getText('unauthorizedInteraction'),
-				flags: MessageFlags.Ephemeral,
-			});
-			return;
-		}
-
-		const command: Command<CommandOptions | undefined> | undefined =
-			puré.commands.get(commandName)
-			|| puré.commands.find((cmd) => cmd.aliases?.includes(commandName));
-
-		if (command == null)
-			return fatal(new ReferenceError(`Command "${commandName}" does not exist.`));
-
-		const request = Command.requestize(interaction);
-		if (command.hasOptions()) {
-			const solver = new CommandOptionSolver(
-				request,
-				stream,
-				command.options,
-				stream.join(' '),
-			);
-			await command.execute(request, solver);
-		} else if (command.hasNoOptions()) await command.execute(request);
-	}
+	if (interaction.customId.startsWith('/'))
+		return handleComponentSlashCommandInteraction(interaction);
 
 	try {
 		const funcStream: string[] = interaction.customId.split('_');
@@ -266,6 +227,23 @@ export async function handleComponent(interaction: AnyCommandInteraction): Promi
 			}
 		}
 
+		const componentPermissions = commandFn.permissionOverrides ?? command.permissions;
+		const hasPermission = await handleComponentInteractionPermissions(
+			interaction,
+			componentPermissions,
+			`${commandName} -=-{\`${commandFnName}\`}`,
+		);
+		if (!hasPermission) return;
+
+		if (commandFn.applyTagExclusions) {
+			const satisfiesExclusions = await handleComponentSlashCommandInteractionExclusions(
+				interaction,
+				command,
+				`${commandName} -=-{\`${commandFnName}\`}`,
+			);
+			if (!satisfiesExclusions) return;
+		}
+
 		debug(
 			`The Component interaction "${interaction.id}" is authorized and the associated function will execute promptly.`,
 		);
@@ -278,6 +256,153 @@ export async function handleComponent(interaction: AnyCommandInteraction): Promi
 		});
 		if (!isPermissionsError) console.error(error);
 	}
+}
+
+async function handleComponentSlashCommandInteraction(
+	interaction: AnyCommandInteraction,
+): Promise<void> {
+	const stream = interaction.customId.slice(1).split('_');
+	const commandName = stream.shift();
+	const authorId = stream.shift();
+
+	if (!commandName || !authorId) {
+		debug(
+			`Component Interaction under the ID: "${interaction.id}" had a malformed custom ID: "${interaction.customId}".`,
+		);
+		return handleUnknownInteraction(interaction);
+	}
+
+	if (interaction.user.id !== decompressId(authorId)) {
+		debug(
+			`The Component interaction "${interaction.id}" is not authorized for the requesting user.`,
+		);
+		const translator = await Translator.fromUser(interaction.user.id);
+		await interaction.reply({
+			content: translator.getText('unauthorizedInteraction'),
+			flags: MessageFlags.Ephemeral,
+		});
+		return;
+	}
+
+	const command: Command<CommandOptions | undefined> | undefined =
+		puré.commands.get(commandName)
+		|| puré.commands.find((cmd) => cmd.aliases?.includes(commandName));
+
+	if (command == null)
+		return fatal(new ReferenceError(`Command "${commandName}" does not exist.`));
+
+	const hasPermission = await handleComponentInteractionPermissions(
+		interaction,
+		command.permissions,
+		`/${commandName}`,
+	);
+	if (!hasPermission) return;
+
+	const satisfiesExclusions = await handleComponentSlashCommandInteractionExclusions(
+		interaction,
+		command,
+		`/${commandName}`,
+	);
+	if (!satisfiesExclusions) return;
+
+	const request = Command.requestize(interaction);
+	if (command.hasOptions()) {
+		const solver = new CommandOptionSolver(request, stream, command.options, stream.join(' '));
+		await command.execute(request, solver);
+	} else if (command.hasNoOptions()) await command.execute(request);
+}
+
+async function handleComponentInteractionPermissions(
+	interaction: ChatInputCommandInteraction | AnyCommandInteraction,
+	permissions: CommandPermissions | undefined,
+	requestString: string,
+): Promise<boolean> {
+	if (!permissions) return true;
+
+	if (!interaction.inCachedGuild()) {
+		const translator = await Translator.fromUser(interaction);
+		await interaction.reply({
+			embeds: [
+				generateCommandExclusionEmbed(
+					{
+						title: translator.getText('unknownInteraction'),
+						desc: translator.getText('invalidChannel'),
+					},
+					{ cmdString: requestString },
+				),
+			],
+		});
+
+		return false;
+	}
+
+	if (
+		!interaction.member
+		|| !interaction.channel
+		|| !permissions.isAllowedIn(interaction.member, interaction.channel)
+	) {
+		const translator = await Translator.fromUser(interaction);
+		await interaction.reply({
+			embeds: [
+				generateCommandExclusionEmbed(
+					{
+						title: translator.getText('interactionNotInCachedGuildTitle'),
+						desc: translator.getText('interactionNotInCachedGuildDescription'),
+					},
+					{ cmdString: requestString },
+				).addFields({
+					name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
+					value: permissions.requisiteTreeString,
+				}),
+			],
+		});
+
+		return false;
+	}
+
+	if (!permissions.amAllowedIn(interaction.channel)) {
+		if (!requestString) return false;
+
+		const translator = await Translator.fromUser(interaction.member);
+		interaction.channel.send({
+			embeds: [
+				generateCommandExclusionEmbed(
+					{
+						title: translator.getText('missingMemberChannelPermissionsTitle'),
+						desc: translator.getText('missingClientChannelPermissionsDescription'),
+					},
+					{ cmdString: requestString },
+				).addFields({
+					name: translator.getText('missingMemberChannelPermissionsFullRequisitesName'),
+					value: permissions.requisiteTreeString,
+				}),
+			],
+		});
+
+		return false;
+	}
+
+	return true;
+}
+
+async function handleComponentSlashCommandInteractionExclusions(
+	interaction: AnyCommandInteraction,
+	command: Command<CommandOptions | undefined>,
+	requestString: string,
+): Promise<boolean> {
+	const exception = await findFirstCommandExclusion(command, interaction);
+
+	if (!exception) return true;
+
+	await interaction.reply({
+		embeds: [
+			generateCommandExclusionEmbed(exception, {
+				cmdString: requestString,
+			}),
+		],
+	});
+
+	return false;
 }
 
 export async function handleAutocompleteInteraction(
