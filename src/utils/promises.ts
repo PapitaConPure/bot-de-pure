@@ -15,7 +15,7 @@ export async function attemptManyTimes<T>(
 	fn: () => Promise<T>,
 	times: number,
 	options: {
-		onEachCatch?: (remaining: number) => void;
+		onEachCatch?: (remaining: number, err: Error) => void;
 		onReattempt?: (remaining: number) => void;
 		getFallback?: () => T;
 	} = {},
@@ -29,7 +29,7 @@ export async function attemptManyTimes<T>(
 			const result = await fn();
 			return result;
 		} catch (err) {
-			onEachCatch?.(times);
+			onEachCatch?.(times, Error.isError(err) ? err : new Error(err));
 			if (times <= 0) {
 				if (getFallback) return getFallback();
 				throw err;
