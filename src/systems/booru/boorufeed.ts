@@ -16,9 +16,10 @@ import { auditAction, auditError } from '@/systems/others/auditor';
 import { isNSFWChannel } from '@/utils/discord';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
 import Logger from '@/utils/logs';
+import { attemptManyTimes } from '@/utils/promises';
 import { getMainBooruClient } from './booruclient';
 
-const { debug, info, warn, error, fatal } = Logger('INFO', 'BooruFeed');
+const { debug, info, warn, error, fatal } = Logger('DEBUG', 'BooruFeed');
 
 export interface FeedData extends PostFormatData {
 	tags: string;
@@ -50,7 +51,37 @@ async function updateBooruFeeds(feedChunk: FeedChunk): Promise<void> {
 	const startMs = Date.now();
 	debug(`Received a request to update Booru Feeds at ${new Date(startMs)}.`);
 
-	feedChunk = await refreshFeedChunk(feedChunk);
+	const refreshedFeedChunk = await attemptManyTimes(() => refetchFeedChunk(feedChunk), 3, {
+		onEachCatch: (remaining) =>
+			warn(`Failed to refresh Booru Feed chunk. ${remaining} attempts left...`),
+		getFallback: () => null,
+	});
+
+	if (!refreshedFeedChunk) {
+		const delayMs = Date.now() - startMs;
+		error(
+			new Error(
+				`Failed to refresh Booru Feed chunk after ${delayMs}ms (${delayMs / 1000}s).`,
+			),
+			`keys: ${[...(feedChunk.feeds?.keys?.() ?? [])].join(', ')}`,
+		);
+
+		const nextMs = Math.max(10_000, FEED_UPDATE_INTERVAL - delayMs);
+		setTimeout(updateBooruFeeds, nextMs, feedChunk);
+		debug(
+			`Next Booru Feed update request should have been programmed at ${new Date(Date.now() + nextMs)}.`,
+		);
+
+		auditAction('Feeds procesados con errores', {
+			name: 'Feeds',
+			value: `${feedChunk.feeds.size}`,
+			inline: true,
+		});
+		return;
+	}
+
+	feedChunk = refreshedFeedChunk;
+
 	debug('Refreshed the Booru Feed chunk.');
 
 	cleanPostAttachmentRecords();
@@ -70,16 +101,16 @@ async function updateBooruFeeds(feedChunk: FeedChunk): Promise<void> {
 		});
 
 		error(err, 'Booru Feeds update request crashed:', now);
+	} finally {
+		const delayMs = Date.now() - startMs;
+		info(`Concluded a request to update Booru Feeds in ${delayMs}ms (${delayMs / 1000}s).`);
+
+		const nextMs = Math.max(10_000, FEED_UPDATE_INTERVAL - delayMs);
+		setTimeout(updateBooruFeeds, nextMs, feedChunk);
+		debug(
+			`Next Booru Feed update request should have been programmed at ${new Date(Date.now() + nextMs)}.`,
+		);
 	}
-
-	const delayMs = Date.now() - startMs;
-	info(`Concluded a request to update Booru Feeds in ${delayMs}ms (${delayMs / 1000}s).`);
-
-	const nextMs = Math.max(10_000, FEED_UPDATE_INTERVAL - delayMs);
-	setTimeout(updateBooruFeeds, nextMs, feedChunk);
-	debug(
-		`Next Booru Feed update request should have been programmed at ${new Date(Date.now() + nextMs)}.`,
-	);
 
 	auditAction('Feeds procesados', {
 		name: 'Feeds',
@@ -233,7 +264,13 @@ async function processFeeds(booru: BooruClient<Gelbooru>, feedChunk: FeedChunk) 
 
 	debug.dir(bulkOps, { depth: null });
 
-	if (bulkOps.length) await FeedConfigModel.bulkWrite(bulkOps);
+	if (bulkOps.length)
+		await attemptManyTimes(() => FeedConfigModel.bulkWrite(bulkOps), 3, {
+			onEachCatch: (remaining, err) => {
+				warn(`Failed Booru Feed chunk bulk-write operation. ${remaining} attempts left...`);
+				warn(`Reason: ${err.message}`);
+			},
+		});
 
 	debug('Finished writing to DB.');
 }
@@ -336,7 +373,7 @@ function paginateFeeds(map: Map<string, FeedDocument>, size: number): FeedChunk[
 	return result;
 }
 
-async function refreshFeedChunk(feedChunk: FeedChunk) {
+async function refetchFeedChunk(feedChunk: FeedChunk) {
 	feedChunk.feeds = new Map(
 		[
 			...(await FeedConfigModel.find({
