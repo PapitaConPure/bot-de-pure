@@ -271,8 +271,7 @@ export async function setupFeedUpdateStack() {
 
 	if (!shortestUpdateDelayMs) {
 		const err = new Error("Couldn't set up Booru Feed chunks.");
-		fatal(err);
-		throw err;
+		return fatal(err);
 	}
 
 	debug.dir({ feedCount, chunkCount, feedChunks, shortestUpdateDelayMs }, { depth: null });
@@ -281,7 +280,7 @@ export async function setupFeedUpdateStack() {
 		'Se prepararon Feeds',
 		{
 			name: 'Primer Envío',
-			value: `<t:${Math.floor((Date.now() + shortestUpdateDelayMs) * 0.001)}:R>`,
+			value: `<t:${getUnixTime(Date.now() + shortestUpdateDelayMs)}:R>`,
 			inline: true,
 		},
 		{ name: 'Intervalo Base', value: `${FEED_UPDATE_INTERVAL / 60e3} minutos`, inline: true },
@@ -345,8 +344,8 @@ async function refreshFeedChunk(feedChunk: FeedChunk) {
 }
 
 /**
- * @description Añade la Guild actual a la cadena de actualización de Feeds si aún no está en ella
- * @returns La cantidad de milisegundos que faltan para actualizar el Feed añadido por primera vez, ó -1 si no se pudo agregar
+ * @description Añade la Guild actual a la cadena de actualización de Feeds si aún no está en ella.
+ * @returns La cantidad de milisegundos que faltan para actualizar el Feed añadido por primera vez, ó -1 si no se pudo agregar.
  */
 export function addFeedToUpdateStack(feed: FeedDocument): number {
 	const feedChunks = globalConfigs.feedChunks;
