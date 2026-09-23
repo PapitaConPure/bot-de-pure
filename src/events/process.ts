@@ -16,7 +16,7 @@ export async function onUncaughtException(err: Error, origin: NodeJS.UncaughtExc
 		return;
 	}
 
-	err = new UnhandledRejectionError(err, `${err}`);
+	err = new UnhandledRejectionError(err, `${err?.message ?? err?.cause}`);
 
 	const lookups = [err.message, err.cause == null ? null : `${err.cause}`, err.stack].filter(
 		(l) => l,
