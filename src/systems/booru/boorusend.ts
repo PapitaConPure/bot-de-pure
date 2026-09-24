@@ -519,44 +519,49 @@ export async function notifyUsers(
 			const descTextDisplay = new TextDisplayBuilder().setContent(
 				`${translator.getText('booruNotifDescription')}`,
 			);
-			const originalAttachment = post.previewUrl ? sent.attachments.first() : undefined;
+			const originalAttachmentURL = post.previewUrl
+				? getAttachmentURLFromPostMessage(sent)
+				: undefined;
 
-			if (originalAttachment != null) {
+			if (originalAttachmentURL != null) {
 				userContainer.addSectionComponents((section) =>
 					section
 						.addTextDisplayComponents(titleTextDisplay, descTextDisplay)
 						.setThumbnailAccessory((accessory) =>
-							accessory.setURL(originalAttachment.url),
+							accessory.setURL(originalAttachmentURL),
 						),
 				);
 			} else {
 				userContainer.addTextDisplayComponents(titleTextDisplay, descTextDisplay);
 			}
 
-			userContainer.addSeparatorComponents((separator) => separator.setDivider(true));
-
-			userContainer.addSectionComponents((section) =>
-				section
-					.addTextDisplayComponents(
-						(textDisplay) =>
+			userContainer
+				.addSeparatorComponents((separator) => separator.setDivider(true))
+				.addSectionComponents((section) =>
+					section
+						.addTextDisplayComponents((textDisplay) =>
 							textDisplay.setContent([`### -# Feed`, `${channel}`].join('\n')),
-						(textDisplay) =>
-							textDisplay.setContent(
-								[
-									`### -# ${translator.getText('booruNotifTagsName')}`,
-									`\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
-								].join('\n'),
-							),
-						(textDisplay) =>
-							textDisplay.setContent(`-# ${translator.getText('dmDisclaimer')}`),
-					)
-					.setButtonAccessory(
-						new ButtonBuilder()
-							.setURL(sent.url)
-							.setEmoji(getBotEmojiResolvable('eyeAccent'))
-							.setStyle(ButtonStyle.Link),
-					),
-			);
+						)
+						.setButtonAccessory(
+							new ButtonBuilder()
+								.setURL(sent.url)
+								.setEmoji(getBotEmojiResolvable('eyeAccent'))
+								.setStyle(ButtonStyle.Link),
+						),
+				)
+				.addSeparatorComponents((separator) => separator.setDivider(true))
+				.addTextDisplayComponents(
+					(textDisplay) =>
+						textDisplay.setContent(
+							[
+								`### -# ${translator.getText('booruNotifTagsName')}`,
+								`\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
+							].join('\n'),
+						),
+					(textDisplay) =>
+						textDisplay.setContent(`-# ${translator.getText('dmDisclaimer')}`),
+				)
+				.addSeparatorComponents((separator) => separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large));
 
 			const postRow = new ActionRowBuilder<ButtonBuilder>();
 			const dangerButtonBuilders: ButtonBuilder[] = [];
@@ -581,6 +586,18 @@ export async function notifyUsers(
 				.catch(error);
 		}),
 	);
+}
+
+function getAttachmentURLFromPostMessage(message: Message<true>): string | undefined {
+	if (!message.flags.has(MessageFlags.IsComponentsV2)) return;
+	if (!message.components.length) return;
+
+	const container = message.components[0];
+	if (container.type !== ComponentType.Container) return;
+
+	for (const component of container.components)
+		if (component.type === ComponentType.MediaGallery && component.items.length)
+			return component.items[0].media.url;
 }
 
 /**
