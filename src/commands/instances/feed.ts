@@ -13,16 +13,13 @@ import {
 } from 'discord.js';
 import { tenshiAltColor } from '@/data/globalProps';
 import { Translator } from '@/i18n';
-import FeedConfigModel from '@/models/feeds';
 import { getMainBooruClient } from '@/systems/booru/booruclient';
-import { getSimpleTagNames } from '@/systems/booru/boorufeed';
 import {
-	formatBooruPostMessage,
 	formatTagNameList,
 	getPostUrlFromComponents,
 } from '@/systems/booru/boorusend.js';
 import { auditError } from '@/systems/others/auditor';
-import { isNotModerator, isNSFWChannel } from '@/utils/discord';
+import { isNotModerator } from '@/utils/discord';
 import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { compressId } from '@/utils/encoding';
 import { shortenText, shortenTextLoose } from '@/utils/misc';
@@ -76,93 +73,6 @@ const command = new Command('feed', tags)
 			],
 		});
 	})
-	.setSelectMenuResponse(
-		async function selectedView(interaction, authorId) {
-			const [translator] = await Promise.all([
-				Translator.fromUser(interaction.user.id),
-				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
-			]);
-
-			const feedChannel = interaction.guild.channels.cache.get(
-				interaction.values[0] || interaction.channelId,
-			);
-			if (!interaction.channel || !feedChannel)
-				return interaction.editReply({ content: translator.getText('invalidChannel') });
-
-			const allowNSFW = isNSFWChannel(feedChannel);
-
-			const feed = await FeedConfigModel.findOne({ channelId: feedChannel.id });
-
-			if (!feed)
-				return interaction.editReply({ content: translator.getText('invalidChannel') });
-
-			const wizard = new EmbedBuilder()
-				.setColor(Colors.Blurple)
-				.setAuthor({
-					name: translator.getText('serverFeedWizardEpigraph'),
-					iconURL: interaction.client.user.displayAvatarURL(),
-				})
-				.setFooter({ text: 'Visualizando Feed' })
-				.addFields(
-					{
-						name: 'Destino',
-						value: `**${feedChannel.name}** (canal ${allowNSFW ? 'NSFW' : 'SFW'})`,
-					},
-					{ name: 'Tags del Feed', value: `\`\`\`${feed?.searchTags}\`\`\`` },
-				);
-
-			await interaction.message
-				.edit({
-					embeds: [wizard],
-					components: [
-						new ActionRowBuilder<ButtonBuilder>().addComponents(
-							new ButtonBuilder()
-								.setCustomId(`feed_selectFeedView_${authorId}`)
-								.setEmoji(getBotEmojiResolvable('navBackAccent'))
-								.setStyle(ButtonStyle.Secondary),
-							cancelButton(authorId),
-						),
-					],
-				})
-				.catch(console.error);
-
-			const booru = getMainBooruClient();
-			if (!booru)
-				return interaction.editReply({
-					content: translator.getText('missingBooruCredentials'),
-				});
-
-			const [post] = await booru.search(`${feed.searchTags} sort:random`, { limit: 1 });
-			if (!post)
-				return interaction.editReply({
-					content: 'Las tags del feed no dieron ningún resultado',
-				});
-
-			const { container: preview, attachment: previewImage } = await formatBooruPostMessage(
-				booru,
-				post,
-				{
-					...feed,
-					allowNSFW: isNSFWChannel(interaction.channel),
-					omittedTags:
-						(feed.omitRedundantTags ?? true) ? getSimpleTagNames(feed.searchTags) : [],
-					disableActions: true,
-				},
-			);
-			return interaction.editReply({
-				flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
-				files: previewImage != null ? [previewImage] : undefined,
-				components: [
-					preview.addTextDisplayComponents((textDisplay) =>
-						textDisplay.setContent(
-							'-# Esto es una vista previa. Las imágenes NSFW solo pueden previsualizarse en canales NSFW',
-						),
-					),
-				],
-			});
-		},
-		{ userFilterIndex: 0 },
-	)
 	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
 		const translator = await Translator.fromUser(interaction.user.id);
 
