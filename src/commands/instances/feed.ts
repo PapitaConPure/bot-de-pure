@@ -14,10 +14,7 @@ import {
 import { tenshiAltColor } from '@/data/globalProps';
 import { Translator } from '@/i18n';
 import { getMainBooruClient } from '@/systems/booru/booruclient';
-import {
-	formatTagNameList,
-	getPostUrlFromComponents,
-} from '@/systems/booru/boorusend.js';
+import { formatTagNameList, getPostUrlFromComponents } from '@/systems/booru/boorusend.js';
 import { auditError } from '@/systems/others/auditor';
 import { isNotModerator } from '@/utils/discord';
 import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
@@ -25,19 +22,12 @@ import { compressId } from '@/utils/encoding';
 import { shortenText, shortenTextLoose } from '@/utils/misc';
 import { Command, CommandPermissions, CommandTags } from '../commons';
 
-const cancelButton = (compressedAuthorId: string) =>
-	new ButtonBuilder()
-		.setCustomId(`feed_exitWizard_${compressedAuthorId}`)
-		.setEmoji(getBotEmojiResolvable('xmarkAccent'))
-		.setStyle(ButtonStyle.Secondary);
-
 const perms = new CommandPermissions()
 	.requireAnyOf(['ManageGuild', 'ManageChannels'])
 	.requireAnyOf('ManageMessages');
 
-const tags = new CommandTags().add('COMMON', 'MOD');
-
 //TODO: how should I implement a way to have button responses without a Command
+const tags = new CommandTags().add('COMMON', 'MOD', 'OUTDATED');
 
 const command = new Command('feed', tags)
 	.setBriefDescription('Inicializa un Feed en un canal por medio de un Asistente.')
@@ -46,32 +36,7 @@ const command = new Command('feed', tags)
 	)
 	.setPermissions(perms)
 	.setExecution(async (request) => {
-		const translator = await Translator.fromUser(request.userId);
-		const wizard = new EmbedBuilder()
-			.setColor(Colors.Aqua)
-			.setAuthor({
-				name: translator.getText('serverFeedWizardEpigraph'),
-				iconURL: request.client.user.displayAvatarURL(),
-			})
-			.setFooter({ text: 'Comenzar' })
-			.addFields({
-				name: 'Bienvenido',
-				value: 'Si es la primera vez que configuras un Feed de imágenes con Bot de Puré, ¡no te preocupes! Simplemente sigue las instrucciones del Asistente y adapta tu Feed a lo que quieras',
-			});
-
-		const authorId = compressId(request.userId);
-		return request.reply({
-			embeds: [wizard],
-			components: [
-				new ActionRowBuilder<ButtonBuilder>().addComponents(
-					new ButtonBuilder()
-						.setCustomId('feed_goToFeedWizard')
-						.setLabel('Comenzar')
-						.setStyle(ButtonStyle.Primary),
-					cancelButton(authorId),
-				),
-			],
-		});
+		return request.reply({ content: '🍃' });
 	})
 	.setButtonResponse(async function showFeedImageTags(interaction, isNotFeed) {
 		const translator = await Translator.fromUser(interaction.user.id);
