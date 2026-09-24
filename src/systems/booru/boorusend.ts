@@ -558,8 +558,6 @@ export async function notifyUsers(
 								`\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
 							].join('\n'),
 						),
-					(textDisplay) =>
-						textDisplay.setContent(`-# ${translator.getText('dmDisclaimer')}`),
 				)
 				.addSeparatorComponents((separator) => separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large));
 
