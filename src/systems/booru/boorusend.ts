@@ -104,10 +104,10 @@ interface SpecialTagGroup {
 }
 
 /**
- * Genera un {@linkcode ContainerBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
- * @param booru Instancia de Booru
- * @param post Post de Booru
- * @param data Información adicional a mostrar en el Embed. Se puede pasar un Feed directamente
+ * Generates a {@linkcode ContainerBuilder} based on a {@linkcode Post} from a {@linkcode Booru}.
+ * @param booru Booru instance.
+ * @param post Booru Post.
+ * @param data Container display settings. Can pass a BooruFeed instance directly.
  */
 export async function formatBooruPostMessage(
 	booru: BooruClient,
@@ -773,7 +773,6 @@ export async function searchAndReplyWithPost(
 		const postMessages = await Promise.all(
 			posts.map((post, i) =>
 				formatBooruPostMessage(booru, post, {
-					maxGeneralTags: 20,
 					title: isNSFW ? nsfwTitle : sfwTitle,
 					manageableBy: author.id,
 					allowNSFW: isNSFW,
