@@ -1,6 +1,6 @@
 import Mongoose, { type InferSchemaType } from 'mongoose';
 
-export const defaultMaxGeneralTags = 20;
+export const defaultMaxGeneralTags = 16;
 export const maxAllowedGeneralTags = 50;
 
 export const defaultMaxSpecialTags = 3;
