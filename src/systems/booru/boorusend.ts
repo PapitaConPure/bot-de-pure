@@ -27,6 +27,7 @@ import { Command, type CommandOptionSolver } from '@/commands/commons';
 import { tenshiPeachColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { Translator } from '@/i18n';
+import { defaultMaxGeneralTags } from '@/models/feeds';
 import { isNSFWChannel } from '@/utils/discord';
 import { type BotEmojiName, getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchExt } from '@/utils/fetchext';
@@ -235,7 +236,7 @@ export async function formatBooruPostMessage(
 
 	//Tags
 	debug('A punto de intentar procesar las tags del Post');
-	const maxTags = data.maxGeneralTags ?? 20;
+	const maxTags = data.maxGeneralTags ?? defaultMaxGeneralTags;
 	const actualTotalTags = processedPostTags.length;
 	try {
 		let thumbnailUrl: string | undefined;
@@ -550,16 +551,17 @@ export async function notifyUsers(
 						),
 				)
 				.addSeparatorComponents((separator) => separator.setDivider(true))
-				.addTextDisplayComponents(
-					(textDisplay) =>
-						textDisplay.setContent(
-							[
-								`### -# ${translator.getText('booruNotifTagsName')}`,
-								`\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
-							].join('\n'),
-						),
+				.addTextDisplayComponents((textDisplay) =>
+					textDisplay.setContent(
+						[
+							`### -# ${translator.getText('booruNotifTagsName')}`,
+							`\`\`\`\n${matchingTags.join(' ')}\n\`\`\``,
+						].join('\n'),
+					),
 				)
-				.addSeparatorComponents((separator) => separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large));
+				.addSeparatorComponents((separator) =>
+					separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
+				);
 
 			const postRow = new ActionRowBuilder<ButtonBuilder>();
 			const dangerButtonBuilders: ButtonBuilder[] = [];
