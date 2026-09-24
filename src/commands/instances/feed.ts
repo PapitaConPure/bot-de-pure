@@ -39,6 +39,8 @@ const perms = new CommandPermissions()
 
 const tags = new CommandTags().add('COMMON', 'MOD');
 
+//TODO: how should I implement a way to have button responses without a Command
+
 const command = new Command('feed', tags)
 	.setBriefDescription('Inicializa un Feed en un canal por medio de un Asistente.')
 	.setLongDescription(
