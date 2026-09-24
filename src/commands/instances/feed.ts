@@ -15,6 +15,7 @@ import { tenshiAltColor } from '@/data/globalProps';
 import { Translator } from '@/i18n';
 import FeedConfigModel from '@/models/feeds';
 import { getMainBooruClient } from '@/systems/booru/booruclient';
+import { getSimpleTagNames } from '@/systems/booru/boorufeed';
 import {
 	formatBooruPostMessage,
 	formatTagNameList,
@@ -143,6 +144,8 @@ const command = new Command('feed', tags)
 				{
 					...feed,
 					allowNSFW: isNSFWChannel(interaction.channel),
+					omittedTags:
+						(feed.omitRedundantTags ?? true) ? getSimpleTagNames(feed.searchTags) : [],
 					disableActions: true,
 				},
 			);

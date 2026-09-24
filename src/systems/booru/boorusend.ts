@@ -1,4 +1,10 @@
-import { type BooruClient, type Post, TagTypes } from '@papitaconpure/booru-client';
+import {
+	type BooruClient,
+	type Post,
+	type Tag,
+	type TagType,
+	TagTypes,
+} from '@papitaconpure/booru-client';
 import { addMinutes, isPast } from 'date-fns';
 import type {
 	ActionRow,
@@ -27,7 +33,11 @@ import { Command, type CommandOptionSolver } from '@/commands/commons';
 import { tenshiPeachColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
 import { Translator } from '@/i18n';
-import { defaultMaxGeneralTags } from '@/models/feeds';
+import {
+	defaultMaxGeneralTags,
+	defaultMaxSpecialTags,
+	maxAllowedTotalSpecialTags,
+} from '@/models/feeds';
 import { isNSFWChannel } from '@/utils/discord';
 import { type BotEmojiName, getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchExt } from '@/utils/fetchext';
@@ -87,6 +97,12 @@ const sexEmotes = {
 
 const ignoredTagsIfSexCount = new Set<string>(['multiple_girls', 'multiple_boys', 'multiple_futa']);
 
+interface SpecialTagGroup {
+	source: Tag[];
+	max: number;
+	output: string[];
+}
+
 /**
  * Genera un {@linkcode ContainerBuilder} a base de un {@linkcode Post} de {@linkcode Booru}
  * @param booru Instancia de Booru
@@ -107,7 +123,7 @@ export async function formatBooruPostMessage(
 	let containerColor = noSource.color;
 	const buttonRow = new ActionRowBuilder<ButtonBuilder>();
 
-	//Botón de Post de Booru
+	//Booru Post button
 	buttonRow.addComponents(
 		new ButtonBuilder()
 			.setEmoji(getBotEmojiResolvable('gelbooruColor'))
@@ -116,7 +132,7 @@ export async function formatBooruPostMessage(
 			.setDisabled(disableLinks ?? false),
 	);
 
-	//Aplicar estilo y botones de source
+	//Apply source style and button
 	debug('Se está por decidir el estilo del Embed del mensaje');
 	if (post.source) {
 		debug('El Post tiene fuentes. Se buscarán enlaces');
@@ -144,7 +160,7 @@ export async function formatBooruPostMessage(
 		}
 	}
 
-	//Filtrar tags con estilos especiales
+	//Filter tags with special styling
 	debug('A punto de procesar tags especiales');
 	let hasTagMe = false;
 	let hasRequestTags = false;
@@ -163,13 +179,14 @@ export async function formatBooruPostMessage(
 		return true;
 	});
 
+	debug('omittedTags =', data.omittedTags);
 	debug('hasTagMe =', hasTagMe);
 	debug('hasRequestTags =', hasRequestTags);
-	debug('postTags =', processedPostTags);
+	debug('processedPostTags =', processedPostTags);
 
 	debug('Aplicando botones adicionales...');
 
-	//Botón de tags
+	//Tags button
 	buttonRow.addComponents(
 		new ButtonBuilder()
 			.setEmoji(getBotEmojiResolvable('tagWhite'))
@@ -180,7 +197,7 @@ export async function formatBooruPostMessage(
 			.setDisabled(!!disableActions),
 	);
 
-	//Botón de contribución
+	//Contribution button
 	if (hasTagMe || hasRequestTags)
 		buttonRow.addComponents(
 			new ButtonBuilder()
@@ -190,7 +207,7 @@ export async function formatBooruPostMessage(
 				.setDisabled(!!disableActions),
 		);
 
-	//Botón de eliminación
+	//Deletion button
 	buttonRow.addComponents(
 		new ButtonBuilder()
 			.setEmoji(getBotEmojiResolvable('xmarkWhite'))
@@ -201,15 +218,21 @@ export async function formatBooruPostMessage(
 			.setDisabled(!!disableActions),
 	);
 
-	//Preparar contenedor final
+	//Prepare final container
 	info('Se comenzará a preparar el contenedor final del Post');
 	const container = new ContainerBuilder().setAccentColor(containerColor);
 
-	//Título
-	if (data.title)
+	//Subtitle (doesn't add separator)
+	if (data.subtitle)
 		container.addTextDisplayComponents((textDisplay) =>
-			textDisplay.setContent(`## ${data.title}`),
+			textDisplay.setContent(`-# ${data.subtitle}`),
 		);
+
+	//Title (only add separator if there's a title)
+	if (data.title)
+		container
+			.addTextDisplayComponents((textDisplay) => textDisplay.setContent(`## ${data.title}`))
+			.addSeparatorComponents((separator) => separator.setDivider(true));
 
 	//Previsualización
 	debug('Comprobando bloqueo de contenido explícito de Post según el canal del mensaje');
@@ -241,10 +264,12 @@ export async function formatBooruPostMessage(
 	try {
 		let thumbnailUrl: string | undefined;
 		debug('Obteniendo información adicional de tags...');
-		const postTags = await booru.fetchPostTags(post);
+		const postTags = (await booru.fetchPostTags(post)).filter(
+			(t) => !data.omittedTags?.includes(t.name),
+		);
 
 		//Advertencia de IA
-		debug('Se determinará la miniatura del Embed del mensaje');
+		debug('Determining Container thumbnail...');
 		const aiGeneratedTagIndex = postTags.findIndex((t) =>
 			['ai-generated', 'ai-assisted'].includes(t.name),
 		);
@@ -253,26 +278,76 @@ export async function formatBooruPostMessage(
 			thumbnailUrl = 'https://i.imgur.com/1Q41hhC.png';
 		}
 
-		debug('A punto de distribuir las etiquetas en categorías');
+		debug('Distributing tags into categories...');
+		const specialTagTypes: TagType[] = [
+			TagTypes.ARTIST,
+			TagTypes.CHARACTER,
+			TagTypes.COPYRIGHT,
+		];
+
 		const postArtistTags: string[] = [];
 		const postCharacterTags: string[] = [];
 		const postCopyrightTags: string[] = [];
 		const postOtherTags: string[] = [];
 
-		postTags.forEach((tag) => {
-			const { name } = tag;
+		const specialTagGroups = new Map<TagType, SpecialTagGroup>([
+			[
+				TagTypes.ARTIST,
+				{
+					source: [],
+					max: data.maxArtistTags ?? defaultMaxSpecialTags,
+					output: postArtistTags,
+				},
+			],
+			[
+				TagTypes.CHARACTER,
+				{
+					source: [],
+					max: data.maxCharacterTags ?? defaultMaxSpecialTags,
+					output: postCharacterTags,
+				},
+			],
+			[
+				TagTypes.COPYRIGHT,
+				{
+					source: [],
+					max: data.maxCopyrightTags ?? defaultMaxSpecialTags,
+					output: postCopyrightTags,
+				},
+			],
+		]);
 
-			switch (tag.type) {
-				case TagTypes.ARTIST:
-					return postArtistTags.push(name);
-				case TagTypes.CHARACTER:
-					return postCharacterTags.push(name);
-				case TagTypes.COPYRIGHT:
-					return postCopyrightTags.push(name);
-				default:
-					return postOtherTags.push(name);
-			}
+		postTags.forEach((tag) => {
+			const specialTagGroup = specialTagGroups.get(tag.type);
+			if (specialTagGroup) specialTagGroup.source.push(tag);
+			else postOtherTags.push(tag.name);
 		});
+
+		//Cap special tags uniformly (bound to type and total maximum)
+		for (
+			let round = 0, totalSpecialTags = 0;
+			totalSpecialTags < maxAllowedTotalSpecialTags;
+			round++
+		) {
+			let added = false;
+
+			for (const specialTagType of specialTagTypes) {
+				const specialTagGroup = specialTagGroups.get(specialTagType) as SpecialTagGroup;
+
+				if (
+					round < specialTagGroup.source.length
+					&& specialTagGroup.output.length < specialTagGroup.max
+				) {
+					specialTagGroup.output.push(specialTagGroup.source[round].name);
+					totalSpecialTags++;
+					added = true;
+
+					if (totalSpecialTags >= maxAllowedTotalSpecialTags) break;
+				}
+			}
+
+			if (!added) break;
+		}
 
 		const { highestResTag, sexTags, remainingTags } = extractSpecialTags(postOtherTags);
 
@@ -284,7 +359,7 @@ export async function formatBooruPostMessage(
 		debug('artistTags =', postArtistTags);
 		debug('characterTags =', postCharacterTags);
 		debug('copyrightTags =', postCopyrightTags);
-		debug('otherTags =', postOtherTags);
+		debug('generalTags =', postOtherTags);
 		debug('- - - - - - - - - - - - - - - - - -');
 		debug('highestResTag =', highestResTag);
 		debug('sexTags =', sexTags);
@@ -304,51 +379,50 @@ export async function formatBooruPostMessage(
 		const generalTagsContent = allDisplayedTags.join(' ').trim();
 		const postGeneralTags = shortenText(`-# ${generalTagsTitle} ${generalTagsContent}`, 1020);
 
-		const getCategoryFieldString = (fieldName: string, arr: string[]) => {
-			if (!arr.length) return;
+		const getCategoryFieldString = (fieldName: string, specialTagGroup: SpecialTagGroup) => {
+			if (!specialTagGroup.output.length) return;
 
-			const totalCount = arr.length;
-			let partialCount = arr.length;
-			if (arr.length > 4) {
-				arr = arr.with(3, '(...)').slice(0, 4);
-				partialCount = 3;
-			}
-
-			const content = formatTagNameList(arr, ' ');
+			const content = formatTagNameList(specialTagGroup.output, ' ');
 			if (!content.length) return;
+
+			const partialCount = specialTagGroup.output.length;
+			const totalCount = specialTagGroup.source.length;
 
 			const infoSuffix = partialCount < totalCount ? ` (${partialCount}/${totalCount})` : '';
 
 			return `${fieldName.trim()}${infoSuffix} ${shortenText(content.trim(), 320)}`;
 		};
 
-		debug('A punto de formular etiquetas en el Embed del mensaje');
-		if (postArtistTags.length + postCharacterTags.length + postCopyrightTags.length > 0)
+		if (postArtistTags.length + postCharacterTags.length + postCopyrightTags.length > 0) {
+			debug('About to compose tags into container...');
 			container.addTextDisplayComponents((textDisplay) =>
 				textDisplay.setContent(
 					[
 						maxTags > 0 ? '###' : '',
-						getCategoryFieldString(getBotEmoji('artistTagAccent'), postArtistTags),
+						getCategoryFieldString(
+							getBotEmoji('artistTagAccent'),
+							specialTagGroups.get(TagTypes.ARTIST) as SpecialTagGroup,
+						),
 						getCategoryFieldString(
 							getBotEmoji('characterTagAccent'),
-							postCharacterTags,
+							specialTagGroups.get(TagTypes.CHARACTER) as SpecialTagGroup,
 						),
 						getCategoryFieldString(
 							getBotEmoji('copyrightTagAccent'),
-							postCopyrightTags,
+							specialTagGroups.get(TagTypes.COPYRIGHT) as SpecialTagGroup,
 						),
 					]
 						.join(' ')
 						.trim(),
 				),
 			);
+		} else debug('No special tags detected. Categorization omitted.');
 
-		debug('Comprobando si se debe insertar un campo de tags sin categoría');
+		debug('Checking if a component for general tags should be added.');
 		debug('displayedTagsCount =', displayedTagsCount);
 		if (displayedTagsCount > 0) {
-			debug('A punto de insertar un campo de tags sin categoría');
-
 			if (thumbnailUrl) {
+				debug('About to add a section to display general tags...');
 				container.addSectionComponents((section) =>
 					section
 						.addTextDisplayComponents((textDisplay) =>
@@ -357,6 +431,7 @@ export async function formatBooruPostMessage(
 						.setThumbnailAccessory((accessory) => accessory.setURL(thumbnailUrl)),
 				);
 			} else {
+				debug('About to add text to display general tags...');
 				container.addTextDisplayComponents((textDisplay) =>
 					textDisplay.setContent(postGeneralTags),
 				);
@@ -365,15 +440,15 @@ export async function formatBooruPostMessage(
 	} catch (err) {
 		error(
 			err,
-			'Ocurrió un problema al procesar y formatear las tags de un Post de Booru para un mensaje',
+			'Ocurrió un problema al procesar y formatear las tags de un Post de Booru para un mensaje.',
 		);
-		info('Intentando formatear tags con método alternativo sin categorías');
+		info('Intentando formatear tags con método alternativo sin categorización.');
 
 		const postTags = processedPostTags;
 		const displayedTags = postTags.slice(0, maxTags);
 		const displayedTagsCount = displayedTags.length;
 
-		debug('Comprobando si se debe insertar un campo de tags');
+		debug('Comprobando si se debe insertar un campo de tags.');
 		debug('displayedTagsCount =', displayedTagsCount);
 		if (displayedTagsCount > 0) {
 			debug('A punto de insertar un campo de tags');
@@ -389,7 +464,7 @@ export async function formatBooruPostMessage(
 		}
 	}
 
-	info('Agregando botones');
+	info('Adding buttons.');
 	container
 		.addSeparatorComponents((separator) =>
 			separator
@@ -398,7 +473,7 @@ export async function formatBooruPostMessage(
 		)
 		.addActionRowComponents(buttonRow);
 
-	info('Se terminó de formatear un contenedor a de acuerdo a un Post de Booru');
+	info('Finished formatting container for Booru Post.');
 
 	return { container, attachment: previewImage };
 }

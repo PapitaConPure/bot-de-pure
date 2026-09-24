@@ -29,6 +29,7 @@ import FeedConfigModel, {
 	type FeedDocument,
 	maxAllowedGeneralTags,
 	maxAllowedSpecialTags,
+	maxAllowedTotalSpecialTags,
 } from '@/models/feeds';
 import { type GuildConfigDocument, GuildConfigModel } from '@/models/guildconfigs';
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice';
@@ -722,11 +723,11 @@ const command = new Command(
 		{ applyTagExclusions: true },
 	)
 	.setButtonResponse(
-		async function customizeFeedMaxTags(interaction, _compressedUserId, compressedChannelId) {
+		async function customizeFeedTags(interaction, _compressedUserId, compressedChannelId) {
 			const { success, data } = await getFeedCustomizationModalContext(
 				interaction,
-				'serverFeedCustomizeMaxTagsModalTitle',
-				'setFeedMaxTags',
+				'serverFeedCustomizeTagsModalTitle',
+				'setFeedTags',
 				compressedChannelId,
 			);
 			if (!success) return;
@@ -735,22 +736,22 @@ const command = new Command(
 			const fields = [
 				{
 					customId: 'inputGeneralTags',
-					labelKey: 'serverFeedCustomizeMaxTagsModalGeneralTagsLabel',
+					labelKey: 'serverFeedCustomizeTagsModalMaxGeneralTagsLabel',
 					value: feedConfig.maxGeneralTags,
 				},
 				{
 					customId: 'inputArtistTags',
-					labelKey: 'serverFeedCustomizeMaxTagsModalArtistTagsLabel',
+					labelKey: 'serverFeedCustomizeTagsModalMaxArtistTagsLabel',
 					value: feedConfig.maxArtistTags,
 				},
 				{
 					customId: 'inputCharacterTags',
-					labelKey: 'serverFeedCustomizeMaxTagsModalCharacterTagsLabel',
+					labelKey: 'serverFeedCustomizeTagsModalMaxCharacterTagsLabel',
 					value: feedConfig.maxCharacterTags,
 				},
 				{
 					customId: 'inputCopyrightTags',
-					labelKey: 'serverFeedCustomizeMaxTagsModalCopyrightTagsLabel',
+					labelKey: 'serverFeedCustomizeTagsModalMaxCopyrightTagsLabel',
 					value: feedConfig.maxCopyrightTags,
 				},
 			] as const satisfies readonly {
@@ -764,7 +765,7 @@ const command = new Command(
 					label
 						.setLabel(translator.getText(field.labelKey))
 						.setDescription(
-							translator.getText('serverFeedCustomizeMaxTagsModalTagsDescription'),
+							translator.getText('serverFeedCustomizeTagsModalMaxTagsDescription'),
 						)
 						.setTextInputComponent((textInput) =>
 							textInput
@@ -777,12 +778,22 @@ const command = new Command(
 						),
 				);
 
+			modal.addLabelComponents((label) =>
+				label
+					.setLabel(translator.getText('serverFeedCustomizeTagsModalOmitRedundantLabel'))
+					.setCheckboxComponent((checkbox) =>
+						checkbox
+							.setCustomId('inputOmitRedundantTags')
+							.setDefault(feedConfig.omitRedundantTags),
+					),
+			);
+
 			return interaction.showModal(modal);
 		},
 		{ userFilterIndex: 0, applyTagExclusions: true },
 	)
 	.setModalResponse(
-		async function setFeedMaxTags(interaction, compressedChannelId) {
+		async function setFeedTags(interaction, compressedChannelId) {
 			const { success, data } = await getFeedCustomizationSetContext(
 				interaction,
 				compressedChannelId,
@@ -833,63 +844,8 @@ const command = new Command(
 				remove: () => (feedConfig.maxCopyrightTags = null),
 			});
 
-			await feedConfig.save();
-
-			const container = await makeFeedWizardCustomizationContainer(
-				compressedUserId,
-				compressedChannelId,
-				feedConfig,
-				translator,
-			);
-
-			return interaction.editReply({ components: [container] });
-		},
-		{ applyTagExclusions: true },
-	)
-	.setButtonResponse(
-		async function customizeFeedFooter(interaction, _compressedUserId, compressedChannelId) {
-			const { success, data } = await getFeedCustomizationModalContext(
-				interaction,
-				'serverFeedCustomizeFooterModalTitle',
-				'setFeedFooter',
-				compressedChannelId,
-			);
-			if (!success) return;
-			const { translator, feedConfig, modal } = data;
-
-			modal.addLabelComponents((label) =>
-				label
-					.setLabel(translator.getText('serverFeedCustomizeFooterModalFooterLabel'))
-					.setTextInputComponent((textInput) =>
-						textInput
-							.setCustomId('inputFooter')
-							.setMinLength(0)
-							.setMaxLength(32)
-							.setRequired(false)
-							.setStyle(TextInputStyle.Short)
-							.setValue(feedConfig.footerText ?? ''),
-					),
-			);
-
-			return interaction.showModal(modal);
-		},
-		{ userFilterIndex: 0, applyTagExclusions: true },
-	)
-	.setModalResponse(
-		async function setFeedFooter(interaction, compressedChannelId) {
-			const { success, data } = await getFeedCustomizationSetContext(
-				interaction,
-				compressedChannelId,
-			);
-			if (!success) return;
-			const { translator, feedConfig } = data;
-			const compressedUserId = compressId(interaction.user.id);
-
-			await interaction.deferUpdate();
-
-			const newFooter = interaction.fields.getTextInputValue('inputFooter');
-			if (newFooter.length) feedConfig.footerText = newFooter;
-			else feedConfig.footerText = null;
+			const omitRedundantTags = interaction.fields.getCheckbox('inputOmitRedundantTags');
+			feedConfig.omitRedundantTags = omitRedundantTags;
 
 			await feedConfig.save();
 
@@ -1545,22 +1501,17 @@ async function makeFeedWizardCustomizationContainer(
 			customId: 'customizeFeedSubtitle',
 		},
 		{
-			name: 'serverFeedCustomizeMaxTagsName',
+			name: 'serverFeedCustomizeTagsName',
 			desc: translator.getText(
-				'serverFeedCustomizeMaxTagsDescription',
+				'serverFeedCustomizeTagsDescription',
 				feedConfig.maxGeneralTags ?? defaultMaxGeneralTags,
 				feedConfig.maxArtistTags ?? defaultMaxSpecialTags,
 				feedConfig.maxCharacterTags ?? defaultMaxSpecialTags,
 				feedConfig.maxCopyrightTags ?? defaultMaxSpecialTags,
+				maxAllowedTotalSpecialTags,
+				feedConfig.omitRedundantTags,
 			),
-			customId: 'customizeFeedMaxTags',
-		},
-		{
-			name: 'serverFeedCustomizeFooterName',
-			desc: feedConfig.footerText
-				? shortenText(feedConfig.footerText, 32, '…')
-				: translator.getText('serverFeedCustomizeNoFooterDescription'),
-			customId: 'customizeFeedFooter',
+			customId: 'customizeFeedTags',
 		},
 	];
 

@@ -3,9 +3,9 @@ import Mongoose, { type InferSchemaType } from 'mongoose';
 export const defaultMaxGeneralTags = 20;
 export const maxAllowedGeneralTags = 50;
 
-export const defaultMaxSpecialTags = 6;
-export const maxAllowedSpecialTags = 12;
-export const maxAllowedTotalSpecialTags = 16; //TODO: use this
+export const defaultMaxSpecialTags = 3;
+export const maxAllowedSpecialTags = 6;
+export const maxAllowedTotalSpecialTags = 12;
 
 export const FeedConfigSchema = new Mongoose.Schema({
 	channelId: {
@@ -47,10 +47,11 @@ export const FeedConfigSchema = new Mongoose.Schema({
 	maxCopyrightTags: {
 		type: Number,
 	},
-	icon: {
-		type: String,
+	omitRedundantTags: {
+		type: Boolean,
+		default: true,
 	},
-	footerText: {
+	icon: {
 		type: String,
 	},
 });

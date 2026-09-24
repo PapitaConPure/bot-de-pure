@@ -451,15 +451,16 @@ export interface FeedOptions {
 	maxArtistTags?: number | null;
 	maxCharacterTags?: number | null;
 	maxCopyrightTags?: number | null;
+	omittedTags?: string[] | null;
 	icon?: string | null;
 	title?: string | null;
 	subtitle?: string | null;
-	footerText?: string | null;
 }
 
 export class BooruFeed {
 	readonly booru: BooruClient<Gelbooru>;
 	readonly #feedDoc: FeedDocument;
+	readonly #omittedTagsCache: string[];
 
 	readonly channel: GuildTextBasedChannel | null;
 
@@ -473,6 +474,10 @@ export class BooruFeed {
 
 		this.booru = booru;
 		this.#feedDoc = feed;
+		this.#omittedTagsCache =
+			(this.#feedDoc.omitRedundantTags ?? true)
+				? getSimpleTagNames(this.#feedDoc.searchTags)
+				: [];
 		this.channel = channel?.isTextBased() ? channel : null;
 
 		debug(`Created a BooruFeed with lastFetchedAt=${this.#feedDoc.lastFetchedAt}`);
@@ -510,6 +515,11 @@ export class BooruFeed {
 		return this.#feedDoc.maxCopyrightTags;
 	}
 
+	get omittedTags() {
+		//Yeah it's a ref but no I won't clone it every time
+		return this.#omittedTagsCache;
+	}
+
 	get icon() {
 		return this.#feedDoc.icon;
 	}
@@ -520,10 +530,6 @@ export class BooruFeed {
 
 	get subtitle() {
 		return this.#feedDoc.subtitle;
-	}
-
-	get footerText() {
-		return this.#feedDoc.footerText;
 	}
 
 	get allowNSFW() {
@@ -611,4 +617,11 @@ export class BooruFeed {
 			},
 		};
 	}
+}
+
+const gelbooruPropertyTagRegex = /^(?:sort|rating|score|width|height|user|fav|pool|md5):[^\s]+$/i;
+export function getSimpleTagNames(tagsString: string) {
+	return tagsString
+		.split(/\s+/)
+		.filter((t) => t && !t.startsWith('-') && !gelbooruPropertyTagRegex.test(t));
 }

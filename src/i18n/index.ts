@@ -2444,26 +2444,32 @@ const localesObject = {
 		en: '_«No subtitle...»_',
 		ja: '_«サブタイトルなし…»_',
 	},
-	serverFeedCustomizeMaxTagsName: {
-		es: '### -# Máximo de etiquetas',
-		en: '### -# Max Tag Count',
-		ja: '### -# 最大タグ数',
+	serverFeedCustomizeTagsName: {
+		es: '### -# Visualización de etiquetas',
+		en: '### -# Tags Display',
+		ja: '### -# タグの表示',
 	},
-	serverFeedCustomizeMaxTagsDescription: {
+	serverFeedCustomizeTagsDescription: {
 		es: () =>
 			paragraph(
-				`${getBotEmoji('tagAccent')} General: **${subl(0)}**`,
-				`${getBotEmoji('artistTagAccent')} Artistas: **${subl(1)}**　${getBotEmoji('characterTagAccent')} Personajes: **${subl(2)}**　${getBotEmoji('copyrightTagAccent')} Copyright: **${subl(3)}**`,
+				`Máximo de tags generales: **${getBotEmoji('tagAccent')}x${subl(0)}**`,
+				`Máximo de tags especiales: **${getBotEmoji('artistTagAccent')}x${subl(1)} ${getBotEmoji('characterTagAccent')}x${subl(2)} ${getBotEmoji('copyrightTagAccent')}x${subl(3)}**`,
+				`-# └ Las tags especiales están limitadas a un total de ${subl(4)}.`,
+				`**${subif(5, '=', true, 'Se omiten', 'No se omiten')}** las tags redundantes.`,
 			),
 		en: () =>
 			paragraph(
-				`${getBotEmoji('tagAccent')} General: **${subl(0)}**`,
-				`${getBotEmoji('artistTagAccent')} Artists: **${subl(1)}**　${getBotEmoji('characterTagAccent')} Characters: **${subl(2)}**　${getBotEmoji('copyrightTagAccent')} Copyright: **${subl(3)}**`,
+				`General Tags Max Count: **${getBotEmoji('tagAccent')}x${subl(0)}**`,
+				`Special Tags Max Count: **${getBotEmoji('artistTagAccent')}x${subl(1)} ${getBotEmoji('characterTagAccent')}x${subl(2)} ${getBotEmoji('copyrightTagAccent')}x${subl(3)}**`,
+				`-# └ Special tags are limited to a total of ${subl(4)}.`,
+				`Redundant tags are **${subif(5, '=', true, 'omitted', 'not omitted')}**.`,
 			),
 		ja: () =>
 			paragraph(
-				`${getBotEmoji('tagAccent')} 一般タグ：**${subl(0)}個**`,
-				`${getBotEmoji('artistTagAccent')} アーティスト：**${subl(1)}個**　${getBotEmoji('characterTagAccent')} キャラクター：**${subl(2)}個**　${getBotEmoji('copyrightTagAccent')} IP：**${subl(3)}個**`,
+				`一般タグの最大数：**${getBotEmoji('tagAccent')}✕${subl(0)}**`,
+				`特別なタグの最大数：**${getBotEmoji('artistTagAccent')}✕${subl(1)} ${getBotEmoji('characterTagAccent')}✕${subl(2)} ${getBotEmoji('copyrightTagAccent')}✕${subl(3)}**`,
+				`-# └ 特別なタグは合計${subl(4)}枚までとなります。`,
+				`冗長なタグは **${subif(5, '=', true, '省略されます', '省略されません')}**。`,
 			),
 	},
 	serverFeedCustomizeFooterName: {
@@ -2496,35 +2502,40 @@ const localesObject = {
 		en: 'Subtitle',
 		ja: 'サブタイトル',
 	},
-	serverFeedCustomizeMaxTagsModalTitle: {
+	serverFeedCustomizeTagsModalTitle: {
 		es: 'Personalizar Máximo de Etiquetas de Feed',
 		en: 'Customize Feed Max Tag Count',
 		ja: 'フィードの最大タグ数をカスタマイズ',
 	},
-	serverFeedCustomizeMaxTagsModalGeneralTagsLabel: {
-		es: 'Etiquetas generales',
-		en: 'General tags',
-		ja: '一般タグ',
+	serverFeedCustomizeTagsModalMaxGeneralTagsLabel: {
+		es: 'Máximo de etiquetas generales',
+		en: 'General tags maximum count',
+		ja: '一般タグの最大数',
 	},
-	serverFeedCustomizeMaxTagsModalArtistTagsLabel: {
-		es: 'Etiquetas de artista',
-		en: 'Artist tags',
-		ja: 'アーティストタグ',
+	serverFeedCustomizeTagsModalMaxArtistTagsLabel: {
+		es: 'Máximo de etiquetas de artista',
+		en: 'Artist tags maximum count',
+		ja: 'アーティストタグの最大数',
 	},
-	serverFeedCustomizeMaxTagsModalCharacterTagsLabel: {
-		es: 'Etiquetas de personaje',
-		en: 'Character tags',
-		ja: 'キャラクタータグ',
+	serverFeedCustomizeTagsModalMaxCharacterTagsLabel: {
+		es: 'Máximo de etiquetas de personaje',
+		en: 'Character tags maximum count',
+		ja: 'キャラクタータグの最大数',
 	},
-	serverFeedCustomizeMaxTagsModalCopyrightTagsLabel: {
-		es: 'Etiquetas de copyright',
-		en: 'Copyright tags',
-		ja: 'IPタグ',
+	serverFeedCustomizeTagsModalMaxCopyrightTagsLabel: {
+		es: 'Máximo de etiquetas de copyright',
+		en: 'Copyright tags maximum count',
+		ja: '版権タグの最大数',
 	},
-	serverFeedCustomizeMaxTagsModalTagsDescription: {
+	serverFeedCustomizeTagsModalMaxTagsDescription: {
 		es: 'Vacío = valor por defecto; 0 = no mostrar',
 		en: "Empty = default value; 0 = don't display",
 		ja: '空 = デフォルト値、0 = 表示しない',
+	},
+	serverFeedCustomizeTagsModalOmitRedundantLabel: {
+		es: '¿Omitir tags redundantes?',
+		en: 'Omit redundant tags?',
+		ja: '冗長なタグを省略しますか？',
 	},
 	serverFeedCustomizeFooterModalTitle: {
 		es: 'Personalizar Pie de Feed',
