@@ -1,5 +1,12 @@
 import Mongoose, { type InferSchemaType } from 'mongoose';
 
+export const defaultMaxGeneralTags = 20;
+export const maxAllowedGeneralTags = 50;
+
+export const defaultMaxSpecialTags = 6;
+export const maxAllowedSpecialTags = 12;
+export const maxAllowedTotalSpecialTags = 16; //TODO: use this
+
 export const FeedConfigSchema = new Mongoose.Schema({
 	channelId: {
 		type: String,
@@ -29,6 +36,15 @@ export const FeedConfigSchema = new Mongoose.Schema({
 		type: String,
 	},
 	maxGeneralTags: {
+		type: Number,
+	},
+	maxArtistTags: {
+		type: Number,
+	},
+	maxCharacterTags: {
+		type: Number,
+	},
+	maxCopyrightTags: {
 		type: Number,
 	},
 	icon: {

@@ -448,6 +448,9 @@ export interface FeedOptions {
 	lastFetchedAt?: Date | null;
 	faults?: number | null;
 	maxGeneralTags?: number | null;
+	maxArtistTags?: number | null;
+	maxCharacterTags?: number | null;
+	maxCopyrightTags?: number | null;
 	icon?: string | null;
 	title?: string | null;
 	subtitle?: string | null;
@@ -493,6 +496,18 @@ export class BooruFeed {
 
 	get maxGeneralTags() {
 		return this.#feedDoc.maxGeneralTags;
+	}
+
+	get maxArtistTags() {
+		return this.#feedDoc.maxArtistTags;
+	}
+
+	get maxCharacterTags() {
+		return this.#feedDoc.maxCharacterTags;
+	}
+
+	get maxCopyrightTags() {
+		return this.#feedDoc.maxCopyrightTags;
 	}
 
 	get icon() {
