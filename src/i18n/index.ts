@@ -2208,14 +2208,14 @@ const localesObject = {
 		ja: '### -# 言語',
 	},
 	serverDashboardOtherConfigsName: {
-		es: '### -# Otras Configuraciones',
-		en: '### -# Other Configurations',
-		ja: '### -# その他の構成',
+		es: '### -# Sistemas de servidor',
+		en: '### -# Server Systems',
+		ja: '### -# サーバーシステム',
 	},
 	serverDashboardMenuConfig: {
-		es: 'Sistemas de servidor',
-		en: 'Server Systems',
-		ja: 'サーバーシステム',
+		es: 'Selecciona un Sistema...',
+		en: 'Select a System...',
+		ja: 'システムを選択してください...',
 	},
 	serverDashboardMenuConfigConfessionsLabel: {
 		es: 'Confesiones',
@@ -2408,6 +2408,133 @@ const localesObject = {
 		es: `Se eliminó el Feed de <#${subl(0)}>.`,
 		en: `The Feed in <#${subl(0)}> has been deleted.`,
 		ja: `<#${subl(0)}> のフィードが削除されました。`,
+	},
+	serverFeedCustomizeModalTitle: {
+		es: 'Personalizar Feed',
+		en: 'Customize Feed',
+		ja: 'フィードをカスタマイズ',
+	},
+	serverFeedCustomizeTitle: {
+		es: '## Personalizar Feed',
+		en: '## Customize Feed',
+		ja: '## フィードをカスタマイズ',
+	},
+	serverFeedCustomizeDescription: {
+		es: `Personaliza cómo se presenta cada Post del feed en <#${subl(0)}>.`,
+		en: `Customize how each Feed Post within <#${subl(0)}> is displayed.`,
+		ja: `<#${subl(0)}> 内の各フィード投稿の表示方法をカスタマイズします。`,
+	},
+	serverFeedCustomizeTitleName: {
+		es: '### -# Título',
+		en: '### -# Title',
+		ja: '### -# タイトル',
+	},
+	serverFeedCustomizeNoTitleDescription: {
+		es: '_«Sin título...»_',
+		en: '_«No title...»_',
+		ja: '_«タイトルなし…»_',
+	},
+	serverFeedCustomizeSubtitleName: {
+		es: '### -# Subtítulo',
+		en: '### -# Subtitle',
+		ja: '### -# サブタイトル',
+	},
+	serverFeedCustomizeNoSubtitleDescription: {
+		es: '_«Sin subtítulo...»_',
+		en: '_«No subtitle...»_',
+		ja: '_«サブタイトルなし…»_',
+	},
+	serverFeedCustomizeMaxTagsName: {
+		es: '### -# Máximo de etiquetas',
+		en: '### -# Max Tag Count',
+		ja: '### -# 最大タグ数',
+	},
+	serverFeedCustomizeMaxTagsDescription: {
+		es: () =>
+			paragraph(
+				`${getBotEmoji('tagAccent')} General: **${subl(0)}**`,
+				`${getBotEmoji('artistTagAccent')} Artistas: **${subl(1)}**　${getBotEmoji('characterTagAccent')} Personajes: **${subl(2)}**　${getBotEmoji('copyrightTagAccent')} Copyright: **${subl(3)}**`,
+			),
+		en: () =>
+			paragraph(
+				`${getBotEmoji('tagAccent')} General: **${subl(0)}**`,
+				`${getBotEmoji('artistTagAccent')} Artists: **${subl(1)}**　${getBotEmoji('characterTagAccent')} Characters: **${subl(2)}**　${getBotEmoji('copyrightTagAccent')} Copyright: **${subl(3)}**`,
+			),
+		ja: () =>
+			paragraph(
+				`${getBotEmoji('tagAccent')} 一般タグ：**${subl(0)}個**`,
+				`${getBotEmoji('artistTagAccent')} アーティスト：**${subl(1)}個**　${getBotEmoji('characterTagAccent')} キャラクター：**${subl(2)}個**　${getBotEmoji('copyrightTagAccent')} IP：**${subl(3)}個**`,
+			),
+	},
+	serverFeedCustomizeFooterName: {
+		es: '### -# Pie',
+		en: '### -# Footer',
+		ja: '### -# フッター',
+	},
+	serverFeedCustomizeNoFooterDescription: {
+		es: '_«Sin pie...»_',
+		en: '_«No footer...»_',
+		ja: '_«フッターなし…»_',
+	},
+	serverFeedCustomizeTitleModalTitle: {
+		es: 'Personalizar Título de Feed',
+		en: 'Customize Feed Title',
+		ja: 'フィードのタイトルをカスタマイズ',
+	},
+	serverFeedCustomizeTitleModalTitleLabel: {
+		es: 'Título',
+		en: 'Title',
+		ja: 'タイトル',
+	},
+	serverFeedCustomizeSubtitleModalTitle: {
+		es: 'Personalizar Subtítulo de Feed',
+		en: 'Customize Feed Subtitle',
+		ja: 'フィードのサブタイトルをカスタマイズ',
+	},
+	serverFeedCustomizeSubtitleModalSubtitleLabel: {
+		es: 'Subtítulo',
+		en: 'Subtitle',
+		ja: 'サブタイトル',
+	},
+	serverFeedCustomizeMaxTagsModalTitle: {
+		es: 'Personalizar Máximo de Etiquetas de Feed',
+		en: 'Customize Feed Max Tag Count',
+		ja: 'フィードの最大タグ数をカスタマイズ',
+	},
+	serverFeedCustomizeMaxTagsModalGeneralTagsLabel: {
+		es: 'Etiquetas generales',
+		en: 'General tags',
+		ja: '一般タグ',
+	},
+	serverFeedCustomizeMaxTagsModalArtistTagsLabel: {
+		es: 'Etiquetas de artista',
+		en: 'Artist tags',
+		ja: 'アーティストタグ',
+	},
+	serverFeedCustomizeMaxTagsModalCharacterTagsLabel: {
+		es: 'Etiquetas de personaje',
+		en: 'Character tags',
+		ja: 'キャラクタータグ',
+	},
+	serverFeedCustomizeMaxTagsModalCopyrightTagsLabel: {
+		es: 'Etiquetas de copyright',
+		en: 'Copyright tags',
+		ja: 'IPタグ',
+	},
+	serverFeedCustomizeMaxTagsModalTagsDescription: {
+		es: 'Vacío = valor por defecto; 0 = no mostrar',
+		en: "Empty = default value; 0 = don't display",
+		ja: '空 = デフォルト値、0 = 表示しない',
+	},
+	serverFeedCustomizeFooterModalTitle: {
+		es: 'Personalizar Pie de Feed',
+		en: 'Customize Feed Footer',
+		ja: 'フィードのフッターをカスタマイズ',
+	},
+	serverFeedCustomizeFooterModalFooterLabel: {
+		es: 'Subtítulo',
+		en: 'Footer',
+		ja: 'フッター',
 	},
 
 	serverVoiceWizardEpigraph: {
@@ -3029,11 +3156,6 @@ const localesObject = {
 		en: '### -# Language',
 		ja: '### -# 言語',
 	},
-	yoDashboardOtherConfigsName: {
-		es: '### -# Otras Configuraciones',
-		en: '### -# Other Configurations',
-		ja: '### -# その他の構成',
-	},
 	yoDashboardTimezoneName: {
 		es: '### -# Huso Horario',
 		en: '### -# Time Zone',
@@ -3076,10 +3198,15 @@ const localesObject = {
 		en: 'Followed Tags...',
 		ja: 'フォロー中のタグ…',
 	},
+	yoDashboardOtherConfigsName: {
+		es: '### -# Otras preferencias',
+		en: '### -# Other Preferences',
+		ja: '### -# その他の設定',
+	},
 	yoDashboardMenuConfig: {
-		es: 'Preferencias',
-		en: 'Preferences',
-		ja: '設定',
+		es: 'Selecciona Preferencias a configurar...',
+		en: 'Select Preferences to configure...',
+		ja: '設定する設定を選択してください...',
 	},
 	yoDashboardMenuConfigFeedDesc: {
 		es: 'Edita tus tags seguidas en Feeds de imágenes',

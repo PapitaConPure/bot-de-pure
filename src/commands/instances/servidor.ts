@@ -14,6 +14,7 @@ import {
 	type GuildMember,
 	MessageFlags,
 	ModalBuilder,
+	type ModalSubmitInteraction,
 	SeparatorSpacingSize,
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
@@ -21,15 +22,21 @@ import {
 } from 'discord.js';
 import type { AnyCommandInteraction } from 'types/commands';
 import { tenshiAltColor, tenshiColor, tenshiPeachColor } from '@/data/globalProps';
-import { isValidLocaleKey, Locales, Translator } from '@/i18n';
-import FeedConfigModel from '@/models/feeds';
+import { isValidLocaleKey, type LocaleIds, Locales, Translator } from '@/i18n';
+import FeedConfigModel, {
+	defaultMaxGeneralTags,
+	defaultMaxSpecialTags,
+	type FeedDocument,
+	maxAllowedGeneralTags,
+	maxAllowedSpecialTags,
+} from '@/models/feeds';
 import { type GuildConfigDocument, GuildConfigModel } from '@/models/guildconfigs';
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice';
 import { addFeedToUpdateStack, setupFeedUpdateStack } from '@/systems/booru/boorufeed';
 import { getBotEmojiResolvable } from '@/utils/emojis';
 import { compressId, decompressId } from '@/utils/encoding';
 import { recacheGuild } from '@/utils/guildcache';
-import { shortenText } from '@/utils/misc';
+import { clamp, shortenText } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandPermissions, CommandTags } from '../commons';
 
@@ -436,7 +443,7 @@ const command = new Command(
 
 			if (!feeds.length)
 				return interaction.reply({
-					content: '⚠️ No hay Feeds para mostrar',
+					content: '⚠️ No hay Feeds disponibles',
 					flags: MessageFlags.Ephemeral,
 				});
 
@@ -539,6 +546,363 @@ const command = new Command(
 			return interaction.update({ components: [container] });
 		},
 		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setButtonResponse(
+		async function selectFeedCustomize(interaction, compressedUserId) {
+			const translator = await Translator.fromUser(interaction.user.id);
+			const feeds = await makeFeedOptions(interaction);
+
+			if (!feeds.length)
+				return interaction.reply({
+					content: '⚠️ No hay Feeds disponibles',
+					flags: MessageFlags.Ephemeral,
+				});
+
+			const modal = new ModalBuilder()
+				.setCustomId(`servidor_customizeFeed_${compressedUserId}`)
+				.setTitle(translator.getText('serverFeedCustomizeModalTitle'))
+				.addLabelComponents((label) =>
+					label
+						.setLabel(translator.getText('serverFeedEditModalSelectFeedLabel'))
+						.setStringSelectMenuComponent((textInput) =>
+							textInput
+								.setCustomId('inputChannel')
+								.setPlaceholder(
+									translator.getText('serverFeedEditModalSelectFeedPlaceholder'),
+								)
+								.setOptions(feeds)
+								.setRequired(true),
+						),
+				);
+
+			return interaction.showModal(modal);
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setModalResponse(
+		async function customizeFeed(interaction, compressedUserId) {
+			const channelId = interaction.fields.getStringSelectValues('inputChannel')[0];
+			const [translator, feedConfig] = await Promise.all([
+				Translator.fromUser(interaction.user.id),
+				FeedConfigModel.findOne({ channelId }),
+			]);
+
+			if (!feedConfig)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('invalidChannel'),
+				});
+
+			const compressedChannelId = compressId(channelId);
+			const container = await makeFeedWizardCustomizationContainer(
+				compressedUserId,
+				compressedChannelId,
+				feedConfig,
+				translator,
+			);
+
+			return interaction.update({ components: [container] });
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setButtonResponse(
+		async function customizeFeedTitle(interaction, _compressedUserId, compressedChannelId) {
+			const { success, data } = await getFeedCustomizationModalContext(
+				interaction,
+				'serverFeedCustomizeTitleModalTitle',
+				'setFeedTitle',
+				compressedChannelId,
+			);
+			if (!success) return;
+			const { translator, feedConfig, modal } = data;
+
+			modal.addLabelComponents((label) =>
+				label
+					.setLabel(translator.getText('serverFeedCustomizeTitleModalTitleLabel'))
+					.setTextInputComponent((textInput) =>
+						textInput
+							.setCustomId('inputTitle')
+							.setMinLength(0)
+							.setMaxLength(32)
+							.setRequired(false)
+							.setStyle(TextInputStyle.Short)
+							.setValue(feedConfig.title ?? ''),
+					),
+			);
+
+			return interaction.showModal(modal);
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setModalResponse(
+		async function setFeedTitle(interaction, compressedChannelId) {
+			const { success, data } = await getFeedCustomizationSetContext(
+				interaction,
+				compressedChannelId,
+			);
+			if (!success) return;
+			const { translator, feedConfig } = data;
+			const compressedUserId = compressId(interaction.user.id);
+
+			await interaction.deferUpdate();
+
+			const newTitle = interaction.fields.getTextInputValue('inputTitle');
+			if (newTitle.length) feedConfig.title = newTitle;
+			else feedConfig.title = null;
+
+			await feedConfig.save();
+
+			const container = await makeFeedWizardCustomizationContainer(
+				compressedUserId,
+				compressedChannelId,
+				feedConfig,
+				translator,
+			);
+
+			return interaction.editReply({ components: [container] });
+		},
+		{ applyTagExclusions: true },
+	)
+	.setButtonResponse(
+		async function customizeFeedSubtitle(interaction, _compressedUserId, compressedChannelId) {
+			const { success, data } = await getFeedCustomizationModalContext(
+				interaction,
+				'serverFeedCustomizeSubtitleModalTitle',
+				'setFeedSubtitle',
+				compressedChannelId,
+			);
+			if (!success) return;
+			const { translator, feedConfig, modal } = data;
+
+			modal.addLabelComponents((label) =>
+				label
+					.setLabel(translator.getText('serverFeedCustomizeSubtitleModalSubtitleLabel'))
+					.setTextInputComponent((textInput) =>
+						textInput
+							.setCustomId('inputSubtitle')
+							.setMinLength(0)
+							.setMaxLength(32)
+							.setRequired(false)
+							.setStyle(TextInputStyle.Short)
+							.setValue(feedConfig.subtitle ?? ''),
+					),
+			);
+
+			return interaction.showModal(modal);
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setModalResponse(
+		async function setFeedSubtitle(interaction, compressedChannelId) {
+			const { success, data } = await getFeedCustomizationSetContext(
+				interaction,
+				compressedChannelId,
+			);
+			if (!success) return;
+			const { translator, feedConfig } = data;
+			const compressedUserId = compressId(interaction.user.id);
+
+			await interaction.deferUpdate();
+
+			const newSubtitle = interaction.fields.getTextInputValue('inputSubtitle');
+			if (newSubtitle.length) feedConfig.subtitle = newSubtitle;
+			else feedConfig.subtitle = null;
+
+			await feedConfig.save();
+
+			const container = await makeFeedWizardCustomizationContainer(
+				compressedUserId,
+				compressedChannelId,
+				feedConfig,
+				translator,
+			);
+
+			return interaction.editReply({ components: [container] });
+		},
+		{ applyTagExclusions: true },
+	)
+	.setButtonResponse(
+		async function customizeFeedMaxTags(interaction, _compressedUserId, compressedChannelId) {
+			const { success, data } = await getFeedCustomizationModalContext(
+				interaction,
+				'serverFeedCustomizeMaxTagsModalTitle',
+				'setFeedMaxTags',
+				compressedChannelId,
+			);
+			if (!success) return;
+			const { translator, feedConfig, modal } = data;
+
+			const fields = [
+				{
+					customId: 'inputGeneralTags',
+					labelKey: 'serverFeedCustomizeMaxTagsModalGeneralTagsLabel',
+					value: feedConfig.maxGeneralTags,
+				},
+				{
+					customId: 'inputArtistTags',
+					labelKey: 'serverFeedCustomizeMaxTagsModalArtistTagsLabel',
+					value: feedConfig.maxArtistTags,
+				},
+				{
+					customId: 'inputCharacterTags',
+					labelKey: 'serverFeedCustomizeMaxTagsModalCharacterTagsLabel',
+					value: feedConfig.maxCharacterTags,
+				},
+				{
+					customId: 'inputCopyrightTags',
+					labelKey: 'serverFeedCustomizeMaxTagsModalCopyrightTagsLabel',
+					value: feedConfig.maxCopyrightTags,
+				},
+			] as const satisfies readonly {
+				labelKey: LocaleIds;
+				customId: string;
+				value: number | null | undefined;
+			}[];
+
+			for (const field of fields)
+				modal.addLabelComponents((label) =>
+					label
+						.setLabel(translator.getText(field.labelKey))
+						.setDescription(
+							translator.getText('serverFeedCustomizeMaxTagsModalTagsDescription'),
+						)
+						.setTextInputComponent((textInput) =>
+							textInput
+								.setCustomId(field.customId)
+								.setValue(`${field.value ?? ''}`)
+								.setMinLength(0)
+								.setMaxLength(2)
+								.setRequired(false)
+								.setStyle(TextInputStyle.Short),
+						),
+				);
+
+			return interaction.showModal(modal);
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setModalResponse(
+		async function setFeedMaxTags(interaction, compressedChannelId) {
+			const { success, data } = await getFeedCustomizationSetContext(
+				interaction,
+				compressedChannelId,
+			);
+			if (!success) return;
+			const { translator, feedConfig } = data;
+			const compressedUserId = compressId(interaction.user.id);
+
+			await interaction.deferUpdate();
+
+			const processField = (
+				customId: string,
+				options: { max: number; apply: (value: number) => void; remove: () => void },
+			) => {
+				const { max, apply, remove } = options;
+
+				const newMaxTagsString = interaction.fields.getTextInputValue(customId);
+				if (!newMaxTagsString.length) return remove();
+
+				const newMaxTags = +newMaxTagsString;
+				if (Number.isNaN(newMaxTags)) return remove();
+
+				const value = clamp(newMaxTags, 0, max);
+				return apply(value);
+			};
+
+			processField('inputGeneralTags', {
+				max: maxAllowedGeneralTags,
+				apply: (value) => (feedConfig.maxGeneralTags = value),
+				remove: () => (feedConfig.maxGeneralTags = null),
+			});
+
+			processField('inputArtistTags', {
+				max: maxAllowedSpecialTags,
+				apply: (value) => (feedConfig.maxArtistTags = value),
+				remove: () => (feedConfig.maxArtistTags = null),
+			});
+
+			processField('inputCharacterTags', {
+				max: maxAllowedSpecialTags,
+				apply: (value) => (feedConfig.maxCharacterTags = value),
+				remove: () => (feedConfig.maxCharacterTags = null),
+			});
+
+			processField('inputCopyrightTags', {
+				max: maxAllowedSpecialTags,
+				apply: (value) => (feedConfig.maxCopyrightTags = value),
+				remove: () => (feedConfig.maxCopyrightTags = null),
+			});
+
+			await feedConfig.save();
+
+			const container = await makeFeedWizardCustomizationContainer(
+				compressedUserId,
+				compressedChannelId,
+				feedConfig,
+				translator,
+			);
+
+			return interaction.editReply({ components: [container] });
+		},
+		{ applyTagExclusions: true },
+	)
+	.setButtonResponse(
+		async function customizeFeedFooter(interaction, _compressedUserId, compressedChannelId) {
+			const { success, data } = await getFeedCustomizationModalContext(
+				interaction,
+				'serverFeedCustomizeFooterModalTitle',
+				'setFeedFooter',
+				compressedChannelId,
+			);
+			if (!success) return;
+			const { translator, feedConfig, modal } = data;
+
+			modal.addLabelComponents((label) =>
+				label
+					.setLabel(translator.getText('serverFeedCustomizeFooterModalFooterLabel'))
+					.setTextInputComponent((textInput) =>
+						textInput
+							.setCustomId('inputFooter')
+							.setMinLength(0)
+							.setMaxLength(32)
+							.setRequired(false)
+							.setStyle(TextInputStyle.Short)
+							.setValue(feedConfig.footerText ?? ''),
+					),
+			);
+
+			return interaction.showModal(modal);
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setModalResponse(
+		async function setFeedFooter(interaction, compressedChannelId) {
+			const { success, data } = await getFeedCustomizationSetContext(
+				interaction,
+				compressedChannelId,
+			);
+			if (!success) return;
+			const { translator, feedConfig } = data;
+			const compressedUserId = compressId(interaction.user.id);
+
+			await interaction.deferUpdate();
+
+			const newFooter = interaction.fields.getTextInputValue('inputFooter');
+			if (newFooter.length) feedConfig.footerText = newFooter;
+			else feedConfig.footerText = null;
+
+			await feedConfig.save();
+
+			const container = await makeFeedWizardCustomizationContainer(
+				compressedUserId,
+				compressedChannelId,
+				feedConfig,
+				translator,
+			);
+
+			return interaction.editReply({ components: [container] });
+		},
+		{ applyTagExclusions: true },
 	)
 	.setButtonResponse(
 		async function goToVoiceWizard(interaction, compressedUserId) {
@@ -1157,6 +1521,163 @@ async function makeFeedOptions(interaction: ButtonInteraction): Promise<APISelec
 		.filter((feed) => feed != null);
 
 	return feedOptions;
+}
+
+async function makeFeedWizardCustomizationContainer(
+	compressedUserId: string,
+	compressedChannelId: string,
+	feedConfig: FeedDocument,
+	translator: Translator,
+) {
+	const items: { name: LocaleIds; desc: string; customId: string }[] = [
+		{
+			name: 'serverFeedCustomizeTitleName',
+			desc: feedConfig.title
+				? shortenText(feedConfig.title, 32, '…')
+				: translator.getText('serverFeedCustomizeNoTitleDescription'),
+			customId: 'customizeFeedTitle',
+		},
+		{
+			name: 'serverFeedCustomizeSubtitleName',
+			desc: feedConfig.subtitle
+				? shortenText(feedConfig.subtitle, 32, '…')
+				: translator.getText('serverFeedCustomizeNoSubtitleDescription'),
+			customId: 'customizeFeedSubtitle',
+		},
+		{
+			name: 'serverFeedCustomizeMaxTagsName',
+			desc: translator.getText(
+				'serverFeedCustomizeMaxTagsDescription',
+				feedConfig.maxGeneralTags ?? defaultMaxGeneralTags,
+				feedConfig.maxArtistTags ?? defaultMaxSpecialTags,
+				feedConfig.maxCharacterTags ?? defaultMaxSpecialTags,
+				feedConfig.maxCopyrightTags ?? defaultMaxSpecialTags,
+			),
+			customId: 'customizeFeedMaxTags',
+		},
+		{
+			name: 'serverFeedCustomizeFooterName',
+			desc: feedConfig.footerText
+				? shortenText(feedConfig.footerText, 32, '…')
+				: translator.getText('serverFeedCustomizeNoFooterDescription'),
+			customId: 'customizeFeedFooter',
+		},
+	];
+
+	const container = makeFeedWizardContainer(
+		translator,
+		tenshiPeachColor,
+	).addTextDisplayComponents(
+		(textDisplay) => textDisplay.setContent(translator.getText('serverFeedCustomizeTitle')),
+		(textDisplay) =>
+			textDisplay.setContent(
+				translator.getText(
+					'serverFeedCustomizeDescription',
+					decompressId(compressedChannelId),
+				),
+			),
+	);
+
+	for (const item of items)
+		container
+			.addSeparatorComponents((separator) => separator.setDivider(true))
+			.addSectionComponents((section) =>
+				section
+					.addTextDisplayComponents(
+						(textDisplay) => textDisplay.setContent(translator.getText(item.name)),
+						(textDisplay) => textDisplay.setContent(item.desc),
+					)
+					.setButtonAccessory(
+						new ButtonBuilder()
+							.setCustomId(
+								`servidor_${item.customId}_${compressedUserId}_${compressedChannelId}`,
+							)
+							.setEmoji(getBotEmojiResolvable('pencilWhite'))
+							.setStyle(ButtonStyle.Primary),
+					),
+			);
+
+	container
+		.addSeparatorComponents((separator) =>
+			separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
+		)
+		.addActionRowComponents((actionRow) =>
+			actionRow.addComponents(
+				backToFeedWizardButton(compressedUserId),
+				cancelButton(compressedUserId),
+			),
+		);
+
+	return container;
+}
+
+async function getFeedCustomizationSetContext(
+	interaction: ModalSubmitInteraction,
+	compressedChannelId: string,
+): Promise<
+	| { success: false; data: null }
+	| {
+			success: true;
+			data: {
+				channelId: string;
+				translator: Translator;
+				feedConfig: FeedDocument;
+			};
+	  }
+> {
+	const channelId = decompressId(compressedChannelId);
+	const [translator, feedConfig] = await Promise.all([
+		Translator.fromUser(interaction.user.id),
+		FeedConfigModel.findOne({ channelId }),
+	]);
+
+	if (!feedConfig) {
+		await interaction.reply({
+			flags: MessageFlags.Ephemeral,
+			content: translator.getText('invalidChannel'),
+		});
+		return { success: false, data: null };
+	}
+
+	return { success: true, data: { channelId, translator, feedConfig } };
+}
+
+async function getFeedCustomizationModalContext(
+	interaction: ButtonInteraction,
+	title: LocaleIds,
+	customIdFn: string,
+	compressedChannelId: string,
+): Promise<
+	| { success: false; data: null }
+	| {
+			success: true;
+			data: {
+				channelId: string;
+				translator: Translator;
+				feedConfig: FeedDocument;
+				modal: ModalBuilder;
+			};
+	  }
+> {
+	const channelId = decompressId(compressedChannelId);
+	const [translator, feedConfig] = await Promise.all([
+		Translator.fromUser(interaction.user.id),
+		FeedConfigModel.findOne({ channelId }),
+	]);
+
+	if (!feedConfig) {
+		await interaction.reply({
+			flags: MessageFlags.Ephemeral,
+			content: translator.getText('invalidChannel'),
+		});
+		return { success: false, data: null };
+	}
+
+	const modal = new ModalBuilder()
+		.setCustomId(`servidor_${customIdFn}_${compressedChannelId}`)
+		.setTitle(translator.getText(title));
+
+	return { success: true, data: { channelId, translator, feedConfig, modal } };
 }
 
 function makeVoiceWizardContainer(translator: Translator, stepColor: number): ContainerBuilder {
