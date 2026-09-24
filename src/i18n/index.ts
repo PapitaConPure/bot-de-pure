@@ -2355,12 +2355,12 @@ const localesObject = {
 				`* ${getBotEmoji('gelbooruAccent')} [タグ早見表](https://gelbooru.com/index.php?page=wiki&s=view&id=26263)`,
 			),
 	},
-	serverFeedEditModalSelectFeedLabel: {
+	serverFeedSelectFeedModalFeedLabel: {
 		es: 'Feed',
 		en: 'Feed',
 		ja: 'フィード',
 	},
-	serverFeedEditModalSelectFeedPlaceholder: {
+	serverFeedSelectFeedModalFeedPlaceholder: {
 		es: 'Selecciona un Feed...',
 		en: 'Select a Feed...',
 		ja: 'フィードを選択してください...',
@@ -2453,21 +2453,21 @@ const localesObject = {
 		es: () =>
 			paragraph(
 				`Máximo de tags generales: **${getBotEmoji('tagAccent')}x${subl(0)}**`,
-				`Máximo de tags especiales: **${getBotEmoji('artistTagAccent')}x${subl(1)} ${getBotEmoji('characterTagAccent')}x${subl(2)} ${getBotEmoji('copyrightTagAccent')}x${subl(3)}**`,
+				`Máximo de tags especiales: **${getBotEmoji('artistTagAccent')}x${subl(1)}**, **${getBotEmoji('characterTagAccent')}x${subl(2)}**, **${getBotEmoji('copyrightTagAccent')}x${subl(3)}**`,
 				`-# └ Las tags especiales están limitadas a un total de ${subl(4)}.`,
 				`**${subif(5, '=', true, 'Se omiten', 'No se omiten')}** las tags redundantes.`,
 			),
 		en: () =>
 			paragraph(
-				`General Tags Max Count: **${getBotEmoji('tagAccent')}x${subl(0)}**`,
-				`Special Tags Max Count: **${getBotEmoji('artistTagAccent')}x${subl(1)} ${getBotEmoji('characterTagAccent')}x${subl(2)} ${getBotEmoji('copyrightTagAccent')}x${subl(3)}**`,
+				`General Tags maximum count: **${getBotEmoji('tagAccent')}x${subl(0)}**`,
+				`Special Tags maximum count: **${getBotEmoji('artistTagAccent')}x${subl(1)}**, **${getBotEmoji('characterTagAccent')}x${subl(2)}**, **${getBotEmoji('copyrightTagAccent')}x${subl(3)}**`,
 				`-# └ Special tags are limited to a total of ${subl(4)}.`,
 				`Redundant tags are **${subif(5, '=', true, 'omitted', 'not omitted')}**.`,
 			),
 		ja: () =>
 			paragraph(
-				`一般タグの最大数：**${getBotEmoji('tagAccent')}✕${subl(0)}**`,
-				`特別なタグの最大数：**${getBotEmoji('artistTagAccent')}✕${subl(1)} ${getBotEmoji('characterTagAccent')}✕${subl(2)} ${getBotEmoji('copyrightTagAccent')}✕${subl(3)}**`,
+				`一般タグの最大数：**${getBotEmoji('tagAccent')}${subl(0)}個**`,
+				`特別なタグの最大数：**${getBotEmoji('artistTagAccent')}${subl(1)}個**、**${getBotEmoji('characterTagAccent')}${subl(2)}個**、**${getBotEmoji('copyrightTagAccent')}${subl(3)}個**`,
 				`-# └ 特別なタグは合計${subl(4)}枚までとなります。`,
 				`冗長なタグは **${subif(5, '=', true, '省略されます', '省略されません')}**。`,
 			),
@@ -2546,6 +2546,21 @@ const localesObject = {
 		es: 'Subtítulo',
 		en: 'Footer',
 		ja: 'フッター',
+	},
+	serverFeedViewModalTitle: {
+		es: 'Ver Feed',
+		en: 'View Feed',
+		ja: 'フィードを表示',
+	},
+	serverFeedViewTitle: {
+		es: '## Detalles de Feed',
+		en: '## Feed Details',
+		ja: '## フィードの詳細',
+	},
+	serverFeedViewDescription: {
+		es: `A continuación, se muestran las tags configuradas para el Feed en <#${subl(0)}>.`,
+		en: `The tags configured for the Feed in <#${subl(0)}> are displayed below.`,
+		ja: `<#${subl(0)}> のフィードに設定されたタグが以下に表示されています。`,
 	},
 
 	serverVoiceWizardEpigraph: {

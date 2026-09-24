@@ -33,11 +33,18 @@ import FeedConfigModel, {
 } from '@/models/feeds';
 import { type GuildConfigDocument, GuildConfigModel } from '@/models/guildconfigs';
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice';
-import { addFeedToUpdateStack, setupFeedUpdateStack } from '@/systems/booru/boorufeed';
+import { getMainBooruClient } from '@/systems/booru/booruclient';
+import {
+	addFeedToUpdateStack,
+	getSimpleTagNames,
+	setupFeedUpdateStack,
+} from '@/systems/booru/boorufeed';
+import { formatBooruPostMessage } from '@/systems/booru/boorusend';
+import { fetchChannel, isNSFWChannel } from '@/utils/discord';
 import { getBotEmojiResolvable } from '@/utils/emojis';
 import { compressId, decompressId } from '@/utils/encoding';
 import { recacheGuild } from '@/utils/guildcache';
-import { clamp, shortenText } from '@/utils/misc';
+import { clamp, shortenText, shortenTextLoose } from '@/utils/misc';
 import { p_pure } from '@/utils/prefixes';
 import { Command, CommandPermissions, CommandTags } from '../commons';
 
@@ -247,12 +254,12 @@ const command = new Command(
 					});
 				modal.addLabelComponents((label) =>
 					label
-						.setLabel(translator.getText('serverFeedEditModalSelectFeedLabel'))
+						.setLabel(translator.getText('serverFeedSelectFeedModalFeedLabel'))
 						.setStringSelectMenuComponent((textInput) =>
 							textInput
 								.setCustomId('inputChannel')
 								.setPlaceholder(
-									translator.getText('serverFeedEditModalSelectFeedPlaceholder'),
+									translator.getText('serverFeedSelectFeedModalFeedPlaceholder'),
 								)
 								.setOptions(feeds)
 								.setRequired(true),
@@ -439,33 +446,14 @@ const command = new Command(
 	)
 	.setButtonResponse(
 		async function selectFeedDelete(interaction, compressedUserId) {
-			const translator = await Translator.fromUser(interaction.user.id);
-			const feeds = await makeFeedOptions(interaction);
-
-			if (!feeds.length)
-				return interaction.reply({
-					content: '⚠️ No hay Feeds disponibles',
-					flags: MessageFlags.Ephemeral,
-				});
-
-			const modal = new ModalBuilder()
-				.setCustomId(`servidor_deleteFeed_${compressedUserId}`)
-				.setTitle(translator.getText('serverFeedDeleteModalTitle'))
-				.addLabelComponents((label) =>
-					label
-						.setLabel(translator.getText('serverFeedEditModalSelectFeedLabel'))
-						.setStringSelectMenuComponent((textInput) =>
-							textInput
-								.setCustomId('inputChannel')
-								.setPlaceholder(
-									translator.getText('serverFeedEditModalSelectFeedPlaceholder'),
-								)
-								.setOptions(feeds)
-								.setRequired(true),
-						),
-				);
-
-			return interaction.showModal(modal);
+			const { success, data } = await getFeedSelectContext(
+				interaction,
+				compressedUserId,
+				'deleteFeed',
+				'serverFeedDeleteModalTitle',
+			);
+			if (!success) return;
+			return interaction.showModal(data.modal);
 		},
 		{ userFilterIndex: 0, applyTagExclusions: true },
 	)
@@ -550,33 +538,14 @@ const command = new Command(
 	)
 	.setButtonResponse(
 		async function selectFeedCustomize(interaction, compressedUserId) {
-			const translator = await Translator.fromUser(interaction.user.id);
-			const feeds = await makeFeedOptions(interaction);
-
-			if (!feeds.length)
-				return interaction.reply({
-					content: '⚠️ No hay Feeds disponibles',
-					flags: MessageFlags.Ephemeral,
-				});
-
-			const modal = new ModalBuilder()
-				.setCustomId(`servidor_customizeFeed_${compressedUserId}`)
-				.setTitle(translator.getText('serverFeedCustomizeModalTitle'))
-				.addLabelComponents((label) =>
-					label
-						.setLabel(translator.getText('serverFeedEditModalSelectFeedLabel'))
-						.setStringSelectMenuComponent((textInput) =>
-							textInput
-								.setCustomId('inputChannel')
-								.setPlaceholder(
-									translator.getText('serverFeedEditModalSelectFeedPlaceholder'),
-								)
-								.setOptions(feeds)
-								.setRequired(true),
-						),
-				);
-
-			return interaction.showModal(modal);
+			const { success, data } = await getFeedSelectContext(
+				interaction,
+				compressedUserId,
+				'customizeFeed',
+				'serverFeedCustomizeModalTitle',
+			);
+			if (!success) return;
+			return interaction.showModal(data.modal);
 		},
 		{ userFilterIndex: 0, applyTagExclusions: true },
 	)
@@ -859,6 +828,102 @@ const command = new Command(
 			return interaction.editReply({ components: [container] });
 		},
 		{ applyTagExclusions: true },
+	)
+	.setButtonResponse(
+		async function selectFeedView(interaction, compressedUserId) {
+			const { success, data } = await getFeedSelectContext(
+				interaction,
+				compressedUserId,
+				'viewFeed',
+				'serverFeedViewModalTitle',
+			);
+			if (!success) return;
+			return interaction.showModal(data.modal);
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setModalResponse(
+		async function viewFeed(interaction, compressedUserId) {
+			const channelId = interaction.fields.getStringSelectValues('inputChannel')[0];
+			const [translator, feedConfig, feedChannel] = await Promise.all([
+				Translator.fromUser(interaction.user.id),
+				FeedConfigModel.findOne({ channelId }),
+				fetchChannel(channelId, interaction.guild),
+			]);
+
+			if (!feedConfig || !interaction.channel || !feedChannel)
+				return interaction.reply({
+					flags: MessageFlags.Ephemeral,
+					content: translator.getText('invalidChannel'),
+				});
+
+			await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+			const container = makeFeedWizardContainer(translator, tenshiPeachColor)
+				.addTextDisplayComponents(
+					(textDisplay) =>
+						textDisplay.setContent(translator.getText('serverFeedViewTitle')),
+					(textDisplay) =>
+						textDisplay.setContent(
+							translator.getText(
+								'serverFeedViewDescription',
+								channelId,
+								isNSFWChannel(feedChannel),
+							),
+						),
+					(textDisplay) =>
+						textDisplay.setContent(
+							`\`\`\`\n${shortenTextLoose(feedConfig.searchTags, 980, 1000, '…')}\n\`\`\``,
+						),
+				)
+				.addSeparatorComponents((separator) =>
+					separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
+				)
+				.addActionRowComponents((actionRow) =>
+					actionRow.addComponents(
+						backToFeedWizardButton(compressedUserId),
+						cancelButton(compressedUserId),
+					),
+				);
+
+			const booru = getMainBooruClient();
+			if (!booru)
+				return interaction.editReply({
+					content: translator.getText('missingBooruCredentials'),
+				});
+
+			const [post] = await booru.search(`${feedConfig.searchTags} sort:random`, { limit: 1 });
+			if (!post) return interaction.deleteReply();
+
+			const { container: preview, attachment: previewImage } = await formatBooruPostMessage(
+				booru,
+				post,
+				{
+					...feedConfig.toObject(),
+					allowNSFW: isNSFWChannel(interaction.channel),
+					omittedTags:
+						(feedConfig.omitRedundantTags ?? true)
+							? getSimpleTagNames(feedConfig.searchTags)
+							: [],
+					disableActions: true,
+				},
+			);
+
+			await interaction.message.edit({ components: [container] });
+
+			return interaction.editReply({
+				flags: MessageFlags.IsComponentsV2,
+				files: previewImage != null ? [previewImage] : undefined,
+				components: [
+					preview.addTextDisplayComponents((textDisplay) =>
+						textDisplay.setContent(
+							'-# Esto es una vista previa. Las imágenes NSFW solo pueden previsualizarse en canales NSFW',
+						),
+					),
+				],
+			});
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
 	)
 	.setButtonResponse(
 		async function goToVoiceWizard(interaction, compressedUserId) {
@@ -1455,6 +1520,46 @@ async function makeFeedWizardMainContainer(
 
 function safeFeedTags(tags: string = '') {
 	return tags.replace(/\\*\*/g, '\\*').replace(/\\*_/g, '\\_');
+}
+
+async function getFeedSelectContext(
+	interaction: ButtonInteraction,
+	compressedUserId: string,
+	customId: string,
+	titleKey: LocaleIds,
+): Promise<
+	| { success: false; data: null }
+	| { success: true; data: { translator: Translator; modal: ModalBuilder } }
+> {
+	const translator = await Translator.fromUser(interaction.user.id);
+	const feeds = await makeFeedOptions(interaction);
+
+	if (!feeds.length) {
+		await interaction.reply({
+			flags: MessageFlags.Ephemeral,
+			content: '⚠️ No hay Feeds disponibles',
+		});
+		return { success: false, data: null };
+	}
+
+	const modal = new ModalBuilder()
+		.setCustomId(`servidor_${customId}_${compressedUserId}`)
+		.setTitle(translator.getText(titleKey))
+		.addLabelComponents((label) =>
+			label
+				.setLabel(translator.getText('serverFeedSelectFeedModalFeedLabel'))
+				.setStringSelectMenuComponent((textInput) =>
+					textInput
+						.setCustomId('inputChannel')
+						.setPlaceholder(
+							translator.getText('serverFeedSelectFeedModalFeedPlaceholder'),
+						)
+						.setOptions(feeds)
+						.setRequired(true),
+				),
+		);
+
+	return { success: true, data: { translator, modal } };
 }
 
 async function makeFeedOptions(interaction: ButtonInteraction): Promise<APISelectMenuOption[]> {
