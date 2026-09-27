@@ -313,8 +313,7 @@ export function fetchChannel(
 }
 
 interface FetchMessageContext {
-	guild?: Guild;
-	channel?: GuildTextBasedChannel;
+	channel: GuildTextBasedChannel;
 }
 
 /**
@@ -329,7 +328,7 @@ interface FetchMessageContext {
  */
 export async function fetchMessage(
 	data: string,
-	context: FetchMessageContext = {},
+	context: FetchMessageContext,
 ): Promise<Message | undefined> {
 	if (typeof data !== 'string' || !data.length) return;
 
