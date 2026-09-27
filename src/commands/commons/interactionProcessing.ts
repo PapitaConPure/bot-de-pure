@@ -6,6 +6,7 @@ import {
 	MessageFlags,
 } from 'discord.js';
 import type { AnyCommandInteraction } from 'types/commands';
+import { handleAutoSystemInteraction } from '@/auto/commons/autoSystemProcessing';
 import {
 	findFirstCommandExclusion,
 	generateCommandExclusionEmbed,
@@ -166,6 +167,13 @@ export async function handleComponent(interaction: AnyCommandInteraction): Promi
 	if (interaction.customId.startsWith('/'))
 		return handleComponentSlashCommandInteraction(interaction);
 
+	if (interaction.customId.startsWith('!')) {
+		if (!interaction.inCachedGuild())
+			return handleBlockedInteraction(interaction).catch(console.error);
+
+		return handleAutoSystemInteraction(interaction);
+	}
+
 	try {
 		const funcStream: string[] = interaction.customId.split('_');
 		const commandName = funcStream.shift();
@@ -312,7 +320,7 @@ async function handleComponentSlashCommandInteraction(
 	} else if (command.hasNoOptions()) await command.execute(request);
 }
 
-async function handleComponentInteractionPermissions(
+export async function handleComponentInteractionPermissions(
 	interaction: ChatInputCommandInteraction | AnyCommandInteraction,
 	permissions: CommandPermissions | undefined,
 	requestString: string,
@@ -474,7 +482,7 @@ export async function handleUnknownInteraction(interaction: Interaction): Promis
 	}
 }
 
-async function handleHuskInteraction(interaction: Interaction): Promise<void> {
+export async function handleHuskInteraction(interaction: Interaction): Promise<void> {
 	const translator = await Translator.fromUser(interaction.user.id);
 	if (interaction.isRepliable()) {
 		await interaction.reply({
