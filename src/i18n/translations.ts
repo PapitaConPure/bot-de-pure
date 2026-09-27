@@ -363,7 +363,7 @@ export default {
 	channel: {
 		es: 'Canal',
 		en: 'Channel',
-		ja: 'チャネル',
+		ja: 'チャンネル',
 	},
 	user: {
 		es: 'Usuario',
@@ -1742,7 +1742,7 @@ export default {
 			`🧵 **${subl(4)}** threads`,
 		),
 		ja: paragraph(
-			'### チャネル',
+			'### チャンネル',
 			`#️⃣ **${subl(0)}個**のテキストチャンネル`,
 			`🔊 **${subl(1)}個**のボイスチャンネル`,
 			`📣 **${subl(2)}個**のニュースチャンネル`,
@@ -1786,12 +1786,12 @@ export default {
 	infoStatsTopMembersSubtitle: {
 		es: `### Miembros más activos (canal: ${subl(0)})`,
 		en: `### Most active members (channel: ${subl(0)})`,
-		ja: `### 最もアクティブなメンバー（チャネル：${subl(0)}）`,
+		ja: `### 最もアクティブなメンバー（チャンネル：${subl(0)}）`,
 	},
 	infoStatsTopChannelsSubtitle: {
 		es: `### Canales más activos`,
 		en: '### Most active channels',
-		ja: '### 最もアクティブなチャネル',
+		ja: '### 最もアクティブなチャンネル',
 	},
 	infoStatsTargetMemberTotalMessageSum: {
 		es: `${subl(0)} envió un total de **${subl(1)}** mensajes en *"${subl(2)}"*`,
@@ -2071,7 +2071,7 @@ export default {
 	reminderEditReminderModalChannelLabel: {
 		es: 'Canal',
 		en: 'Channel',
-		ja: 'チャネル',
+		ja: 'チャンネル',
 	},
 	reminderEditReminderModalContentLabel: {
 		es: 'Contenido',
@@ -2122,7 +2122,7 @@ export default {
 	},
 	serverFeedWizardMainTitle: {
 		es: () =>
-			`## ${getBotEmoji('boorutatoFullColor')} Asistente de Configuración de Feeds de imágenes`,
+			`## ${getBotEmoji('boorutatoFullColor')} Asistente de configuración de Feeds de imágenes`,
 		en: () => `## ${getBotEmoji('boorutatoFullColor')} Imageboard Feeds Configuration Wizard`,
 		ja: () => `## ${getBotEmoji('boorutatoFullColor')} 画像掲示板フィードの設定ウィザード`,
 	},
@@ -2137,9 +2137,9 @@ export default {
 		ja: '今、何をしたいですか？',
 	},
 	serverFeedEditModalChannelPlaceholder: {
-		es: 'Selecciona el canal objetivo',
-		en: 'Select the target channel',
-		ja: '対象チャンネルを選択してください',
+		es: 'Selecciona el canal objetivo...',
+		en: 'Select the target channel...',
+		ja: '対象チャンネルを選択してください…',
 	},
 	serverFeedEditModalSearchLabel: {
 		es: 'Tags',
@@ -2512,7 +2512,7 @@ export default {
 			`You can relocate the created PuréVoice System in the future, just use \`${subl(0)}server\` again.`,
 		),
 		ja: paragraph(
-			'動的に音声チャネルを拡張するカテゴリが用意されました。',
+			'動的に音声チャンネルを拡張するカテゴリが用意されました。',
 			`作成した PuréVoice システムは将来的に再配置できます。\`${subl(0)}server\`を再度使用するだけです。`,
 		),
 	},
@@ -2534,7 +2534,7 @@ export default {
 		),
 		ja: paragraph(
 			'⚠️ PuréVoice をカテゴリに挿入中にエラーが発生しました。',
-			'このアクション (チャネルの管理) を実行するために必要な権限があることを確認してください。',
+			'このアクション (チャンネルの管理) を実行するために必要な権限があることを確認してください。',
 			'また、入力した名前が他のカテゴリやチャンネルにすでに占有されていないことを確認してください',
 		),
 	},
@@ -2553,7 +2553,7 @@ export default {
 			'Confirm the disassociation of this server with PuréVoice.',
 		),
 		ja: paragraph(
-			'これにより、システムによって作成されたすべてのチャンネルが削除されます。システム カテゴリと手動で作成したチャネルは無視されます。',
+			'これにより、システムによって作成されたすべてのチャンネルが削除されます。システム カテゴリと手動で作成したチャンネルは無視されます。',
 			'このサーバーと PuréVoice の関連付けが解除されていることを確認します。',
 		),
 	},
@@ -2622,6 +2622,189 @@ export default {
 		en: 'UNINSTALL',
 		ja: '本当にアンインストール',
 	},
+	serverConfessionsWizardEpigraph: {
+		es: '-# Asistente de Sistema de confesiones',
+		en: '-# Confessions System Wizard',
+		ja: '-# 告白システムウィザード',
+	},
+	serverConfessionsWizardMainTitle: {
+		es: () =>
+			`## ${getBotEmoji('confessionsFullColor')} Asistente de instalación de Sistema de confesiones`,
+		en: () =>
+			`## ${getBotEmoji('confessionsFullColor')} Confessions System Installation Wizard`,
+		ja: () => `## ${getBotEmoji('confessionsFullColor')} 告白システムインストールウィザード`,
+	},
+	serverConfessionsWizardWelcome: {
+		es: 'Si es la primera vez que configuras un Sistema de confesiones, ¡no te preocupes!\nSolo sigue las instrucciones del Asistente de configuración.',
+		en: "If this is your first time setting up a Confessions System, don't worry!\nJust follow the Configuration Wizard's instructions.",
+		ja: '告白システムを初めて設定される場合でも、ご安心ください！\n設定ウィザードの指示に従うだけで設定できます。',
+	},
+	serverConfessionsWizardAuditLogChannelName: {
+		es: '### -# Canal de auditoría',
+		en: '### -# Audit Channel',
+		ja: '### -# 監査チャンネル',
+	},
+	serverConfessionsWizardConfessionsChannelName: {
+		es: '### -# Canal de confesiones',
+		en: '### -# Confessions Channel',
+		ja: '### -# 告白チャンネル',
+	},
+	serverConfessionsWizardChannelNotConfigured: {
+		es: '_Sin configurar...»_',
+		en: '_«Not configured...»_',
+		ja: '_«設定されていません…»_',
+	},
+	serverConfessionsWizardHelpName: {
+		es: '### -# Ayuda de configuración',
+		en: '### -# Configuration help',
+		ja: '### -# 設定に関するヘルプ',
+	},
+	serverConfessionsWizardHelpExistingDescription: {
+		es: 'Si quieres cambiar alguno de los canales del Sistema, elimínalo y vuélvelo a crear con los canales deseados.',
+		en: "If you want to change any of the System's channels, delete it and create it again with the desired channels.",
+		ja: 'システムのチャンネルを変更したい場合は、そのシステムを削除し、希望するチャンネルで改めて作成してください。',
+	},
+	serverConfessionsWizardHelpNewDescription: {
+		es: paragraph(
+			'* Se aceptan confesiones por medio de un **canal confesionario** especificado.',
+			'* Todas las confesiones pasan por un proceso de aprobación en el **canal de auditoría** seleccionado.',
+			'* Aquellas confesiones que sean aprobadas irán al **canal de confesiones** indicado.',
+			'* Todos estos pueden ser canales separados o el mismo canal.',
+		),
+		en: paragraph(
+			'* Confessions are accepted through a specified **confessional channel**.',
+			'* All confessions undergo an approval process via the selected **audit channel**.',
+			'* Approved confessions will be posted to the designated **confessions channel**.',
+			'* All of these can be separate channels or the same channel.',
+		),
+		ja: paragraph(
+			'* 告白は、指定された **告解室チャンネル** を通じて受け付けられます。',
+			'* すべての告白は、選択された **審査用チャンネル** での承認プロセスを経て処理されます。',
+			'* 承認された告白は、指定の **告白公開用チャンネル** に投稿されます。',
+			'* これらはすべて、それぞれ別のチャンネルにすることも、同一のチャンネルにすることも可能です。',
+		),
+	},
+	serverConfessionsInstallationNextStepQuestion: {
+		es: '¿Qué deseas hacer ahora mismo?',
+		en: 'What do you want to do now?',
+		ja: '今、何をしたいですか？',
+	},
+	serverConfessionsButtonInstall: {
+		es: 'Configurar nuevo sistema',
+		en: 'Configure New System',
+		ja: '新しいシステムを構成する',
+	},
+	serverConfessionsButtonUninstall: {
+		es: 'Desmontar sistema',
+		en: 'Dismount System',
+		ja: 'システムを取り外する',
+	},
+	serverConfessionsInstallationModalTitle: {
+		es: 'Instalación de Sistema de Confesiones',
+		en: 'Confessions System Installation',
+		ja: '告白システムのインストール',
+	},
+	serverConfessionsInstallationModalConfessionalChannelName: {
+		es: 'Canal de confesionario',
+		en: 'Confessional channel',
+		ja: '告解室チャンネル',
+	},
+	serverConfessionsInstallationModalConfessionalChannelDescription: {
+		es: 'Los miembros enviarán sus confesiones desde este canal.',
+		en: 'Members will submit their confessions via this channel.',
+		ja: 'メンバーは、このチャンネルを通じて自身の告白を提出します。',
+	},
+	serverConfessionsInstallationModalAuditChannelName: {
+		es: 'Canal de auditoría',
+		en: 'Audit channel',
+		ja: '審査用チャンネル',
+	},
+	serverConfessionsInstallationModalAuditChannelDescription: {
+		es: 'Las confesiones enviadas serán revisadas en este canal antes de publicarse.',
+		en: 'Submissions will be reviewed on this channel before being published.',
+		ja: '投稿内容は、公開前にこのチャンネル上で審査されます。',
+	},
+	serverConfessionsInstallationModalConfessionsChannelName: {
+		es: 'Canal de confesiones',
+		en: 'Confessions channel',
+		ja: '告白公開用チャンネル',
+	},
+	serverConfessionsInstallationModalConfessionsChannelDescription: {
+		es: 'Las confesiones aprobadas serán publicadas en este canal.',
+		en: 'Approved confessions will be posted to this channel.',
+		ja: '承認された告白は、このチャンネルに投稿されます。',
+	},
+	serverConfessionsInstallationModalChannelPlaceholder: {
+		es: 'Selecciona el canal objetivo...',
+		en: 'Select the target channel...',
+		ja: '対象チャンネルを選択してください…',
+	},
+	serverConfessionsSystemInstallSuccess: {
+		es: '✅ Instalación de Sistema de confesiones finalizada',
+		en: '✅ Confessions System installation finished',
+		ja: '✅ 告白システムのインストールが完了しました',
+	},
+	serverConfessionsSystemAlreadyExists: {
+		es: '⚠️ Este servidor ya tiene un Sistema de confesiones configurado',
+		en: '⚠️ This server already has a Confessions System configured',
+		ja: '⚠️ このサーバーには既に告白システムが設定済みです。',
+	},
+	serverConfessionsSystemNotInstalled: {
+		es: '⚠️ Este servidor no tiene un Sistema de confesiones configurado',
+		en: "⚠️ This server doesn't have a Confessions System configured",
+		ja: '⚠️ このサーバーには告白システムが設定されていません',
+	},
+	serverConfessionsSystemUninstallTitle: {
+		es: '## Desinstalación del Sistema de confesiones del servidor',
+		en: '## Uninstalling the Confessions System from the server',
+		ja: '## 告白システムをサーバーからアンインストールする',
+	},
+	serverConfessionsSystemUninstallDescription: {
+		es: 'Esto no borrará los canales asociados al Sistema de confesiones, pero se perderán todas las configuraciones del mismo.',
+		en: 'This will not delete the channels associated with the System, but its settings will be lost.',
+		ja: 'これにより、システムに関連付けられたチャンネルが削除されることはありませんが、システムの設定は保持されません。',
+	},
+	serverConfessionsSystemUninstallConfirmQuestion: {
+		es: '**¿Estás segur@?**',
+		en: '**Are you sure?**',
+		ja: '**本気ですか？**',
+	},
+	serverConfessionsSystemButtonUninstallConfirm: {
+		es: 'DESINSTALAR',
+		en: 'UNINSTALL',
+		ja: '本当にアンインストール',
+	},
+	serverConfessionsSystemUninstallSuccess: {
+		es: '✅ Desinstalación de Sistema de confesiones finalizada',
+		en: '✅ Confessions System uninstallation finished',
+		ja: '✅ 告白システムのアンインストールが完了しました',
+	},
+
+	confessionalTitle: {
+		es: '## Confesionario',
+		en: '## Confessional',
+		ja: '## 告解室',
+	},
+	confessionalDescription: {
+		es: `¡Usa los botones debajo para enviar confesiones a <#${subl(0)}>!`,
+		en: `Use the buttons below to submit confessions to <#${subl(0)}>!`,
+		ja: `以下のボタンを使用して、<#${subl(0)}> に告白を送信してください。`,
+	},
+	confessionalNoticeFooter: {
+		es: '-# Las confesiones atraviesan un proceso de aprobación manual totalmente anónimo.',
+		en: '-# Confessions undergo a completely anonymous manual approval process.',
+		ja: '-# 告白は、完全に匿名の手動承認プロセスを経て公開されます。',
+	},
+	confessionalButtonConfessAnon: {
+		es: 'Confesar (anónimo)',
+		en: 'Confess (anonymous)',
+		ja: '告白（匿名）',
+	},
+	confessionalButtonConfessWithName: {
+		es: 'Confesar (+ nombre)',
+		en: 'Confess (with name)',
+		ja: '告白（記名）',
+	},
 
 	voiceExpected: {
 		es: '❌ Debes conectarte a un canal de voz primero',
@@ -2631,7 +2814,7 @@ export default {
 	voiceSameChannelExpected: {
 		es: '❌ Ya estoy conectada a otro chat de voz. ¡Ven conmigo antes de hacer eso!',
 		en: "❌ I'm already connected to another voice channel. Come here before doing that!",
-		ja: '❌ すでに別の音声チャネルに接続しています。その前にここに来てください！',
+		ja: '❌ すでに別の音声チャンネルに接続しています。その前にここに来てください！',
 	},
 	voiceSessionNameExpected: {
 		es: paragraph(
@@ -2742,7 +2925,7 @@ export default {
 	voiceSessionReasonChannelCreate: {
 		es: 'Desplegar Canal Automutable PuréVoice',
 		en: 'Deploy PuréVoice Automutable Channel',
-		ja: 'PuréVoice 自動可変チャネルのデプロイ',
+		ja: 'PuréVoice 自動可変チャンネルのデプロイ',
 	},
 	voiceSessionReasonChannelForceName: {
 		es: 'Renombrar sesión PuréVoice (forzado automáticamente)',
@@ -3483,8 +3666,8 @@ export default {
 		ja: 'フォロー中のタグ',
 	},
 	yoTagsValueDefault: {
-		es: '<Todavía no sigues ninguna tag>',
-		en: "<You aren't following any tag yet>",
-		ja: '【まだタグをフォローしていません】',
+		es: '_«Todavía no sigues ninguna tag»_',
+		en: "_«You aren't following any tags yet»_",
+		ja: '_【まだタグをフォローしていません】_',
 	},
 } as const satisfies Record<string, TranslationRecord>;

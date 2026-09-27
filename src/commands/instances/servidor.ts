@@ -23,6 +23,7 @@ import {
 import type { AnyCommandInteraction } from 'types/commands';
 import { tenshiAltColor, tenshiColor, tenshiPeachColor } from '@/data/globalProps';
 import { isValidLocaleKey, Locales, type TranslationKey, Translator } from '@/i18n';
+import ConfessionSystemModel from '@/models/confessionSystems';
 import FeedConfigModel, {
 	defaultMaxGeneralTags,
 	defaultMaxSpecialTags,
@@ -60,15 +61,21 @@ const backToMainDashboardButton = (compressedAuthorId: string) =>
 		.setEmoji(getBotEmojiResolvable('navBackAccent'))
 		.setStyle(ButtonStyle.Secondary);
 
+const backToFeedWizardButton = (compressedUserId: string) =>
+	new ButtonBuilder()
+		.setCustomId(`servidor_goToFeedWizard_${compressedUserId}`)
+		.setEmoji(getBotEmojiResolvable('navBackAccent'))
+		.setStyle(ButtonStyle.Secondary);
+
 const backToVoiceWizardButton = (compressedUserId: string) =>
 	new ButtonBuilder()
 		.setCustomId(`servidor_goToVoiceWizard_${compressedUserId}`)
 		.setEmoji(getBotEmojiResolvable('navBackAccent'))
 		.setStyle(ButtonStyle.Secondary);
 
-const backToFeedWizardButton = (compressedUserId: string) =>
+const backToConfessionsWizardButton = (compressedUserId: string) =>
 	new ButtonBuilder()
-		.setCustomId(`servidor_goToFeedWizard_${compressedUserId}`)
+		.setCustomId(`servidor_goToConfessionsWizard_${compressedUserId}`)
 		.setEmoji(getBotEmojiResolvable('navBackAccent'))
 		.setStyle(ButtonStyle.Secondary);
 
@@ -168,6 +175,16 @@ const command = new Command(
 					return interaction.update({ components: [container] });
 				}
 
+				case 'confessions': {
+					const container = await makeConfessionsWizardMainContainer(
+						compressedUserId,
+						guild,
+						translator,
+					);
+
+					return interaction.update({ components: [container] });
+				}
+
 				default:
 					return interaction.reply({
 						flags: MessageFlags.Ephemeral,
@@ -204,6 +221,7 @@ const command = new Command(
 		},
 		{ userFilterIndex: 0, applyTagExclusions: true },
 	)
+	//#region Boorutato
 	.setButtonResponse(
 		async function goToFeedWizard(interaction, compressedUserId) {
 			const translator = await Translator.fromUser(interaction);
@@ -925,6 +943,8 @@ const command = new Command(
 		},
 		{ userFilterIndex: 0, applyTagExclusions: true },
 	)
+	//#endregion
+	//#region PuréVoice
 	.setButtonResponse(
 		async function goToVoiceWizard(interaction, compressedUserId) {
 			const translator = await Translator.fromUser(interaction);
@@ -1307,7 +1327,240 @@ const command = new Command(
 			}
 		},
 		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	//#endregion
+	//#region Confessions
+	.setButtonResponse(
+		async function goToConfessionsWizard(interaction, compressedUserId) {
+			const translator = await Translator.fromUser(interaction);
+			const { guild } = interaction;
+
+			const container = await makeConfessionsWizardMainContainer(
+				compressedUserId,
+				guild,
+				translator,
+			);
+
+			return interaction.update({ components: [container] });
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setButtonResponse(
+		async function installConfessionsSystem(interaction) {
+			const translator = await Translator.fromUser(interaction);
+
+			const channelLabels: {
+				name: TranslationKey;
+				desc: TranslationKey;
+				customId: string;
+			}[] = [
+				{
+					name: 'serverConfessionsInstallationModalConfessionalChannelName',
+					desc: 'serverConfessionsInstallationModalConfessionalChannelDescription',
+					customId: 'inputConfessionalChannel',
+				},
+				{
+					name: 'serverConfessionsInstallationModalAuditChannelName',
+					desc: 'serverConfessionsInstallationModalAuditChannelDescription',
+					customId: 'inputAuditChannel',
+				},
+				{
+					name: 'serverConfessionsInstallationModalConfessionsChannelName',
+					desc: 'serverConfessionsInstallationModalConfessionsChannelDescription',
+					customId: 'inputConfessionsChannel',
+				},
+			];
+
+			const modal = new ModalBuilder()
+				.setCustomId('servidor_installConfessionsSystemFinish')
+				.setTitle(translator.getText('serverConfessionsInstallationModalTitle'));
+
+			for (const channelLabel of channelLabels)
+				modal.addLabelComponents((label) =>
+					label
+						.setLabel(translator.getText(channelLabel.name))
+						.setDescription(translator.getText(channelLabel.desc))
+						.setChannelSelectMenuComponent((select) =>
+							select
+								.setCustomId(channelLabel.customId)
+								.setPlaceholder(
+									translator.getText(
+										'serverConfessionsInstallationModalChannelPlaceholder',
+									),
+								)
+								.setChannelTypes(ChannelType.GuildText)
+								.setRequired(true),
+						),
+				);
+
+			return interaction.showModal(modal);
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setModalResponse(
+		async function installConfessionsSystemFinish(interaction) {
+			const [translator] = await Promise.all([
+				Translator.fromUser(interaction),
+				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
+			]);
+
+			const confessionalChannel = interaction.fields
+				.getSelectedChannels('inputConfessionalChannel')
+				?.first();
+			if (confessionalChannel == null || !confessionalChannel.isTextBased())
+				return interaction.editReply({
+					content: translator.getText('invalidChannel'),
+				});
+
+			const logChannel = interaction.fields.getSelectedChannels('inputAuditChannel')?.first();
+			if (logChannel == null || !confessionalChannel.isTextBased())
+				return interaction.editReply({
+					content: translator.getText('invalidChannel'),
+				});
+
+			const confessionsChannel = interaction.fields
+				.getSelectedChannels('inputConfessionsChannel')
+				?.first();
+			if (confessionsChannel == null || !confessionalChannel.isTextBased())
+				return interaction.editReply({
+					content: translator.getText('invalidChannel'),
+				});
+
+			if (await ConfessionSystemModel.exists({ guildId: interaction.guildId }))
+				return interaction.editReply({
+					content: translator.getText('serverConfessionsSystemAlreadyExists'),
+				});
+
+			const confSystem = new ConfessionSystemModel({
+				guildId: interaction.guildId,
+				logChannelId: logChannel.id,
+				confessionsChannelId: confessionsChannel.id,
+			});
+
+			const guildTranslator = await Translator.fromGuild(interaction);
+			const confessionalContainer = new ContainerBuilder()
+				.setAccentColor(0x8334eb)
+				.addTextDisplayComponents(
+					(textDisplay) =>
+						textDisplay.setContent(guildTranslator.getText('confessionalTitle')),
+					(textDisplay) =>
+						textDisplay.setContent(
+							guildTranslator.getText(
+								'confessionalDescription',
+								confessionsChannel.id,
+							),
+						),
+				)
+				.addSeparatorComponents((separator) =>
+					separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
+				)
+				.addActionRowComponents((actionRow) =>
+					actionRow.addComponents(
+						new ButtonBuilder()
+							.setCustomId(`confesión_confess_anon`)
+							.setLabel(guildTranslator.getText('confessionalButtonConfessAnon'))
+							.setStyle(ButtonStyle.Primary),
+						new ButtonBuilder()
+							.setCustomId(`confesión_confess`)
+							.setLabel(guildTranslator.getText('confessionalButtonConfessWithName'))
+							.setStyle(ButtonStyle.Danger),
+					),
+				)
+				.addTextDisplayComponents((textDisplay) =>
+					textDisplay.setContent(guildTranslator.getText('confessionalNoticeFooter')),
+				);
+
+			await confSystem.save();
+			await confessionalChannel.send({
+				flags: MessageFlags.IsComponentsV2,
+				components: [confessionalContainer],
+			});
+
+			const compressedUserId = compressId(interaction.user.id);
+			const wizardContainer = await makeConfessionsWizardMainContainer(
+				compressedUserId,
+				interaction.guild,
+				translator,
+			);
+
+			await interaction.message.edit({ components: [wizardContainer] });
+
+			return interaction.editReply({
+				content: translator.getText('serverConfessionsSystemInstallSuccess'),
+			});
+		},
+		{ applyTagExclusions: true },
+	)
+	.setButtonResponse(
+		async function uninstallConfessionsSystem(interaction, compressedUserId) {
+			const translator = await Translator.fromUser(interaction);
+
+			const container = makeConfessionsWizardContainer(translator, Colors.Red)
+				.addTextDisplayComponents(
+					(textDisplay) =>
+						textDisplay.setContent(
+							translator.getText('serverConfessionsSystemUninstallTitle'),
+						),
+					(textDisplay) =>
+						textDisplay.setContent(
+							translator.getText('serverConfessionsSystemUninstallDescription'),
+						),
+				)
+				.addSeparatorComponents((separator) => separator.setDivider(false))
+				.addTextDisplayComponents((textDisplay) =>
+					textDisplay.setContent(
+						translator.getText('serverConfessionsSystemUninstallConfirmQuestion'),
+					),
+				)
+				.addActionRowComponents((actionRow) =>
+					actionRow.addComponents(
+						new ButtonBuilder()
+							.setCustomId(
+								`servidor_uninstallConfessionsSystemConfirmed_${compressedUserId}`,
+							)
+							.setLabel(
+								translator.getText('serverConfessionsSystemButtonUninstallConfirm'),
+							)
+							.setStyle(ButtonStyle.Danger),
+						backToConfessionsWizardButton(compressedUserId),
+						cancelButton(compressedUserId),
+					),
+				);
+
+			return interaction.update({ components: [container] });
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
+	)
+	.setButtonResponse(
+		async function uninstallConfessionsSystemConfirmed(interaction, compressedUserId) {
+			const [translator] = await Promise.all([
+				Translator.fromUser(interaction),
+				interaction.deferReply({ flags: MessageFlags.Ephemeral }),
+			]);
+			const { guild } = interaction;
+
+			if (!(await ConfessionSystemModel.exists({ guildId: guild.id })))
+				return interaction.editReply({
+					content: translator.getText('serverConfessionsSystemNotInstalled'),
+				});
+
+			await ConfessionSystemModel.deleteOne({ guildId: guild.id });
+
+			const container = await makeConfessionsWizardMainContainer(
+				compressedUserId,
+				guild,
+				translator,
+			);
+
+			await interaction.message.edit({ components: [container] });
+
+			return interaction.editReply({
+				content: translator.getText('serverConfessionsSystemUninstallSuccess'),
+			});
+		},
+		{ userFilterIndex: 0, applyTagExclusions: true },
 	);
+//#endregion Confessions
 
 async function getWizardContext(
 	request: AnyCommandInteraction & { guild: Guild },
@@ -1594,14 +1847,14 @@ async function makeFeedWizardCustomizationContainer(
 		{
 			name: 'serverFeedCustomizeTitleName',
 			desc: feedConfig.title
-				? shortenText(feedConfig.title, 32, '…')
+				? shortenText(feedConfig.title, 48, '…')
 				: translator.getText('serverFeedCustomizeNoTitleDescription'),
 			customId: 'customizeFeedTitle',
 		},
 		{
 			name: 'serverFeedCustomizeSubtitleName',
 			desc: feedConfig.subtitle
-				? shortenText(feedConfig.subtitle, 32, '…')
+				? shortenText(feedConfig.subtitle, 48, '…')
 				: translator.getText('serverFeedCustomizeNoSubtitleDescription'),
 			customId: 'customizeFeedSubtitle',
 		},
@@ -1790,6 +2043,99 @@ async function makeVoiceWizardMainContainer(
 	);
 
 	container.addActionRowComponents(row);
+
+	return container;
+}
+
+function makeConfessionsWizardContainer(
+	translator: Translator,
+	stepColor: number,
+): ContainerBuilder {
+	return new ContainerBuilder()
+		.setAccentColor(stepColor)
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(translator.getText('serverConfessionsWizardEpigraph')),
+		);
+}
+
+async function makeConfessionsWizardMainContainer(
+	compressedUserId: string,
+	guild: Guild,
+	translator: Translator,
+): Promise<ContainerBuilder> {
+	const query = { guildId: guild.id };
+	const confSystem = await ConfessionSystemModel.findOne(query);
+	const logChannel = fetchChannel(confSystem?.logChannelId, guild);
+	const confChannel = fetchChannel(confSystem?.confessionsChannelId, guild);
+	const isProperlyInstalled = logChannel != null && confChannel != null;
+
+	const container = makeConfessionsWizardContainer(translator, tenshiAltColor)
+		.addTextDisplayComponents(
+			(textDisplay) =>
+				textDisplay.setContent(translator.getText('serverConfessionsWizardMainTitle')),
+			(textDisplay) =>
+				textDisplay.setContent(translator.getText('serverConfessionsWizardWelcome')),
+		)
+		.addSeparatorComponents((separator) => separator.setDivider(true))
+		.addTextDisplayComponents(
+			(textDisplay) =>
+				textDisplay.setContent(
+					translator.getText('serverConfessionsWizardAuditLogChannelName'),
+				),
+			(textDisplay) =>
+				textDisplay.setContent(
+					`${logChannel ?? translator.getText('serverConfessionsWizardChannelNotConfigured')}`,
+				),
+		)
+		.addSeparatorComponents((separator) => separator.setDivider(true))
+		.addTextDisplayComponents(
+			(textDisplay) =>
+				textDisplay.setContent(
+					translator.getText('serverConfessionsWizardConfessionsChannelName'),
+				),
+			(textDisplay) =>
+				textDisplay.setContent(
+					`${confChannel ?? translator.getText('serverConfessionsWizardChannelNotConfigured')}`,
+				),
+		)
+		.addSeparatorComponents((separator) => separator.setDivider(true))
+		.addTextDisplayComponents(
+			(textDisplay) =>
+				textDisplay.setContent(translator.getText('serverConfessionsWizardHelpName')),
+			(textDisplay) =>
+				textDisplay.setContent(
+					translator.getText(
+						confChannel
+							? 'serverConfessionsWizardHelpExistingDescription'
+							: 'serverConfessionsWizardHelpNewDescription',
+					),
+				),
+		)
+		.addSeparatorComponents((separator) =>
+			separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
+		)
+		.addTextDisplayComponents((textDisplay) =>
+			textDisplay.setContent(
+				translator.getText('serverConfessionsInstallationNextStepQuestion'),
+			),
+		)
+		.addActionRowComponents((actionRow) =>
+			actionRow.addComponents(
+				isProperlyInstalled
+					? new ButtonBuilder()
+							.setCustomId(`servidor_uninstallConfessionsSystem_${compressedUserId}`)
+							.setLabel(translator.getText('serverConfessionsButtonUninstall'))
+							.setEmoji(getBotEmojiResolvable('trashWhite'))
+							.setStyle(ButtonStyle.Danger)
+					: new ButtonBuilder()
+							.setCustomId(`servidor_installConfessionsSystem_${compressedUserId}`)
+							.setLabel(translator.getText('serverConfessionsButtonInstall'))
+							.setEmoji(getBotEmojiResolvable('plusWhite'))
+							.setStyle(ButtonStyle.Primary),
+				backToMainDashboardButton(compressedUserId),
+				cancelButton(compressedUserId),
+			),
+		);
 
 	return container;
 }
