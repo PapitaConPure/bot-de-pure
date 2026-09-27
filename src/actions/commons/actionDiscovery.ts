@@ -4,7 +4,7 @@ import { ContextMenuAction as Action } from './actionBuilder';
 export const actionFilenames = getModuleNames(readdirFromSync(import.meta.url, '../instances'));
 
 interface FetchActionOptions {
-	filter?: (command: Action) => boolean;
+	filter?: (action: Action) => boolean;
 }
 
 /**@throws {FetchActionError}*/
