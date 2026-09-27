@@ -17,7 +17,7 @@ import {
 } from 'discord.js';
 import type { AnyCommandInteraction, ComplexCommandRequest } from 'types/commands';
 import { tenshiAltColor, tenshiColor, tenshiPeachColor } from '@/data/globalProps';
-import type { LocaleIds } from '@/i18n';
+import type { TranslationKey } from '@/i18n';
 import { isValidLocaleKey, Locales, Translator } from '@/i18n';
 import type { UserConfigDocument, UserConfigSchemaType } from '@/models/userconfigs';
 import UserConfigModel from '@/models/userconfigs';
@@ -342,10 +342,10 @@ interface ConverterWizardServiceOption<TConverterKey extends string> {
 }
 
 interface ConverterWizard<TConverterKey extends string> {
-	title: LocaleIds;
-	description: LocaleIds;
+	title: TranslationKey;
+	description: TranslationKey;
 	serviceColor: number;
-	serviceNoneDescription: LocaleIds;
+	serviceNoneDescription: TranslationKey;
 	services: ReadonlyArray<TConverterKey | ''>;
 	getServiceOptions: (translator: Translator) => ConverterWizardServiceOption<TConverterKey>[];
 	getKey: (userConfigs: UserConfigDocument) => TConverterKey | '';
@@ -1221,7 +1221,7 @@ const command = new Command(
 				(await UserConfigModel.findOne(userQuery)) || new UserConfigModel(userQuery);
 			const translator = new Translator(userConfigs.language);
 			let newTags = userConfigs.feedTagSuscriptions.get(channelId)?.slice(0) ?? [];
-			let setTagsResponse: LocaleIds;
+			let setTagsResponse: TranslationKey;
 			const previousLength = newTags.length;
 
 			if (operation === 'ADD') {

@@ -24,7 +24,7 @@ import type {
 	ComplexCommandRequest,
 	ExtendedCommandRequest,
 } from 'types/commands';
-import type { Translation, Translator } from '@/i18n';
+import type { StaticTranslationRecord, Translator } from '@/i18n';
 import type { CommandOptionSolver, CommandOptions } from './cmdOpts';
 import type { CommandPermissions } from './cmdPerms';
 import type { CommandTags } from './cmdTags';
@@ -201,7 +201,7 @@ interface CommandWikiData {
 
 /**@class Representa un comando.*/
 export class Command<TOptions extends CommandOptions | undefined = undefined> {
-	readonly localizedNames: Translation;
+	readonly localizedNames: StaticTranslationRecord;
 	aliases: string[] | null;
 	desc: string | undefined;
 	brief: string | undefined;
@@ -219,8 +219,8 @@ export class Command<TOptions extends CommandOptions | undefined = undefined> {
 	 * @param localizedNames El nombre identificador del comando
 	 * @param tags Un objeto {@linkcode CommandTags} con las flags del comando
 	 */
-	constructor(localizedNames: string | Translation, tags: CommandTags) {
-		let actualLocalizedNames: Translation;
+	constructor(localizedNames: string | StaticTranslationRecord, tags: CommandTags) {
+		let actualLocalizedNames: StaticTranslationRecord;
 
 		if (typeof localizedNames === 'string') {
 			if (!localizedNames.length)

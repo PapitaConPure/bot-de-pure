@@ -5,7 +5,7 @@ import type {
 	UserContextMenuCommandInteraction,
 } from 'discord.js';
 import { ApplicationCommandType, Locale as DiscordLocale } from 'discord.js';
-import type { LocaleIds } from '@/i18n';
+import type { TranslationKey } from '@/i18n';
 import { Translator } from '@/i18n';
 
 export type ActionCommandType = 'ChatInput' | 'Message' | 'User';
@@ -26,8 +26,8 @@ export class ContextMenuAction {
 	type: ApplicationCommandType;
 	execute: ContextMenuActionHandler;
 
-	constructor(nameLocaleId: LocaleIds, type: ActionCommandType) {
-		const translation = Translator.getTranslation(nameLocaleId);
+	constructor(nameLocaleId: TranslationKey, type: ActionCommandType) {
+		const translation = Translator.getStaticTranslation(nameLocaleId);
 
 		this.name = translation.es;
 		this.type = ApplicationCommandType[type];

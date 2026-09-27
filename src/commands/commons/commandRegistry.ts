@@ -4,9 +4,9 @@ import type { BaseParamType } from 'types/commands';
 import type { Command, CommandOptions } from '@/commands/commons';
 import puré from '@/core/puréRegistry';
 import { UnexpectedValueError } from '@/errors/unexpectedValue';
-import { botTranslationToDiscordLocalizations } from '@/i18n';
 import { defaultLocale } from '@/i18n/locales';
 import type { AnySlashCommandOption, SlashCommandBuilderAddFunctionName } from '@/types/discord';
+import { botTranslationToDiscordLocalizations } from '@/utils/discord';
 import { shortenText } from '@/utils/misc';
 
 interface CommandRegistryLogTableRow {

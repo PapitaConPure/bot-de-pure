@@ -22,7 +22,7 @@ import {
 } from 'discord.js';
 import type { AnyCommandInteraction } from 'types/commands';
 import { tenshiAltColor, tenshiColor, tenshiPeachColor } from '@/data/globalProps';
-import { isValidLocaleKey, type LocaleIds, Locales, Translator } from '@/i18n';
+import { isValidLocaleKey, Locales, type TranslationKey, Translator } from '@/i18n';
 import FeedConfigModel, {
 	defaultMaxGeneralTags,
 	defaultMaxSpecialTags,
@@ -724,7 +724,7 @@ const command = new Command(
 					value: feedConfig.maxCopyrightTags,
 				},
 			] as const satisfies readonly {
-				labelKey: LocaleIds;
+				labelKey: TranslationKey;
 				customId: string;
 				value: number | null | undefined;
 			}[];
@@ -1526,7 +1526,7 @@ async function getFeedSelectContext(
 	interaction: ButtonInteraction,
 	compressedUserId: string,
 	customId: string,
-	titleKey: LocaleIds,
+	titleKey: TranslationKey,
 ): Promise<
 	| { success: false; data: null }
 	| { success: true; data: { translator: Translator; modal: ModalBuilder } }
@@ -1590,7 +1590,7 @@ async function makeFeedWizardCustomizationContainer(
 	feedConfig: FeedDocument,
 	translator: Translator,
 ) {
-	const items: { name: LocaleIds; desc: string; customId: string }[] = [
+	const items: { name: TranslationKey; desc: string; customId: string }[] = [
 		{
 			name: 'serverFeedCustomizeTitleName',
 			desc: feedConfig.title
@@ -1700,7 +1700,7 @@ async function getFeedCustomizationSetContext(
 
 async function getFeedCustomizationModalContext(
 	interaction: ButtonInteraction,
-	title: LocaleIds,
+	title: TranslationKey,
 	customIdFn: string,
 	compressedChannelId: string,
 ): Promise<

@@ -13,7 +13,7 @@ import {
 } from 'discord.js';
 import type { SimpleTypeExpr } from 'types/typeExpr';
 import { UnexpectedValueError } from '@/errors/unexpectedValue';
-import type { LocaleKey, Translation, Translator } from '@/i18n';
+import type { LocaleKey, StaticTranslationRecord, Translator } from '@/i18n';
 import type {
 	BaseParamType,
 	BaseParamTypeMap,
@@ -179,7 +179,7 @@ const paramTypes = {
 			ja: '期間',
 		},
 	},
-} as const satisfies Record<BaseParamType, { getMethod: GetMethodName; help: Translation }>;
+} as const satisfies Record<BaseParamType, { getMethod: GetMethodName; help: StaticTranslationRecord }>;
 
 function fetchMessageFlagText(args: string[], i: number): string | undefined {
 	if (i >= args.length) return undefined;

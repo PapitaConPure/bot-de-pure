@@ -5,6 +5,7 @@ import {
 	ButtonStyle,
 	ChannelType,
 	type Collection,
+	Locale as DiscordLocaleKey,
 	type Guild,
 	type GuildBasedChannel,
 	type GuildMember,
@@ -17,6 +18,7 @@ import {
 } from 'discord.js';
 import { ClientNotFoundError, client } from '@/core/client';
 import { globalConfigs } from '@/data/globalProps';
+import { defaultLocale, type LocaleKey, Locales, type StaticTranslationRecord } from '@/i18n';
 import Logger from '@/utils/logs';
 import { getBotEmojiResolvable } from './emojis';
 import { levenshteinDistance, sleep } from './misc';
@@ -556,4 +558,49 @@ async function suppressUntilThereAreNoEmbeds(
 
 	await sleep(1500);
 	return suppressUntilThereAreNoEmbeds(updatedMessage, attempts - 1);
+}
+
+export const botToDiscordLocaleMap = {
+	es: DiscordLocaleKey.SpanishLATAM,
+	en: DiscordLocaleKey.EnglishUS,
+	ja: DiscordLocaleKey.Japanese,
+} as const satisfies Record<LocaleKey, DiscordLocaleKey>;
+
+export function botTranslationToDiscordLocalizations(
+	translation: StaticTranslationRecord,
+): Partial<Record<DiscordLocaleKey, string>> {
+	const entries = Object.entries(translation) as [LocaleKey, string][];
+
+	return Object.fromEntries(
+		entries.map(([key, value]) => [botToDiscordLocaleMap[key], value]),
+	) as Partial<Record<DiscordLocaleKey, string>>;
+}
+
+export const discordToBotLocaleMap = {
+	[DiscordLocaleKey.SpanishLATAM]: Locales.Spanish,
+	[DiscordLocaleKey.SpanishES]: Locales.Spanish,
+	[DiscordLocaleKey.EnglishUS]: Locales.English,
+	[DiscordLocaleKey.EnglishGB]: Locales.English,
+	[DiscordLocaleKey.Japanese]: Locales.Japanese,
+} as const satisfies Partial<Record<DiscordLocaleKey, LocaleKey>>;
+
+export function discordTranslationToBotLocalizations(
+	translation: Partial<Record<DiscordLocaleKey, string>>,
+): StaticTranslationRecord {
+	const botLocaleKeys = Object.keys(botToDiscordLocaleMap) as LocaleKey[];
+
+	const entries = botLocaleKeys.map((botLocale) => {
+		const discordValue = Object.entries(discordToBotLocaleMap).find(
+			([discordKey, targetBotLocale]) =>
+				targetBotLocale === botLocale && translation[discordKey as DiscordLocaleKey],
+		);
+
+		const finalValue = discordValue
+			? translation[discordValue[0] as DiscordLocaleKey]
+			: translation[botToDiscordLocaleMap[defaultLocale]];
+
+		return [botLocale, finalValue];
+	});
+
+	return Object.fromEntries(entries) as StaticTranslationRecord;
 }

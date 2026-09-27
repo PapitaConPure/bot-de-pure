@@ -1,8 +1,8 @@
 /**
  * @description
- * Idiomas de localización disponibles.
+ * Localization languages that should be available.
  *
- * Todos los idiomas aquí enumerados deben ser soportados por el bot.
+ * All locales listed here must be supported by the bot.
  */
 const Locales = {
 	Spanish: 'es',
@@ -12,5 +12,5 @@ const Locales = {
 
 export default Locales;
 
-/**@description El idioma por defecto a utilizar en las situaciones que se desconoce el idioma preferido del servidor o usuario.*/
+/**@description Default language to use when the guild or user's preferred locale is unknown.*/
 export const defaultLocale = Locales.Spanish;
