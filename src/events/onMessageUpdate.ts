@@ -1,4 +1,4 @@
-import { addHours } from 'date-fns';
+import { addHours, differenceInMinutes } from 'date-fns';
 import {
 	type Message,
 	MessageFlags,
@@ -16,6 +16,7 @@ import {
 import { mergeConverterPayloads, processConverter } from '@/systems/converters/pipeline';
 import {
 	addMessageCascade,
+	deleteCachedMessageCascade,
 	deleteCachedMessageCascadePart,
 	getMessageCascade,
 	type MessageCascadePartKey,
@@ -30,7 +31,12 @@ export async function onMessageUpdate(
 	oldMessage: OmitPartialGroupDMChannel<Message<boolean> | PartialMessage<boolean>>,
 	message: OmitPartialGroupDMChannel<Message<boolean>>,
 ) {
-	if (oldMessage.content === message.content) return;
+	if (
+		oldMessage.content === message.content
+		|| message.editedAt == null
+		|| differenceInMinutes(message.editedAt, Date.now()) > 1
+	)
+		return;
 
 	const { author } = message;
 
@@ -48,15 +54,28 @@ export async function onMessageUpdate(
 		processConverter(instagramConverter, message, userCache.instagramConverter),
 	]);
 
-	if (!convertersPayload.contentful) return;
-
-	const cascade = getMessageCascade(messageId) ?? {};
+	const cascade = getMessageCascade(messageId);
 	console.log({ convertersPayload, cascade });
 
-	if (cascade.contentBasedId == null) addCascadePart(message, convertersPayload, 'contentBased');
+	if (!convertersPayload.contentful) {
+		if (cascade == null) return;
+		deleteCachedMessageCascade(messageId);
+
+		const deleteMessageById = async (otherMessageId: string) => {
+			const otherMessage = await fetchMessage(otherMessageId, message);
+			return otherMessage?.deletable && otherMessage.delete().catch(console.error);
+		};
+
+		return Promise.all([
+			cascade.contentBasedId != null && deleteMessageById(cascade.contentBasedId),
+			cascade.componentsBasedId != null && deleteMessageById(cascade.componentsBasedId),
+		]);
+	}
+
+	if (cascade?.contentBasedId == null) addCascadePart(message, convertersPayload, 'contentBased');
 	else editOrDeleteExistingCascadePart(message, convertersPayload, cascade, 'contentBased');
 
-	if (cascade.componentsBasedId == null)
+	if (cascade?.componentsBasedId == null)
 		addCascadePart(message, convertersPayload, 'componentsBased');
 	else editOrDeleteExistingCascadePart(message, convertersPayload, cascade, 'componentsBased');
 }

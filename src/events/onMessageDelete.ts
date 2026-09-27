@@ -17,8 +17,8 @@ export async function onMessageDelete(message: Message | PartialMessage) {
 	const { id: messageId, guild, channel } = message;
 
 	const cascade = getMessageCascade(messageId);
-	deleteCachedMessageCascade(messageId);
 	if (cascade == null) return;
+	deleteCachedMessageCascade(messageId);
 
 	const deleteMessageById = async (otherMessageId: string) => {
 		const otherMessage = await fetchMessage(otherMessageId, { guild, channel });
