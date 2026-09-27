@@ -16,8 +16,8 @@ import {
 import { mergeConverterPayloads, processConverter } from '@/systems/converters/pipeline';
 import {
 	addMessageCascade,
-	deleteCachedMessageCascade,
-	deleteCachedMessageCascadePart,
+	deleteMessageCascade,
+	deleteMessageCascadePart,
 	getMessageCascade,
 	type MessageCascadePartKey,
 	type MessageCascadeRecord,
@@ -59,10 +59,10 @@ export async function onMessageUpdate(
 
 	if (!convertersPayload.contentful) {
 		if (cascade == null) return;
-		deleteCachedMessageCascade(messageId);
+		await deleteMessageCascade(messageId);
 
 		const deleteMessageById = async (otherMessageId: string) => {
-			const otherMessage = await fetchMessage(otherMessageId, message);
+			const otherMessage = await fetchMessage(otherMessageId, message).catch(console.error);
 			return otherMessage?.deletable && otherMessage.delete().catch(console.error);
 		};
 
@@ -119,15 +119,15 @@ async function editOrDeleteExistingCascadePart(
 	const otherMessageId = cascade[partKey];
 	if (otherMessageId == null) return;
 
-	const { guild, channel } = message;
-	const otherMessage = await fetchMessage(otherMessageId, { guild, channel });
+	const { channel } = message;
+	const otherMessage = await fetchMessage(otherMessageId, { channel });
 
 	if (
 		(part === 'contentBased' && !convertersPayload.content)
 		|| (part === 'componentsBased' && !convertersPayload.components?.length)
 	) {
-		deleteCachedMessageCascadePart(message.id, part);
 		await Promise.all([
+			deleteMessageCascadePart(message.id, part),
 			WebhookOwnerModel.deleteOne({ messageId: otherMessageId, userId: message.author.id }),
 			otherMessage?.deletable && otherMessage.delete().catch(console.error),
 		]);
@@ -135,8 +135,10 @@ async function editOrDeleteExistingCascadePart(
 	}
 
 	if (!otherMessage?.editable) {
-		deleteCachedMessageCascadePart(message.id, part);
-		await WebhookOwnerModel.deleteOne({ messageId: otherMessageId, userId: message.author.id });
+		await Promise.all([
+			deleteMessageCascadePart(message.id, part),
+			WebhookOwnerModel.deleteOne({ messageId: otherMessageId, userId: message.author.id }),
+		]);
 		return;
 	}
 

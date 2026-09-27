@@ -21,7 +21,7 @@ const MessageCascadeSchema = new Mongoose.Schema({
 		default: () => addHours(Date.now(), 4),
 	},
 });
-MessageCascadeSchema.index({ messageId: 1, otherMessageId: 1 }, { unique: true });
+MessageCascadeSchema.index({ messageId: 1, part: 1 }, { unique: true });
 
 export type MessageCascadeSchemaType = InferSchemaType<typeof MessageCascadeSchema>;
 
