@@ -12,12 +12,13 @@ interface InteractionResponseOptions {
 
 export type SystemResponseHandler<
 	TInteraction extends AnyCommandInteraction<'cached'> = AnyCommandInteraction<'cached'>,
-> = ((interaction: TInteraction) => Promise<unknown>) & InteractionResponseOptions;
+> = ((interaction: TInteraction, ...args: string[]) => Promise<unknown>) &
+	InteractionResponseOptions;
 
 /**Represents an automated guild or user system.*/
-export class AutoSystem {
+export class AutoSystem<TResponseName extends string = never> {
 	readonly name: string;
-	#responses: Map<string, SystemResponseHandler<AnyCommandInteraction<'cached'>>>;
+	#responses: Map<TResponseName, SystemResponseHandler<AnyCommandInteraction<'cached'>>>;
 
 	constructor(name: string) {
 		this.name = name;
@@ -31,48 +32,65 @@ export class AutoSystem {
 		responseFn.permissions = options.permissions;
 	}
 
-	/** @param responseFn Una función no-anónima que responderá a la interacción de componente.*/
-	setButtonResponse(
+	/**
+	 * @param responseName El nombre de registro de la respuesta de interacción de componente.
+	 * @param responseFn La respuesta a la interacción de componente.
+	 */
+	setButtonResponse<TName extends string>(
+		responseName: TName,
 		responseFn: SystemResponseHandler<ButtonInteraction<'cached'>>,
 		options: InteractionResponseOptions = {},
 	) {
 		this.#configureResponse(responseFn, options);
 		this.#responses.set(
-			responseFn.name,
+			responseName as unknown as TResponseName,
 			responseFn as SystemResponseHandler<AnyCommandInteraction<'cached'>>,
 		);
-		return this;
+		return this as AutoSystem<TResponseName | TName>;
 	}
 
-	/** @param responseFn Una función no-anónima que responderá a la interacción de componente.*/
-	setSelectMenuResponse(
+	/**
+	 * @param responseName El nombre de registro de la respuesta de interacción de componente.
+	 * @param responseFn La respuesta a la interacción de componente.
+	 */
+	setSelectMenuResponse<TName extends string>(
+		responseName: string,
 		responseFn: SystemResponseHandler<AnySelectMenuInteraction<'cached'>>,
 		options: InteractionResponseOptions = {},
 	) {
 		this.#configureResponse(responseFn, options);
 		this.#responses.set(
-			responseFn.name,
+			responseName as unknown as TResponseName,
 			responseFn as SystemResponseHandler<AnyCommandInteraction<'cached'>>,
 		);
-		return this;
+		return this as AutoSystem<TResponseName | TName>;
 	}
 
-	/** @param responseFn Una función no-anónima que responderá a la interacción de componente.*/
-	setModalResponse(
+	/**
+	 * @param responseName El nombre de registro de la respuesta de interacción de componente.
+	 * @param responseFn La respuesta a la interacción de componente.
+	 */
+	setModalResponse<TName extends string>(
+		responseName: TName,
 		responseFn: SystemResponseHandler<ModalSubmitInteraction<'cached'>>,
 		options: InteractionResponseOptions = {},
 	) {
 		this.#configureResponse(responseFn, options);
 		this.#responses.set(
-			responseFn.name,
+			responseName as unknown as TResponseName,
 			responseFn as SystemResponseHandler<AnyCommandInteraction<'cached'>>,
 		);
-		return this;
+		return this as AutoSystem<TResponseName | TName>;
 	}
 
 	getResponseFn(
-		responseId: string,
+		responseId: TResponseName,
 	): SystemResponseHandler<AnyCommandInteraction<'cached'>> | undefined {
 		return this.#responses.get(responseId);
+	}
+
+	get customIdGetter() {
+		return (fnName: TResponseName, ...args: string[]) =>
+			`!${this.name}_${fnName}${args?.length ? `_${args.join('_')}` : ''}`;
 	}
 }

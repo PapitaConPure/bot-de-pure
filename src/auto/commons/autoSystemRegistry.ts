@@ -5,7 +5,7 @@ interface AutoSystemRegistryLogTableRow {
 	name: string;
 }
 
-export function registerAutoSystems(systems: AutoSystem[], log: boolean = false) {
+export function registerAutoSystems(systems: AutoSystem<string>[], log: boolean = false) {
 	const actionTableStack: AutoSystemRegistryLogTableRow[] = [];
 
 	for (const system of systems) {

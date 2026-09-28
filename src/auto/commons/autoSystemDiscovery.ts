@@ -4,27 +4,27 @@ import { AutoSystem } from './autoSystemBuilder';
 export const actionFilenames = getModuleNames(readdirFromSync(import.meta.url, '../instances'));
 
 interface FetchAutoSystemOptions {
-	filter?: (system: AutoSystem) => boolean;
+	filter?: (system: AutoSystem<string>) => boolean;
 }
 
 /**@throws {FetchAutoSystemError}*/
-export async function fetchAutoSystemsFromFiles(): Promise<AutoSystem[]>;
+export async function fetchAutoSystemsFromFiles(): Promise<AutoSystem<string>[]>;
 /**@throws {FetchAutoSystemError}*/
 export async function fetchAutoSystemsFromFiles(
 	options: FetchAutoSystemOptions,
-): Promise<AutoSystem[]>;
+): Promise<AutoSystem<string>[]>;
 export async function fetchAutoSystemsFromFiles(
 	options: FetchAutoSystemOptions = {},
-): Promise<AutoSystem[]> {
+): Promise<AutoSystem<string>[]> {
 	const { filter = null } = options;
 
-	const matches: AutoSystem[] = [];
+	const matches: AutoSystem<string>[] = [];
 
-	const pushOrDiscard = (command: AutoSystem) => {
+	const pushOrDiscard = (system: AutoSystem<string>) => {
 		let isValid: boolean = true;
-		isValid &&= filter == null || filter(command);
+		isValid &&= filter == null || filter(system);
 
-		if (isValid) matches.push(command);
+		if (isValid) matches.push(system);
 	};
 
 	const commandModules = await Promise.all(

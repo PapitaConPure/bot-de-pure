@@ -10,7 +10,7 @@ import type { Command } from '../commands/commons';
 const puré = {
 	commands: new Collection<string, Command>(),
 	actions: new Collection<string, ContextMenuAction>(),
-	systems: new Collection<string, AutoSystem>(),
+	systems: new Collection<string, AutoSystem<string>>(),
 	slash: new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
 	contextMenu: new Collection<string, RESTPostAPIContextMenuApplicationCommandsJSONBody>(),
 } as const;
