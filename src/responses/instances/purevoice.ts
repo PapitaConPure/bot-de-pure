@@ -1,4 +1,4 @@
-import { AutoSystem } from '../commons/autoSystemBuilder';
+import { AutoSystem } from '../commons/sysResBuilder';
 
 const system = new AutoSystem('voz');
 

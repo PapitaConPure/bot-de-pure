@@ -29,7 +29,6 @@ import {
 	TextDisplayBuilder,
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
-import { getBoorutatoCustomId } from '@/auto/instances/boorutato';
 import { Command, type CommandOptionSolver } from '@/commands/commons';
 import { tenshiPeachColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
@@ -39,6 +38,7 @@ import {
 	defaultMaxSpecialTags,
 	maxAllowedTotalSpecialTags,
 } from '@/models/feeds';
+import { getBoorutatoCustomId } from '@/responses/instances/boorutato';
 import { isNSFWChannel } from '@/utils/discord';
 import { type BotEmojiName, getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchExt } from '@/utils/fetchext';

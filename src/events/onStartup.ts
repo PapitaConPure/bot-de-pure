@@ -11,9 +11,9 @@ import type {
 import { REST } from 'discord.js';
 import { Routes } from 'discord-api-types/v9';
 import { connect as mongooseConnect, set as mongooseSet } from 'mongoose';
-import { fetchAutoSystemsFromFiles } from '@/auto/commons/autoSystemDiscovery';
-import { registerAutoSystems } from '@/auto/commons/autoSystemRegistry';
 import { databaseUri } from '@/core/db';
+import { fetchAutoSystemsFromFiles } from '@/responses/commons/autoSystemDiscovery';
+import { registerAutoSystems } from '@/responses/commons/autoSystemRegistry';
 import { cleanupPurevoiceSystems } from '@/systems/others/purevoice';
 import { initializeWebhookMessageOwners } from '@/utils/discordagent';
 import { setupAppEmojis } from '@/utils/emojis';

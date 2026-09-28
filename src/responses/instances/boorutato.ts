@@ -19,7 +19,7 @@ import { isNotModerator } from '@/utils/discord';
 import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { compressId } from '@/utils/encoding';
 import { shortenText, shortenTextLoose } from '@/utils/misc';
-import { AutoSystem } from '../commons/autoSystemBuilder';
+import { AutoSystem } from '../commons/sysResBuilder';
 
 const system = new AutoSystem('feed')
 	.setButtonResponse('showFeedImageTags', async (interaction, isNotFeed) => {

@@ -1,5 +1,5 @@
 import { getModuleNames, readdirFromSync } from '@/utils/runtimeFs';
-import { AutoSystem } from './autoSystemBuilder';
+import { AutoSystem } from './sysResBuilder';
 
 export const actionFilenames = getModuleNames(readdirFromSync(import.meta.url, '../instances'));
 

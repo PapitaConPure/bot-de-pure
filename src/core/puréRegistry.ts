@@ -3,7 +3,7 @@ import type {
 	RESTPostAPIContextMenuApplicationCommandsJSONBody,
 } from 'discord.js';
 import { Collection } from 'discord.js';
-import type { AutoSystem } from '@/auto/commons/autoSystemBuilder';
+import type { AutoSystem } from '@/responses/commons/sysResBuilder';
 import type { ContextMenuAction } from '../actions/commons/actionBuilder';
 import type { Command } from '../commands/commons';
 

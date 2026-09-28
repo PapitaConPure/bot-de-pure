@@ -6,7 +6,6 @@ import {
 	MessageFlags,
 } from 'discord.js';
 import type { AnyCommandInteraction } from 'types/commands';
-import { handleAutoSystemInteraction } from '@/auto/commons/autoSystemProcessing';
 import {
 	findFirstCommandExclusion,
 	generateCommandExclusionEmbed,
@@ -15,6 +14,7 @@ import {
 import puré from '@/core/puréRegistry';
 import userIds from '@/data/userIds.json';
 import { Translator } from '@/i18n';
+import { handleAutoSystemInteraction } from '@/responses/commons/autoSystemProcessing';
 import { decompressId } from '@/utils/encoding';
 import Logger from '@/utils/logs';
 import type { CommandOption, CommandOptions } from './cmdOpts';

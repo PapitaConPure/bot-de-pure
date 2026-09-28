@@ -1,5 +1,5 @@
 import puré from '@/core/puréRegistry';
-import type { AutoSystem } from './autoSystemBuilder';
+import type { AutoSystem } from './sysResBuilder';
 
 interface AutoSystemRegistryLogTableRow {
 	name: string;

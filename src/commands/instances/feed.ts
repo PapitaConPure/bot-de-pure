@@ -11,9 +11,9 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
-import { getBoorutatoCustomId } from '@/auto/instances/boorutato';
 import { tenshiAltColor } from '@/data/globalProps';
 import { Translator } from '@/i18n';
+import { getBoorutatoCustomId } from '@/responses/instances/boorutato';
 import { getMainBooruClient } from '@/systems/booru/booruclient';
 import { formatTagNameList, getPostUrlFromComponents } from '@/systems/booru/boorusend.js';
 import { auditError } from '@/systems/others/auditor';
