@@ -37,7 +37,8 @@ export function radix128to10(s: string): number {
  */
 
 export function compressId(id: string): string {
-	if (typeof id !== 'string') throw Error('La id debe ser un string');
+	if (typeof id !== 'string')
+		throw Error(`ID must be of type string, but received "${id}" of type ${typeof id}`);
 
 	let mid = Math.floor(id.length * 0.5);
 
@@ -61,7 +62,8 @@ export function compressId(id: string): string {
 /**@description Realiza el proceso inverso de la función de compresión: {@linkcode compressId}.*/
 
 export function decompressId(id: string): string {
-	if (typeof id !== 'string') throw Error('La id debe ser un string');
+	if (typeof id !== 'string')
+		throw Error(`ID must be of type string, but received "${id}" of type ${typeof id}`);
 
 	const mid = id[0];
 	id = id.slice(1);
