@@ -3124,6 +3124,26 @@ export default {
 		en: `**${subl(0)}** active / **${subl(1)}** total`,
 		ja: `有効 **${subl(0)}名** / 総数 **${subl(1)}名**`,
 	},
+	voiceSessionMemberAddModalTitle: {
+		es: 'Agregar Nuevo Miembro de Sesión',
+		en: 'Add New Session Member',
+		ja: '新しいセッションメンバーを追加',
+	},
+	voiceSessionMemberAddModalMemberLabel: {
+		es: 'Nuevo Miembro de Sesión',
+		en: 'New Session Member',
+		ja: '新しいセッションメンバー',
+	},
+	voiceSessionMemberAddModalMemberPlaceholder: {
+		es: 'Selecciona un miembro...',
+		en: 'Select a member...',
+		ja: 'メンバーを選択してください…',
+	},
+	voiceSessionMemberAddAlreadyExists: {
+		es: `⚠️ <@${subl(0)}> ya está registrad@ en la sesión. Si no lo ves, refresca la lista de miembros`,
+		en: `⚠️ <@${subl(0)}> is already registered for the session. If you don't see them, refresh the member list`,
+		ja: `⚠️ <@${subl(0)}> はすでにセッションに登録されています。表示されない場合は、メンバーリストを更新してください。`,
+	},
 	voiceSessionMemberEditTransferAdminTitle: {
 		es: 'Elegir Administrador de Sesión',
 		en: 'Select Session Administrator',
