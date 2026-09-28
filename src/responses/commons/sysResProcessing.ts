@@ -48,7 +48,7 @@ export async function handleSystemInteraction(
 		);
 		if (!hasPermission) return;
 
-		await responseFn(interaction);
+		await responseFn(interaction, ...stream);
 	} catch (error) {
 		handleAndAuditError(error, interaction, {
 			details: `!${systemName}`,
