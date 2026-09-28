@@ -26,21 +26,29 @@ const system = new SystemResponses('feed')
 		const translator = await Translator.fromUser(interaction.user.id);
 
 		const url = getPostUrlFromComponents(interaction.message.components);
-		if (!url) return interaction.deleteReply();
+		if (!url) {
+			await interaction.deleteReply();
+			return;
+		}
 
 		await interaction.deferReply({
 			flags: MessageFlags.Ephemeral,
 		});
 
 		const booru = getMainBooruClient();
-		if (!booru)
-			return interaction.editReply({
+		if (!booru) {
+			await interaction.editReply({
 				content: translator.getText('missingBooruCredentials'),
 			});
+			return;
+		}
 
 		try {
 			const post = await booru.fetchPostByUrl(url);
-			if (!post) return interaction.deleteReply();
+			if (!post) {
+				await interaction.deleteReply();
+				return;
+			}
 
 			const postTags = await booru.fetchPostTags(post);
 
@@ -155,7 +163,7 @@ const system = new SystemResponses('feed')
 				);
 			}
 
-			return interaction.editReply({
+			await interaction.editReply({
 				flags: MessageFlags.IsComponentsV2,
 				components: [tagsContainer],
 			});
@@ -164,15 +172,15 @@ const system = new SystemResponses('feed')
 			auditError(error, { brief: 'Ha ocurrido un error al procesar un Post de Feed' });
 
 			if (error instanceof BooruUnknownPostError)
-				return interaction.editReply({
+				await interaction.editReply({
 					flags: MessageFlags.IsComponentsV2,
 					content: translator.getText('feedPostTagsInaccessible'),
 				});
-
-			return interaction.editReply({
-				flags: MessageFlags.IsComponentsV2,
-				content: translator.getText('feedPostTagsUnknownError'),
-			});
+			else
+				await interaction.editReply({
+					flags: MessageFlags.IsComponentsV2,
+					content: translator.getText('feedPostTagsUnknownError'),
+				});
 		}
 	})
 	.setButtonResponse('editFollowedTags', async (interaction, operation) => {
@@ -203,7 +211,7 @@ const system = new SystemResponses('feed')
 					),
 			);
 
-		return interaction.showModal(modal).catch(auditError);
+		await interaction.showModal(modal).catch(auditError);
 	})
 	.setButtonResponse('deletePost', async (interaction, manageableBy, isNotFeed) => {
 		const translator = await Translator.fromUser(interaction.user.id);
@@ -212,39 +220,47 @@ const system = new SystemResponses('feed')
 			interaction.inCachedGuild()
 			&& manageableBy !== interaction.user.id
 			&& isNotModerator(interaction.member)
-		)
-			return interaction.reply({
+		) {
+			await interaction.reply({
 				content: translator.getText('unauthorizedInteraction'),
 				flags: MessageFlags.Ephemeral,
 			});
+			return;
+		}
 
 		const { message } = interaction;
 		const url = getPostUrlFromComponents(message.components);
-		if (isNotFeed || !url)
-			return Promise.all([
+		if (isNotFeed || !url) {
+			await Promise.all([
 				interaction.reply({
 					content: `**${translator.getText('feedDeletePostTitle')}**`,
 					flags: MessageFlags.Ephemeral,
 				}),
 				message.delete().catch(console.error),
 			]);
+			return;
+		}
 
 		const booru = getMainBooruClient();
-		if (!booru)
-			return interaction.editReply({
+		if (!booru) {
+			await interaction.editReply({
 				content: translator.getText('missingBooruCredentials'),
 			});
+			return;
+		}
 
 		try {
 			const post = await booru.fetchPostByUrl(url);
-			if (!post)
-				return Promise.all([
+			if (!post) {
+				await Promise.all([
 					interaction.reply({
 						content: `${getBotEmoji('gelbooruColor')} **${translator.getText('feedDeletePostTitle')}** <${url}>`,
 						flags: MessageFlags.Ephemeral,
 					}),
 					message.delete().catch(console.error),
 				]);
+				return;
+			}
 
 			const tags = shortenText(`\`\`\`\n${post.tags.join(' ')}\n\`\`\``, 1024);
 			const embed = new EmbedBuilder()
@@ -268,7 +284,7 @@ const system = new SystemResponses('feed')
 					.setStyle(ButtonStyle.Primary),
 			);
 
-			return Promise.all([
+			await Promise.all([
 				interaction.reply({
 					embeds: [embed],
 					components: [row],
@@ -280,13 +296,15 @@ const system = new SystemResponses('feed')
 			console.error(error);
 			auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
 
-			if (error instanceof BooruUnknownPostError)
-				return interaction.reply({
+			if (error instanceof BooruUnknownPostError) {
+				await interaction.reply({
 					content: translator.getText('feedDeletePostTagsInaccessible'),
 					flags: MessageFlags.Ephemeral,
 				});
+				return;
+			}
 
-			return Promise.all([
+			await Promise.all([
 				interaction.reply({
 					content: translator.getText('feedDeletePostTagsUnknownError'),
 					flags: MessageFlags.Ephemeral,
@@ -299,27 +317,36 @@ const system = new SystemResponses('feed')
 		const translator = await Translator.fromUser(interaction.user.id);
 
 		const url = getPostUrlFromComponents(interaction.message.components);
-		if (!url) return interaction.deleteReply();
+		if (!url) {
+			await interaction.deleteReply();
+			return;
+		}
 
 		const booru = getMainBooruClient();
-		if (!booru)
-			return interaction.editReply({
+		if (!booru) {
+			await interaction.editReply({
 				content: translator.getText('missingBooruCredentials'),
 			});
+			return;
+		}
 
 		try {
 			const post = await booru.fetchPostByUrl(url);
-			if (!post) return interaction.deleteReply();
+			if (!post) {
+				await interaction.deleteReply();
+				return;
+			}
 
 			const requestTags = post.tags.filter(
 				(t) => t === 'tagme' || (t !== 'commentary_request' && t.endsWith('_request')),
 			);
 
 			if (!requestTags.length) {
-				return interaction.reply({
+				await interaction.reply({
 					content: translator.getText('feedContributeNoPendingRequest'),
 					flags: MessageFlags.Ephemeral,
 				});
+				return;
 			}
 
 			const embed = new EmbedBuilder()
@@ -336,7 +363,7 @@ const system = new SystemResponses('feed')
 			if (`${post.creatorId}` === danbooruCreatorId)
 				embed.setFooter({ text: translator.getText('feedContributeDanbooruFooter') });
 
-			return interaction.reply({
+			await interaction.reply({
 				embeds: [embed],
 				flags: MessageFlags.Ephemeral,
 			});
@@ -344,13 +371,15 @@ const system = new SystemResponses('feed')
 			console.error(error);
 			auditError(error, { brief: 'Ha ocurrido un error al procesar un Post de Feed' });
 
-			if (error instanceof BooruUnknownPostError)
-				return interaction.reply({
+			if (error instanceof BooruUnknownPostError) {
+				await interaction.reply({
 					content: translator.getText('feedPostTagsInaccessible'),
 					flags: MessageFlags.Ephemeral,
 				});
+				return;
+			}
 
-			return interaction.reply({
+			await interaction.reply({
 				content: translator.getText('feedPostTagsUnknownError'),
 				flags: MessageFlags.Ephemeral,
 			});
