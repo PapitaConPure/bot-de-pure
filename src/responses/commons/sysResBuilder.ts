@@ -1,7 +1,7 @@
 import type {
 	AnySelectMenuInteraction,
 	ButtonInteraction,
-	ModalSubmitInteraction,
+	ModalMessageModalSubmitInteraction,
 } from 'discord.js';
 import type { AnyCommandInteraction } from 'types/commands';
 import type { CommandPermissions } from '@/commands/commons';
@@ -12,7 +12,7 @@ interface InteractionResponseOptions {
 
 export type SystemResponseHandler<
 	TInteraction extends AnyCommandInteraction<'cached'> = AnyCommandInteraction<'cached'>,
-> = ((interaction: TInteraction, ...args: string[]) => Promise<unknown>) &
+> = ((interaction: TInteraction, ...args: string[]) => Promise<void>) &
 	InteractionResponseOptions;
 
 /**Represents an automated guild or user system.*/
@@ -72,7 +72,7 @@ export class SystemResponses<TResponseName extends string = never> {
 	 */
 	setModalResponse<TName extends string>(
 		responseName: TName,
-		responseFn: SystemResponseHandler<ModalSubmitInteraction<'cached'>>,
+		responseFn: SystemResponseHandler<ModalMessageModalSubmitInteraction<'cached'>>,
 		options: InteractionResponseOptions = {},
 	) {
 		this.#configureResponse(responseFn, options);
@@ -89,8 +89,8 @@ export class SystemResponses<TResponseName extends string = never> {
 		return this.#responses.get(responseId);
 	}
 
-	get customIdGetter() {
-		return (fnName: TResponseName, ...args: string[]) =>
+	get customIdGetter(): (fnName: TResponseName, ...args: unknown[]) => string {
+		return (fnName: TResponseName, ...args: unknown[]) =>
 			`!${this.name}_${fnName}${args?.length ? `_${args.join('_')}` : ''}`;
 	}
 }
