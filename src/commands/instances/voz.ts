@@ -16,6 +16,7 @@ import type { AnyCommandInteraction } from 'types/commands';
 import { tenshiColor } from '@/data/globalProps';
 import { Translator } from '@/i18n';
 import { PureVoiceSessionModel } from '@/models/purevoice.js';
+import { getPurevoiceCustomId } from '@/responses/instances/purevoice';
 import {
 	getFrozenSessionAllowedMembers,
 	getOrchestrator,
@@ -97,7 +98,13 @@ function makeMembersListContainer(
 					)
 					.setButtonAccessory(
 						new ButtonBuilder()
-							.setCustomId(`voz_editSessionMember_${compressId(member.id)}_${page}`)
+							.setCustomId(
+								getPurevoiceCustomId(
+									'editSessionMember',
+									compressId(member.id),
+									page,
+								),
+							)
 							.setEmoji(getBotEmojiResolvable('pencilWhite'))
 							.setStyle(ButtonStyle.Primary),
 					),
@@ -111,24 +118,24 @@ function makeMembersListContainer(
 		.addActionRowComponents((actionRow) =>
 			actionRow.addComponents(
 				new ButtonBuilder()
-					.setCustomId(`voz_sessionMembersNav_${0}_FS`)
+					.setCustomId(getPurevoiceCustomId('sessionMembersNav', 0, 'FS'))
 					.setEmoji(getBotEmojiResolvable('navFirstAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
-					.setCustomId(`voz_sessionMembersNav_${page - 1}_PV`)
+					.setCustomId(getPurevoiceCustomId('sessionMembersNav', page - 1, 'PV'))
 					.setEmoji(getBotEmojiResolvable('navPrevAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
-					.setCustomId('voz_pageCounterDONOTUSE')
+					.setCustomId('!voz_pageCounterDONOTUSE')
 					.setLabel(`${page + 1}/${finalPage + 1}`)
 					.setDisabled(true)
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
-					.setCustomId(`voz_sessionMembersNav_${page + 1}_NX`)
+					.setCustomId(getPurevoiceCustomId('sessionMembersNav', page + 1, 'NX'))
 					.setEmoji(getBotEmojiResolvable('navNextAccent'))
 					.setStyle(ButtonStyle.Secondary),
 				new ButtonBuilder()
-					.setCustomId(`voz_sessionMembersNav_${finalPage}_LS`)
+					.setCustomId(getPurevoiceCustomId('sessionMembersNav', finalPage, 'LS'))
 					.setEmoji(getBotEmojiResolvable('navLastAccent'))
 					.setStyle(ButtonStyle.Secondary),
 			),
@@ -136,12 +143,12 @@ function makeMembersListContainer(
 		.addActionRowComponents((actionRow) =>
 			actionRow.addComponents(
 				new ButtonBuilder()
-					.setCustomId(`voz_addSessionMember_${page}`)
+					.setCustomId(getPurevoiceCustomId('addSessionMember', page))
 					.setEmoji(getBotEmojiResolvable('plusWhite'))
 					.setLabel(translator.getText('buttonAdd'))
 					.setStyle(ButtonStyle.Success),
 				new ButtonBuilder()
-					.setCustomId(`voz_sessionMembersNav_${page}_RE`)
+					.setCustomId(getPurevoiceCustomId('sessionMembersNav', page, 'RE'))
 					.setEmoji(getBotEmojiResolvable('refreshWhite'))
 					.setLabel(translator.getText('buttonRefresh'))
 					.setStyle(ButtonStyle.Primary),
@@ -285,7 +292,7 @@ const command = new Command(
 		if (!session) return warnNotInSession(interaction, translator);
 
 		const modal = new ModalBuilder()
-			.setCustomId(`voz_applySessionName`)
+			.setCustomId(getPurevoiceCustomId('applySessionName'))
 			.setTitle(translator.getText('yoVoiceAutonameModalTitle'))
 			.addLabelComponents(
 				new LabelBuilder().setLabel(translator.getText('name')).setTextInputComponent(
@@ -422,7 +429,7 @@ const command = new Command(
 			const otherSessionMember = new PureVoiceSessionMember(otherSchemaMember);
 			if (thisSessionMember.isAdmin() && thisSessionMemberId === otherSessionMemberId) {
 				const modal = new ModalBuilder()
-					.setCustomId(`voz_transferSessionAdmin_${page}`)
+					.setCustomId(getPurevoiceCustomId('transferSessionAdmin', page))
 					.setTitle(translator.getText('voiceSessionMemberEditTransferAdminTitle'))
 					.addLabelComponents((label) =>
 						label
@@ -468,7 +475,9 @@ const command = new Command(
 				});
 
 			const modal = new ModalBuilder()
-				.setCustomId(`voz_applyEditSessionMember_${compressedSessionMemberId}_${page}`)
+				.setCustomId(
+					getPurevoiceCustomId('applyEditSessionMember', compressedSessionMemberId, page),
+				)
 				.setTitle(translator.getText('voiceSessionMemberEditTitle'));
 
 			const radioGroup = new RadioGroupBuilder().setCustomId('inputRole');
@@ -692,7 +701,7 @@ const command = new Command(
 		if (!session) return warnNotInSession(interaction, translator);
 
 		const modal = new ModalBuilder()
-			.setCustomId(`voz_applySessionKillDelay`)
+			.setCustomId(getPurevoiceCustomId('applySessionKillDelay'))
 			.setTitle(translator.getText('yoVoiceKillDelayModalTitle'))
 			.addLabelComponents(
 				new LabelBuilder()

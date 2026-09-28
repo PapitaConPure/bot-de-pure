@@ -31,6 +31,7 @@ import type { PureVoiceDocument, PureVoiceSessionDocument } from '@/models/purev
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice.js';
 import type { UserConfigSchemaType } from '@/models/userconfigs.js';
 import UserConfigModel from '@/models/userconfigs.js';
+import { getPurevoiceCustomId } from '@/responses/instances/purevoice';
 import { fetchGuild, fetchMember } from '@/utils/discord';
 import { getBotEmojiResolvable } from '@/utils/emojis';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
@@ -1387,7 +1388,7 @@ export async function createPVControlPanelChannel(
 			(actionRow) =>
 				actionRow.addComponents(
 					new ButtonBuilder()
-						.setCustomId('voz_setSessionName')
+						.setCustomId(getPurevoiceCustomId('setSessionName'))
 						.setEmoji(getBotEmojiResolvable('pencilWhite'))
 						.setLabel(translator.getText('voiceControlPanelButtonRename'))
 						.setStyle(ButtonStyle.Primary),
@@ -1395,7 +1396,7 @@ export async function createPVControlPanelChannel(
 			(actionRow) =>
 				actionRow.addComponents(
 					new ButtonBuilder()
-						.setCustomId('voz_editSessionMembers')
+						.setCustomId(getPurevoiceCustomId('editSessionMembers'))
 						.setEmoji(getBotEmojiResolvable('userWhite'))
 						.setLabel(translator.getText('voiceControlPanelButtonMembersList'))
 						.setStyle(ButtonStyle.Primary),
@@ -1403,7 +1404,7 @@ export async function createPVControlPanelChannel(
 			(actionRow) =>
 				actionRow.addComponents(
 					new ButtonBuilder()
-						.setCustomId('voz_editSessionKillDelay')
+						.setCustomId(getPurevoiceCustomId('editSessionKillDelay'))
 						.setEmoji(getBotEmojiResolvable('timerWhite'))
 						.setLabel(translator.getText('voiceControlPanelButtonKillDelay'))
 						.setStyle(ButtonStyle.Primary),
@@ -1411,7 +1412,7 @@ export async function createPVControlPanelChannel(
 			(actionRow) =>
 				actionRow.addComponents(
 					new ButtonBuilder()
-						.setCustomId('voz_freezeSession')
+						.setCustomId(getPurevoiceCustomId('freezeSession'))
 						.setEmoji(getBotEmojiResolvable('freezeWhite'))
 						.setLabel(translator.getText('voiceControlPanelButtonFreeze'))
 						.setStyle(ButtonStyle.Danger),
