@@ -11,6 +11,7 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from 'discord.js';
+import { getBoorutatoCustomId } from '@/auto/instances/boorutato';
 import { tenshiAltColor } from '@/data/globalProps';
 import { Translator } from '@/i18n';
 import { getMainBooruClient } from '@/systems/booru/booruclient';
@@ -26,7 +27,7 @@ const perms = new CommandPermissions()
 	.requireAnyOf(['ManageGuild', 'ManageChannels'])
 	.requireAnyOf('ManageMessages');
 
-//TODO: how should I implement a way to have button responses without a Command
+//TODO: delete this command file in a month or so, for a bit of compatibility...
 const tags = new CommandTags().add('COMMON', 'MOD', 'OUTDATED');
 
 const command = new Command('feed', tags)
@@ -159,12 +160,12 @@ const command = new Command('feed', tags)
 								.setLabel(translator.getText('feedSetTagsButtonView'))
 								.setStyle(ButtonStyle.Primary),
 							new ButtonBuilder()
-								.setCustomId('feed_editFollowedTags_ADD')
+								.setCustomId(getBoorutatoCustomId('editFollowedTags', 'ADD'))
 								.setEmoji(getBotEmojiResolvable('tagPlus'))
 								.setLabel(translator.getText('feedSetTagsButtonAdd'))
 								.setStyle(ButtonStyle.Success),
 							new ButtonBuilder()
-								.setCustomId('feed_editFollowedTags_REMOVE')
+								.setCustomId(getBoorutatoCustomId('editFollowedTags', 'REMOVE'))
 								.setEmoji(getBotEmojiResolvable('tagMinus'))
 								.setLabel(translator.getText('feedSetTagsButtonRemove'))
 								.setStyle(ButtonStyle.Danger),
@@ -225,98 +226,96 @@ const command = new Command('feed', tags)
 		},
 		{ permissionOverrides: new CommandPermissions() },
 	)
-	.setGlobalButtonResponse(
-		async function deletePost(interaction, manageableBy, isNotFeed) {
-			const translator = await Translator.fromUser(interaction.user.id);
+	.setGlobalButtonResponse(async function deletePost(interaction, manageableBy, isNotFeed) {
+		const translator = await Translator.fromUser(interaction.user.id);
 
-			if (
-				interaction.inCachedGuild()
-				&& manageableBy !== interaction.user.id
-				&& isNotModerator(interaction.member)
-			)
+		if (
+			interaction.inCachedGuild()
+			&& manageableBy !== interaction.user.id
+			&& isNotModerator(interaction.member)
+		)
+			return interaction.reply({
+				content: translator.getText('unauthorizedInteraction'),
+				flags: MessageFlags.Ephemeral,
+			});
+
+		const { message } = interaction;
+		const url = getPostUrlFromComponents(message.components);
+		if (isNotFeed || !url)
+			return Promise.all([
+				interaction.reply({
+					content: `**${translator.getText('feedDeletePostTitle')}**`,
+					flags: MessageFlags.Ephemeral,
+				}),
+				message.delete().catch(console.error),
+			]);
+
+		const booru = getMainBooruClient();
+		if (!booru)
+			return interaction.editReply({
+				content: translator.getText('missingBooruCredentials'),
+			});
+
+		try {
+			const post = await booru.fetchPostByUrl(url);
+			if (!post)
+				return Promise.all([
+					interaction.reply({
+						content: `${getBotEmoji('gelbooruColor')} **${translator.getText('feedDeletePostTitle')}** <${url}>`,
+						flags: MessageFlags.Ephemeral,
+					}),
+					message.delete().catch(console.error),
+				]);
+
+			const tags = shortenText(`\`\`\`\n${post.tags.join(' ')}\n\`\`\``, 1024);
+			const embed = new EmbedBuilder()
+				.setColor(Colors.DarkRed)
+				.setTitle(translator.getText('feedDeletePostTitle'))
+				.setDescription(translator.getText('feedDeletePostAdvice'))
+				.addFields(
+					{
+						name: `${getBotEmoji('tagAccent')} ${translator.getText('feedDeletePostTagsName')}`,
+						value: tags,
+					},
+					{
+						name: `${getBotEmoji('urlAccent')} ${translator.getText('feedDeletePostLinkName')}`,
+						value: `[Gelbooru](${url})`,
+					},
+				);
+			const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+				new ButtonBuilder()
+					.setCustomId('feed_goToFeedWizard')
+					.setLabel('Configurar Feeds...')
+					.setStyle(ButtonStyle.Primary),
+			);
+
+			return Promise.all([
+				interaction.reply({
+					embeds: [embed],
+					components: [row],
+					flags: MessageFlags.Ephemeral,
+				}),
+				message.delete().catch(console.error),
+			]);
+		} catch (error) {
+			console.error(error);
+			auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
+
+			if (error instanceof BooruUnknownPostError)
 				return interaction.reply({
-					content: translator.getText('unauthorizedInteraction'),
+					content: translator.getText('feedDeletePostTagsInaccessible'),
 					flags: MessageFlags.Ephemeral,
 				});
 
-			const { message } = interaction;
-			const url = getPostUrlFromComponents(message.components);
-			if (isNotFeed || !url)
-				return Promise.all([
-					interaction.reply({
-						content: `**${translator.getText('feedDeletePostTitle')}**`,
-						flags: MessageFlags.Ephemeral,
-					}),
-					message.delete().catch(console.error),
-				]);
-
-			const booru = getMainBooruClient();
-			if (!booru)
-				return interaction.editReply({
-					content: translator.getText('missingBooruCredentials'),
-				});
-
-			try {
-				const post = await booru.fetchPostByUrl(url);
-				if (!post)
-					return Promise.all([
-						interaction.reply({
-							content: `${getBotEmoji('gelbooruColor')} **${translator.getText('feedDeletePostTitle')}** <${url}>`,
-							flags: MessageFlags.Ephemeral,
-						}),
-						message.delete().catch(console.error),
-					]);
-
-				const tags = shortenText(`\`\`\`\n${post.tags.join(' ')}\n\`\`\``, 1024);
-				const embed = new EmbedBuilder()
-					.setColor(Colors.DarkRed)
-					.setTitle(translator.getText('feedDeletePostTitle'))
-					.setDescription(translator.getText('feedDeletePostAdvice'))
-					.addFields(
-						{
-							name: `${getBotEmoji('tagAccent')} ${translator.getText('feedDeletePostTagsName')}`,
-							value: tags,
-						},
-						{
-							name: `${getBotEmoji('urlAccent')} ${translator.getText('feedDeletePostLinkName')}`,
-							value: `[Gelbooru](${url})`,
-						},
-					);
-				const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-					new ButtonBuilder()
-						.setCustomId('feed_goToFeedWizard')
-						.setLabel('Configurar Feeds...')
-						.setStyle(ButtonStyle.Primary),
-				);
-
-				return Promise.all([
-					interaction.reply({
-						embeds: [embed],
-						components: [row],
-						flags: MessageFlags.Ephemeral,
-					}),
-					message.delete().catch(console.error),
-				]);
-			} catch (error) {
-				console.error(error);
-				auditError(error, { brief: 'Ha ocurrido un error al procesar Feed' });
-
-				if (error instanceof BooruUnknownPostError)
-					return interaction.reply({
-						content: translator.getText('feedDeletePostTagsInaccessible'),
-						flags: MessageFlags.Ephemeral,
-					});
-
-				return Promise.all([
-					interaction.reply({
-						content: translator.getText('feedDeletePostTagsUnknownError'),
-						flags: MessageFlags.Ephemeral,
-					}),
-					message.delete().catch(console.error),
-				]);
-			}
-		},
-	)
+			return Promise.all([
+				interaction.reply({
+					content: translator.getText('feedDeletePostTagsUnknownError'),
+					flags: MessageFlags.Ephemeral,
+				}),
+				message.delete().catch(console.error),
+			]);
+		}
+	})
 	.setButtonResponse(
 		async function contribute(interaction) {
 			const translator = await Translator.fromUser(interaction.user.id);

@@ -29,6 +29,7 @@ import {
 	TextDisplayBuilder,
 } from 'discord.js';
 import type { ComplexCommandRequest } from 'types/commands';
+import { getBoorutatoCustomId } from '@/auto/instances/boorutato';
 import { Command, type CommandOptionSolver } from '@/commands/commons';
 import { tenshiPeachColor } from '@/data/globalProps';
 import userIds from '@/data/userIds.json';
@@ -118,7 +119,7 @@ export async function formatBooruPostMessage(
 
 	const { allowNSFW = false, disableLinks = false, disableActions = false, componentKey } = data;
 
-	const componentKeySuffix = componentKey ? `_${componentKey}` : '';
+	const componentKeyString = componentKey ? `${componentKey}` : '';
 
 	let containerColor = noSource.color;
 	const buttonRow = new ActionRowBuilder<ButtonBuilder>();
@@ -152,7 +153,7 @@ export async function formatBooruPostMessage(
 			debug('El Post no tiene enlaces como fuentes. Se aplicará un botón de texto plano');
 			buttonRow.addComponents(
 				new ButtonBuilder()
-					.setCustomId(`feed_plainText${componentKeySuffix}`)
+					.setCustomId(`!feed_plainText_${componentKeyString}`)
 					.setStyle(ButtonStyle.Secondary)
 					.setLabel(shortenText(post.source, 72))
 					.setDisabled(true),
@@ -192,7 +193,11 @@ export async function formatBooruPostMessage(
 			.setEmoji(getBotEmojiResolvable('tagWhite'))
 			.setStyle(ButtonStyle.Primary)
 			.setCustomId(
-				`feed_showFeedImageTags_${data.isNotFeed ? 'NaF' : ''}${componentKeySuffix}`,
+				getBoorutatoCustomId(
+					'showFeedImageTags',
+					(data.isNotFeed ?? false) ? 'NaF' : '',
+					componentKeyString,
+				),
 			)
 			.setDisabled(!!disableActions),
 	);
@@ -203,7 +208,7 @@ export async function formatBooruPostMessage(
 			new ButtonBuilder()
 				.setEmoji(getBotEmojiResolvable('handshakeWhite'))
 				.setStyle(ButtonStyle.Success)
-				.setCustomId(`feed_contribute${componentKeySuffix}`)
+				.setCustomId(getBoorutatoCustomId('contribute', componentKeyString))
 				.setDisabled(!!disableActions),
 		);
 
@@ -213,7 +218,12 @@ export async function formatBooruPostMessage(
 			.setEmoji(getBotEmojiResolvable('xmarkWhite'))
 			.setStyle(ButtonStyle.Danger)
 			.setCustomId(
-				`feed_deletePost_${data.manageableBy ?? ''}_${data.isNotFeed ?? ''}${componentKeySuffix}`,
+				getBoorutatoCustomId(
+					'deletePost',
+					data.manageableBy ?? '',
+					(data.isNotFeed ?? false) ? 'NaF' : '',
+					componentKeyString,
+				),
 			)
 			.setDisabled(!!disableActions),
 	);
