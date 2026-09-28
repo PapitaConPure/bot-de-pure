@@ -8,9 +8,9 @@ import {
 import puré from '@/core/puréRegistry';
 import Logger from '@/utils/logs';
 
-const { debug, fatal } = Logger('DEBUG', 'AutoSystem');
+const { debug, fatal } = Logger('DEBUG', 'SystemResponse');
 
-export async function handleAutoSystemInteraction(
+export async function handleSystemInteraction(
 	interaction: AnyCommandInteraction<'cached'>,
 ): Promise<void> {
 	const stream = interaction.customId.slice(1).split('_');

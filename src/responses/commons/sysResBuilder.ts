@@ -16,7 +16,7 @@ export type SystemResponseHandler<
 	InteractionResponseOptions;
 
 /**Represents an automated guild or user system.*/
-export class AutoSystem<TResponseName extends string = never> {
+export class SystemResponses<TResponseName extends string = never> {
 	readonly name: string;
 	#responses: Map<TResponseName, SystemResponseHandler<AnyCommandInteraction<'cached'>>>;
 
@@ -46,7 +46,7 @@ export class AutoSystem<TResponseName extends string = never> {
 			responseName as unknown as TResponseName,
 			responseFn as SystemResponseHandler<AnyCommandInteraction<'cached'>>,
 		);
-		return this as AutoSystem<TResponseName | TName>;
+		return this as SystemResponses<TResponseName | TName>;
 	}
 
 	/**
@@ -63,7 +63,7 @@ export class AutoSystem<TResponseName extends string = never> {
 			responseName as unknown as TResponseName,
 			responseFn as SystemResponseHandler<AnyCommandInteraction<'cached'>>,
 		);
-		return this as AutoSystem<TResponseName | TName>;
+		return this as SystemResponses<TResponseName | TName>;
 	}
 
 	/**
@@ -80,7 +80,7 @@ export class AutoSystem<TResponseName extends string = never> {
 			responseName as unknown as TResponseName,
 			responseFn as SystemResponseHandler<AnyCommandInteraction<'cached'>>,
 		);
-		return this as AutoSystem<TResponseName | TName>;
+		return this as SystemResponses<TResponseName | TName>;
 	}
 
 	getResponseFn(

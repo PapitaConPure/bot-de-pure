@@ -1,30 +1,30 @@
 import { getModuleNames, readdirFromSync } from '@/utils/runtimeFs';
-import { AutoSystem } from './sysResBuilder';
+import { SystemResponses } from './sysResBuilder';
 
 export const actionFilenames = getModuleNames(readdirFromSync(import.meta.url, '../instances'));
 
-interface FetchAutoSystemOptions {
-	filter?: (system: AutoSystem<string>) => boolean;
+interface FetchSystemResponsesOptions {
+	filter?: (sysres: SystemResponses<string>) => boolean;
 }
 
-/**@throws {FetchAutoSystemError}*/
-export async function fetchAutoSystemsFromFiles(): Promise<AutoSystem<string>[]>;
-/**@throws {FetchAutoSystemError}*/
-export async function fetchAutoSystemsFromFiles(
-	options: FetchAutoSystemOptions,
-): Promise<AutoSystem<string>[]>;
-export async function fetchAutoSystemsFromFiles(
-	options: FetchAutoSystemOptions = {},
-): Promise<AutoSystem<string>[]> {
+/**@throws {FetchSystemResponsesError}*/
+export async function fetchSystemsResponsesFromFiles(): Promise<SystemResponses<string>[]>;
+/**@throws {FetchSystemResponsesError}*/
+export async function fetchSystemsResponsesFromFiles(
+	options: FetchSystemResponsesOptions,
+): Promise<SystemResponses<string>[]>;
+export async function fetchSystemsResponsesFromFiles(
+	options: FetchSystemResponsesOptions = {},
+): Promise<SystemResponses<string>[]> {
 	const { filter = null } = options;
 
-	const matches: AutoSystem<string>[] = [];
+	const matches: SystemResponses<string>[] = [];
 
-	const pushOrDiscard = (system: AutoSystem<string>) => {
+	const pushOrDiscard = (sysres: SystemResponses<string>) => {
 		let isValid: boolean = true;
-		isValid &&= filter == null || filter(system);
+		isValid &&= filter == null || filter(sysres);
 
-		if (isValid) matches.push(system);
+		if (isValid) matches.push(sysres);
 	};
 
 	const commandModules = await Promise.all(
@@ -35,11 +35,13 @@ export async function fetchAutoSystemsFromFiles(
 	);
 
 	for (const { filename, commandModule } of commandModules) {
-		if (commandModule instanceof AutoSystem) pushOrDiscard(commandModule);
-		else if (commandModule.default instanceof AutoSystem) pushOrDiscard(commandModule.default);
-		else if (commandModule.command instanceof AutoSystem) pushOrDiscard(commandModule.command);
+		if (commandModule instanceof SystemResponses) pushOrDiscard(commandModule);
+		else if (commandModule.default instanceof SystemResponses)
+			pushOrDiscard(commandModule.default);
+		else if (commandModule.command instanceof SystemResponses)
+			pushOrDiscard(commandModule.command);
 		else
-			throw new FetchAutoSystemError(
+			throw new FetchSystemResponsesError(
 				`No se encontró un comando en el módulo: ${filename} desde ${__dirname}`,
 			);
 	}
@@ -47,11 +49,11 @@ export async function fetchAutoSystemsFromFiles(
 	return matches;
 }
 
-export class FetchAutoSystemError extends Error {
+export class FetchSystemResponsesError extends Error {
 	constructor();
 	constructor(message: string);
 	constructor(message?: string) {
 		super(message);
-		this.name = 'FetchAutoSystemError';
+		this.name = 'FetchSystemResponsesError';
 	}
 }

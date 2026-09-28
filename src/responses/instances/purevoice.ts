@@ -1,5 +1,5 @@
-import { AutoSystem } from '../commons/sysResBuilder';
+import { SystemResponses } from '../commons/sysResBuilder';
 
-const system = new AutoSystem('voz');
+const system = new SystemResponses('voz');
 
 export default system;

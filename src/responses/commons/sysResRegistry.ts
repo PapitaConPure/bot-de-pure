@@ -1,14 +1,14 @@
 import puré from '@/core/puréRegistry';
-import type { AutoSystem } from './sysResBuilder';
+import type { SystemResponses } from './sysResBuilder';
 
-interface AutoSystemRegistryLogTableRow {
+interface SystemResponsesRegistryLogTableRow {
 	name: string;
 }
 
-export function registerAutoSystems(systems: AutoSystem<string>[], log: boolean = false) {
-	const actionTableStack: AutoSystemRegistryLogTableRow[] = [];
+export function registerSystemsResponses(instances: SystemResponses<string>[], log: boolean = false) {
+	const actionTableStack: SystemResponsesRegistryLogTableRow[] = [];
 
-	for (const system of systems) {
+	for (const system of instances) {
 		puré.systems.set(system.name, system);
 
 		log

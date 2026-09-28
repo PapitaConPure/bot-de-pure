@@ -19,9 +19,9 @@ import { isNotModerator } from '@/utils/discord';
 import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { compressId } from '@/utils/encoding';
 import { shortenText, shortenTextLoose } from '@/utils/misc';
-import { AutoSystem } from '../commons/sysResBuilder';
+import { SystemResponses } from '../commons/sysResBuilder';
 
-const system = new AutoSystem('feed')
+const system = new SystemResponses('feed')
 	.setButtonResponse('showFeedImageTags', async (interaction, isNotFeed) => {
 		const translator = await Translator.fromUser(interaction.user.id);
 

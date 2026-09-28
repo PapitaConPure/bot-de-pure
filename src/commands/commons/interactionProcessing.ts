@@ -14,7 +14,7 @@ import {
 import puré from '@/core/puréRegistry';
 import userIds from '@/data/userIds.json';
 import { Translator } from '@/i18n';
-import { handleAutoSystemInteraction } from '@/responses/commons/autoSystemProcessing';
+import { handleSystemInteraction } from '@/responses/commons/sysResProcessing';
 import { decompressId } from '@/utils/encoding';
 import Logger from '@/utils/logs';
 import type { CommandOption, CommandOptions } from './cmdOpts';
@@ -171,7 +171,7 @@ export async function handleComponent(interaction: AnyCommandInteraction): Promi
 		if (!interaction.inCachedGuild())
 			return handleBlockedInteraction(interaction).catch(console.error);
 
-		return handleAutoSystemInteraction(interaction);
+		return handleSystemInteraction(interaction);
 	}
 
 	try {

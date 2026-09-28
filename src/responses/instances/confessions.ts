@@ -1,5 +1,5 @@
-import { AutoSystem } from '../commons/sysResBuilder';
+import { SystemResponses } from '../commons/sysResBuilder';
 
-const system = new AutoSystem('conf');
+const system = new SystemResponses('conf');
 
 export default system;

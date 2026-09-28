@@ -3,14 +3,14 @@ import type {
 	RESTPostAPIContextMenuApplicationCommandsJSONBody,
 } from 'discord.js';
 import { Collection } from 'discord.js';
-import type { AutoSystem } from '@/responses/commons/sysResBuilder';
+import type { SystemResponses } from '@/responses/commons/sysResBuilder';
 import type { ContextMenuAction } from '../actions/commons/actionBuilder';
 import type { Command } from '../commands/commons';
 
 const puré = {
 	commands: new Collection<string, Command>(),
 	actions: new Collection<string, ContextMenuAction>(),
-	systems: new Collection<string, AutoSystem<string>>(),
+	systems: new Collection<string, SystemResponses<string>>(),
 	slash: new Collection<string, RESTPostAPIChatInputApplicationCommandsJSONBody>(),
 	contextMenu: new Collection<string, RESTPostAPIContextMenuApplicationCommandsJSONBody>(),
 } as const;

@@ -12,8 +12,8 @@ import { REST } from 'discord.js';
 import { Routes } from 'discord-api-types/v9';
 import { connect as mongooseConnect, set as mongooseSet } from 'mongoose';
 import { databaseUri } from '@/core/db';
-import { fetchAutoSystemsFromFiles } from '@/responses/commons/autoSystemDiscovery';
-import { registerAutoSystems } from '@/responses/commons/autoSystemRegistry';
+import { fetchSystemsResponsesFromFiles } from '@/responses/commons/sysResDiscovery';
+import { registerSystemsResponses } from '@/responses/commons/sysResRegistry';
 import { cleanupPurevoiceSystems } from '@/systems/others/purevoice';
 import { initializeWebhookMessageOwners } from '@/utils/discordagent';
 import { setupAppEmojis } from '@/utils/emojis';
@@ -96,8 +96,8 @@ export async function onStartup(client: Client) {
 	registerActions(actions, false);
 
 	console.log(chalk.bold.magentaBright('Compilando auto-sistemas...'));
-	const autoSystems = await fetchAutoSystemsFromFiles();
-	registerAutoSystems(autoSystems, false);
+	const systemResponses = await fetchSystemsResponsesFromFiles();
+	registerSystemsResponses(systemResponses, false);
 
 	if (remoteStartup)
 		console.log(chalk.redBright.bold('Se inicializará para un entorno de producción.'));
