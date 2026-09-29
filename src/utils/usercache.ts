@@ -1,5 +1,5 @@
 import type { GuildMember, Interaction, User } from 'discord.js';
-import type { LocaleKey } from '@/i18n';
+import { defaultLocale, type LocaleKey } from '@/i18n';
 import UserConfigModel from '@/models/userconfigs';
 import type {
 	AcceptedGelbooruConverterKey,
@@ -8,6 +8,7 @@ import type {
 	AcceptedTwitterConverterKey,
 } from '@/systems/converters/instances';
 import type { AnyRequest } from '@/types/commands';
+import { fetchGuildCache } from './guildcache';
 
 export interface UserCache {
 	language: LocaleKey;
@@ -31,11 +32,13 @@ export async function cacheUser(user: UserCacheResolvable): Promise<UserCache> {
 	const userId = resolveUserCacheId(user);
 	if (!userId) throw new ReferenceError('Se esperaba una ID de usuario');
 
-	const userQuery = { userId };
-	let userConfigs = await UserConfigModel.findOne(userQuery);
+	let userConfigs = await UserConfigModel.findOne({ userId });
 
 	if (!userConfigs) {
-		userConfigs = new UserConfigModel(userQuery);
+		userConfigs = new UserConfigModel({
+			userId,
+			language: getGuildOrDefaultLocale(user),
+		});
 		await userConfigs.save();
 	}
 
@@ -51,6 +54,13 @@ export async function cacheUser(user: UserCacheResolvable): Promise<UserCache> {
 	cachedUsers.set(userId, userCache);
 
 	return userCache;
+}
+
+async function getGuildOrDefaultLocale(user: UserCacheResolvable): Promise<LocaleKey> {
+	if (typeof user === 'string') return defaultLocale;
+	if (!('guild' in user) || user.guild == null) return defaultLocale;
+	const guildCache = await fetchGuildCache(user.guild);
+	return guildCache.locale ?? defaultLocale;
 }
 
 /**
