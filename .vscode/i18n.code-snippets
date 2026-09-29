@@ -16,6 +16,14 @@
 		],
 		"description": "Gets a translated string from an instanced translator based on the supplied ID"
 	},
+	"Get text from Guild Translator": {
+		"scope": "javascript,typescript",
+		"prefix": "gtlt",
+		"body": [
+			"guildTranslator.getText($1)$0"
+		],
+		"description": "Gets a translated string from an instanced guild translator based on the supplied ID"
+	},
 	"Translation Entry - Simple": {
 		"scope": "javascript,typescript",
 		"prefix": "tles",
