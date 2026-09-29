@@ -1795,7 +1795,7 @@ export default {
 		ja: '拒否してタイムアウト',
 	},
 	confessionAuditButtonBan: {
-		es: 'Rechazar y Aislar',
+		es: 'Rechazar y Bannear',
 		en: 'Reject and Ban',
 		ja: '拒否してBAN',
 	},
