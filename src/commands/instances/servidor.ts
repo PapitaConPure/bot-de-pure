@@ -34,6 +34,7 @@ import FeedConfigModel, {
 } from '@/models/feeds';
 import { type GuildConfigDocument, GuildConfigModel } from '@/models/guildconfigs';
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice';
+import { getConfessionsCustomId } from '@/responses/instances/confessions';
 import { getMainBooruClient } from '@/systems/booru/booruclient';
 import {
 	addFeedToUpdateStack,
@@ -1451,23 +1452,13 @@ const command = new Command(
 							),
 						),
 				)
-				.addSeparatorComponents((separator) =>
-					separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
-				)
 				.addActionRowComponents((actionRow) =>
 					actionRow.addComponents(
 						new ButtonBuilder()
-							.setCustomId(`confesión_confess_anon`)
-							.setLabel(guildTranslator.getText('confessionalButtonConfessAnon'))
+							.setCustomId(getConfessionsCustomId('confess'))
+							.setLabel(guildTranslator.getText('confessionalButtonConfess'))
 							.setStyle(ButtonStyle.Primary),
-						new ButtonBuilder()
-							.setCustomId(`confesión_confess`)
-							.setLabel(guildTranslator.getText('confessionalButtonConfessWithName'))
-							.setStyle(ButtonStyle.Danger),
 					),
-				)
-				.addTextDisplayComponents((textDisplay) =>
-					textDisplay.setContent(guildTranslator.getText('confessionalNoticeFooter')),
 				);
 
 			await confSystem.save();

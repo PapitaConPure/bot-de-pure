@@ -1664,6 +1664,275 @@ export default {
 		ja: 'フィードバック',
 	},
 
+	confessionSystemNotConfigured: {
+		es: '⚠️ No se ha configurado un sistema de confesiones en este servidor',
+		en: '⚠️ A Confessions System has not been configured in this server',
+		ja: '⚠️ このサーバーには告白システムが設定されていません',
+	},
+	confessionAuditChannelNotFound: {
+		es: '⚠️ No se encontró un canal de auditoría de confesiones válido',
+		en: '⚠️ No valid confessions audit channel was found',
+		ja: '⚠️ 有効な告白監査チャンネルが見つかりませんでした',
+	},
+	confessionConfessionsChannelNotFound: {
+		es: '⚠️ No se encontró un canal de confesiones válido',
+		en: '⚠️ No valid confessions channel was found',
+		ja: '⚠️ 有効な告白チャンネルが見つかりませんでした',
+	},
+	confessionRequestAlreadyAnsweredFooter: {
+		es: '-# ⚠️ La confesión ya se había atendido, pero no se registró aquí por un error externo',
+		en: '-# ⚠️ The confession had already been handled, but it was not recorded here due to an external error',
+		ja: '-# ⚠️ この告白はすでに処理されていましたが、外部エラーによりここに記録されていませんでした',
+	},
+	confessionRepliesThreadName: {
+		es: 'Respuestas',
+		en: 'Replies',
+		ja: '返信',
+	},
+	confessionRepliesThreadReason: {
+		es: 'Aprobación de respuesta anónima a confesión',
+		en: 'Approval of anonymous reply to confession',
+		ja: '告白への匿名返信の承認',
+	},
+	confessionMessageAnonEpigraph: {
+		es: () => `-# ${getBotEmoji('userAccent')} Confesión anónima`,
+		en: () => `-# ${getBotEmoji('userAccent')} Anonymous confession`,
+		ja: () => `-# ${getBotEmoji('userAccent')} 匿名の告白`,
+	},
+	confessionMessageNonAnonEpigraph: {
+		es: () => `-# ${getBotEmoji('userAccent')} Confesión de <@${subl(0)}>`,
+		en: () => `-# ${getBotEmoji('userAccent')} <@${subl(0)}>'s confession`,
+		ja: () => `-# ${getBotEmoji('userAccent')} <@${subl(0)}>の告白`,
+	},
+	confessionMessageNonAnonErrorEpigraph: {
+		es: '-# ⚠️ Confesión no-anónima, pero no se pudo recuperar el autor',
+		en: "-# ⚠️ Non-anonymous confession, but the author couldn't be obtained",
+		ja: '-# ⚠️ 匿名ではない告白ですが、著者の情報を取得できませんでした',
+	},
+	confessionMessageButtonReplyShort: {
+		es: '(Anón.)',
+		en: '(Anon.)',
+		ja: '（匿名）',
+	},
+	confessionMessageButtonReplyLong: {
+		es: 'Responder anónimamente',
+		en: 'Reply Anonymously',
+		ja: '匿名で返信する',
+	},
+	confessionAnonReplyUsernameDefault: {
+		es: 'Miembro anónimo',
+		en: 'Anonymous',
+		ja: '匿名',
+	},
+	confessionConfessModalTitle: {
+		es: 'Enviar Mensaje de Confesión',
+		en: 'Submit Confession Message',
+		ja: '告白メッセージのリクエスト',
+	},
+	confessionConfessModalContentLabel: {
+		es: 'Contenido de confesión',
+		en: 'Confession content',
+		ja: '告白のコンテンツ',
+	},
+	confessionConfessModalAnonymousLabel: {
+		es: 'Confesar de forma anónima',
+		en: 'Anonymous',
+		ja: '匿名',
+	},
+	confessionConfessModalDescription: {
+		es: 'Las confesiones atraviesan un proceso de aprobación manual totalmente anónimo antes de publicarse.',
+		en: 'Confessions undergo a completely anonymous manual approval process before being made public.',
+		ja: '告白は、公開される前に、完全に匿名の手動承認プロセスを経て処理されます。',
+	},
+	confessionAuditAnonTitle: {
+		es: '## Confesión anónima',
+		en: '## Anonymous Confession',
+		ja: '## 匿名の告白',
+	},
+	confessionAuditNonAnonTitle: {
+		es: '## Confesión no anónima',
+		en: '## Non-Anonymous Confession',
+		ja: '## 記名の告白',
+	},
+	confessionAuditSubtitle: {
+		es: '-# Confesión entrante',
+		en: '-# Incoming confession',
+		ja: '-# 告白が届きました',
+	},
+	confessionAuditContentName: {
+		es: '### -# Contenido',
+		en: '### -# Content',
+		ja: '### -# コンテンツ',
+	},
+	confessionAuditReplyTitle: {
+		es: '## Respuesta anónima',
+		en: '## Anonymous Reply',
+		ja: '## 匿名の返信',
+	},
+	confessionAuditReplySubtitle: {
+		es: '-# Respuesta anónima entrante',
+		en: '-# Incoming anonymous reply',
+		ja: '-# 匿名の返信が届きました',
+	},
+	confessionAuditReplyDescription: {
+		es: `Destino: ${subl(0)}`,
+		en: `Destination: ${subl(0)}`,
+		ja: `送信先：${subl(0)}`,
+	},
+	confessionAuditReplyPseudonymName: {
+		es: '### -# Pseudónimo',
+		en: '### -# Pseudonym',
+		ja: '### -# 仮名',
+	},
+	confessionAuditReplyContentName: {
+		es: '### -# Contenido',
+		en: '### -# Content',
+		ja: '### -# コンテンツ',
+	},
+	confessionAuditButtonTimeout: {
+		es: 'Rechazar y Aislar',
+		en: 'Reject and Timeout',
+		ja: '拒否してタイムアウト',
+	},
+	confessionAuditButtonBan: {
+		es: 'Rechazar y Aislar',
+		en: 'Reject and Ban',
+		ja: '拒否してBAN',
+	},
+	confessionAuditAcceptDescription: {
+		es: `${subif(0, '=', true, 'Respuesta anónima', 'Confesión')} aceptada por <@${subl(1)}>. Aparecerá en <#${subl(2)}>.`,
+		en: `${subif(0, '=', true, 'Anonymous reply', 'Confession')} accepted by <@${subl(1)}>. It'll be posted to <#${subl(2)}>.`,
+		ja: `${subif(0, '=', true, '匿名の返信', '告白')}は<@${subl(1)}>によって承認されました。<#${subl(2)}>に投稿されます。`,
+	},
+	confessionAuditRejectDescription: {
+		es: `Confesión rechazada por <@${subl(0)}>. No se le notificará al autor.`,
+		en: `Confession rejected by <@${subl(0)}>. The author won't be notified.`,
+		ja: `<@${subl(0)}>によって告白は却下されました。投稿者には通知されません。`,
+	},
+	confessionAuditTimeoutReason: {
+		es: `Aislado por ${subl(0)} por confesión malintencionada`,
+		en: `Timed out by ${subl(0)} because of a malicious confession`,
+		ja: `悪意のある告白を理由に${subl(0)}によってタイムアウトされました`,
+	},
+	confessionAuditTimeoutDM: {
+		es: `Fuiste aislado en **${subl(0)}** por **${subl(1)} horas** por enviar una confesión malintencionada.`,
+		en: `You've been timed out in **${subl(0)}** for **${subl(1)} hours** because you submitted a malicious confession.`,
+		ja: `悪意のある告白を送信したため、**${subl(0)}** での発言が **${subl(1)}時間** 制限されました。`,
+	},
+	confessionAuditTimeoutTitle: {
+		es: '## Confesante aislado',
+		en: '## Confessant Timed Out',
+		ja: '## 告白者をタイムアウトしました',
+	},
+	confessionAuditTimeoutDescription: {
+		es: `Esta confesión fue rechazada por <@${subl(0)}> y su confesante fue aislado.`,
+		en: `This confession was rejected by <@${subl(0)}>, and its confessant was timed out.`,
+		ja: `<@${subl(0)}> によってこの告白は却下され、告白者はタイムアウトされました。`,
+	},
+	confessionAuditBanReason: {
+		es: `Banneado por ${subl(0)} por confesión malintencionada`,
+		en: `Banned by ${subl(0)} because of a malicious confession`,
+		ja: `悪意のある告白を理由に${subl(0)}によってBANされました`,
+	},
+	confessionAuditBanDM: {
+		es: `Fuiste banneado en **${subl(0)}** por enviar una confesión malintencionada.`,
+		en: `You've been banned from **${subl(0)}** because you submitted a malicious confession.`,
+		ja: `悪意のある告白を投稿したため、**${subl(0)}** からアクセス禁止処分を受けました。`,
+	},
+	confessionAuditBanTitle: {
+		es: '## Confesante banneado',
+		en: '## Confessant Banned',
+		ja: '## 告白者をBANしました',
+	},
+	confessionAuditBanDescription: {
+		es: `Esta confesión fue rechazada por <@${subl(0)}> y su confesante fue banneado.`,
+		en: `This confession was rejected by <@${subl(0)}>, and its confessant was banned.`,
+		ja: `<@${subl(0)}> によってこの告白は却下され、告白者はBANされました。`,
+	},
+	confessionAuditTimeoutOrBanAuthorNotFoundError: {
+		es: 'No se pudo encontrar el autor de esta confesión.',
+		en: "Couldn't find confession author.",
+		ja: 'この告白の投稿者が見つかりませんでした。',
+	},
+	confessionAuditTimeoutOrBanFailedTitle: {
+		es: '## Confesión rechazada con errores',
+		en: '## Confession Rejected with Errors',
+		ja: '## 告白の却下中にエラーが発生しました',
+	},
+	confessionAuditTimeoutFailedDescription: {
+		es: `Confesión rechazada por <@${subl(0)}>. Se intentó aislar al confesante (<@${subl(1)}>), pero algo lo impidió.`,
+		en: `Confession rejected by <@${subl(0)}>. Tried to timeout its confessant (<@${subl(1)}>) but failed for some reason.`,
+		ja: `<@${subl(0)}> によって告白は却下されました。告白者（<@${subl(1)}>）をタイムアウトしようとしましたが、何らかの理由で失敗しました。`,
+	},
+	confessionAuditBanFailedDescription: {
+		es: `Confesión rechazada por <@${subl(0)}>. Se intentó bannear al confesante (<@${subl(1)}>), pero algo lo impidió.`,
+		en: `Confession rejected by <@${subl(0)}>. Tried to ban its confessant (<@${subl(1)}>) but failed for some reason.`,
+		ja: `<@${subl(0)}> によって告白は却下されました。告白者（<@${subl(1)}>）をBANしようとしましたが、何らかの理由で失敗しました。`,
+	},
+	confessionAuditTimeoutOrBanFailedErrorName: {
+		es: '### -# Error',
+		en: '### -# Error',
+		ja: '### -# エラー',
+	},
+	confessionConfessSuccessTitle: {
+		es: '## Confesión enviada anónimamente para aprobación',
+		en: '## The confession has been anonymously submitted for approval',
+		ja: '## その告白は、承認を求めて匿名で提出されました',
+	},
+	confessionConfessSuccessSubtitle: {
+		es: '-# Tu confesión está en camino',
+		en: '-# Your confession is on its way',
+		ja: '-# あなたの告白は、今まさに届こうとしています',
+	},
+	confessionConfessSuccessDescription: {
+		es: 'Podrás ver tu confesión en cuanto se la apruebe.',
+		en: "You'll get to see your confession once it gets approved.",
+		ja: '告白が承認されれば、それを見ることができます。',
+	},
+	confessionConfessSuccessExplanationName: {
+		es: '### -# Proceso de aprobación',
+		en: '### -# Approval Process',
+		ja: '### -# 承認プロセス',
+	},
+	confessionConfessSuccessExplanationDescription: {
+		es: `Tu confesión será accesible públicamente luego de ser aprobada${subif(0, '=', true, '', ' y recién entonces se revelará tu nombre')}.`,
+		en: `Your confession will be publicly accessible once it has been approved${subif(0, '=', true, '', ' and only then will your name be revealed')}.`,
+		ja: `あなたの告白は承認された後にのみ公開されます${subif(0, '=', true, '', '。その時点で初めてあなたの名前が公開されます')}.`,
+	},
+	confessionConfessSuccessNoticeName: {
+		es: '### -# Medidas Protectivas',
+		en: '### -# Preventive Measures',
+		ja: '### -# 予防策',
+	},
+	confessionConfessSuccessNoticeDescription: {
+		es: paragraph(
+			'Ten en cuenta que se proveen herramientas de auditoría para castigar confesiones malintencionadas.',
+			'En dichos casos, incluso si tu confesión es anónima, tu identidad puede quedar expuesta y la confesión se rechazará.',
+		),
+		en: paragraph(
+			'Keep in mind that auditing tools are provided in order to combat malicious confessions.',
+			'In such cases, even if your confession is anonymous, your identity may be exposed and your confession rejected.',
+		),
+		ja: paragraph(
+			'悪意ある投稿に対処するため、監査ツールが導入されている点にご留意ください。',
+			'そのような場合、たとえ匿名での投稿であっても、身元が特定されたり、投稿が拒否されたりする可能性があります。',
+		),
+	},
+	confessionReplySuccessNoticeDescription: {
+		es: paragraph(
+			'✅ Tu respuesta anónima a la confesión fue enviada para revisión. Será visible cuando se apruebe',
+			'-# Ten en cuenta que se proveen herramientas de auditoría para castigar confesiones malintencionadas. En dichos casos, incluso si tu confesión es anónima, tu identidad puede quedar expuesta y la confesión se rechazará.',
+		),
+		en: paragraph(
+			"✅ Your anonymous reply was submitted for revision. You'll get to see it once it gets approved",
+			'-# Keep in mind that auditing tools are provided in order to combat malicious confessions. In such cases, even if your confession is anonymous, your identity may be exposed and your confession rejected.',
+		),
+		ja: paragraph(
+			'✅ 匿名での回答が、審査のために送信されました。承認され次第、内容をご確認いただけます',
+			'-# 悪意ある投稿に対処するため、監査ツールが導入されている点にご留意ください。そのような場合、たとえ匿名での投稿であっても、身元が特定されたり、投稿が拒否されたりする可能性があります。',
+		),
+	},
+
 	infoGuildBannerAlt: {
 		es: 'Portada del servidor',
 		en: 'Guild banner',
@@ -2786,24 +3055,14 @@ export default {
 		ja: '## 告解室',
 	},
 	confessionalDescription: {
-		es: `¡Usa los botones debajo para enviar confesiones a <#${subl(0)}>!`,
-		en: `Use the buttons below to submit confessions to <#${subl(0)}>!`,
-		ja: `以下のボタンを使用して、<#${subl(0)}> に告白を送信してください。`,
+		es: `¡Usa este botón para enviar confesiones a <#${subl(0)}>!`,
+		en: `Use this button to submit confessions to <#${subl(0)}>!`,
+		ja: `ボタンを使用して、<#${subl(0)}> に告白を送信してください！`,
 	},
-	confessionalNoticeFooter: {
-		es: '-# Las confesiones atraviesan un proceso de aprobación manual totalmente anónimo.',
-		en: '-# Confessions undergo a completely anonymous manual approval process.',
-		ja: '-# 告白は、完全に匿名の手動承認プロセスを経て公開されます。',
-	},
-	confessionalButtonConfessAnon: {
-		es: 'Confesar (anónimo)',
-		en: 'Confess (anonymous)',
-		ja: '告白（匿名）',
-	},
-	confessionalButtonConfessWithName: {
-		es: 'Confesar (+ nombre)',
-		en: 'Confess (with name)',
-		ja: '告白（記名）',
+	confessionalButtonConfess: {
+		es: 'Enviar una confesión',
+		en: 'Submit a Confession',
+		ja: '告白を投稿する',
 	},
 
 	voiceExpected: {
