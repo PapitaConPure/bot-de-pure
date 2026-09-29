@@ -67,7 +67,7 @@ export class Translator {
 	/**@description Instancia un {@link Translator} en base al idioma del usuario indicado*/
 	static async fromUser(user: UserCacheResolvable): Promise<Translator> {
 		const userCache = await fetchUserCache(user);
-		return new Translator(userCache?.language ?? defaultLocale);
+		return new Translator(userCache.language ?? defaultLocale);
 	}
 
 	static async fromGuild(guild: GuildCacheResolvable): Promise<Translator> {
