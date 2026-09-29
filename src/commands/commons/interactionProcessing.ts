@@ -167,12 +167,7 @@ export async function handleComponent(interaction: AnyCommandInteraction): Promi
 	if (interaction.customId.startsWith('/'))
 		return handleComponentSlashCommandInteraction(interaction);
 
-	if (interaction.customId.startsWith('!')) {
-		if (!interaction.inCachedGuild())
-			return handleBlockedInteraction(interaction).catch(console.error);
-
-		return handleSystemInteraction(interaction);
-	}
+	if (interaction.customId.startsWith('!')) return handleSystemInteraction(interaction);
 
 	try {
 		const funcStream: string[] = interaction.customId.split('_');

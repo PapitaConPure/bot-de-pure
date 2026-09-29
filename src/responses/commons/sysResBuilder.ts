@@ -1,6 +1,7 @@
 import type {
 	AnySelectMenuInteraction,
 	ButtonInteraction,
+	CacheType,
 	ModalMessageModalSubmitInteraction,
 } from 'discord.js';
 import type { AnyCommandInteraction } from 'types/commands';
@@ -11,18 +12,116 @@ interface InteractionResponseOptions {
 }
 
 export type SystemResponseHandler<
-	TInteraction extends AnyCommandInteraction<'cached'> = AnyCommandInteraction<'cached'>,
-> = ((interaction: TInteraction, ...args: string[]) => Promise<void>) &
-	InteractionResponseOptions;
+	TInteraction extends AnyCommandInteraction = AnyCommandInteraction,
+> = ((interaction: TInteraction, ...args: string[]) => Promise<void>) & InteractionResponseOptions;
+
+export type AnySystemResponseHandler<TCache extends CacheType = CacheType> =
+	| SystemResponseHandler<ButtonInteraction<TCache>>
+	| SystemResponseHandler<AnySelectMenuInteraction<TCache>>
+	| SystemResponseHandler<ModalMessageModalSubmitInteraction<TCache>>;
 
 /**Represents an automated guild or user system.*/
 export class SystemResponses<TResponseName extends string = never> {
 	readonly name: string;
-	#responses: Map<TResponseName, SystemResponseHandler<AnyCommandInteraction<'cached'>>>;
+	#guildResponses: Map<TResponseName, AnySystemResponseHandler<'cached'>>;
+	#globalResponses: Map<TResponseName, AnySystemResponseHandler>;
 
 	constructor(name: string) {
 		this.name = name;
-		this.#responses = new Map();
+		this.#guildResponses = new Map();
+		this.#globalResponses = new Map();
+	}
+
+	/**
+	 * @param responseName The name of the response.
+	 * @param responseFn The component interaction response to execute.
+	 */
+	setButtonResponse<TName extends string>(
+		responseName: TName,
+		responseFn: SystemResponseHandler<ButtonInteraction<'cached'>>,
+		options: InteractionResponseOptions = {},
+	) {
+		return this.#registerGuildResponse(responseName, responseFn, options);
+	}
+
+	/**
+	 * @param responseName The name of the global response.
+	 * @param responseFn The global component interaction response to execute.
+	 */
+	setGlobalButtonResponse<TName extends string>(
+		responseName: TName,
+		responseFn: SystemResponseHandler<ButtonInteraction>,
+		options: InteractionResponseOptions = {},
+	) {
+		return this.#registerGlobalResponse(responseName, responseFn, options);
+	}
+
+	/**
+	 * @param responseName The name of the response.
+	 * @param responseFn The component interaction response to execute.
+	 */
+	setSelectMenuResponse<TName extends string>(
+		responseName: TName,
+		responseFn: SystemResponseHandler<AnySelectMenuInteraction<'cached'>>,
+		options: InteractionResponseOptions = {},
+	) {
+		return this.#registerGuildResponse(responseName, responseFn, options);
+	}
+
+	/**
+	 * @param responseName The name of the global response.
+	 * @param responseFn The global component interaction response to execute.
+	 */
+	setGlobalSelectMenuResponse<TName extends string>(
+		responseName: TName,
+		responseFn: SystemResponseHandler<AnySelectMenuInteraction>,
+		options: InteractionResponseOptions = {},
+	) {
+		return this.#registerGlobalResponse(responseName, responseFn, options);
+	}
+
+	/**
+	 * @param responseName The name of the response.
+	 * @param responseFn The component interaction response to execute.
+	 */
+	setModalResponse<TName extends string>(
+		responseName: TName,
+		responseFn: SystemResponseHandler<ModalMessageModalSubmitInteraction<'cached'>>,
+		options: InteractionResponseOptions = {},
+	) {
+		return this.#registerGuildResponse(responseName, responseFn, options);
+	}
+
+	/**
+	 * @param responseName The name of the global response.
+	 * @param responseFn The global component interaction response to execute.
+	 */
+	setGlobalModalResponse<TName extends string>(
+		responseName: TName,
+		responseFn: SystemResponseHandler<ModalMessageModalSubmitInteraction>,
+		options: InteractionResponseOptions = {},
+	) {
+		return this.#registerGlobalResponse(responseName, responseFn, options);
+	}
+
+	#registerGuildResponse<TName extends string>(
+		responseName: TName,
+		responseFn: AnySystemResponseHandler<'cached'>,
+		options: InteractionResponseOptions,
+	) {
+		this.#configureResponse(responseFn, options);
+		this.#guildResponses.set(responseName as unknown as TResponseName, responseFn);
+		return this as SystemResponses<TResponseName | TName>;
+	}
+
+	#registerGlobalResponse<TName extends string>(
+		responseName: TName,
+		responseFn: AnySystemResponseHandler,
+		options: InteractionResponseOptions,
+	) {
+		this.#configureResponse(responseFn, options);
+		this.#globalResponses.set(responseName as unknown as TResponseName, responseFn);
+		return this as SystemResponses<TResponseName | TName>;
 	}
 
 	#configureResponse(
@@ -32,61 +131,20 @@ export class SystemResponses<TResponseName extends string = never> {
 		responseFn.permissions = options.permissions;
 	}
 
-	/**
-	 * @param responseName El nombre de registro de la respuesta de interacción de componente.
-	 * @param responseFn La respuesta a la interacción de componente.
-	 */
-	setButtonResponse<TName extends string>(
-		responseName: TName,
-		responseFn: SystemResponseHandler<ButtonInteraction<'cached'>>,
-		options: InteractionResponseOptions = {},
-	) {
-		this.#configureResponse(responseFn, options);
-		this.#responses.set(
-			responseName as unknown as TResponseName,
-			responseFn as SystemResponseHandler<AnyCommandInteraction<'cached'>>,
-		);
-		return this as SystemResponses<TResponseName | TName>;
-	}
-
-	/**
-	 * @param responseName El nombre de registro de la respuesta de interacción de componente.
-	 * @param responseFn La respuesta a la interacción de componente.
-	 */
-	setSelectMenuResponse<TName extends string>(
-		responseName: string,
-		responseFn: SystemResponseHandler<AnySelectMenuInteraction<'cached'>>,
-		options: InteractionResponseOptions = {},
-	) {
-		this.#configureResponse(responseFn, options);
-		this.#responses.set(
-			responseName as unknown as TResponseName,
-			responseFn as SystemResponseHandler<AnyCommandInteraction<'cached'>>,
-		);
-		return this as SystemResponses<TResponseName | TName>;
-	}
-
-	/**
-	 * @param responseName El nombre de registro de la respuesta de interacción de componente.
-	 * @param responseFn La respuesta a la interacción de componente.
-	 */
-	setModalResponse<TName extends string>(
-		responseName: TName,
-		responseFn: SystemResponseHandler<ModalMessageModalSubmitInteraction<'cached'>>,
-		options: InteractionResponseOptions = {},
-	) {
-		this.#configureResponse(responseFn, options);
-		this.#responses.set(
-			responseName as unknown as TResponseName,
-			responseFn as SystemResponseHandler<AnyCommandInteraction<'cached'>>,
-		);
-		return this as SystemResponses<TResponseName | TName>;
-	}
-
 	getResponseFn(
 		responseId: TResponseName,
 	): SystemResponseHandler<AnyCommandInteraction<'cached'>> | undefined {
-		return this.#responses.get(responseId);
+		return this.#guildResponses.get(responseId) as SystemResponseHandler<
+			AnyCommandInteraction<'cached'>
+		>;
+	}
+
+	getGlobalResponseFn(
+		responseId: TResponseName,
+	): SystemResponseHandler<AnyCommandInteraction> | undefined {
+		return this.#globalResponses.get(
+			responseId,
+		) as SystemResponseHandler<AnyCommandInteraction>;
 	}
 
 	get customIdGetter(): (fnName: TResponseName, ...args: unknown[]) => string {

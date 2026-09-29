@@ -10,9 +10,7 @@ import Logger from '@/utils/logs';
 
 const { debug, fatal } = Logger('DEBUG', 'SystemResponse');
 
-export async function handleSystemInteraction(
-	interaction: AnyCommandInteraction<'cached'>,
-): Promise<void> {
+export async function handleSystemInteraction(interaction: AnyCommandInteraction): Promise<void> {
 	const stream = interaction.customId.slice(1).split('_');
 	const systemName = stream.shift();
 	const responseFnName = stream.shift();
@@ -38,13 +36,30 @@ export async function handleSystemInteraction(
 			`The Component interaction "${interaction.id}" has the following arguments: [ ${stream.join(', ')} ]`,
 		);
 
+		const requestString = `!${systemName} -=-{\`${responseFnName}\`}`;
+
+		if (!interaction.inCachedGuild()) {
+			const globalResponseFn = system.getGlobalResponseFn(responseFnName);
+			if (!globalResponseFn) return handleHuskInteraction(interaction);
+
+			const hasPermission = await handleComponentInteractionPermissions(
+				interaction,
+				globalResponseFn.permissions,
+				requestString,
+			);
+			if (!hasPermission) return;
+
+			await globalResponseFn(interaction);
+			return;
+		}
+
 		const responseFn = system.getResponseFn(responseFnName);
 		if (!responseFn) return handleHuskInteraction(interaction);
 
 		const hasPermission = await handleComponentInteractionPermissions(
 			interaction,
 			responseFn.permissions,
-			`!${systemName} -=-{\`${responseFnName}\`}`,
+			requestString,
 		);
 		if (!hasPermission) return;
 
