@@ -77,8 +77,10 @@ export class Translator {
 
 	/**@description Instancia un {@link Translator} en base al idioma del usuario indicado*/
 	static async from(
-		data: UserCacheResolvable & GuildCacheResolvable,
+		data: Exclude<UserCacheResolvable & GuildCacheResolvable, string>,
 	): Promise<readonly [Translator, Translator]> {
+		if (typeof data === 'string')
+			throw TypeError("Can't use the same string data to resolve both a user and a guild.");
 		return Promise.all([Translator.fromUser(data), Translator.fromGuild(data)]);
 	}
 
