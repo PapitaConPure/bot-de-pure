@@ -1739,10 +1739,10 @@ export default {
 		en: 'Anonymous',
 		ja: '匿名',
 	},
-	confessionConfessModalDescription: {
-		es: 'Las confesiones atraviesan un proceso de aprobación manual totalmente anónimo antes de publicarse.',
-		en: 'Confessions undergo a completely anonymous manual approval process before being made public.',
-		ja: '告白は、公開される前に、完全に匿名の手動承認プロセスを経て処理されます。',
+	confessionConfessModalNotice: {
+		es: '-# Las confesiones atraviesan un proceso de aprobación manual totalmente anónimo antes de publicarse.',
+		en: '-# Confessions undergo a completely anonymous manual approval process before being made public.',
+		ja: '-# 告白は、公開される前に、完全に匿名の手動承認プロセスを経て処理されます。',
 	},
 	confessionAuditAnonTitle: {
 		es: '## Confesión anónima',

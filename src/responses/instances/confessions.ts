@@ -51,9 +51,6 @@ const system = new SystemResponses('conf')
 		const modal = new ModalBuilder()
 			.setCustomId(getConfessionsCustomId('confessionFilled'))
 			.setTitle(translator.getText('confessionConfessModalTitle'))
-			.addTextDisplayComponents((textDisplay) =>
-				textDisplay.setContent(translator.getText('confessionConfessModalDescription')),
-			)
 			.addLabelComponents(
 				(label) =>
 					label
@@ -71,9 +68,12 @@ const system = new SystemResponses('conf')
 						.setCheckboxComponent((checkbox) =>
 							checkbox.setCustomId('inputAnonymous').setDefault(true),
 						),
+			)
+			.addTextDisplayComponents((textDisplay) =>
+				textDisplay.setContent(translator.getText('confessionConfessModalNotice')),
 			);
 
-		return interaction.showModal(modal);
+		await interaction.showModal(modal);
 	})
 	.setModalResponse('confessionFilled', async (interaction) => {
 		const [translator, guildTranslator] = await Translator.from(interaction);

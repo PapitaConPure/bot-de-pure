@@ -539,7 +539,7 @@ function getSourceButtonAndColor(
 	const sourceButton = sourceTooLong
 		? new ButtonBuilder()
 				.setStyle(ButtonStyle.Danger)
-				.setCustomId(`feed_invalidUrl${componentKey ? `_${componentKey}` : ''}`)
+				.setCustomId(`!feed_invalidUrl${componentKey ? `_${componentKey}` : ''}`)
 				.setDisabled(true)
 		: new ButtonBuilder().setStyle(ButtonStyle.Link).setURL(source).setDisabled(!!disableLinks);
 
