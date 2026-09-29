@@ -368,6 +368,7 @@ export class Command<TOptions extends CommandOptions | undefined = undefined> {
 		responseFn: GlobalButtonResponseFunction,
 		options: InteractionResponseOptions = {},
 	) {
+		//TODO: Remove this function after a month
 		return this.setFunction(responseFn as AnyCommandComponentResponseFunction, options);
 	}
 
