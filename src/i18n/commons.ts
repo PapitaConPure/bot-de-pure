@@ -39,7 +39,7 @@ export function subif<TReplacement>(
 	whenFalse: string | null = '',
 ) {
 	if (i == null) throw ReferenceError('Se esperaba un índice de componente de traducción');
-	if (!whenTrue)
+	if (whenTrue == null)
 		throw ReferenceError('Se esperaba un valor para verdadero en componente de traducción');
 
 	const r = typeof rightOperand === 'boolean' ? `__${rightOperand}__` : rightOperand;
