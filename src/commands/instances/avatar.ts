@@ -217,6 +217,7 @@ const command = new Command('avatar', tags)
 
 		return request.reply({
 			flags: MessageFlags.IsComponentsV2,
+			allowedMentions: { parse: [] },
 			components,
 			files,
 		});

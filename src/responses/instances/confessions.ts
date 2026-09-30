@@ -299,6 +299,7 @@ const system = new SystemResponses('conf')
 
 				await confChannel.send({
 					flags: MessageFlags.IsComponentsV2,
+					allowedMentions: { parse: [] },
 					components: [confessionContainer],
 				});
 			}

@@ -376,8 +376,8 @@ const command = new Command(
 
 		return request.editReply({
 			flags: MessageFlags.IsComponentsV2,
+			allowedMentions: { parse: [] },
 			components: [mainCointainer],
-			allowedMentions: {},
 		});
 	})
 	.setButtonResponse(async function navigate(interaction, page, requestId) {
