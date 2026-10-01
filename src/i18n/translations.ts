@@ -1734,6 +1734,11 @@ export default {
 		en: 'Confession content',
 		ja: '告白のコンテンツ',
 	},
+	confessionConfessModalAttachmentsLabel: {
+		es: 'Archivos adjuntos',
+		en: 'Attachments',
+		ja: '添付ファイル',
+	},
 	confessionConfessModalAnonymousLabel: {
 		es: 'Confesar de forma anónima',
 		en: 'Anonymous',
@@ -1763,6 +1768,11 @@ export default {
 		es: '### -# Contenido',
 		en: '### -# Content',
 		ja: '### -# コンテンツ',
+	},
+	confessionAuditAttachmentsName: {
+		es: '### -# Archivos adjuntos',
+		en: '### -# Attachments',
+		ja: '### -# 添付ファイル',
 	},
 	confessionAuditReplyTitle: {
 		es: '## Respuesta anónima',
