@@ -2,6 +2,7 @@ import { hoursToMinutes } from 'date-fns';
 import {
 	type AnyThreadChannel,
 	type APISectionComponent,
+	AttachmentBuilder,
 	ButtonBuilder,
 	ButtonStyle,
 	ChannelType,
@@ -24,12 +25,16 @@ import type { AnyCommandInteraction } from 'types/commands';
 import { CommandPermissions } from '@/commands/commons';
 import { Translator } from '@/i18n';
 import ConfessionSystemModel from '@/models/confessionSystems';
-import PendingConfessionModel from '@/models/pendingConfessions';
+import PendingConfessionModel, {
+	PendingConfessionAttachmentModel,
+	type PendingConfessionAttachmentSchemaType,
+} from '@/models/pendingConfessions';
 import { auditError } from '@/systems/others/auditor';
 import { DiscordAgent } from '@/utils/discordagent';
-import { getBotEmojiResolvable } from '@/utils/emojis';
+import { getBotEmoji, getBotEmojiResolvable } from '@/utils/emojis';
 import { compressId, decompressId } from '@/utils/encoding';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
+import { improveFileSize, shortenText } from '@/utils/misc';
 import { SystemResponses } from '../commons/sysResBuilder';
 
 const auditPermissions = new CommandPermissions()
@@ -64,6 +69,16 @@ const system = new SystemResponses('conf')
 						),
 				(label) =>
 					label
+						.setLabel(translator.getText('confessionConfessModalAttachmentsLabel'))
+						.setFileUploadComponent((fileUpload) =>
+							fileUpload
+								.setCustomId('inputAttachments')
+								.setMinValues(0)
+								.setMaxValues(4)
+								.setRequired(false),
+						),
+				(label) =>
+					label
 						.setLabel(translator.getText('confessionConfessModalAnonymousLabel'))
 						.setCheckboxComponent((checkbox) =>
 							checkbox.setCustomId('inputAnonymous').setDefault(true),
@@ -89,6 +104,7 @@ const system = new SystemResponses('conf')
 		const { confSystem, logChannel } = data;
 
 		const confContent = interaction.fields.getTextInputValue('inputContent');
+		const confAttachments = interaction.fields.getUploadedFiles('inputAttachments');
 		const isAnonymous = interaction.fields.getCheckbox('inputAnonymous');
 		const userId = compressId(interaction.user.id);
 		const confId = compressId(interaction.id);
@@ -96,6 +112,10 @@ const system = new SystemResponses('conf')
 			id: confId,
 			channelId: confSystem.confessionsChannelId,
 			content: confContent,
+			attachments: confAttachments?.map(
+				({ name, url, contentType }) =>
+					new PendingConfessionAttachmentModel({ name, url, contentType }),
+			),
 			anonymous: isAnonymous,
 		});
 		confSystem.pending[confSystem.pending.length] = confId;
@@ -120,7 +140,43 @@ const system = new SystemResponses('conf')
 				(textDisplay) =>
 					textDisplay.setContent(guildTranslator.getText('confessionAuditContentName')),
 				(textDisplay) => textDisplay.setContent(`${confContent}`),
-			)
+			);
+
+		if (confAttachments?.size) {
+			const shortenFileName = (name: string): string => {
+				const maxLength = 24;
+
+				if (name.length <= maxLength) return name;
+
+				const indexOfExtension = name.lastIndexOf('.');
+				if (indexOfExtension < 0) return shortenText(name, maxLength, '…');
+
+				const lengthOfExtension = name.length - indexOfExtension;
+				if (lengthOfExtension >= maxLength) return shortenText(name, maxLength, '…');
+
+				const lengthOfName = maxLength - lengthOfExtension;
+				const nameString = name.slice(0, indexOfExtension);
+				const extensionString = name.slice(indexOfExtension);
+				return shortenText(nameString, lengthOfName, '…') + extensionString;
+			};
+
+			const attachmentsList = confAttachments.map(
+				({ name, url, size }) =>
+					`${getBotEmoji('urlAccent')} [\`${shortenFileName(name)}\`](${url}) (${improveFileSize(size, guildTranslator)}) ${getBotEmoji('eyeAccent')} [VirusTotal](https://www.virustotal.com/gui/search/${encodeURIComponent(url)})`,
+			);
+
+			auditContainer
+				.addSeparatorComponents((separator) => separator.setDivider(true))
+				.addTextDisplayComponents(
+					(textDisplay) =>
+						textDisplay.setContent(
+							guildTranslator.getText('confessionAuditAttachmentsName'),
+						),
+					(textDisplay) => textDisplay.setContent(attachmentsList.join('\n')),
+				);
+		}
+
+		auditContainer
 			.addSeparatorComponents((separator) =>
 				separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
 			)
@@ -148,7 +204,10 @@ const system = new SystemResponses('conf')
 			);
 
 		await delegateConfessionSystemTasks(
-			confSystem.save().then(() => pendingConf.save()),
+			confSystem
+				.save()
+				.then(() => pendingConf.save())
+				.catch(console.error),
 			logChannel.send({ flags: MessageFlags.IsComponentsV2, components: [auditContainer] }),
 		);
 
@@ -256,6 +315,43 @@ const system = new SystemResponses('conf')
 					.setEmoji(getBotEmojiResolvable('replyAccent'))
 					.setStyle(ButtonStyle.Secondary);
 
+				const otherFileAttachments: PendingConfessionAttachmentSchemaType[] = [];
+
+				if (confession.attachments?.length) {
+					const galleryAttachments: PendingConfessionAttachmentSchemaType[] = [];
+
+					for (const attachment of confession.attachments) {
+						if (
+							attachment.contentType?.startsWith('image/')
+							|| attachment.contentType?.startsWith('video/')
+						)
+							galleryAttachments.push(attachment);
+						else otherFileAttachments.push(attachment);
+					}
+
+					confessionContainer.addSeparatorComponents((separator) =>
+						separator.setDivider(true),
+					);
+
+					if (galleryAttachments.length)
+						confessionContainer.addMediaGalleryComponents((gallery) =>
+							gallery.addItems(
+								galleryAttachments.map(
+									(attachment) => (galleryItem) =>
+										galleryItem.setURL(attachment.url),
+								),
+							),
+						);
+
+					if (otherFileAttachments.length)
+						confessionContainer.addFileComponents(
+							otherFileAttachments.map(
+								(attachment) => (file) =>
+									file.setURL(`attachment://${attachment.name}`),
+							),
+						);
+				}
+
 				if (confession.anonymous) {
 					confessionEpigraph = guildTranslator.getText('confessionMessageAnonEpigraph');
 					replyButton.setLabel(
@@ -278,9 +374,13 @@ const system = new SystemResponses('conf')
 						replyButton.setLabel(
 							guildTranslator.getText('confessionMessageButtonReplyLong'),
 						);
-						confessionContainer.addActionRowComponents((actionRow) =>
-							actionRow.setComponents(replyButton),
-						);
+						confessionContainer
+							.addSeparatorComponents((separator) =>
+								separator.setDivider(true).setSpacing(SeparatorSpacingSize.Large),
+							)
+							.addActionRowComponents((actionRow) =>
+								actionRow.setComponents(replyButton),
+							);
 					} else {
 						confessionEpigraph = guildTranslator.getText(
 							'confessionMessageNonAnonErrorEpigraph',
@@ -301,6 +401,10 @@ const system = new SystemResponses('conf')
 					flags: MessageFlags.IsComponentsV2,
 					allowedMentions: { parse: [] },
 					components: [confessionContainer],
+					files: otherFileAttachments.map(
+						(attachment) =>
+							new AttachmentBuilder(attachment.url, { name: attachment.name }),
+					),
 				});
 			}
 
@@ -830,50 +934,46 @@ function remakeContainerBuilderWithoutActions(
 
 	for (const component of container.components) {
 		switch (component.type) {
-			case ComponentType.TextDisplay:
-				console.log(
-					`Detected a TextDisplay component with content: "${component.content}"`,
-				);
+			case ComponentType.TextDisplay: {
 				builder.addTextDisplayComponents((textDisplay) =>
 					textDisplay.setContent(component.content),
 				);
 				break;
-			case ComponentType.Separator:
-				console.log(
-					`Detected a separator with divider=${component.divider}, spacing=${component.spacing}`,
-				);
+			}
+
+			case ComponentType.Separator: {
 				builder.addSeparatorComponents((separator) =>
 					separator.setDivider(component.divider).setSpacing(component.spacing),
 				);
 				break;
+			}
+
 			case ComponentType.Section: {
 				if (component.accessory.type === ComponentType.Button) {
-					console.log(`Detected a Section component with Button accesory.`);
 					builder.addTextDisplayComponents(
 						component.components.map(
 							(textDisplay) => new TextDisplayBuilder(textDisplay),
 						),
 					);
 				} else {
-					console.log(`Detected a Section component with Button accesory.`);
 					builder.addSectionComponents(
 						new SectionBuilder(component as APISectionComponent),
 					);
 				}
 				break;
 			}
-			case ComponentType.MediaGallery:
-				console.log(`Detected a MediaGallery component.`);
+
+			case ComponentType.MediaGallery: {
 				builder.addMediaGalleryComponents(new MediaGalleryBuilder(component));
 				break;
-			case ComponentType.File:
-				console.log(`Detected a File component.`);
+			}
+
+			case ComponentType.File: {
 				builder.addFileComponents(new FileBuilder(component));
 				break;
+			}
 		}
 	}
-
-	console.log('Was able to remake builder');
 
 	return builder;
 }
