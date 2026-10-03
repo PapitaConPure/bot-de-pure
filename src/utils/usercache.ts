@@ -37,7 +37,7 @@ export async function cacheUser(user: UserCacheResolvable): Promise<UserCache> {
 	if (!userConfigs) {
 		userConfigs = new UserConfigModel({
 			userId,
-			language: getGuildOrDefaultLocale(user),
+			language: await getGuildOrDefaultLocale(user),
 		});
 		await userConfigs.save();
 	}
