@@ -49,7 +49,7 @@ export const FeedConfigSchema = new Mongoose.Schema({
 	},
 	omitRedundantTags: {
 		type: Boolean,
-		default: true,
+		default: false,
 	},
 	icon: {
 		type: String,
