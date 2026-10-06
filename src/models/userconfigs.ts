@@ -112,10 +112,6 @@ const UserConfigSchema = new Mongoose.Schema({
 		enum: acceptedInstagramConverters,
 		default: 'dd',
 	},
-	showLevelUp: {
-		type: Boolean,
-		default: true,
-	},
 	collectMessageData: {
 		type: Boolean,
 		default: true,
