@@ -19,7 +19,7 @@ import Logger from '@/utils/logs';
 import { attemptManyTimes } from '@/utils/promises';
 import { getMainBooruClient } from './booruclient';
 
-const { debug, info, warn, error, fatal } = Logger('DEBUG', 'BooruFeed');
+const { debug, info, warn, error, fatal } = Logger('INFO', 'BooruFeed');
 
 export interface FeedData extends PostFormatData {
 	tags: string;
@@ -475,7 +475,7 @@ export class BooruFeed {
 		this.booru = booru;
 		this.#feedDoc = feed;
 		this.#omittedTagsCache =
-			(this.#feedDoc.omitRedundantTags ?? true)
+			(this.#feedDoc.omitRedundantTags)
 				? getSimpleTagNames(this.#feedDoc.searchTags)
 				: [];
 		this.channel = channel?.isTextBased() ? channel : null;
