@@ -920,10 +920,9 @@ const command = new Command(
 				{
 					...feedConfig.toObject(),
 					allowNSFW: isNSFWChannel(interaction.channel),
-					omittedTags:
-						(feedConfig.omitRedundantTags)
-							? getSimpleTagNames(feedConfig.searchTags)
-							: [],
+					omittedTags: feedConfig.omitRedundantTags
+						? getSimpleTagNames(feedConfig.searchTags)
+						: [],
 					disableActions: true,
 				},
 			);

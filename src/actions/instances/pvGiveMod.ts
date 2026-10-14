@@ -1,10 +1,7 @@
 import { MessageFlags } from 'discord.js';
 import { Translator } from '@/i18n';
 import { PureVoiceModel, PureVoiceSessionModel } from '@/models/purevoice';
-import {
-	getOrchestrator,
-	PureVoiceSessionMember,
-} from '@/systems/others/purevoice';
+import { getOrchestrator, PureVoiceSessionMember } from '@/systems/others/purevoice';
 import { ContextMenuAction } from '../commons/actionBuilder';
 
 const action = new ContextMenuAction('actionPVGiveMod', 'User').setUserResponse(

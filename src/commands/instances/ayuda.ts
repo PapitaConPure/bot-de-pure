@@ -167,9 +167,7 @@ const command = new Command(
 			if (!foundCommand)
 				return interaction.reply({
 					flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
-					components: [
-						makeCommandNotFoundContainer(interaction, translator),
-					],
+					components: [makeCommandNotFoundContainer(interaction, translator)],
 				});
 
 			const components = getWikiPageComponentsV2(

@@ -588,7 +588,9 @@ function makeSelectTagsChannelContainer(
 								},
 							),
 						)
-						.setPlaceholder(translator.getText('serverFeedSelectFeedModalFeedPlaceholder')),
+						.setPlaceholder(
+							translator.getText('serverFeedSelectFeedModalFeedPlaceholder'),
+						),
 				),
 			(actionRow) =>
 				actionRow.addComponents(

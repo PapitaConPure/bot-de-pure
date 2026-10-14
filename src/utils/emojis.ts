@@ -242,7 +242,7 @@ export async function setupAppEmojis(): Promise<void> {
 }
 
 /**
- * @description 
+ * @description
  * Tries to obtain the emoji specified by name, and throws if it's not found.
  * @param emojiName The name of the emoji to expect.
  * @returns The expected {@link BotEmoji}'s object.
@@ -262,7 +262,7 @@ function expectBotEmoji(emojiName: BotEmojiName): BotEmoji {
 }
 
 /**
- * @description 
+ * @description
  * Obtains the string representation of the specified bot emoji.
  *
  * This is either the bot emoji's application emoji string representation, or the fallback Unicode string if there's no associated application emoji.
@@ -276,7 +276,7 @@ export function getBotEmoji(emojiName: BotEmojiName): string {
 }
 
 /**
- * @description 
+ * @description
  * Obtains a result object based on whether the specified bot emoji object had an associated application emoji:
  * * If it does, it returns the bot emoji's application emoji object, with `app` set to `true`.
  * * If it doesn't, it returns the bot emoji's fallback Unicode string, with `app` set to `false`.
@@ -294,7 +294,7 @@ export function getBotEmojiResult(
 }
 
 /**
- * @description 
+ * @description
  * Obtains the identification data of the specified bot emoji.
  *
  * This is either the bot emoji's application emoji ID, or the fallback Unicode string if there's no associated application emoji.

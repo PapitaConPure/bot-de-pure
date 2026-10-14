@@ -5,7 +5,10 @@ interface SystemResponsesRegistryLogTableRow {
 	name: string;
 }
 
-export function registerSystemsResponses(instances: SystemResponses<string>[], log: boolean = false) {
+export function registerSystemsResponses(
+	instances: SystemResponses<string>[],
+	log: boolean = false,
+) {
 	const actionTableStack: SystemResponsesRegistryLogTableRow[] = [];
 
 	for (const system of instances) {

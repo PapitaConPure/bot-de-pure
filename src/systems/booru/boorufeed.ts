@@ -474,10 +474,9 @@ export class BooruFeed {
 
 		this.booru = booru;
 		this.#feedDoc = feed;
-		this.#omittedTagsCache =
-			(this.#feedDoc.omitRedundantTags)
-				? getSimpleTagNames(this.#feedDoc.searchTags)
-				: [];
+		this.#omittedTagsCache = this.#feedDoc.omitRedundantTags
+			? getSimpleTagNames(this.#feedDoc.searchTags)
+			: [];
 		this.channel = channel?.isTextBased() ? channel : null;
 
 		debug(`Created a BooruFeed with lastFetchedAt=${this.#feedDoc.lastFetchedAt}`);

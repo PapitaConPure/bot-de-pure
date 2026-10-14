@@ -179,7 +179,10 @@ const paramTypes = {
 			ja: '期間',
 		},
 	},
-} as const satisfies Record<BaseParamType, { getMethod: GetMethodName; help: StaticTranslationRecord }>;
+} as const satisfies Record<
+	BaseParamType,
+	{ getMethod: GetMethodName; help: StaticTranslationRecord }
+>;
 
 function fetchMessageFlagText(args: string[], i: number): string | undefined {
 	if (i >= args.length) return undefined;

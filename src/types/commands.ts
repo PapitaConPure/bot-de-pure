@@ -107,14 +107,18 @@ export type ComponentInteraction<Cached extends CacheType = CacheType> =
 	| MessageContextMenuCommandInteraction<Cached>;
 
 /**@description Representa los tipos de petición de comando o manejos de interacciones de componentes.*/
-export type AnyRequest<Cached extends CacheType = CacheType> = ComplexCommandRequest | ComponentInteraction<Cached>;
+export type AnyRequest<Cached extends CacheType = CacheType> =
+	| ComplexCommandRequest
+	| ComponentInteraction<Cached>;
 
 export type AnyCommandInteraction<Cached extends CacheType = CacheType> =
 	| ButtonInteraction<Cached>
 	| AnySelectMenuInteraction<Cached>
 	| ModalSubmitInteraction<Cached>;
 
-export type AnyCommandRequest<Cached extends CacheType = CacheType> = ComplexCommandRequest | AnyCommandInteraction<Cached>;
+export type AnyCommandRequest<Cached extends CacheType = CacheType> =
+	| ComplexCommandRequest
+	| AnyCommandInteraction<Cached>;
 
 export interface ParamTypeStrict {
 	name: string;
