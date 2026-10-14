@@ -55,7 +55,6 @@ export async function onMessageUpdate(
 	]);
 
 	const cascade = getMessageCascade(messageId);
-	console.log({ convertersPayload, cascade });
 
 	if (!convertersPayload.contentful) {
 		if (cascade == null) return;
