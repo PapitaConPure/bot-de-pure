@@ -30,7 +30,6 @@ La columna "Meta" indica los modificadores de interés de un comando:
 | calcular        | ✅ | ✅ |  |
 | caos            | ✅ | ✅ | 🛡️ |
 | catbox          | ✅ | ✅ |  |
-| cola            | ✅ | ✅ |  |
 | confesión       | ✅ | ✅ | 🛡️ |
 | cultivar        | ✅ | ✅ |  |
 | dado            | ✅ | ✅ |  |
@@ -65,26 +64,18 @@ La columna "Meta" indica los modificadores de interés de un comando:
 | papa-terminar   | ✅ | ✅ | 🥔 |
 | papa-test       | ✅ | ✅ | 🥔 |
 | papita          | ✅ | ✅ |  |
-| pausar          | ✅ | ✅ |  |
 | ping            | ✅ | ✅ |  |
-| pinguear        | ✅ | ✅ |  |
 | prefijo         | ✅ | ✅ | 🛡️ |
 | presentar       | ✅ | ✅ |  |
 | puréscript      | ✅ | ✅ |  |
 | rakkidei        | ✅ | ✅ |  |
-| reproducir      | ✅ | ✅ |  |
-| resumir         | ✅ | ✅ |  |
-| saltar          | ✅ | ✅ |  |
 | saucenao        | ✅ | ✅ |  |
-| sonando         | ✅ | ✅ |  |
 | sticker         | ✅ | ✅ |  |
-| sugerir         | ✅ | ✅ |  |
 | roles           | ✅ | ✅ | 🎎 |
 | tarjeta         | ✅ | ✅ |  |
 | touhou          | ✅ | ✅ |  |
 | transferir      | ✅ | ✅ |  |
 | tubérculo       | ✅ | ✅ |  |
-| uwus            | ✅ | ✅ |  |
 | voz             | ✅ | ✅ |  |
 | vtubers         | ✅ | ✅ |  |
 | yo              | ✅ | ✅ |  |
