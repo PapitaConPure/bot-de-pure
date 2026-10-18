@@ -196,5 +196,5 @@ export function stringHexToNumber(str: string): number {
 
 	if (str.startsWith('#')) str = str.slice(1);
 
-	return parseInt(`0x${str}`, 10);
+	return parseInt(str, 16);
 }
