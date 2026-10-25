@@ -24,7 +24,6 @@ export interface WeightedDecision<TValue> {
  * // 'common' is most likely, 'legendary' is least likely
  * console.log(result);
  */
-
 export function makeWeightedDecision<TValue = unknown>(
 	options: WeightedDecision<TValue>[],
 ): TValue {
@@ -47,12 +46,13 @@ export function makeWeightedDecision<TValue = unknown>(
 	}
 
 	return options[optionCount - 1].value;
-} /**
+}
+
+/**
  * @description Devuelve un valor aleatorio entre 0 y otro valor.
  * @param maxExclusive Máximo valor; excluído del resultado. 1 por defecto.
  * @param [round=false] Si el número debería ser redondeado hacia abajo. `true` por defecto.
  */
-
 export function rand(maxExclusive: number, round: boolean = true) {
 	maxExclusive = +maxExclusive;
 	const negativeHandler = maxExclusive < 0 ? -1 : 1;
@@ -67,7 +67,6 @@ export function rand(maxExclusive: number, round: boolean = true) {
  * @param maxExclusive Máximo valor; excluído del resultado.
  * @param round Si el número debería ser redondeado hacia abajo. `false` por defecto.
  */
-
 export function randRange(minInclusive: number, maxExclusive: number, round: boolean = true) {
 	minInclusive = 1 * minInclusive;
 	maxExclusive = 1 * maxExclusive;
