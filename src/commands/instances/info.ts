@@ -14,7 +14,7 @@ import { fetchMember } from '@/utils/discord';
 import { getBotEmojiResolvable } from '@/utils/emojis';
 import { compressId } from '@/utils/encoding';
 import { fetchGuildMembers } from '@/utils/guildratekeeper';
-import { quantityDisplay, shortenText } from '@/utils/misc';
+import { improveNumber, quantityDisplay, shortenText } from '@/utils/misc';
 import { Command, CommandOptions, CommandTags } from '../commons';
 
 /**
@@ -135,6 +135,8 @@ const command = new Command(
 		const guildIsDiscoverable = guild.features.includes('DISCOVERABLE');
 		const guildCreatedAtUnix = Math.floor(getUnixTime(guild.createdAt));
 		const guildIcon = guild.iconURL({ size: 256 });
+		const formatCounterBold = (num: number) =>
+			quantityDisplay(num, translator, { format: (n) => `**${n}**` });
 
 		if (guildIcon)
 			mainCointainer.addSectionComponents((section) =>
@@ -202,9 +204,9 @@ const command = new Command(
 				textDisplay.setContent(
 					translator.getText(
 						'infoGuildMemberCount',
-						humanCount,
-						botCount,
-						guild.memberCount,
+						formatCounterBold(humanCount),
+						formatCounterBold(botCount),
+						formatCounterBold(guild.memberCount),
 					),
 				),
 			)
@@ -256,7 +258,7 @@ const command = new Command(
 			? membersRanking
 					.map(
 						([id, count]: [string, number]) =>
-							`${translator.getText('infoStatsMemberMessageCountItem', id, quantityDisplay(count, translator))}`,
+							`${translator.getText('infoStatsMemberMessageCountItem', id, formatCounterBold(count))}`,
 					)
 					.join('\n')
 			: translator.getText('infoStatsChannelEmptyNotice');
@@ -268,7 +270,7 @@ const command = new Command(
 		const formattedChannelsRanking = channelsRanking
 			.map(
 				([id, count]) =>
-					`${translator.getText('infoStatsChannelMessageCountItem', id, quantityDisplay(count, translator))}`,
+					`${translator.getText('infoStatsChannelMessageCountItem', id, formatCounterBold(count))}`,
 			)
 			.join('\n');
 
@@ -314,7 +316,7 @@ const command = new Command(
 				const formattedMemberActivitySum = translator.getText(
 					'infoStatsTargetMemberTotalMessageSum',
 					targetMember,
-					quantityDisplay(memberActivitySum, translator),
+					formatCounterBold(memberActivitySum),
 					guild,
 				);
 
@@ -326,7 +328,7 @@ const command = new Command(
 						translator.getText(
 							'infoStatsChannelMessageCountItem',
 							id,
-							quantityDisplay(count, translator),
+							formatCounterBold(count),
 						),
 					)
 					.join('\n');

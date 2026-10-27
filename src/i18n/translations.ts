@@ -467,7 +467,7 @@ export default {
 	//Special entry for number formatting
 	genericNumberOfSuffix: {
 		es: ' de',
-		en: ' of',
+		en: '',
 		ja: '',
 	},
 
@@ -1986,21 +1986,21 @@ export default {
 	infoGuildMemberCount: {
 		es: paragraph(
 			'### Miembros',
-			`🧑‍🦲 **${subl(0)}** humanos (aproximado)`,
-			`🤖 **${subl(1)}** bots (aproximado)`,
-			`👥 **${subl(2)}** miembros totales`,
+			`🧑‍🦲 ${subl(0)} humanos (aproximado)`,
+			`🤖 ${subl(1)} bots (aproximado)`,
+			`👥 ${subl(2)} miembros totales`,
 		),
 		en: paragraph(
 			'### Members',
-			`🧑‍🦲 **${subl(0)}** humans (approximate)`,
-			`🤖 **${subl(1)}** bots (approximate)`,
-			`👥 **${subl(2)}** total members`,
+			`🧑‍🦲 ${subl(0)} humans (approximate)`,
+			`🤖 ${subl(1)} bots (approximate)`,
+			`👥 ${subl(2)} total members`,
 		),
 		ja: paragraph(
 			'### メンバー',
-			`🧑‍🦲 **${subl(0)}人**の人間（近似）`,
-			`🤖 **${subl(1)}体**のボット（近似）`,
-			`👥 **${subl(2)}名**のメンバー総数`,
+			`🧑‍🦲 ${subl(0)}人の人間（近似）`,
+			`🤖 ${subl(1)}体のボット（近似）`,
+			`👥 ${subl(2)}名のメンバー総数`,
 		),
 	},
 	infoGuildChannelCount: {
@@ -2043,14 +2043,14 @@ export default {
 		ja: paragraph('### 安全', `検証レベル **${subl(0)}**`, `多要素認証レベル **${subl(1)}**`),
 	},
 	infoStatsMemberMessageCountItem: {
-		es: `<@${subl(0)}>: **${subl(1)}** mensajes`,
-		en: `<@${subl(0)}>: **${subl(1)}** messages`,
-		ja: `<@${subl(0)}>さん：**${subl(1)}件**のメッセージ`,
+		es: `<@${subl(0)}>: ${subl(1)} mensajes`,
+		en: `<@${subl(0)}>: ${subl(1)} messages`,
+		ja: `<@${subl(0)}>さん：${subl(1)}件のメッセージ`,
 	},
 	infoStatsChannelMessageCountItem: {
-		es: `<#${subl(0)}>: **${subl(1)}** mensajes`,
-		en: `<#${subl(0)}>: **${subl(1)}** messages`,
-		ja: `<#${subl(0)}>：**${subl(1)}件**のメッセージ`,
+		es: `<#${subl(0)}>: ${subl(1)} mensajes`,
+		en: `<#${subl(0)}>: ${subl(1)} messages`,
+		ja: `<#${subl(0)}>：${subl(1)}件のメッセージ`,
 	},
 	infoStatsChannelEmptyNotice: {
 		es: '_Este canal no tiene mensajes_',
@@ -2073,9 +2073,9 @@ export default {
 		ja: '### 最もアクティブなチャンネル',
 	},
 	infoStatsTargetMemberTotalMessageSum: {
-		es: `${subl(0)} envió un total de **${subl(1)}** mensajes en *"${subl(2)}"*`,
-		en: `${subl(0)} has sent a total of **${subl(1)}** messages on *"${subl(2)}"*`,
-		ja: `${subl(0)}さんは*『${subl(2)}』*で合計**${subl(1)}件**のメッセージを送信しました。`,
+		es: `${subl(0)} envió un total de ${subl(1)} mensajes en *"${subl(2)}"*`,
+		en: `${subl(0)} has sent a total of ${subl(1)} messages on *"${subl(2)}"*`,
+		ja: `${subl(0)}さんは*『${subl(2)}』*で合計${subl(1)}件のメッセージを送信しました。`,
 	},
 	infoStatsTargetMemberTitle: {
 		es: `## Actividad de ${subl(0)}`,
@@ -3583,6 +3583,16 @@ export default {
 		en: 'Followed Tags...',
 		ja: 'フォロー中のタグ…',
 	},
+	yoDashboardPrivacyName: {
+		es: '### -# Privacidad',
+		en: '### -# Privacy',
+		ja: '### -# プライバシー',
+	},
+	yoDashboardPrivacyDesc: {
+		es: 'Puedes leer la política de privacidad [aquí](https://papitaconpure.github.io/bot-de-pure/privacy).',
+		en: 'You can read the Privacy Policy [here](https://papitaconpure.github.io/bot-de-pure/privacy).',
+		ja: 'プライバシーポリシーは[こちら](https://papitaconpure.github.io/bot-de-pure/privacy)からお読みいただけます。',
+	},
 	yoDashboardOtherConfigsName: {
 		es: '### -# Otras preferencias',
 		en: '### -# Other Preferences',
@@ -3674,6 +3684,56 @@ export default {
 		es: 'America/Buenos_Aires, UTC+3, JST, -3, GMT+5, UTC-4, etc.',
 		en: 'America/New_York, UTC+3, JST, -3, GMT+5, UTC-4, etc.',
 		ja: 'Asia/Tokyo, UTC+3、JST、-3、GMT+5、UTC-4など',
+	},
+	yoPrivacyModalTitle: {
+		es: 'Opciones de Privacidad',
+		en: 'Privacy Settings',
+		ja: 'プライバシー設定',
+	},
+	yoPrivacyModalUsageDataGroupLabel: {
+		es: 'Enviar información de uso',
+		en: 'Send usage data',
+		ja: '使用状況データを送信する',
+	},
+	yoPrivacyModalUsageDataGroupDescription: {
+		es: 'Esta información nos ayuda a encontrar bugs y otros problemas más rápido.',
+		en: 'This information helps us find and fix bugs and other issues faster.',
+		ja: 'この情報は、バグやその他の問題をより迅速に見つけ、修正するのに役立ちます。',
+	},
+	yoPrivacyModalUsageDataOnErrorLabel: {
+		es: 'Al fallar',
+		en: 'On Error',
+		ja: 'エラー発生時',
+	},
+	yoPrivacyModalUsageDataAlwaysLabel: {
+		es: 'Siempre',
+		en: 'Always',
+		ja: '常に',
+	},
+	yoPrivacyModalStatsName: {
+		es: '### -# Estadísticas',
+		en: '### -# Statistics',
+		ja: '### -# 統計',
+	},
+	yoPrivacyModalStatsDescription: {
+		es: 'Los mensajes que envías se cuentan por canal. No se guarda su contenido.',
+		en: 'Messages you send are counted by channel. No message content is stored.',
+		ja: '送信したメッセージはチャンネルごとにカウントされます。メッセージの内容は保存されません。',
+	},
+	yoPrivacyModalStatsLabel: {
+		es: 'Contar mis mensajes con propósitos estadísticos.',
+		en: 'Count my messages for statistical purposes.',
+		ja: '統計目的のために、私のメッセージをカウントする。',
+	},
+	yoPrivacyModalPRCDescription: {
+		es: 'Los mensajes que envías y las reacciones que recibes te hacen ganar PRC. [Más información](https://papitaconpure.github.io/bot-de-pure/privacy).',
+		en: 'Messages you send and reactions you receive can earn you PRC. [More information](https://papitaconpure.github.io/bot-de-pure/privacy).',
+		ja: 'メッセージの送信やリアクションの受け取りを通じて、PRCを獲得できます。[詳細情報](https://papitaconpure.github.io/bot-de-pure/privacy)。',
+	},
+	yoPrivacyModalPRCLabel: {
+		es: 'Participar en el sistema monetario PuréCoin.',
+		en: 'Participate in the PuréCoin currency system.',
+		ja: 'PuréCoin通貨システムに参加する。',
 	},
 	yoFeedEmptyError: {
 		es: paragraph(

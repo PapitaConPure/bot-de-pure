@@ -63,11 +63,12 @@ export function regroupText(arr: string[], sep = ',') {
  * @param num The number to display
  * @param translator A Translator to format the number internationally
  */
-export function quantityDisplay(num: number, translator: Translator) {
+export function quantityDisplay(num: number, translator: Translator, options: Exclude<ImproveNumberOptions, 'appendOf' | 'shorten' | 'translator'> = {}) {
 	return improveNumber(num, {
 		appendOf: true,
 		shorten: true,
 		translator,
+		...options,
 	});
 }
 
@@ -149,9 +150,9 @@ export function shortenTextSmart(text: string, options: Partial<SmartShortenOpti
 
 	const whitespaceOffset =
 		/\s/.exec(text.slice(max, trueHardMax - suspensor.length))?.index ?? -1;
-	const trueMax = max + (whitespaceOffset > 0 ? whitespaceOffset : 0);
+	const trueMax = max + Math.max(0, whitespaceOffset);
 
-	//PENDIENTE
+	//TODO: implement duh
 	return `${text.slice(0, trueMax)}${suspensor}`;
 }
 
@@ -293,7 +294,7 @@ export function edlDistance(a: string, b: string): number {
 
 	return distance[m - 1][n - 1];
 }
-export const shortnumberNames = {
+export const shortNumberMagOrdersPerLocale = {
 	es: [
 		'millones',
 		'miles de millones',
@@ -329,72 +330,72 @@ export const shortnumberNames = {
 		'miles de sexdecillones',
 	],
 	en: [
-		'millions',
-		'billions',
-		'trillions',
-		'quadrillions',
-		'quintillions',
-		'sextillions',
-		'septillions',
-		'octillions',
-		'nonillions',
-		'decillions',
-		'undecillions',
-		'duodecillions',
-		'tredecillions',
-		'quattuordecillions',
-		'quindecillions',
-		'sexdecillions',
-		'septendecillions',
-		'octodecillions',
-		'novemdecillions',
-		'vigintillions',
-		'unvigintillions',
-		'duovigintillions',
-		'trevigintillions',
-		'quattuorvigintillions',
-		'quinvigintillions',
-		'sexvigintillions',
-		'septenvigintillions',
-		'octovigintillions',
-		'novemvigintillions',
-		'trigintillions',
-		'untrigintillions',
-		'duotrigintillions',
+		'million',
+		'billion',
+		'trillion',
+		'quadrillion',
+		'quintillion',
+		'sextillion',
+		'septillion',
+		'octillion',
+		'nonillion',
+		'decillion',
+		'undecillion',
+		'duodecillion',
+		'tredecillion',
+		'quattuordecillion',
+		'quindecillion',
+		'sexdecillion',
+		'septendecillion',
+		'octodecillion',
+		'novemdecillion',
+		'vigintillion',
+		'unvigintillion',
+		'duovigintillion',
+		'trevigintillion',
+		'quattuorvigintillion',
+		'quinvigintillion',
+		'sexvigintillion',
+		'septenvigintillion',
+		'octovigintillion',
+		'novemvigintillion',
+		'trigintillion',
+		'untrigintillion',
+		'duotrigintillion',
 	],
 	ja: [
-		'millions',
-		'billions',
-		'trillions',
-		'quadrillions',
-		'quintillions',
-		'sextillions',
-		'septillions',
-		'octillions',
-		'nonillions',
-		'decillions',
-		'undecillions',
-		'duodecillions',
-		'tredecillions',
-		'quattuordecillions',
-		'quindecillions',
-		'sexdecillions',
-		'septendecillions',
-		'octodecillions',
-		'novemdecillions',
-		'vigintillions',
-		'unvigintillions',
-		'duovigintillions',
-		'trevigintillions',
-		'quattuorvigintillions',
-		'quinvigintillions',
-		'sexvigintillions',
-		'septenvigintillions',
-		'octovigintillions',
-		'novemvigintillions',
-		'trigintillions',
-		'untrigintillions',
-		'duotrigintillions',
+		'million',
+		'billion',
+		'trillion',
+		'quadrillion',
+		'quintillion',
+		'sextillion',
+		'septillion',
+		'octillion',
+		'nonillion',
+		'decillion',
+		'undecillion',
+		'duodecillion',
+		'tredecillion',
+		'quattuordecillion',
+		'quindecillion',
+		'sexdecillion',
+		'septendecillion',
+		'octodecillion',
+		'novemdecillion',
+		'vigintillion',
+		'unvigintillion',
+		'duovigintillion',
+		'trevigintillion',
+		'quattuorvigintillion',
+		'quinvigintillion',
+		'sexvigintillion',
+		'septenvigintillion',
+		'octovigintillion',
+		'novemvigintillion',
+		'trigintillion',
+		'untrigintillion',
+		'duotrigintillion',
 	],
 } as const;
 
@@ -403,6 +404,7 @@ interface ImproveNumberOptions {
 	shorten?: boolean;
 	translator?: Translator;
 	minDigits?: number;
+	format?: (n: number | string) => string;
 }
 
 /**
@@ -415,46 +417,53 @@ export function improveNumber(num: number | string, options: ImproveNumberOption
 		appendOf = false,
 		shorten = false,
 		translator = new Translator('es'),
+		format: userFormat = (n) => `${n}`,
 		minDigits = 1,
 	} = options;
 
 	if (typeof num === 'string') num = parseFloat(num);
 
-	if (Number.isNaN(num)) return '0';
+	if (Number.isNaN(num)) return userFormat(0);
 
 	/**
 	 * @param {number} n
 	 * @param {Intl.numberFormatOptions} nopt
 	 */
-	const formatnumber = (n: number, nopt: Intl.NumberFormatOptions = {}) =>
+	const formatNumber = (n: number, nopt: Intl.NumberFormatOptions = {}): string =>
 		n.toLocaleString(translator.locale, {
 			maximumFractionDigits: 2,
 			minimumIntegerDigits: minDigits,
 			...nopt,
 		});
-	if (num < 1000000 || !shorten) return formatnumber(num);
+
+	if (num < 1000000 || !shorten) return userFormat(formatNumber(num));
 
 	const ofPrefix = appendOf ? translator.getText('genericNumberOfPrefix') : '';
 	const ofSuffix = appendOf ? translator.getText('genericNumberOfSuffix') : '';
 
-	const getShortenedNumber = () => {
+	const getShortenedNumber = (): string => {
 		const googol = 10 ** 100;
 		if (num >= googol)
-			return `${formatnumber(num / googol, { maximumFractionDigits: 4 })} Gúgol`;
+			return `${formatNumber(num / googol, { maximumFractionDigits: 4 })} Gúgol`;
 
-		const jesus = shortnumberNames[translator.locale];
-		const ni =
-			num < 10 ** (6 + jesus.length * 3)
+		const shortNumberMagnitudeOrders = shortNumberMagOrdersPerLocale[translator.locale];
+		const shortNumberMagnitudeOrder: number =
+			num < 10 ** (6 + shortNumberMagnitudeOrders.length * 3)
 				? Math.floor(
 						(num.toLocaleString('fullwide', { useGrouping: false }).length - 7) / 3,
 					)
-				: jesus.length - 1;
-		const snum = formatnumber(num / 1000 ** (ni + 2), { minimumFractionDigits: 2 });
+				: shortNumberMagnitudeOrders.length - 1;
+		const shortNumber: string = formatNumber(
+			num / 1000 ** (shortNumberMagnitudeOrder + 2),
+			{ minimumFractionDigits: 2 },
+		);
 
-		return [snum, jesus[ni]].join(' ');
+		const shortNumberMagnitudeOrderName = shortNumberMagnitudeOrders[shortNumberMagnitudeOrder];
+
+		return [shortNumber, shortNumberMagnitudeOrderName].join(' ');
 	};
 
-	return `${ofPrefix}${getShortenedNumber()}${ofSuffix}`;
+	return `${ofPrefix}${userFormat(getShortenedNumber())}${ofSuffix}`;
 }
 
 const fileSizeUnits = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];

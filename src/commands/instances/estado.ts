@@ -48,6 +48,8 @@ const command = new Command(
 		};
 		const totalCommands = stats.commands.succeeded + stats.commands.failed;
 		const me = request.client.user;
+		const formatCounterBold = (num: number) =>
+			quantityDisplay(num, translator, { format: (n) => `**${n}**` });
 
 		const container = new ContainerBuilder()
 			.setAccentColor(tenshiColor)
@@ -114,20 +116,20 @@ const command = new Command(
 						translator.getText('estadoStatsTitle'),
 						translator.getText(
 							'estadoStatsRegisteredMessagesCount',
-							quantityDisplay(stats.read, translator),
+							formatCounterBold(stats.read),
 						),
 						translator.getText(
 							'estadoStatsProcessedCommandsCount',
-							quantityDisplay(totalCommands, translator),
+							formatCounterBold(totalCommands),
 						),
 						translator.getText(
 							'estadoStatsSuccessfulCommandsCount',
-							quantityDisplay(stats.commands.succeeded, translator),
+							formatCounterBold(stats.commands.succeeded),
 							((stats.commands.succeeded / totalCommands) * 100).toFixed(2),
 						),
 						translator.getText(
 							'estadoStatsFailedCommandsCount',
-							quantityDisplay(stats.commands.failed, translator),
+							formatCounterBold(stats.commands.failed),
 							((stats.commands.failed / totalCommands) * 100).toFixed(2),
 						),
 					].join('\n'),
