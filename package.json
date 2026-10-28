@@ -31,7 +31,7 @@
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
     "@date-fns/utc": "^2.1.1",
-    "@napi-rs/canvas": "^1.0.11",
+    "@napi-rs/canvas": "^1.0.13",
     "@papitaconpure/booru-client": "^2.0.6",
     "chalk": "^6.0.1",
     "date-fns": "^4.4.0",
