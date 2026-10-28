@@ -37,7 +37,7 @@
     "date-fns": "^4.4.0",
     "discord.js": "^14.27.0",
     "groq-sdk": "^1.6.0",
-    "mongoose": "^9.11.2",
+    "mongoose": "^9.11.4",
     "mongoose-int32": "^0.6.0",
     "node-catbox": "^6.0.0",
     "object-sizeof": "^2.6.5",
