@@ -44,7 +44,7 @@
     "sagiri": "^5.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.15",
+    "@biomejs/biome": "2.6.3",
     "@types/bun": "latest",
     "globals": "^17.13.0"
   },
