@@ -781,5 +781,5 @@ function useSkill(cells: string[][], x: number, y: number, id: string, mask: num
 }
 
 function calcMatrixWidth(matrix: unknown[][]) {
-	return matrix.map((r) => r.length).reduce((a, b) => (a > b ? a : b), 0);
+	return matrix.map((r) => r.length).reduce((a, b) => Math.max(a, b), 0);
 }
