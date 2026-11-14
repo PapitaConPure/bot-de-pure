@@ -63,7 +63,11 @@ export function regroupText(arr: string[], sep = ',') {
  * @param num The number to display
  * @param translator A Translator to format the number internationally
  */
-export function quantityDisplay(num: number, translator: Translator, options: Exclude<ImproveNumberOptions, 'appendOf' | 'shorten' | 'translator'> = {}) {
+export function quantityDisplay(
+	num: number,
+	translator: Translator,
+	options: Exclude<ImproveNumberOptions, 'appendOf' | 'shorten' | 'translator'> = {},
+) {
 	return improveNumber(num, {
 		appendOf: true,
 		shorten: true,
@@ -453,10 +457,9 @@ export function improveNumber(num: number | string, options: ImproveNumberOption
 						(num.toLocaleString('fullwide', { useGrouping: false }).length - 7) / 3,
 					)
 				: shortNumberMagnitudeOrders.length - 1;
-		const shortNumber: string = formatNumber(
-			num / 1000 ** (shortNumberMagnitudeOrder + 2),
-			{ minimumFractionDigits: 2 },
-		);
+		const shortNumber: string = formatNumber(num / 1000 ** (shortNumberMagnitudeOrder + 2), {
+			minimumFractionDigits: 2,
+		});
 
 		const shortNumberMagnitudeOrderName = shortNumberMagnitudeOrders[shortNumberMagnitudeOrder];
 
