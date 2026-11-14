@@ -40,7 +40,7 @@
     "mongoose": "^9.12.1",
     "mongoose-int32": "^0.6.0",
     "node-catbox": "^6.0.0",
-    "object-sizeof": "^2.7.1",
+    "object-sizeof": "^3.0.1",
     "sagiri": "^5.0.0"
   },
   "devDependencies": {
